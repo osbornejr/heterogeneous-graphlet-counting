@@ -1,0 +1,6 @@
+PASSWORD=jupyter-julia
+docker run --rm -td -p 8888:8888 \
+-v $PWD/../notebooks:/home/osbornejr/app/notebooks \
+-v $PWD/../src:/home/osbornejr/app/src \
+-v $PWD/../data:/home/osbornejr/app/data \
+jupyter:latest

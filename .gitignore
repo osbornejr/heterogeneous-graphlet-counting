@@ -1,0 +1,10 @@
+
+.DS_Store
+*.pdf
+*.swp
+*Library.bib
+.ipynb*
+data/
+output/
+node_modules
+cytoscape/*

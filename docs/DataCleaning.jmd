@@ -1,0 +1,183 @@
+
+---
+title : Examining data variance
+author : Joel Robertson
+date: 9th October 2020
+---
+
+
+```julia; echo = false; results = "hidden"; cache = true
+projectdir = ENV["JULIA_PROJECT"]
+cd(projectdir)
+outputdir = projectdir*"/docs/"  
+for src in filter(x->endswith(x ,".jl"),readdir("src"))
+	cd(projectdir)
+	include(projectdir*"/src/"*src)
+end
+
+### Read in each set
+raw_counts=read_count_data("data/mayank-de-novo/isoforms",method="expected_count");
+#raw_counts=RSEM.read_count_data("data/mayank-per-transcript/isoforms",method="expected_count");
+
+#filtering out into types
+code_counts=filter_count_data("data/mayank-de-novo/code-hits.list",raw_counts)
+noncode_counts=filter_count_data("data/mayank-de-novo/non-code-hits.list",raw_counts)	
+insertcols!(code_counts,"transcript_type"=>"coding")
+insertcols!(noncode_counts,"transcript_type"=>"noncoding")
+#merging back into one dataframe, with 
+raw_counts=outerjoin(code_counts,noncode_counts,on = intersect(names(code_counts),names(noncode_counts)))
+#create data matrix
+data=Array(raw_counts[!,2:25]);
+```
+## Introduction
+The data has been read in from the RSEM results and typed according to the type classification process. 
+This gives us `j size(raw_counts,1)` transcripts in total, with `j size(filter(:transcript_type=>x->x=="coding",raw_counts),1)` coding transcripts and `j size(filter(:transcript_type=>x->x=="noncoding",raw_counts),1)` noncoding transcripts.
+Before we proceed to construct networks, we must make sure the data we are putting in is clean and as free from noise as possible.
+
+```julia; echo = false; results = "hidden"
+
+
+## set up dictionary to map samples to desired grouping. Here we group by polyA+ and polyA-
+group_dict = Dict{String,String}()
+for samp_name in names(raw_counts[:,2:25])
+	group_dict[samp_name] = split(samp_name,"_")[1]
+end
+ 
+boxplot(raw_counts,"output/plots/raw_data_boxplot.svg",group_dict)
+
+histogram(DataFrame([log2.(vec(sum(data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/plots/raw_count_sum_samples_histogram.svg",xaxis = "sum of expression (log2 adjusted)")
+```
+## Raw data
+First let's look at the expression data in its raw form:
+
+![image](../output/plots/raw_data_boxplot.svg)
+
+In this boxplot, both polyA+ and polyA- data are represented as standalone samples. The polyA- samples in general have smaller counts, as we would expect, but the coverage looks pretty good.
+
+However, there are many transcripts that have very low counts that are skewing the data. Observe this histogram of the sum of expression values for each transcript across all samples: 
+
+![image](../output/plots/raw_count_sum_samples_histogram.svg)
+
+There is a huge overrepresenation at $log_2(x)=0$, which corresponds to a lot of transcripts with total expression count of ~1, and likely means there are a lot of cases where a "transcript" has been detected in the _de novo_ assembly process even though it only occurs in one sample once! This is almost certainly noise, and we should remove it.
+Notice too how there are a number of other "spikes" around about 1 before things start to smooth out.
+These correspond to other low integer values, further indicating that several transcripts are being represented by just a few counts across all samples.
+This is not to mention the huge prevalence of zero sum count transcripts, (which do not show up here as $log2(0)=-\infty$).
+Here are the top 25 values for transcript count sums (left are the sum values, right are the occurences of it):     
+
+```julia; echo = false
+using DataStructures
+d = countmap(vec(sum(data,dims=2)))
+top = OrderedDict{Float64,Int}()
+for val in collect(Iterators.reverse(sort(collect(values(d)))[end-24:end]))	
+	for key in collect(keys(d))[collect(values(d)).==val]
+		top[key] = val
+	end
+end
+
+ints = collect(keys(d))[collect(keys(d))-round.(collect(keys(d))).==0]
+total_ints = sum([d[int] for int in ints])
+total = sum(collect(values(d)))
+int_percent = total_ints/total
+low_int_total =sum(collect(values(top)))
+low_int_percent = low_int_total/total_ints
+
+top
+```
+
+Note that these expression count sums need not be integers (and in general, they are not; ~`j round(100*int_percent)`% of count sums are integers, but ~`j round(100*low_int_percent)`% of these occur as the integers listed above. 
+Note also that these non integer count sums occur because RSEM gives an _expected count_ value, which may not be a whole number).
+Integer counts in general are more likely to occur frequently, but the main illustration here is how over represented the very small integers are, even when compared to other low integer sums. 
+
+
+```julia; echo = false; results = "hidden"
+
+## Clean - remove transcripts with total counts across all samples less than X
+X = 25
+raw_counts=raw_counts[vec(sum(data,dims = 2 ).>=X),:]
+data=Array(raw_counts[!,2:25]);
+
+boxplot(raw_counts,"output/plots/raw_data_cleaned_boxplot.svg",group_dict)
+
+histogram(DataFrame([log2.(vec(sum(data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/plots/raw_cleaned_sum_samples_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+
+
+```
+
+## Raw data cleaned
+ 
+One course of action then is to remove all transcripts below a certain total expression count sum.
+Choosing $x=25$ as the cutoff means that all of the integer "spikes" we see above are removed:   
+
+![image](../output/plots/raw_cleaned_sum_samples_histogram.svg)
+
+Having filtered out these low integer counts, we are left with `j size(raw_counts,1) ` transcripts, with `j size(filter(:transcript_type=>x->x=="coding",raw_counts),1)` coding transcripts and `j size(filter(:transcript_type=>x->x=="noncoding",raw_counts),1)` noncoding transcripts.
+The filtering does not seem to have affected any sample too much, although we do note that the polyA- samples have shifted a little. We would expect those to be more affected by low count removal.
+
+![image](../output/plots/raw_data_cleaned_boxplot.svg)
+
+
+```julia; echo = false;results = "hidden"
+## Condense - merge polyA- and polyA+ counts for the same sample
+condensed=raw_counts[!,[1:13;26]]
+for i in 2:13
+	condensed[!,i]=raw_counts[!,i]+raw_counts[!,i+12]
+end 
+raw_counts=condensed
+rename!(raw_counts,replace.(names(raw_counts),"polyA+_" => ""))
+data=Array(raw_counts[!,2:13]);
+
+boxplot(raw_counts,"output/plots/raw_data_condensed_boxplot.svg")
+histogram(vec(sum(data,dims=2)),"output/plots/raw_condensed_sum_samples_histogram.svg")
+```
+## Raw data condensed
+ 
+Before we go any further in terms of normalising and analysing the variance, we should merge the polyA+ and polyA- samples:
+
+![image](../output/plots/raw_data_condensed_boxplot.svg)
+
+
+```julia; echo = false;
+### Normalisation
+for method in ["upperquartile", "Quantile", "Median","TMM","RLE"]
+	norm_data=library_size_normalisation(data,method)
+	norm_counts=copy(raw_counts)
+	norm_counts[!,2:13]=norm_data
+
+	boxplot(norm_counts,"output/plots/norm_data_boxplot_$method.svg")
+end
+#PCs,D_1,per_sample=pca(data')
+#p=pca_plot(PCs,3);
+## update data to normalised version
+#data=per_sample
+#draw(SVG("output/Construction/test_per_sample.svg"),p)
+
+```
+## Normalised data
+
+There doesn't seem to be any drastic outlie samples now in the above boxplot, but sample 1 does seem a bit out of whack.
+Let's try a few different normalisation methods to see if they can straighten that up.  
+
+### Upper quartile normalisation
+
+![image](../output/plots/norm_data_boxplot_upperquartile.svg)
+
+
+### Quantile normalisation
+
+![image](../output/plots/norm_data_boxplot_Quantile.svg)
+
+
+### Median normalisation
+
+![image](../output/plots/norm_data_boxplot_Median.svg)
+
+
+### Trimmed mean of m-values normalisation
+
+![image](../output/plots/norm_data_boxplot_TMM.svg)
+
+
+### Relative log expression normalisation
+
+![image](../output/plots/norm_data_boxplot_RLE.svg)
+

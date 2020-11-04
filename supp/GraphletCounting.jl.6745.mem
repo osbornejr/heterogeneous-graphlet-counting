@@ -1,0 +1,97 @@
+        - #module GraphletCounting
+        - #export Neighbours, mergecum, add3graphlets
+        - #activate environment
+        - ##
+        - 
+        - import Pkg
+        - 	Pkg.activate(".")
+        - ##
+        - #Functions
+        - function Neighbours(edgelist::Array{Int,2})
+  1972857 	Neigh=Dict{Int,Vector{Int}}()
+        0 	for row in eachrow(edgelist)
+   669680        		vals=get!(Vector{Int},Neigh,row[1])
+  1157216        		push!(vals,row[2])
+  2295088        		vals=get!(Vector{Int},Neigh,row[2])
+  1336912        		push!(vals,row[1])
+        -        	end
+        0 	return Neigh 
+        - end
+        - 
+        - function mergecum(d1::AbstractDict,d2::AbstractDict)
+ 62391562 	return merge(+,d1,d2)
+        - end
+        - 
+        - 
+        - 
+        - function add3graphlets(vertexlist::Array{String,1},nodelist::Array{Int,1},count_dict::Dict{String,Int},i::Int,j::Int;graphlet_type::String)
+        - 	#type_col=2 ## may need to be more sophisticated at some point; assumes types are
+        - 		   ## given in the 2nd column of vertexlist. Alternatively, JUST give the type column.
+        0 	if length(nodelist)==0
+        0 		return count_dict
+        - 	end
+ 54452672 	list=fill("",length(nodelist))
+        - 	delim="_"
+        0 	for (ind ,n) in enumerate(nodelist)
+265544448 		list[ind]=string(vertexlist[i],delim,vertexlist[j],delim,vertexlist[n],delim,graphlet_type)
+        - 	end
+        - 	#list=vertexlist[i].*"_".*vertexlist[j].*"_".*vertexlist[nodelist].*"_".*graphlet_type	
+146364912 	x=Dict{String,Integer}([(i,count(x->x==i,list)) for i in unique(list)]) 
+     1472 	merge!(+,count_dict,x)
+        0 	return count_dict
+        - end
+        - 
+        - 
+        - #import data
+        - import CSV
+        - edgelist=CSV.read("../data/rt-pol/soc-political-retweet.edges",header=["V1","V2","ref"],type=Int)
+        - edgelist=edgelist[:,1:2]
+        - vertexlist=CSV.read("../data/rt-pol/soc-political-retweet.node_labels",header=["V","type"],type=Int)
+        - 
+        - #fix vertex values to iterate from 1, not 0
+        - edgelist[:,1:2]=edgelist[:,1:2].+1
+        - vertexlist.V=vertexlist.V.+1
+        - 
+        - #change label names
+        - vertexlist.type=replace(vertexlist.type,Pair(1,"right"),Pair(2,"left"))
+        - 
+        - #create graph from edgelist (only really needed for visualisation, moving on now)
+        - #using LightGraphs
+        - #using LightGraphs.SimpleGraphs
+        - #using GraphPlot
+        - #g₁=SimpleGraph(map(SimpleEdge,Tuple.(eachrow(edgelist))))
+        - #gplot(g₁) 
+        - 
+        - #start writing required functions ad hoc
+        - #change to arrays for performance (also remove multi-edges from edgelist here for now)
+        - edgelist=unique(convert(Array{Int,2},edgelist),dims=1);
+        - vertexlist=convert(Array{String},vertexlist[:,2]);
+        - #get neighbourhood for each vertex in advance (rather than calling per-edge)
+        - neighbourdict=Neighbours(edgelist)
+        - #preallocate array to store each edge's graphlet dictionary 
+        - Chi=Array{Dict}(undef,size(edgelist,1));
+        - #per edge process
+  6945011 for h in 1:size(edgelist,1)
+ 29405920 	count_dict=Dict{String,Int}()
+        - #	h=1	
+   761648 	i=edgelist[h,1]
+   753088 	j=edgelist[h,2]
+        0 	gamma_i=neighbourdict[i]	
+        0 	gamma_j=neighbourdict[j]
+        - 	
+        - 	#three node graphlets
+353835712 	Tri=intersect(gamma_i,gamma_j)
+   773840 	count_dict=add3graphlets(vertexlist,Tri,count_dict,i,j,graphlet_type="3-tri")
+429948824 	jPath=setdiff(gamma_j,union(gamma_i,i))
+   773840 	count_dict=add3graphlets(vertexlist,jPath,count_dict,i,j,graphlet_type="3-path")
+396338904 	iPath=setdiff(gamma_i,union(gamma_j,j))
+   773840 	count_dict=add3graphlets(vertexlist,iPath,count_dict,j,i,graphlet_type="3-path")
+        - 	
+        - 	#Save count dictionary for this edge
+  1547648 	Chi[h]=count_dict
+        - end
+        - #total counts for each graphlet
+        - total_counts=reduce(mergecum,Chi)
+        - 
+        - #end
+        - 

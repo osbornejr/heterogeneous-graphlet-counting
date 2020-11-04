@@ -1,0 +1,88 @@
+---
+title : Examining data variance
+author : Joel Robertson
+date: 30th September 2020
+---
+
+
+<!-- setup dependencies, doesn't appear in the generated document -->
+```julia; echo = false; results="hidden"
+
+# need to fix to be general.
+cd("/home/osbornejr/app")
+
+#better solution in long term is to use src code as a package
+for src in filter(x->endswith(x,".jl"),readdir("src"))
+include("../src/"*src)
+end
+
+```
+
+
+## Loading in data
+
+```julia
+#Read in data
+raw_counts=read_count_data("data/mayank-de-novo/isoforms",method="expected_count");
+
+#filtering out into types
+code_counts=filter_count_data("data/mayank-de-novo/code-hits.list",raw_counts)
+noncode_counts=filter_count_data("data/mayank-de-novo/non-code-hits.list",raw_counts)	
+insertcols!(code_counts,"transcript_type"=>"coding")
+insertcols!(noncode_counts,"transcript_type"=>"noncoding")
+
+#merging back into one dataframe, with 
+raw_counts=outerjoin(code_counts,noncode_counts,on = intersect(names(code_counts),names(noncode_counts)))
+#create data matrix
+data=Array(raw_counts[!,2:25]);
+
+## Clean - remove zero counts
+raw_counts=raw_counts[vec(std(data,dims=2).!=0).==1,:]
+data=Array(raw_counts[!,2:25]);
+
+## Condense - merge polyA- and polyA+ counts for the same sample
+condensed=raw_counts[!,[1:13;26]]
+for i in 2:13
+	condensed[!,i]=raw_counts[!,i]+raw_counts[!,i+12]
+end
+raw_counts=condensed
+data=Array(raw_counts[!,2:13]);
+
+```
+
+## Normalisation
+
+```julia
+
+### Normalisation
+data=library_size_normalisation(data,"upperquartile")
+PCs,D_1,per_sample=pca(data')
+#p=pca_plot(PCs,3);
+#draw(SVG("output/Construction/test_per_sample.svg"),p)
+
+## update data to normalised version
+#data=per_sample
+norm_counts=copy(raw_counts)
+norm_counts[!,2:13]=data
+
+```
+
+## Variance
+
+```julia
+
+
+
+variance = vec(var(data, dims=2));
+insertcols!(norm_counts,"variance"=>variance);
+
+#current method
+#N=1000
+#norm_counts_sample_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[end-Int(N/2)+1:end,:]
+#norm_counts_sample_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[end-Int(N/2)+1:end,:]
+#norm_counts_sample = outerjoin(norm_counts_sample_noncoding,norm_counts_sample_coding,on = names(norm_counts))
+#data=Array(norm_counts_sample[!,2:13])
+
+plot(x = log2.(variance), Geom.histogram(bincount = 100,density = false));
+draw(SVG("variance.svg"),p)
+```

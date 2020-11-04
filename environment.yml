@@ -1,0 +1,18 @@
+name: julia-workspace
+channels:
+        - conda-forge
+        - bioconda
+        - defaults
+dependencies:
+        - r-base
+        - r-tidyverse 
+        - r-data.table
+        - r-wgcna
+        - r-igraph
+        - r-rnentropy
+        - bioconductor-edger
+        - bioconductor-deseq2
+        - bioconductor-ebseq
+        - jupyterlab
+prefix: /home/joel/miniconda3/envs/julia-workspace
+
