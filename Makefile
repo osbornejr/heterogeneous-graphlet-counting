@@ -14,3 +14,9 @@ update: ## update conda and julia environments
 
 build: ## build conda and julia environments from scratch
 	docker image build --file docker/env/Dockerfile --tag $(julia_env) ./
+
+push: ## push julia environment docker image
+	docker push $(julia_env)
+
+pull: ## pull julia environment docker image
+	docker pull $(julia_env)
