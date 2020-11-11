@@ -16,7 +16,7 @@ function Neighbours(edgelist::Array{Int,2})
 	return Neigh 
 end
 
-function Neighbours(edgelist::Array{Pair,1})
+function Neighbours(edgelist::Array{Pair{Int,Int},1})
 	Neigh=Dict{Int,Vector{Int}}()
 	for row in edgelist
        		vals=get!(Vector{Int},Neigh,row.first)
@@ -36,53 +36,65 @@ end
 function add3graphlets(vertexlist::Array{String,1},nodelist::Array{Int,1},count_dict::Dict{String,Int},i::Int,j::Int;graphlet_type::String)
 	#type_col=2 ## may need to be more sophisticated at some point; assumes types are
 		   ## given in the 2nd column of vertexlist. Alternatively, JUST give the type column.
-	if length(nodelist)==0
+	if length(nodelist)==0 
 		return count_dict
 	end
 	list=fill("",length(nodelist))
 	delim="_"
 	for (ind ,n) in enumerate(nodelist)
 		list[ind]=string(vertexlist[i],delim,vertexlist[j],delim,vertexlist[n],delim,graphlet_type)
-	end
+	end 
 	#list=vertexlist[i].*"_".*vertexlist[j].*"_".*vertexlist[nodelist].*"_".*graphlet_type	
 	x=Dict{String,Integer}([(i,count(x->x==i,list)) for i in unique(list)]) 
 	merge!(+,count_dict,x)
 	return count_dict
 end
 
-#### RT-POL specific archive
-##import data
-#import CSV
-#edgelist=CSV.read("data/rt-pol/soc-political-retweet.edges",header=["V1","V2","ref"],type=Int)
-#edgelist=edgelist[:,1:2]
-#vertexlist=CSV.read("data/rt-pol/soc-political-retweet.node_labels",header=["V","type"],type=Int)
+function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelist2::Array{Array{Int,1},1},count_dict::Dict{String,Int},i::Int,j::Int;graphlet_type::String)
 
-#fix vertex values to iterate from 1, not 0
-#edgelist[:,1:2]=edgelist[:,1:2].+1
-#vertexlist.V=vertexlist.V.+1
+	#check to see if candidate lists are empty
+	if length(nodelist1)==0 
+		return count_dict
+	elseif sum(length.(nodelist2))==0
+		return count_dict
+	else ##we do have some graphlets to add!
+		delim = "_"
+		for (ind,n) in enumerate(nodelist1)
+			#check if specific list is empty
+			if length(nodelist2[ind])==0
+				x = Dict{String,Int}()
+			else
+				list = fill("",sum(length(nodelist2[ind])))
+				if (graphlet_type=="4-path-edge-orbit")
+					for (indd,m) in enumerate(nodelist2[ind])
+						#ordering i_j_jneigh_j_neighneigh
+						list[indd] = string(typelist[i],delim,typelist[j],delim,typelist[n],delim,typelist[m],delim,graphlet_type)
+					end
+				end
+				if (graphlet_type == "4-path-centre-orbit")
+					for (indd,m) in enumerate(nodelist2[ind])
+						#ordering neigh_i_i_j_jneigh
+						list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[j],delim,typelist[n],delim,graphlet_type)
+					end
+				end
+				x = Dict{String,Int}([(p,count(x->x==p,list)) for p in unique(list)])
+			end
+		merge!(+,count_dict,x)
+		end
+	end
+	return count_dict
+end
 
-#change label names
-#vertexlist.type=replace(vertexlist.type,Pair(1,"right"),Pair(2,"left"))
 
-#create graph from edgelist (only really needed for visualisation, moving on now)
-#using LightGraphs
-#using LightGraphs.SimpleGraphs
-#using GraphPlot
-#g₁=SimpleGraph(map(SimpleEdge,Tuple.(eachrow(edgelist))))
-#gplot(g₁) 
-####
-
-
-#start writing required functions ad hoc
-#change to arrays for performance (also remove multi-edges from edgelist here for now)
-#edgelist=unique(sort(convert(Array{Int,2},edgelist),dims=2),dims=1)
-
-function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,1})
+function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,1},graphlet_size::Int=3)
 	
-	#vertexlist=convert(Array{String},vertexlist[:,2]);
-	vertexlist = vertex_type_list
 	#get neighbourhood for each vertex in advance (rather than calling per-edge)
 	neighbourdict=Neighbours(edgelist)
+	# set up function to apply dict to arrays (maybe a better way exists, but this works?)
+	neighbourdictfunc(x::Int) = neighbourdict[x]
+	#vertex set derived from edgelist (allows for any arbritary vertex labelling)
+	##(important: not an ordered list that matches with vertexlist types!!) 
+	vertices = unique(vcat(first.(edgelist),last.(edgelist)))		
 	#preallocate array to store each edge's graphlet dictionary 
 	Chi=Array{Dict}(undef,size(edgelist,1));
 	
@@ -90,19 +102,48 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
 	for h in 1:size(edgelist,1)
 		count_dict = Dict{String,Int}()
 	#	h=1	
+	#	# get nodes i and j for this edge
 		i = edgelist[h].first
 		j = edgelist[h].second
+		#get neighbourhoods of i and j
 		gamma_i = neighbourdict[i]	
 		gamma_j = neighbourdict[j]
 		
 		#three node graphlets
+		#Triangles: nodes connected to both i and j
 		Tri = intersect(gamma_i,gamma_j)
-		count_dict = add3graphlets(vertexlist,Tri,count_dict,i,j,graphlet_type="3-tri")
+		count_dict = add3graphlets(vertex_type_list,Tri,count_dict,i,j,graphlet_type="3-tri")
+		# Paths with j at centre
 		jPath = setdiff(gamma_j,union(gamma_i,i))
-		count_dict = add3graphlets(vertexlist,jPath,count_dict,i,j,graphlet_type="3-path")
+		count_dict = add3graphlets(vertex_type_list,jPath,count_dict,i,j,graphlet_type="3-path")
+		# Paths with i at centre
 		iPath = setdiff(gamma_i,union(gamma_j,j))
-		count_dict = add3graphlets(vertexlist,iPath,count_dict,j,i,graphlet_type="3-path")
-		
+		count_dict = add3graphlets(vertex_type_list,iPath,count_dict,j,i,graphlet_type="3-path")
+		if (graphlet_size==4)
+			#4-node graphlets		
+			#find nodes that aren't connected to either i or j
+			E = setdiff(vertices,union(gamma_j,gamma_i))
+			##get neighbours of (neighbours of i that aren't i or neighbours of j)
+			iiPath = setdiff.(neighbourdictfunc.(iPath),Ref(i))
+			##get neighbours of (neighbours of j that arent j or neighbours of i)
+			jjPath = setdiff.(neighbourdictfunc.(jPath),Ref(j))
+			#4-path edge orbits, i-stem
+			##get all neighours of i that have neighbours that are not connected to i or j
+			istem = intersect.(iiPath,Ref(E))
+			count_dict = add4graphlets(vertex_type_list,iPath,istem,count_dict,j,i,graphlet_type = "4-path-edge-orbit")
+			#4-path edge orbits, j-stem
+			#get all neighours of j that have neighbours that are not connected to i or j
+			jstem = intersect.(jjPath,Ref(E))
+			count_dict = add4graphlets(vertex_type_list,jPath,jstem,count_dict,i,j,graphlet_type = "4-path-edge-orbit")
+		end	
+			#4 
+			#get all (uniquely) neighbours of j that are not connected to neighbours of i (note, this is symmetric, so do not need to do for the other way round as well)
+			centres = Array{Array{Int64,1},1}(undef,length(jPath))
+			for p in 1:length(jPath)
+        			centres[p] = iPath[BitArray(in.(jPath[p],iiPath).*-1 .+1)]
+        		end
+			count_dict = add4graphlets(vertex_type_list,jPath,centres,count_dict,i,j,graphlet_type = "4-path-centre-orbit")
+
 		#Save count dictionary for this edge
 		Chi[h] = count_dict
 	end
@@ -115,8 +156,8 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
 		#do not reorder for x-y-x paths (different orbit to other 3-paths) 
 		if !(graphlet_names[el][1]!=graphlet_names[el][2] && graphlet_names[el][1]==graphlet_names[el][3] && graphlet_names[el][4]=="3-path")
 	          graphlet_names[el][1:3]=sort(graphlet_names[el][1:3])
-	        end
-	end
+ 	        end
+ 	end
 	orbit_counts = Dict{String,Int}()
 	orbits = join.(graphlet_names,"_")
 	count_values = collect(values(total_counts))
@@ -127,9 +168,6 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
 end
 
 
-#count triangles for comparison
-#tri_counts=[orbit_counts[i] for i in collect(keys(orbit_counts)) if occursin("3-tri",i)]
-#tri_counts=tri_counts./sum(tri_counts)
 
 function concentrate(graphlet_counts::Dict{String,Int})
 	conc = Dict{String,Float64}()

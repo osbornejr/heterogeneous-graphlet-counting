@@ -63,7 +63,7 @@ draw(SVG("norm_mean_expression.svg"),p)
 
 
 #To run locally (ie on laptop) we must still cut down number of transcripts to managable level here. TODO put into function? At the moment, we select the N/m highest variable transcripts of each type, where m is the number of types. 
-N=10000
+N=1000
 
 variance = vec(var(data, dims=2))
 insertcols!(norm_counts,"variance"=>variance)
@@ -116,7 +116,7 @@ connected_components_html_table(adj_matrix,"cytoscape/connected_components.html"
 
 #Graphlet counting
 
-@time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist)
+@time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4)
 graphlet_concentrations = concentrate(graphlet_counts) 
 
 #@time find_motifs(adj_matrix,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg")
