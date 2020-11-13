@@ -94,6 +94,20 @@ function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelis
 					end
                                         
                                 end
+                                if (graphlet_type == "4-tail-tri-edge-orbit" )
+					for (indd,m) in enumerate(nodelist2[ind])
+						#ordering k_j_i_neigh_i
+						list[indd] = string(typelist[m],delim,typelist[j],delim,typelist[i],delim,typelist[n],delim,graphlet_type)
+					end
+                                        
+                                end
+                                if (graphlet_type == "4-tail-tri-centre-orbit" )
+					for (indd,m) in enumerate(nodelist2[ind])
+						#ordering i_j_k_neigh_k
+						list[indd] = string(typelist[i],delim,typelist[j],delim,typelist[n],delim,typelist[m],delim,graphlet_type)
+					end
+                                        
+                                end
                                 if (graphlet_type == "4-cycles")
 					for (indd,m) in enumerate(nodelist2[ind])
 						#ordering neighi_i_j_neighj
@@ -196,14 +210,41 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
                                 itails[ind] = setdiff(iPath[in.(Ref(p),neighbourdictfunc.(iPath))],iPath[1:ind])
                         end
                         count_dict = add4graphlets(vertex_type_list,iPath,itails,count_dict,i,j,graphlet_type = "4-tail-edge-orbit")
-                
-                        #4-star jstem (as above)
+                	
+			
+
+                        #4-tail-edge-orbit jstem (as above)
                 	jtails = Array{Array{Int,1},1}(undef,length(jPath))
                         for (ind,p) in enumerate(jPath)
                                 jtails[ind] = setdiff(jPath[in.(Ref(p),neighbourdictfunc.(jPath))],jPath[1:ind])
                         end
                         count_dict = add4graphlets(vertex_type_list,jPath,jtails,count_dict,j,i,graphlet_type = "4-tail-edge-orbit")
-                
+                	
+			#4-tail-tri-edge
+			##this is instead based off protrusions off the triangles of i and j
+			#first we look at protrusions off of i:
+                	ittails = Array{Array{Int,1},1}(undef,length(iPath))
+			##find neighbours of i that are not neighbours of j (iPath) that are also not neighbours of k (Tri)
+			for (ind,p) in enumerate(iPath)
+                                ittails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
+                        end
+                        count_dict = add4graphlets(vertex_type_list,iPath,ittails,count_dict,i,j,graphlet_type = "4-tail-tri-edge-orbit")
+			
+			#the same for j:
+                	jttails = Array{Array{Int,1},1}(undef,length(jPath))
+			##find neighbours of j that are not neighbours of i (jPath) that are also not neighbours of k (Tri)
+			for (ind,p) in enumerate(iPath)
+                                jttails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
+                        end
+                        count_dict = add4graphlets(vertex_type_list,jPath,jttails,count_dict,j,i,graphlet_type = "4-tail-tri-edge-orbit")
+
+			#4-tail-tri-centre
+			## find neighbours of the third node in the triangle that are not connected to i or j
+			kttails = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(E))		
+                        count_dict = add4graphlets(vertex_type_list,Tri,kttails,count_dict,i,j,graphlet_type = "4-tail-tri-centre-orbit")
+			
+
+
                 	## 4-CYCLE
                         #
                         #Again, this is symmetric, so we only need to count this from one perspective
@@ -213,7 +254,8 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
                         end
                         count_dict = add4graphlets(vertex_type_list,iPath,cycles,count_dict,i,j,graphlet_type = "4-cycles")
                         
-                
+          		## 
+
                 #Save count dictionary for this edge
                 Chi[h] = count_dict
 	end
