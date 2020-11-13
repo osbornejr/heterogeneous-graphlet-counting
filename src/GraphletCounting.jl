@@ -233,7 +233,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
 			#the same for j:
                 	jttails = Array{Array{Int,1},1}(undef,length(jPath))
 			##find neighbours of j that are not neighbours of i (jPath) that are also not neighbours of k (Tri)
-			for (ind,p) in enumerate(iPath)
+			for (ind,p) in enumerate(jPath)
                                 jttails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
                         end
                         count_dict = add4graphlets(vertex_type_list,jPath,jttails,count_dict,j,i,graphlet_type = "4-tail-tri-edge-orbit")
