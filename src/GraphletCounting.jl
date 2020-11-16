@@ -356,7 +356,33 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair{
 	for orb in 1:size(orbits,1)
 		graphlet_counts[orbits[orb]] = get(graphlet_counts,orbits[orb],0)+count_values[orb]	
 	end
-
+	#divide each graphlet count by number of edges in graphlet
+	for g in collect(keys(graphlet_counts))
+		if (occursin("3-tri",g))
+			graphlet_counts[g] = div(graphlet_counts[g],3)
+		end
+		if (occursin("3-path",g))
+			graphlet_counts[g] = div(graphlet_counts[g],2)
+		end
+		if (occursin("4-path",g))
+			graphlet_counts[g] = div(graphlet_counts[g],3)
+		end
+		if (occursin("4-star",g))
+			graphlet_counts[g] = div(graphlet_counts[g],3)
+		end
+		if (occursin("4-cycle",g))
+			graphlet_counts[g] = div(graphlet_counts[g],4)
+		end
+		if (occursin("4-tail",g))
+			graphlet_counts[g] = div(graphlet_counts[g],4)
+		end
+		if (occursin("4-chord",g))
+			graphlet_counts[g] = div(graphlet_counts[g],5)
+		end
+		if (occursin("4-clique",g))
+			graphlet_counts[g] = div(graphlet_counts[g],6)
+		end
+	end
 	return graphlet_counts
 end
 
