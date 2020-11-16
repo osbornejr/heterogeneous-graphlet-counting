@@ -338,7 +338,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair{
 				graphlet_names[el][[1,2,4]] = sort(graphlet_names[el][[1,2,4]])
 			#tails (maintain and order edge not connected to tail)
 			elseif(graphlet_names[el][5] == "4-tail")
-				graphlet_names[el][[3,4]] = sort(graphlet_names[el][[3,4]])
+				graphlet_names[el][[1,2]] = sort(graphlet_names[el][[1,2]])
 			#chords (maintain and order centre edge in middle of name)
 			elseif (graphlet_names[el][5] == "4-chord")
 				graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
