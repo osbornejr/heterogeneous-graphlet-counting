@@ -89,6 +89,7 @@ adj_matrix = adjacency(similarity_matrix,threshold)
 #adj_matrix = consensus_measure(data,methods = ["pearson","spearman","kendall","mutual_information"])
 
 #Trim nodes with degree zero
+data = data[vec(sum(adj_matrix,dims=2).!=0),:]
 vertexlist = vertexlist[vec(sum(adj_matrix,dims=2).!=0),:]
 adj_matrix = adj_matrix[:,vec(sum(adj_matrix,dims=1).!=0)]
 adj_matrix = adj_matrix[vec(sum(adj_matrix,dims=2).!=0),:]
