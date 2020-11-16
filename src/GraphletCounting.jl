@@ -60,7 +60,7 @@ function add3graphlets(vertexlist::Array{String,1},nodelist::Array{Int,1},count_
 	return count_dict
 end
 
-function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelist2::Array{Array{Int,1},1},count_dict::Dict{String,Int},i::Int,j::Int;graphlet_type::String)
+function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelist2::Array{Array{Int,1},1},count_dict::Dict{String,Int},i::Int,j::Int;graphlet_type::String,order::Array{Int,1}=[1,2,3,4])
 
 	#check to see if candidate lists are empty
 	if length(nodelist1)==0 
@@ -108,7 +108,7 @@ function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelis
 					end
                                         
                                 end
-                                if (graphlet_type == "4-cycles")
+                                if (graphlet_type == "4-cycle")
 					for (indd,m) in enumerate(nodelist2[ind])
 						#ordering neighi_i_j_neighj
                                                 list[indd] = string(typelist[n],delim,typelist[i],delim,typelist[j],delim,typelist[m],delim,graphlet_type)
@@ -191,7 +191,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
                         # counted.
                 	istars = Array{Array{Int,1},1}(undef,length(iPath))
                         for (ind,p) in enumerate(iPath)
-                                istars[ind] = setdiff(iPath[BitArray(in.(Ref(p),neighbourdictfunc.(iPath)).*-1 .+1)],iPath[1:ind])
+                                istars[ind] = setdiff(iPath[BitArray(in.(Ref(p),neighboYurdictfunc.(iPath)).*-1 .+1)],iPath[1:ind])
                         end
                         count_dict = add4graphlets(vertex_type_list,iPath,istars,count_dict,i,j,graphlet_type = "4-star")
                 
@@ -252,9 +252,34 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
                         for (ind,p) in enumerate(iPath)
                                 cycles[ind] = jPath[in.(Ref(p),neighbourdictfunc.(jPath))]
                         end
-                        count_dict = add4graphlets(vertex_type_list,iPath,cycles,count_dict,i,j,graphlet_type = "4-cycles")
+                        count_dict = add4graphlets(vertex_type_list,iPath,cycles,count_dict,i,j,graphlet_type = "4-cycle")
                         
-          		## 
+          		##4-CHORD
+			#
+			#4-chord, i edge
+			#similar to 4-tail-tri-centre, but we instead find neighbours of k that are connected to one of i or j
+			## find neighbours of the third node in the triangle that are not connected to i or j
+			ichord = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(iPath))		
+                        count_dict = add4graphlets(vertex_type_list,Tri,ichord,count_dict,i,j,graphlet_type = "4-chord-edge-orbit")
+			
+			jchord = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(jPath))		
+                        count_dict = add4graphlets(vertex_type_list,Tri,jchord,count_dict,j,i,graphlet_type = "4-chord-edge-orbit")
+
+			##4-chord centre orbit
+			#now we need to identify triangles (k in Tri) that don't share an edge with one another
+                	chord = Array{Array{Int,1},1}(undef,length(Tri))
+                        for (ind,p) in enumerate(Tri)
+                                chord[ind] = setdiff(Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)],Tri[1:ind])
+                        end
+                        count_dict = add4graphlets(vertex_type_list,Tri,chord,count_dict,i,j,graphlet_type = "4-chord-centre-orbit")
+			
+			##4-CLIQUE
+			#Finally, we need to identify triangles (k in Tri) that DO share an edge with one another
+                	clique = Array{Array{Int,1},1}(undef,length(Tri))
+                        for (ind,p) in enumerate(Tri)
+                                clique[ind] = setdiff(Tri[in.(Ref(p),neighbourdictfunc.(Tri))],Tri[1:ind])
+                        end
+                        count_dict = add4graphlets(vertex_type_list,Tri,clique,count_dict,i,j,graphlet_type = "4-clique")
 
                 #Save count dictionary for this edge
                 Chi[h] = count_dict
