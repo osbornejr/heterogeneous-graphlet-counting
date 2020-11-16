@@ -324,6 +324,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair{
 			#clean off orbit listing
 			graphlet_names[el][5] = replace(graphlet_names[el][5],Pair("-edge-orbit",""))
 			graphlet_names[el][5] = replace(graphlet_names[el][5],Pair("-centre-orbit",""))
+			graphlet_names[el][5] = replace(graphlet_names[el][5],Pair("-tri",""))
 			
 			#paths (maintain and order centre edge, moving others accordingly)
 			if (graphlet_names[el][5] == "4-path")
