@@ -349,13 +349,15 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair{
 		end
 
  	end
-	orbit_counts = Dict{String,Int}()
+	#merge counts for each graphlet type
+	graphlet_counts = Dict{String,Int}()
 	orbits = join.(graphlet_names,"_")
 	count_values = collect(values(total_counts))
 	for orb in 1:size(orbits,1)
-		orbit_counts[orbits[orb]] = get(orbit_counts,orbits[orb],0)+count_values[orb]	
+		graphlet_counts[orbits[orb]] = get(graphlet_counts,orbits[orb],0)+count_values[orb]	
 	end
-	return orbit_counts
+
+	return graphlet_counts
 end
 
 
