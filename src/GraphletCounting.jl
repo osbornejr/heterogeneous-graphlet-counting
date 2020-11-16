@@ -145,7 +145,7 @@ function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelis
 end
 
 
-function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,1},graphlet_size::Int=3)
+function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair{Int,Int},1},graphlet_size::Int=3)
 	
 	#get neighbourhood for each vertex in advance (rather than calling per-edge)
 	neighbourdict=Neighbours(edgelist)
@@ -311,10 +311,43 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
 	#reorder names to merge orbits
 	graphlet_names = (split.(collect(keys(total_counts)),"_"))
 	for el in 1:size(graphlet_names,1)
-		#do not reorder for x-y-x paths (different orbit to other 3-paths) 
-		if !(graphlet_names[el][1]!=graphlet_names[el][2] && graphlet_names[el][1]==graphlet_names[el][3] && graphlet_names[el][4]=="3-path")
-	          graphlet_names[el][1:3]=sort(graphlet_names[el][1:3])
- 	        end
+		#for 3 graphlets:
+		if(length(graphlet_names[el])==4)
+		   
+			#do not reorder for x-y-x paths (different orbit to other 3-paths) 
+			if !(graphlet_names[el][1]!=graphlet_names[el][2] && graphlet_names[el][1]==graphlet_names[el][3] && graphlet_names[el][4]=="3-path")
+	          		graphlet_names[el][1:3]=sort(graphlet_names[el][1:3])
+ 	        	end
+		end
+		## for 4 graphlets
+		if(length(graphlet_names[el])==5)
+			#clean off orbit listing
+			graphlet_names[el][5] == replace(graphlet_names[el][5],Pair("-edge-orbit"->""))
+			graphlet_names[el][5] == replace(graphlet_names[el][5],Pair("-centre-orbit"->""))
+			
+			#paths (maintain and order centre edge, moving others accordingly)
+			if (graphlet_names[el][5] == "4-path")
+				#we only want to switch if interior needs switching
+				if (graphlet_names[el][[2,3]][1]!=sort(graphlet_names[el][[2,3]])[1])
+					graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
+					graphlet_names[el][[1,4]] = graphlet_names[el][[4,1]]
+				end
+			#stars (maintain star centre (3rd entry), order others)
+			elseif (graphlet_names[el][5] == "4-star")
+				graphlet_names[el][[1,2,4]] = sort(graphlet_names[el][[1,2,4]])
+			#tails (maintain and order edge not connected to tail)
+			elseif(graphlet_names[el][5] == "4-tail")
+				graphlet_names[el][[3,4]] = sort(graphlet_names[el][[3,4]])
+			#chords (maintain and order centre edge in middle of name)
+			elseif (graphlet_names[el][5] == "4-chord")
+				graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
+				graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]])
+			#cycles and cliques (just order everything)
+			else 
+				graphlet_names[el][1:4] = sort(graphlet_names[el][1:4])
+			end
+		end
+
  	end
 	orbit_counts = Dict{String,Int}()
 	orbits = join.(graphlet_names,"_")
