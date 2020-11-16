@@ -115,6 +115,27 @@ function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelis
 					end
                                         
                                 end
+                                if (graphlet_type == "4-chord-edge-orbit")
+					for (indd,m) in enumerate(nodelist2[ind])
+						#ordering neighik_i_k_j
+                                                list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[n],delim,typelist[j],delim,graphlet_type)
+					end
+                                        
+                                end
+                                if (graphlet_type == "4-chord-centre-orbit")
+					for (indd,m) in enumerate(nodelist2[ind])
+						#ordering neighij_i_j_k
+                                                list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[j],delim,typelist[n],delim,graphlet_type)
+					end
+                                        
+                                end
+                                if (graphlet_type == "4-clique")
+					for (indd,m) in enumerate(nodelist2[ind])
+						#ordering k_i_j_neigh_kij
+                                                list[indd] = string(typelist[n],delim,typelist[i],delim,typelist[j],delim,typelist[m],delim,graphlet_type)
+					end
+                                        
+                                end
 				x = Dict{String,Int}([(p,count(x->x==p,list)) for p in unique(list)])
 			end
 		merge!(+,count_dict,x)
@@ -191,7 +212,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
                         # counted.
                 	istars = Array{Array{Int,1},1}(undef,length(iPath))
                         for (ind,p) in enumerate(iPath)
-                                istars[ind] = setdiff(iPath[BitArray(in.(Ref(p),neighboYurdictfunc.(iPath)).*-1 .+1)],iPath[1:ind])
+                                istars[ind] = setdiff(iPath[BitArray(in.(Ref(p),neighbourdictfunc.(iPath)).*-1 .+1)],iPath[1:ind])
                         end
                         count_dict = add4graphlets(vertex_type_list,iPath,istars,count_dict,i,j,graphlet_type = "4-star")
                 
