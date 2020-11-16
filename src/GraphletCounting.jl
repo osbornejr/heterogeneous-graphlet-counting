@@ -87,10 +87,16 @@ function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelis
 						list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[j],delim,typelist[n],delim,graphlet_type)
 					end
 				end
-                                if (graphlet_type == "4-star"|| graphlet_type == "4-tail-edge-orbit" )
+                                if (graphlet_type == "4-tail-edge-orbit" )
 					for (indd,m) in enumerate(nodelist2[ind])
 						#ordering neighi_neighi_i_j
                                                 list[indd] = string(typelist[n],delim,typelist[m],delim,typelist[i],delim,typelist[j],delim,graphlet_type)
+					end
+				end
+                                if (graphlet_type == "4-star")
+					for (indd,m) in enumerate(nodelist2[ind])
+						#ordering j_neighi_neighi_i
+                                                list[indd] = string(typelist[j],delim,typelist[n],delim,typelist[m],delim,typelist[i],delim,graphlet_type)
 					end
                                         
                                 end
@@ -335,7 +341,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair{
 				end
 			#stars (maintain star centre (3rd entry), order others)
 			elseif (graphlet_names[el][5] == "4-star")
-				graphlet_names[el][[1,2,4]] = sort(graphlet_names[el][[1,2,4]])
+				graphlet_names[el][[1,2,3]] = sort(graphlet_names[el][[1,2,3]])
 			#tails (maintain and order edge not connected to tail)
 			elseif(graphlet_names[el][5] == "4-tail")
 				graphlet_names[el][[1,2]] = sort(graphlet_names[el][[1,2]])
