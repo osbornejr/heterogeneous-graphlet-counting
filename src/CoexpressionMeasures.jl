@@ -14,32 +14,7 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
 	end
 
 	if (method=="mutual_information")
-		discretizer = "uniform_width"
-		estimator = "maximum_likelihood"
-		mi_base = 2
-		nvars, nvals = size(data)
-
-		bin_ids = zeros(Int, (nvars, nvals))
-		nbins = Int(round(sqrt(nvals)))
-		#mis = zeros(binomial(nvars, 2))
-		matrix = zeros(nvars,nvars)
-		for i in 1 : nvars
-			get_bin_ids!(view(data,i,1:nvals), discretizer, nbins, view(bin_ids, i, 1:nvals))
-		end
-
-		#index = 1
-		for i in 1 : nvars, j in i : nvars
-			f = get_frequencies_from_bin_ids(view(bin_ids,i,1:nvals), view(bin_ids,j,1:nvals), nbins, nbins)
-			p = get_probabilities(estimator, f) 
-			#mis[index] = apply_mutual_information_formula(p, sum(p, dims = 1), sum(p, dims = 2), mi_base)
-			matrix[i,j] = apply_mutual_information_formula(p, sum(p, dims = 1), sum(p, dims = 2), mi_base)
-
-			#index += 1
-		end
-		#copy upper triangle to lower triangle
-		matrix = matrix + matrix'
-		matrix[diagind(matrix)]=matrix[diagind(matrix)]./2
-		return matrix
+		return mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
 	end
 end
 
@@ -72,6 +47,7 @@ function mutual_information(data; discretizer = "uniform_width", estimator = "ma
 	return matrix
 
 end
+
 
 function consensus_measure(data::AbstractArray;methods::AbstractVector{String})
 	nvars, nvals = size(data)
