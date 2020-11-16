@@ -1,0 +1,1 @@
+histogram(DataFrame([get_entropy.(eachrow(data)),vertexlist[:,2]],[:entropy,:transcript_type]),:entropy,:transcript_type,"entropy_distribution.svg",xaxis ="entropy scores")
