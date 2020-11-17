@@ -1,1 +1,55 @@
-histogram(DataFrame([get_entropy.(eachrow(data)),vertexlist[:,2]],[:entropy,:transcript_type]),:entropy,:transcript_type,"entropy_distribution.svg",xaxis ="entropy scores")
+---
+title : Sampling the most relevant transcripts
+author : Joel Robertson
+date: 16th November 2020
+---
+
+
+```julia; echo = false; results = "hidden"; cache = true
+projectdir = ENV["JULIA_PROJECT"]
+cd(projectdir)
+outputdir = projectdir*"/docs/"  
+ for src in filter(x->endswith(x ,".jl"),readdir("src"))
+	cd(projectdir)
+	include(projectdir*"/src/"*src)
+end
+
+### Read in each set- generate (condensed) raw_counts and data matrix 
+include(projectdir*"/test/ReadData.jl")
+
+### Clean and normalise data- generate (filtered) raw_counts, norm_counts and normalised data matrix 
+include(projectdir*"/test/CleanData.jl")
+
+```
+
+## Entropy 
+As discussed last week, we could instead use entropy to select transcripts. The Shannon entropy
+ 
+
+```
+ H(X) = - \sum_{x\in X}p(x)log(p(x))
+```
+
+of a variable $X$, where p(x) is the probability di 
+This would tie in nicely with the use of a (partial) mutual information measure of coexpression. As is becoming clear though there may be some problems with this approach, which we will discuss on Thursday. For now, here is what the entropy distribution looks like: 
+
+```julia; echo = false; results = "hidden"; cache = true
+
+histogram(DataFrame([get_entropy.(eachrow(data)),norm_counts[:,14]],[:entropy,:transcript_type]),:entropy,:transcript_type,projectdir*"/output/plots/entropy_distribution.svg",xaxis ="entropy scores")
+
+```
+
+![image](../output/plots/entropy_distribution.svg)
+
+This peculiar effect is the result of the discretisation process required to fit a probability distribution 
+```julia
+#; echo = false; results = "hidden"; cache = true
+variance = vec(var(data, dims=2))
+insertcols!(norm_counts,"variance"=>variance)
+
+p = plot(x = log2.(variance), Geom.histogram(bincount = 100,density = false),Guide.xlabel("variance (log2)"),Guide.ylabel("frequency"),Guide.title("Variance histogram"));
+draw(SVG(projectdir*"/output/plots/variance_distribution.svg"),p)
+
+```
+
+![image](../output/plots/variance_distribution.svg)
