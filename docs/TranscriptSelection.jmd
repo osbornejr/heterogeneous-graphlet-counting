@@ -23,15 +23,15 @@ include(projectdir*"/test/CleanData.jl")
 ```
 
 ## Entropy 
-As discussed last week, we could instead use entropy to select transcripts. The Shannon entropy
- 
+As discussed last week, we could instead use entropy to select transcripts. The Shannon entropy 										
+$$
+	H(X) = - \sum_{x\in X}p(x)log(p(x))
+$$
 
-```
- H(X) = - \sum_{x\in X}p(x)log(p(x))
-```
-
-of a variable $X$, where p(x) is the probability di 
-This would tie in nicely with the use of a (partial) mutual information measure of coexpression. As is becoming clear though there may be some problems with this approach, which we will discuss on Thursday. For now, here is what the entropy distribution looks like: 
+describes the uncertainty inherent in the probability distribution p(x) of a variable $X$. This will be higher for transcripts that are expressed differently across samples.  
+Using this would tie in nicely with the use of a (partial) mutual information measure of coexpression. 
+As is becoming clear though there may be some problems with this approach, which we will discuss on Thursday. 
+For now, here is what the entropy distribution looks like: 
 
 ```julia; echo = false; results = "hidden"; cache = true
 
@@ -41,7 +41,7 @@ histogram(DataFrame([get_entropy.(eachrow(data)),norm_counts[:,14]],[:entropy,:t
 
 ![image](../output/plots/entropy_distribution.svg)
 
-This peculiar effect is the result of the discretisation process required to fit a probability distribution 
+This peculiar effect is the result of the discretisation process required to fit a probability distribution to each transcript's expression profile. Because the sample size is so small, we onl 
 ```julia
 #; echo = false; results = "hidden"; cache = true
 variance = vec(var(data, dims=2))
