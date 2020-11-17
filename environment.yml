@@ -9,6 +9,7 @@ dependencies:
         - r-data.table
         - r-wgcna
         - r-igraph
+        - r-pcit
         - r-rnentropy
         - bioconductor-edger
         - bioconductor-deseq2
