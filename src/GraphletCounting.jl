@@ -394,6 +394,247 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair{
 end
 
 
+function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,1},graphlet_size::Int=3)
+	
+	#get neighbourhood for each vertex in advance (rather than calling per-edge)
+	neighbourdict=Neighbours(edgelist)
+	# set up function to apply dict to arrays (maybe a better way exists, but this works?)
+	neighbourdictfunc(x::Int) = neighbourdict[x]
+	#vertex set derived from edgelist (allows for any arbritary vertex labelling)
+	##(important: not an ordered list that matches with vertexlist types!!) 
+	vertices = unique(vcat(first.(edgelist),last.(edgelist)))		
+	#preallocate array to store each edge's graphlet dictionary 
+	Chi=Array{Dict}(undef,size(edgelist,1));
+	
+	#per edge process
+	for h in 1:size(edgelist,1)
+		count_dict = Dict{String,Int}()
+	#	h=1	
+	#	# get nodes i and j for this edge
+                i = edgelist[h].first
+                j = edgelist[h].second
+                #get neighbourhoods of i and j
+                gamma_i = neighbourdict[i]	
+                gamma_j = neighbourdict[j]
+                
+                #three node graphlets
+                #Triangles: nodes connected to both i and j
+                Tri = intersect(gamma_i,gamma_j)
+                count_dict = add3graphlets(vertex_type_list,Tri,count_dict,i,j,graphlet_type="3-tri")
+                # Paths with j at centre
+                jPath = setdiff(gamma_j,union(gamma_i,i))
+                count_dict = add3graphlets(vertex_type_list,jPath,count_dict,i,j,graphlet_type="3-path")
+                # Paths with i at centre
+                iPath = setdiff(gamma_i,union(gamma_j,j))
+                count_dict = add3graphlets(vertex_type_list,iPath,count_dict,j,i,graphlet_type="3-path")
+                if (graphlet_size==4)
+                	#4-node graphlets		
+                	#find nodes that aren't connected to either i or j
+                	E = setdiff(vertices,union(gamma_j,gamma_i))
+                	##get neighbours of (neighbours of i that aren't i or neighbours of j)
+                	iiPath = setdiff.(neighbourdictfunc.(iPath),Ref(i))
+                	##get neighbours of (neighbours of j that arent j or neighbours of i)
+                	jjPath = setdiff.(neighbourdictfunc.(jPath),Ref(j))
+                	
+                	##4-PATH
+                	#4-path edge orbits, i-stem
+                	##get all neighours of i that have neighbours that are not connected to i or j
+                	istem = intersect.(iiPath,Ref(E))
+                	count_dict = add4graphlets(vertex_type_list,iPath,istem,count_dict,j,i,graphlet_type = "4-path-edge-orbit")
+                	#4-path edge orbits, j-stem
+                	#get all neighours of j that have neighbours that are not connected to i or j
+                	jstem = intersect.(jjPath,Ref(E))
+                	count_dict = add4graphlets(vertex_type_list,jPath,jstem,count_dict,i,j,graphlet_type = "4-path-edge-orbit")
+                end	
+                	#4-path centre orbits 
+                	#get all (uniquely) neighbours of j that are not connected to neighbours of i (note, this is symmetric, so do not need to do for the other way round as well)
+                	centres = Array{Array{Int,1},1}(undef,length(jPath))
+                	for p in 1:length(jPath)
+                		centres[p] = iPath[BitArray(in.(jPath[p],iiPath).*-1 .+1)]
+                	end
+                	count_dict = add4graphlets(vertex_type_list,jPath,centres,count_dict,i,j,graphlet_type = "4-path-centre-orbit")
+                
+                	## 4-STAR
+                	# 4-star istem
+                	# find pairs of neighbours of i that are not themselves connected.
+                        # prioritises earlier nodes in iPath, so that later ones are not double
+                        # counted.
+                	istars = Array{Array{Int,1},1}(undef,length(iPath))
+                        for (ind,p) in enumerate(iPath)
+                                istars[ind] = setdiff(iPath[BitArray(in.(Ref(p),neighbourdictfunc.(iPath)).*-1 .+1)],iPath[1:ind])
+                        end
+                        count_dict = add4graphlets(vertex_type_list,iPath,istars,count_dict,i,j,graphlet_type = "4-star")
+                
+                        #4-star jstem (as above)
+                	jstars = Array{Array{Int,1},1}(undef,length(jPath))
+                        for (ind,p) in enumerate(jPath)
+                                jstars[ind] = setdiff(jPath[BitArray(in.(Ref(p),neighbourdictfunc.(jPath)).*-1 .+1)],jPath[1:ind])
+                        end
+                        count_dict = add4graphlets(vertex_type_list,jPath,jstars,count_dict,j,i,graphlet_type = "4-star")
+                
+                	## 4-TAIL
+                	#4-tail-edge-orbit istem
+                	#Similar to 4-star, but instead want those neighbour pairs that ARE connected
+                	itails = Array{Array{Int,1},1}(undef,length(iPath))
+                        for (ind,p) in enumerate(iPath)
+                                itails[ind] = setdiff(iPath[in.(Ref(p),neighbourdictfunc.(iPath))],iPath[1:ind])
+                        end
+                        count_dict = add4graphlets(vertex_type_list,iPath,itails,count_dict,i,j,graphlet_type = "4-tail-edge-orbit")
+                	
+			
+
+                        #4-tail-edge-orbit jstem (as above)
+                	jtails = Array{Array{Int,1},1}(undef,length(jPath))
+                        for (ind,p) in enumerate(jPath)
+                                jtails[ind] = setdiff(jPath[in.(Ref(p),neighbourdictfunc.(jPath))],jPath[1:ind])
+                        end
+                        count_dict = add4graphlets(vertex_type_list,jPath,jtails,count_dict,j,i,graphlet_type = "4-tail-edge-orbit")
+                	
+			#4-tail-tri-edge
+			##this is instead based off protrusions off the triangles of i and j
+			#first we look at protrusions off of i:
+                	ittails = Array{Array{Int,1},1}(undef,length(iPath))
+			##find neighbours of i that are not neighbours of j (iPath) that are also not neighbours of k (Tri)
+			for (ind,p) in enumerate(iPath)
+                                ittails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
+                        end
+                        count_dict = add4graphlets(vertex_type_list,iPath,ittails,count_dict,i,j,graphlet_type = "4-tail-tri-edge-orbit")
+			
+			#the same for j:
+                	jttails = Array{Array{Int,1},1}(undef,length(jPath))
+			##find neighbours of j that are not neighbours of i (jPath) that are also not neighbours of k (Tri)
+			for (ind,p) in enumerate(jPath)
+                                jttails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
+                        end
+                        count_dict = add4graphlets(vertex_type_list,jPath,jttails,count_dict,j,i,graphlet_type = "4-tail-tri-edge-orbit")
+
+			#4-tail-tri-centre
+			## find neighbours of the third node in the triangle that are not connected to i or j
+			kttails = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(E))		
+                        count_dict = add4graphlets(vertex_type_list,Tri,kttails,count_dict,i,j,graphlet_type = "4-tail-tri-centre-orbit")
+			
+
+
+                	## 4-CYCLE
+                        #
+                        #Again, this is symmetric, so we only need to count this from one perspective
+                        cycles = Array{Array{Int,1},1}(undef,length(iPath))
+                        for (ind,p) in enumerate(iPath)
+                                cycles[ind] = jPath[in.(Ref(p),neighbourdictfunc.(jPath))]
+                        end
+                        count_dict = add4graphlets(vertex_type_list,iPath,cycles,count_dict,i,j,graphlet_type = "4-cycle")
+                        
+          		##4-CHORD
+			#
+			#4-chord, i edge
+			#similar to 4-tail-tri-centre, but we instead find neighbours of k that are connected to one of i or j
+			## find neighbours of the third node in the triangle that are not connected to i or j
+			ichord = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(iPath))		
+                        count_dict = add4graphlets(vertex_type_list,Tri,ichord,count_dict,i,j,graphlet_type = "4-chord-edge-orbit")
+			
+			jchord = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(jPath))		
+                        count_dict = add4graphlets(vertex_type_list,Tri,jchord,count_dict,j,i,graphlet_type = "4-chord-edge-orbit")
+
+			##4-chord centre orbit
+			#now we need to identify triangles (k in Tri) that don't share an edge with one another
+                	chord = Array{Array{Int,1},1}(undef,length(Tri))
+                        for (ind,p) in enumerate(Tri)
+                                chord[ind] = setdiff(Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)],Tri[1:ind])
+                        end
+                        count_dict = add4graphlets(vertex_type_list,Tri,chord,count_dict,i,j,graphlet_type = "4-chord-centre-orbit")
+			
+			##4-CLIQUE
+			#Finally, we need to identify triangles (k in Tri) that DO share an edge with one another
+                	clique = Array{Array{Int,1},1}(undef,length(Tri))
+                        for (ind,p) in enumerate(Tri)
+                                clique[ind] = setdiff(Tri[in.(Ref(p),neighbourdictfunc.(Tri))],Tri[1:ind])
+                        end
+                        count_dict = add4graphlets(vertex_type_list,Tri,clique,count_dict,i,j,graphlet_type = "4-clique")
+
+                #Save count dictionary for this edge
+                Chi[h] = count_dict
+	end
+	#total counts for each graphlet
+	total_counts = reduce(mergecum,Chi)
+	
+	#reorder names to merge orbits
+	graphlet_names = (split.(collect(keys(total_counts)),"_"))
+	for el in 1:size(graphlet_names,1)
+		#for 3 graphlets:
+		if(length(graphlet_names[el])==4)
+		   
+			#do not reorder for x-y-x paths (different orbit to other 3-paths) 
+			if !(graphlet_names[el][1]!=graphlet_names[el][2] && graphlet_names[el][1]==graphlet_names[el][3] && graphlet_names[el][4]=="3-path")
+	          		graphlet_names[el][1:3]=sort(graphlet_names[el][1:3])
+ 	        	end
+		end
+		## for 4 graphlets
+		if(length(graphlet_names[el])==5)
+			#clean off orbit listing
+			graphlet_names[el][5] = replace(graphlet_names[el][5],Pair("-edge-orbit",""))
+			graphlet_names[el][5] = replace(graphlet_names[el][5],Pair("-centre-orbit",""))
+			graphlet_names[el][5] = replace(graphlet_names[el][5],Pair("-tri",""))
+			
+			#paths (maintain and order centre edge, moving others accordingly)
+			if (graphlet_names[el][5] == "4-path")
+				#we only want to switch if interior needs switching
+				if (graphlet_names[el][[2,3]][1]!=sort(graphlet_names[el][[2,3]])[1])
+					graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
+					graphlet_names[el][[1,4]] = graphlet_names[el][[4,1]]
+				end
+			#stars (maintain star centre (3rd entry), order others)
+			elseif (graphlet_names[el][5] == "4-star")
+				graphlet_names[el][[1,2,3]] = sort(graphlet_names[el][[1,2,3]])
+			#tails (maintain and order edge not connected to tail)
+			elseif(graphlet_names[el][5] == "4-tail")
+				graphlet_names[el][[1,2]] = sort(graphlet_names[el][[1,2]])
+			#chords (maintain and order centre edge in middle of name)
+			elseif (graphlet_names[el][5] == "4-chord")
+				graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
+				graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]])
+			#cycles and cliques (just order everything)
+			else 
+				graphlet_names[el][1:4] = sort(graphlet_names[el][1:4])
+			end
+		end
+
+ 	end
+	#merge counts for each graphlet type
+	graphlet_counts = Dict{String,Int}()
+	orbits = join.(graphlet_names,"_")
+	count_values = collect(values(total_counts))
+	for orb in 1:size(orbits,1)
+		graphlet_counts[orbits[orb]] = get(graphlet_counts,orbits[orb],0)+count_values[orb]	
+	end
+	#divide each graphlet count by number of edges in graphlet
+	for g in collect(keys(graphlet_counts))
+		if (occursin("3-tri",g))
+			graphlet_counts[g] = div(graphlet_counts[g],3)
+		end
+		if (occursin("3-path",g))
+			graphlet_counts[g] = div(graphlet_counts[g],2)
+		end
+		if (occursin("4-path",g))
+			graphlet_counts[g] = div(graphlet_counts[g],3)
+		end
+		if (occursin("4-star",g))
+			graphlet_counts[g] = div(graphlet_counts[g],3)
+		end
+		if (occursin("4-cycle",g))
+			graphlet_counts[g] = div(graphlet_counts[g],4)
+		end
+		if (occursin("4-tail",g))
+			graphlet_counts[g] = div(graphlet_counts[g],4)
+		end
+		if (occursin("4-chord",g))
+			graphlet_counts[g] = div(graphlet_counts[g],5)
+		end
+		if (occursin("4-clique",g))
+			graphlet_counts[g] = div(graphlet_counts[g],6)
+		end
+	end
+	return graphlet_counts
+end
 
 function concentrate(graphlet_counts::Dict{String,Int})
 	conc = Dict{String,Float64}()
