@@ -1,86 +1,23 @@
+### Include all source files TODO make this occur more fluently and automatically by creating a package, and using Revise
 for src in filter(x->endswith(x,".jl"),readdir("src"))
 include("src/"*src)
 end
 
-### Read in each set
-raw_counts=read_count_data("data/mayank-de-novo/isoforms",method="expected_count");
-#raw_counts=RSEM.read_count_data("data/mayank-per-transcript/isoforms",method="expected_count");
+### Read in each set- generate (condensed) raw_counts and data matrix 
+include("test/ReadData.jl")
 
-#filtering out into types
-code_counts=filter_count_data("data/mayank-de-novo/code-hits.list",raw_counts)
-noncode_counts=filter_count_data("data/mayank-de-novo/non-code-hits.list",raw_counts)	
-insertcols!(code_counts,"transcript_type"=>"coding")
-insertcols!(noncode_counts,"transcript_type"=>"noncoding")
+### Clean and normalise data- generate (filtered) raw_counts, norm_counts and normalised data matrix 
+include("test/CleanData.jl")
 
-#merging back into one dataframe, with 
-raw_counts=outerjoin(code_counts,noncode_counts,on = intersect(names(code_counts),names(noncode_counts)))
-#create data matrix
-data=Array(raw_counts[!,2:25]);
-
-boxplot(raw_counts,"raw_data_boxplot.svg")
-
-test = stack(raw_counts,variable_name = "sample")
-
-## Condense - merge polyA- and polyA+ counts for the same sample
-condensed=raw_counts[!,[1:13;26]]
-for i in 2:13
-	condensed[!,i]=raw_counts[!,i]+raw_counts[!,i+12]
-end
-raw_counts=condensed
-data=Array(raw_counts[!,2:13]);
-
-boxplot(raw_counts,"raw_data_condensed_boxplot.svg")
-
-## Clean - remove transcripts with total counts across all samples less than X
-X = 25
-raw_counts=raw_counts[vec(sum(data,dims = 2 ).>=X),:]
-data=Array(raw_counts[!,2:13]);
-
-boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
-
-### Normalisation
-data=library_size_normalisation(data,"upperquartile")
-PCs,D_1,per_sample=pca(data')
-#p=pca_plot(PCs,3);
-#draw(SVG("output/Construction/test_per_sample.svg"),p)
-
-## update data to normalised version
-#data=per_sample
-norm_counts=copy(raw_counts)
-norm_counts[!,2:13]=data
-
-boxplot(norm_counts,"norm_data_boxplot.svg")
-
-p = plot(x = log2.(vec(data)), Geom.histogram(bincount = 100,density = false),Guide.xlabel("normalised expression (log2)"),Guide.ylabel("frequency"),Guide.title("Normalised expression histogram"));
-draw(SVG("norm_expression.svg"),p)
-
-norm_means = sum(data,dims=2)./12
-
-p = plot(x = log2.(vec(norm_means)), Geom.histogram(bincount = 100,density = false),Guide.xlabel("normalised mean expression (log2)"),Guide.ylabel("frequency"),Guide.title("Normalised mean expression histogram"));
-draw(SVG("norm_mean_expression.svg"),p)
-
-## There might be some problems with keeping the polyA+ ad polyA- samples separate to this point. Monitor.
+### Sample data - generate sample set of transcripts, alongside reduced data matrix
+include("test/SampleData.jl")
 
 
-#To run locally (ie on laptop) we must still cut down number of transcripts to managable level here. TODO put into function? At the moment, we select the N/m highest variable transcripts of each type, where m is the number of types. 
-N=1000
-
-variance = vec(var(data, dims=2))
-insertcols!(norm_counts,"variance"=>variance)
-
-p = plot(x = log2.(variance), Geom.histogram(bincount = 100,density = false),Guide.xlabel("variance (log2)"),Guide.ylabel("frequency"),Guide.title("Variance histogram"));
-draw(SVG("variance.svg"),p)
-
-norm_counts_sample_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[end-Int(N/2)+1:end,:]
-norm_counts_sample_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[end-Int(N/2)+1:end,:]
-norm_counts_sample = outerjoin(norm_counts_sample_noncoding,norm_counts_sample_coding,on = names(norm_counts))
-data=Array(norm_counts_sample[!,2:13])
 #maintain list of vertices in graph
 vertexlist = Array(norm_counts_sample[:,[1,14]])
-
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
-similarity_matrix = coexpression_measure(data,"mutual_information")
+similarity_matrix = coexpression_measure(data,"pearson")
 ## Adjacency matrix
 threshold = 0.95
 adj_matrix = adjacency(similarity_matrix,threshold)
