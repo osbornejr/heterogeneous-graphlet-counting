@@ -9,7 +9,7 @@ include("test/ReadData.jl")
 ### Clean and normalise data- generate (filtered) raw_counts, norm_counts and normalised data matrix 
 include("test/CleanData.jl")
 
-### Sample data - generate sample set of transcripts, alongside reduced data matrix
+### Sample data - generate sample set of transcripts norm_data_sample, alongside reduced data matrix
 include("test/SampleData.jl")
 
 
@@ -17,7 +17,7 @@ include("test/SampleData.jl")
 vertexlist = Array(norm_counts_sample[:,[1,14]])
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
-similarity_matrix = coexpression_measure(data,"pearson")
+similarity_matrix = coexpression_measure(data,"mutual_information")
 ## Adjacency matrix
 threshold = 0.95
 adj_matrix = adjacency(similarity_matrix,threshold)
