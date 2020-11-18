@@ -1,9 +1,8 @@
 ---
 title : Sampling the most relevant transcripts
 author : Joel Robertson
-date: 16th November 2020
+date: 17th November 2020
 ---
-
 
 ```julia; echo = false; results = "hidden"; cache = true
 projectdir = ENV["JULIA_PROJECT"]
@@ -22,7 +21,92 @@ include(projectdir*"/test/CleanData.jl")
 
 ```
 
-## Entropy 
+## Introduction
+Once the expression data has been filtered, cleaned and normalised, we have `j sum(norm_counts[:,14].=="coding")` coding and `j sum(norm_counts[:,14].=="noncoding")` noncoding transcripts remaining. 
+We  want to select from the remaining transcripts those which are most active or of interest across our samples.
+Whilst we want to include as much of the active transcriptome as possible, there is the danger that an overrepresentation of stable, housekeeping transcripts will mean our coepxression measure will detect conncetions that are largely due to stability rather than activity across different conditions.
+
+## Current method
+The most intuitive way to do this is to look at the variance of each transcript's expression profile; those with a higher variance across samples will have been turned on and off, and coexpression between these transcripts more likely indicates a direct interaction.
+If we look at the variance across all samples (note each type's bars are stacked, not overlaid):
+
+
+```julia; echo = false; results = "hidden"; cache = true
+#; echo = false; results = "hidden"; cache = true
+variance = vec(var(data, dims=2))
+insertcols!(norm_counts,"variance"=>variance)
+
+histogram(DataFrame([ log2.(variance),norm_counts[:,14]],[:variance,:transcript_type]),:variance,:transcript_type,projectdir*"/output/plots/variance_distribution.svg",xaxis ="variance (log2)")
+
+```
+
+![image](../output/plots/variance_distribution.svg)
+
+It is clear that noncoding transcripts can be expected to have a lower variance in our data; this makes sense as noncoding transcripts are known to be more lowly expressed in general (giving less "room to move").
+The difficulty here is that we still want an adequate number of noncoding transcripts included, and they are already underrepresented after filtering and cleaning the data.
+The current approach we have been using is to set a desired number of transcripts $n$ and then choose the top $\frac{n}{2}$ transcripts of each type.
+This is in line with how most WGCNA analyses proceed, with the usual alternative being to select only a small subset of interest (e.g. DEGs).
+However, it is a bit arbitrary to enforce 
+	1. a number $n$ of total transcripts
+	2. (in our case) an exactly equal distribution of typed transcripts.
+There may be a better way to enforce this whilst seeking some justification from the data itself.
+
+
+## Type-specific median variance selection
+If we look at each type's variance distribution seperately, and select based on transcripts with variance greater than the median variance for each type:         
+
+```julia; echo = false; results = "hidden"; cache = true
+noncoding = filter(:transcript_type => x->x=="noncoding",norm_counts)
+coding = filter(:transcript_type => x->x=="coding",norm_counts)
+Change(x) = if(x==1)return "keep"else return "discard"end
+insertcols!(noncoding,"abovemedian"=>Change.(noncoding[:,15].>median(noncoding[:,15])))
+insertcols!(coding,"abovemedian"=>Change.(coding[:,15].>median(coding[:,15])))
+
+histogram(DataFrame([ log2.(noncoding[:,15]),noncoding[:,16]],[:variance,:median]),:variance,:median,projectdir*"/output/plots/noncoding_variance_distribution.svg",xaxis ="variance (log2)")
+histogram(DataFrame([ log2.(coding[:,15]),coding[:,16]],[:variance,:median]),:variance,:median,projectdir*"/output/plots/coding_variance_distribution.svg",xaxis ="variance (log2)")
+```
+ 
+![image](../output/plots/noncoding_variance_distribution.svg)
+
+![image](../output/plots/coding_variance_distribution.svg)
+
+Choosing the median is just as arbitrary though (i.e. the top 50% rather than the top $x$ transcripts).
+We could just as easily choose the top 25%, or even 10%!
+## Condition-specific differences
+
+Another suggestion has been that the transcripts of interest are those that show a significant difference over the conditions in the data we are looking at.
+This follows the idea of DEG fold-change detection and would ideally identify transcripts that are switched on and off under the condition.
+If we simply look at the difference between expression across the two genotypes in Mayank's data, JG11 and ICCV2:
+
+```julia; echo = false; results = "hidden"; cache = true
+#genoytpe absolute differnces
+condition = abs.(sum(data[:,[1,2,3,10,11,12]],dims=2)-sum(data[:,4:9],dims=2))
+histogram(DataFrame([ vec(log2.(condition)),norm_counts[:,14]],[:variance,:transcript_type]),:variance,:transcript_type,projectdir*"/output/plots/genotype_difference_distribution.svg",xaxis ="absolute difference between genotype conditions (log2)")
+
+condition_coding = abs.(sum(data[norm_counts[:,14].=="coding",[1,2,3,10,11,12]],dims=2)-sum(data[norm_counts[:,14].=="coding",4:9],dims=2)) 
+condition_noncoding = abs.(sum(data[norm_counts[:,14].=="noncoding",[1,2,3,10,11,12]],dims=2)-sum(data[norm_counts[:,14].=="noncoding",4:9],dims=2))
+
+```
+
+![image](../output/plots/genotype_difference_distribution.svg)
+
+The noncoding transcripts also tend to have lower differences in general, and again notably we see that the normalised difference data appears to be approximately lognormally distributed.
+ 
+We can also apply the same method across the the control and stress conditions.
+
+```julia; echo = false; results = "hidden"; cache = true
+#control and stress absolute differences
+condition = abs.(sum(data[:,[4,5,6,10,11,12]],dims=2)-sum(data[:,[1,2,3,7,8,9]],dims=2))
+histogram(DataFrame([ vec(log2.(condition)),norm_counts[:,14]],[:variance,:transcript_type]),:variance,:transcript_type,projectdir*"/output/plots/stress_difference_distribution.svg",xaxis ="absolute difference between stres and control conditions (log2)")
+
+condition_coding = abs.(sum(data[norm_counts[:,14].=="coding",[4,5,6,10,11,12]],dims=2)-sum(data[norm_counts[:,14].=="coding",[1,2,3,7,8,9]],dims=2)) 
+condition_noncoding = abs.(sum(data[norm_counts[:,14].=="noncoding",[4,5,6,10,11,12]],dims=2)-sum(data[norm_counts[:,14].=="noncoding",[1,2,3,7,8,9]],dims=2))
+
+```
+
+![image](../output/plots/stress_difference_distribution.svg)
+
+## Entropy selection 
 As discussed last week, we could instead use entropy to select transcripts. The Shannon entropy 										
 $$
 	H(X) = - \sum_{x\in X}p(x)log(p(x))
@@ -35,21 +119,14 @@ For now, here is what the entropy distribution looks like:
 
 ```julia; echo = false; results = "hidden"; cache = true
 
-histogram(DataFrame([get_entropy.(eachrow(data)),norm_counts[:,14]],[:entropy,:transcript_type]),:entropy,:transcript_type,projectdir*"/output/plots/entropy_distribution.svg",xaxis ="entropy scores")
-
+histogram(DataFrame([get_entropy.(eachrow(data)),norm_counts[:,14]],[:entropy,:transcript_type]),:entropy,:transcript_type,projectdir*"/output/plots/entropy_distribution.svg",xaxis ="entropy scores (bits)")
 ```
 
 ![image](../output/plots/entropy_distribution.svg)
 
-This peculiar effect is the result of the discretisation process required to fit a probability distribution to each transcript's expression profile. Because the sample size is so small, we onl 
-```julia
-#; echo = false; results = "hidden"; cache = true
-variance = vec(var(data, dims=2))
-insertcols!(norm_counts,"variance"=>variance)
+This peculiar effect is the result of the discretisation process required to fit a probability distribution to each transcript's expression profile. 
+Because the sample size $N$ is so small, the discretisation only occurs on a tiny number of bins ($\left \lceil\sqrt{N}\right \rceil$ as a guide).
+This ties into the fact that information theoretic based measures will almost definitely require more samples than we have, and perhaps will have to be abandoned in favour of a more nuanced correlation-based approach. 
 
-p = plot(x = log2.(variance), Geom.histogram(bincount = 100,density = false),Guide.xlabel("variance (log2)"),Guide.ylabel("frequency"),Guide.title("Variance histogram"));
-draw(SVG(projectdir*"/output/plots/variance_distribution.svg"),p)
+One thing we might note from the entropy-based approach though is that noncoding transcripts are not underrepresented in the higher entropy scores, and if anything their entropyscores appear to skew high.
 
-```
-
-![image](../output/plots/variance_distribution.svg)
