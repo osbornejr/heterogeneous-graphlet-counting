@@ -28,7 +28,7 @@ function edgelists_null_model(adj_matrix::AbstractArray,n::Int,method::String,ty
 	if(method == "hetero_rewire")
 		for i in 1:n	
 			print("Rewiring network $i...\n")
-			edgelists[i] = edgelist_from_adj(hetero_rewire(edgelist,switching_factor,typelist))
+			edgelists[i] = hetero_rewire(edgelist,switching_factor,typelist)
 			print("Successfully rewired edges.\n")	
 		end
 	end
@@ -41,7 +41,7 @@ function null_model_counts(typelist::Array{String,1},edgelists::Array{Array{Pair
 	null_num = size(edgelists,1)
 	null_model = Array{Dict{String,Int},1}(undef,null_num)
 	for (i,el) in enumerate(edgelists)
-		null_model[i] = count_graphlets(typelist,el)
+		null_model[i] = count_graphlets(typelist,el,4)
 	end
 	return null_model
 end
