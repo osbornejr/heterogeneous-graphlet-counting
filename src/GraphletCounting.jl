@@ -445,7 +445,6 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
                 	#get all neighours of j that have neighbours that are not connected to i or j
                 	jstem = intersect.(jjPath,Ref(E))
                 	count_dict = add4graphlets(vertex_type_list,jPath,jstem,count_dict,i,j,graphlet_type = "4-path-edge-orbit")
-                end	
                 	#4-path centre orbits 
                 	#get all (uniquely) neighbours of j that are not connected to neighbours of i (note, this is symmetric, so do not need to do for the other way round as well)
                 	centres = Array{Array{Int,1},1}(undef,length(jPath))
@@ -550,7 +549,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Array{Pair,
                                 clique[ind] = setdiff(Tri[in.(Ref(p),neighbourdictfunc.(Tri))],Tri[1:ind])
                         end
                         count_dict = add4graphlets(vertex_type_list,Tri,clique,count_dict,i,j,graphlet_type = "4-clique")
-
+		end
                 #Save count dictionary for this edge
                 Chi[h] = count_dict
 	end
@@ -652,12 +651,14 @@ function find_motifs(adjacency_matrix::AbstractArray,null_model::String,null_num
 	null_model_df = null_model_dataframe(null_model_calc) 
 	
 	# calculate real network counts
-	graphlet_counts = count_graphlets(vertexlist[:,2],edgelist)
+	graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4)
 	
 	#Statistical significance
 	zscores = Dict{String,Float64}()
 	for g in collect(keys(graphlet_counts))
+		## get score that each null model graph got for corresponding graphlet. If it didn't appear at all in a random graph, we must add the 0 here as well
 		rand_vals = filter(:graphlet=>x->x==g,null_model_df)[!,:value]
+		rand_vals = vcat(rand_vals,zeros(Int,null_num-length(rand_vals)))
 		m = mean(rand_vals)
 		sd = std(rand_vals)
 		Z = (graphlet_counts[g]-m)/sd
