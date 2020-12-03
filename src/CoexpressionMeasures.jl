@@ -1,7 +1,7 @@
 using Statistics, StatsBase, DataFrames, InformationMeasures,LinearAlgebra
 
 function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
-	if (method=="pearson")
+	if (method =="pearson")
 		return cor(data')
 	end
 
@@ -9,7 +9,7 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
 		return corspearman(data')
 	end
 
-	if (method=="kendall")
+	if (method== "kendall")
 		return corkendall(data')
 	end
 
@@ -48,7 +48,26 @@ function mutual_information(data; discretizer = "uniform_width", estimator = "ma
 
 end
 
-
+function pcit(data::AbstractArray)
+	#implementing the R package PCIT here for now. In the long run it might be better/faster/more desirable to implement our own version in Julia?
+	# Note that unlike the coexpression suite above, this method does not require an explicit threshold, and hence the output here (for now) is a fully constructed
+	# adjacency matrix.
+	@rput data
+	R"""
+	library(PCIT)
+	#just using pearson cor as basis for now (could use nonlinear correlation method here? unclear from PCIT documentation)
+	c = cor(t(data))
+	results = pcit(c)
+	sig = idx(results)
+	nonsig = idxInvert(nrow(c),sig)
+	#at the moment, just choose significant interactions in binary (i.e. only for unweighted networks)
+	c[nonsig] = 0
+	c[sig] = 1
+	
+	"""
+	@rget c
+	return BitArray(c)
+end
 function consensus_measure(data::AbstractArray;methods::AbstractVector{String})
 	nvars, nvals = size(data)
 	consensus_matrix = ones(nvars,nvars)
