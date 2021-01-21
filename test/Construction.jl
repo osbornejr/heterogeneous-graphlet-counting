@@ -17,53 +17,45 @@ include("test/SampleData.jl")
 vertexlist = Array(norm_counts_sample[:,[1,14]])
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
-
-similarity_matrix_1 = coexpression_measure(data,"pearson")
-similarity_matrix_2 = coexpression_measure(data,"pcit")
+similarity_matrix = coexpression_measure(data,"pcit")
 ## Adjacency matrix
 threshold = 0.95
-adj_matrix_1 = adjacency(similarity_matrix_1,threshold)
-adj_matrix_2 = adjacency(similarity_matrix_2,threshold)
+adj_matrix = adjacency(similarity_matrix,threshold)
 
 ##Consensus measure method
 #adj_matrix = consensus_measure(data,methods = ["pearson","spearman","kendall","mutual_information"])
 
 
 #Trim nodes with degree zero
-data_1 = data[vec(sum(adj_matrix_1,dims=2).!=0),:]
-data_2 = data[vec(sum(adj_matrix_2,dims=2).!=0),:]
-vertexlist_1 = vertexlist[vec(sum(adj_matrix_1,dims=2).!=0),:]
-vertexlist_2 = vertexlist[vec(sum(adj_matrix_2,dims=2).!=0),:]
-adj_matrix_1 = adj_matrix_1[:,vec(sum(adj_matrix_1,dims=1).!=0)]
-adj_matrix_2 = adj_matrix_2[:,vec(sum(adj_matrix_2,dims=1).!=0)]
-adj_matrix_1 = adj_matrix_1[vec(sum(adj_matrix_1,dims=2).!=0),:]
-adj_matrix_2 = adj_matrix_2[vec(sum(adj_matrix_2,dims=2).!=0),:]
-edgelist_1 = edgelist_from_adj(adj_matrix_1)
-edgelist_2 = edgelist_from_adj(adj_matrix_2)
+data = data[vec(sum(adj_matrix,dims=2).!=0),:]
+vertexlist = vertexlist[vec(sum(adj_matrix,dims=2).!=0),:]
+adj_matrix = adj_matrix[:,vec(sum(adj_matrix,dims=1).!=0)]
+adj_matrix = adj_matrix[vec(sum(adj_matrix,dims=2).!=0),:]
+edgelist = edgelist_from_adj(adj_matrix)
 
-##get largest connected component TODO maybe have a way to select all components above a certain size, and plot them all separately?
-#using LightGraphs
-##using PrettyTables
-#g = Graph(adj_matrix) 
-#components = connected_components(g)
-#largest = components[length.(components).==max(length.(components)...)]
-#adj_matrix_comp = adj_matrix[largest[1],largest[1]]
-#g_comp = Graph(adj_matrix_comp)
-##update vertexlist
-#vertexlist_comp = vertexlist[largest[1],:]
-##Network visualisation
-#edgelist_comp=edgelist_from_adj(adj_matrix_comp)
-#cytoscape_elements(vertexlist_comp,edgelist_comp,"cytoscape/elements.js")
-#
-##Network Analysis
-#degrees = sum(adj_matrix,dims=2)
-#p = plot(DataFrame(sort(degrees,dims=1)),x = "x1",Geom.histogram,Guide.title("Degree Distribution"),Guide.xlabel("degree"));
-#draw(SVG("degree_distribution.svg"),p)
-#connected_components_html_table(adj_matrix,"cytoscape/connected_components.html")
-#
+#get largest connected component TODO maybe have a way to select all components above a certain size, and plot them all separately?
+using LightGraphs
+#using PrettyTables
+g = Graph(adj_matrix) 
+components = connected_components(g)
+largest = components[length.(components).==max(length.(components)...)]
+adj_matrix_comp = adj_matrix[largest[1],largest[1]]
+g_comp = Graph(adj_matrix_comp)
+#update vertexlist
+vertexlist_comp = vertexlist[largest[1],:]
+#Network visualisation
+edgelist_comp=edgelist_from_adj(adj_matrix_comp)
+cytoscape_elements(vertexlist_comp,edgelist_comp,"cytoscape/elements.js")
+
+#Network Analysis
+degrees = sum(adj_matrix,dims=2)
+p = plot(DataFrame(sort(degrees,dims=1)),x = "x1",Geom.histogram,Guide.title("Degree Distribution"),Guide.xlabel("degree"));
+draw(SVG("degree_distribution.svg"),p)
+connected_components_html_table(adj_matrix,"cytoscape/connected_components.html")
+
 #Graphlet counting
 
-#@time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4)
+@time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4)
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
 #@time motif_counts = find_motifs(adj_matrix,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg")
