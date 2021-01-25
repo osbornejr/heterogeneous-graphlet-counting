@@ -347,18 +347,22 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 					count_dict[string(a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,b,delim,"4-path-centre-orbit")] = iPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[string(a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,b,delim,"4-cycle")]
 					count_dict[string(b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,a,delim,"4-path-centre-orbit")] = iPathTypes[inda+indb-1]*jPathTypes[inda] - count_dict[string(b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,a,delim,"4-cycle")]
 				end
-			end
-		end
+	 		end
+	 	end
 
 		##4-star
 		#To maintain type order here, we also have to separate. Note we enforce that the centre of the star is THIRD listed (in line with the 4-tail edge orbit layout)
-		for ind,a in enumerate(types)	
-			for b in types[ind:end]
-				if (a == b)
-					#i-centre
-					count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-star")] = div(factorize(iPathTypes[inda]),factorize(iPathTypes[inda]-2)*2) - 	count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")]
-					#j-centre
-					count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-star")] = div(factorize(jPathTypes[inda]),factorize(jPathTypes[inda]-2)*2) - 	count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-tail-edge-orbit")]
+		for (inda,a) in enumerate(types)	
+			for (indb,b) in enumerate(types[inda:end])
+				if  (a == b)
+					if (iPathTypes[inda]>1)
+						#i-centre
+						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-star")] = 0.5*iPathTypes[inda]*(iPathTypes[inda]-1) - 	count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")]
+					end
+					if (jPathTypes[inda]>1)
+						#j-centre
+						count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-star")] = 0.5*jPathTypes[inda]*(jPathTypes[inda]-1) - 	count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-tail-edge-orbit")]
+					end
 				else
 					#to maintain order here, we diverge from ROssi et al and calculate each orientation separately
 					count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-star")] = iPathTypes[inda]*iPathTypes[inda+indb-1] - count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")] - count_dict[string(b,delim,a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")]#unsure if both need to be subtracted here? TEST					
@@ -545,7 +549,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 				end
 			#stars (maintain star centre (3rd entry), order others)
 			elseif (graphlet_names[el][5] == "4-star")
-				graphlet_names[el][[1,2,3]] = sort(graphlet_names[el][[1,2,3]])
+				graphlet_names[el][[1,2,4]] = sort(graphlet_names[el][[1,2,4]])
 			#tails (maintain and order edge not connected to tail)
 			elseif(graphlet_names[el][5] == "4-tail")
 				graphlet_names[el][[1,2]] = sort(graphlet_names[el][[1,2]])
