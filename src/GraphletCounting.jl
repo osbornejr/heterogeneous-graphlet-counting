@@ -355,18 +355,27 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 		for (inda,a) in enumerate(types)	
 			for (indb,b) in enumerate(types[inda:end])
 				if  (a == b)
-					if (iPathTypes[inda]>1)
+					##We only need to split here if i and j are of different types
+					if (vertex_type_list[i]!=vertex_type_list[j])
 						#i-centre
 						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-star")] = 0.5*iPathTypes[inda]*(iPathTypes[inda]-1) - 	count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")]
-					end
-					if (jPathTypes[inda]>1)
+
 						#j-centre
 						count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-star")] = 0.5*jPathTypes[inda]*(jPathTypes[inda]-1) - 	count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-tail-edge-orbit")]
+
+					else # when i and j are also of same type
+						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-star")] = 0.5*iPathTypes[inda]*(iPathTypes[inda]-1)+0.5*jPathTypes[inda]*(jPathTypes[inda]-1) - 	count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")]
 					end
-				else
-					#to maintain order here, we diverge from ROssi et al and calculate each orientation separately
-					count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-star")] = iPathTypes[inda]*iPathTypes[inda+indb-1] - count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")] - count_dict[string(b,delim,a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")]#unsure if both need to be subtracted here? TEST					
-					count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-star")] = jPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-tail-edge-orbit")] - count_dict[string(b,delim,a,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-tail-edge-orbit")]#unsure if both need to be subtracted here? TEST
+
+				else # when a and b are of different types
+				#again, to maintain order here, we diverge from ROssi et al and calculate each orientation separately WHEN J AND I ARE OF DIFFERENT TYPE
+					if (vertex_type_list[i]!=vertex_type_list[j])
+						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-star")] = iPathTypes[inda]*iPathTypes[inda+indb-1] - count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")] - count_dict[string(b,delim,a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")]#unsure if both need to be subtracted here? TEST					
+						count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-star")] = jPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-tail-edge-orbit")] - count_dict[string(b,delim,a,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-tail-edge-orbit")]#unsure if both need to be subtracted here? TEST
+					else
+						
+					count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-star")] = iPathTypes[inda]*iPathTypes[inda+indb-1] +  jPathTypes[inda]*jPathTypes[inda+indb-1]  - count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")] - count_dict[string(b,delim,a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tail-edge-orbit")]#unsure if both need to be subtracted here? TEST					
+					end
 				end
 			end
 		end
