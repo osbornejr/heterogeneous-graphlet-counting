@@ -305,9 +305,9 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 			end
 		end
 	
-		for w in Tri
-			for v in neighbourdict[w]
-				if (v==i|v==j)
+		for w in Tri 
+			for v  in neighbourdict[w]
+			 	if (v==i|v==j)
 				#do nothing
 				elseif ((v in Tri) & (v < w)) 
 					count_dict[string(vertex_type_list[w],delim,vertex_type_list[i],delim,vertex_type_list[j],delim,vertex_type_list[v],delim,"4-clique")]+=1
@@ -334,6 +334,10 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 		jPathTypes = Array{Int}(undef,length(types))
 		for(ind,t) in enumerate(types)
 			jPathTypes[ind] = sum(vertex_type_list[jPath].==t)
+		end
+		TriTypes = Array{Int}(undef,length(types))
+		for(ind,t) in enumerate(types)
+			TriTypes[ind] = sum(vertex_type_list[Tri].==t)
 		end
 
 		##4-path centre orbit
@@ -378,8 +382,36 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 					end
 				end
 			end
-		end
+		end	
+		
+		##4-tail tri-edge orbit
 
+		for (inda,a) in enumerate(types)	
+			for (indb,b) in enumerate(types[inda:end])
+				if (a==b)
+					##We only need to split here if i and j are of different types
+					if (vertex_type_list[i]!=vertex_type_list[j])
+						#i-centre
+						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tri-edge-orbit")] = TriTypes[inda]*iPathTypes[inda] - 	count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-chord-edge-orbit")]
+
+						#j-centre
+						count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-star")] = TriTypes[inda]*jPathTypes[inda] - 	count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-chord-edge-orbit")]
+					else # when i and j are of same type
+						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tri-edge-orbit")] = TriTypes[inda]*iPathTypes[inda] + TriTypes[inda]*jPathTypes[inda] - count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-chord-edge-orbit")]
+					end
+				else # when a and b are different types
+					if (vertex_type_list[i]!=vertex_type_list[j])
+						#i-centre
+						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tri-edge-orbit")] = TriTypes[inda]*iPathTypes[inda] + TriTypes[indb]*iPathTypes[indb] - count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-chord-edge-orbit")]- count_dict[string(b,delim,a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-chord-edge-orbit")]
+
+						#j-centre
+						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tri-edge-orbit")] = TriTypes[inda]*jPathTypes[inda] + TriTypes[indb]*jPathTypes[indb] - count_dict[string(a,delim,b,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-chord-edge-orbit")]- count_dict[string(b,delim,a,delim,vertex_type_list[j],delim,vertex_type_list[i],delim,"4-chord-edge-orbit")]
+					else # when i and j are of same type
+						count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-tri-edge-orbit")] = TriTypes[inda]*iPathTypes[inda] + TriTypes[indb]*iPathTypes[indb] + TriTypes[inda]*jPathTypes[inda] + TriTypes[indb]*jPathTypes[indb] - count_dict[string(a,delim,b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-chord-edge-orbit")]- count_dict[string(b,delim,a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,"4-chord-edge-orbit")]
+					end
+				end
+			end
+		end
 
 #		#4-node graphlets		
 #        	#find nodes that aren't connected to either i or j
