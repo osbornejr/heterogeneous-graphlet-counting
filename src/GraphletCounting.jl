@@ -412,6 +412,18 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 				end
 			end
 		end
+		
+		## 4-chord-centre-orbit
+		for (inda,a) in enumerate(types)	
+			for (indb,b) in enumerate(types[inda:end])
+				if  (a == b)
+					count_dict[string(a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,b,delim,"4-tri-edge-orbit")] = 0.5*TriTypes[inda]*(TriTypes[inda]-1) - count_dict[string(a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,b,delim,"4-clique")]
+				else
+					count_dict[string(a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,b,delim,"4-tri-edge-orbit")] = TriTypes[inda]*TriTypes[indb] - count_dict[string(a,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,b,delim,"4-clique")] - count_dict[string(b,delim,vertex_type_list[i],delim,vertex_type_list[j],delim,a,delim,"4-clique")]
+				end
+			end
+		end
+
 
 #		#4-node graphlets		
 #        	#find nodes that aren't connected to either i or j
