@@ -530,7 +530,7 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 					count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-path-centre-orbit",delim)] = iPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-cycle",delim)]
 					count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-path-centre-orbit",delim)] = iPathTypes[inda+indb-1]*jPathTypes[inda] - count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-cycle",delim)]
 					## 4-chord-centre-orbit
-					count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-chord-centre-orbit",delim)] = TriTypes[inda]*TriTypes[indb] - count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-clique",delim)] - count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-clique",delim)]
+					count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-chord-centre-orbit",delim)] = TriTypes[inda]*TriTypes[inda+indb-1] - count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-clique",delim)] - count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-clique",delim)]
 
 					##For the other two graphlets, we operate differently if i and j are of different types
 					 if (vertex_type_list[i]!=vertex_type_list[j])
@@ -539,14 +539,14 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 						count_dict[graphlet_string(a,b,vertex_type_list[j],vertex_type_list[i],"4-star",delim)] = jPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(a,b,vertex_type_list[j],vertex_type_list[i],"4-tail-edge-orbit",delim)] - count_dict[graphlet_string(b,a,vertex_type_list[j],vertex_type_list[i],"4-tail-edge-orbit",delim)]#unsure if both need to be subtracted here? TEST
 						##4-tail tri-edge orbit
 						#i-centre
-						count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-tri-edge-orbit",delim)] = TriTypes[inda]*iPathTypes[inda] + TriTypes[indb]*iPathTypes[indb] - count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-chord-edge-orbit",delim)]- count_dict[graphlet_string(b,a,vertex_type_list[i],vertex_type_list[j],"4-chord-edge-orbit",delim)]
+						count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-tri-edge-orbit",delim)] = TriTypes[inda]*iPathTypes[inda] + TriTypes[inda+indb-1]*iPathTypes[inda+indb-1] - count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-chord-edge-orbit",delim)]- count_dict[graphlet_string(b,a,vertex_type_list[i],vertex_type_list[j],"4-chord-edge-orbit",delim)]
 						#j-centre
-						count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-tri-edge-orbit",delim)] = TriTypes[inda]*jPathTypes[inda] + TriTypes[indb]*jPathTypes[indb] - count_dict[graphlet_string(a,b,vertex_type_list[j],vertex_type_list[i],"4-chord-edge-orbit",delim)]- count_dict[graphlet_string(b,a,vertex_type_list[j],vertex_type_list[i],"4-chord-edge-orbit",delim)]
+						count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-tri-edge-orbit",delim)] = TriTypes[inda]*jPathTypes[inda] + TriTypes[inda+indb-1]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(a,b,vertex_type_list[j],vertex_type_list[i],"4-chord-edge-orbit",delim)]- count_dict[graphlet_string(b,a,vertex_type_list[j],vertex_type_list[i],"4-chord-edge-orbit",delim)]
 					else
 						##4-star
 						count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-star",delim)] = iPathTypes[inda]*iPathTypes[inda+indb-1] +  jPathTypes[inda]*jPathTypes[inda+indb-1]  - count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)] - count_dict[graphlet_string(b,a,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)]#unsure if both need to be subtracted here? TEST					
 						##4-tail tri-edge orbit
-						count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tri-edge-orbit",delim)] = TriTypes[inda]*iPathTypes[inda] + TriTypes[indb]*iPathTypes[indb] + TriTypes[inda]*jPathTypes[inda] + TriTypes[indb]*jPathTypes[indb] - count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-chord-edge-orbit",delim)]- count_dict[graphlet_string(b,a,vertex_type_list[i],vertex_type_list[j],"4-chord-edge-orbit",delim)]
+						count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-tri-edge-orbit",delim)] = TriTypes[inda]*iPathTypes[inda] + TriTypes[inda+indb-1]*iPathTypes[inda+indb-1] + TriTypes[inda]*jPathTypes[inda] + TriTypes[inda+indb-1]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-chord-edge-orbit",delim)]- count_dict[graphlet_string(b,a,vertex_type_list[i],vertex_type_list[j],"4-chord-edge-orbit",delim)]
 					end
 				end
 	 		end
@@ -574,7 +574,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	
 	#per edge process
 	for h in 1 :size(edgelist,1)
-		count_dict = per_edge_counts_old(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
+		count_dict = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
 		Chi[h] = count_dict		
 	end
 	#total counts for each graphlet
