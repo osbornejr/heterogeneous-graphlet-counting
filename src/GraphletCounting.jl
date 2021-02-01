@@ -258,6 +258,154 @@ function graphlet_string(a::String,b::String,c::String,d::String,graphlet::Strin
 	return string(a,delim,b,delim,c,delim,d,delim,graphlet)
 end
 
+
+function per_edge_counts_old(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},neighbourdictfunc::Function,ordered_vertices::Array{Int,1})
+	count_dict = DefaultDict{String,Int}(0)
+	h=edge	
+#	# get nodes i and j for this edge
+        i = edgelist[h].first
+        j = edgelist[h].second
+        #get neighbourhoods of i and j
+        gamma_i = neighbourdict[i]	
+        gamma_j = neighbourdict[j]
+        
+        #three node graphlets
+        #Triangles: nodes connected to both i and j
+        Tri = intersect(gamma_i,gamma_j)
+        count_dict = add3graphlets(vertex_type_list,Tri,count_dict,i,j,graphlet_type="3-tri")
+        # Paths with j at centre
+        jPath = setdiff(gamma_j,union(gamma_i,i))
+        count_dict = add3graphlets(vertex_type_list,jPath,count_dict,i,j,graphlet_type="3-path")
+        # Paths with i at centre
+        iPath = setdiff(gamma_i,union(gamma_j,j))
+        count_dict = add3graphlets(vertex_type_list,iPath,count_dict,j,i,graphlet_type="3-path")
+        if (graphlet_size==4)
+        delim = "_"
+		#4-node graphlets		
+        	#find nodes that aren't connected to either i or j
+        	E = setdiff(ordered_vertices,union(gamma_j,gamma_i))
+        	##get neighbours of (neighbours of i that aren't i or neighbours of j)
+        	iiPath = setdiff.(neighbourdictfunc.(iPath),Ref(i))
+        	##get neighbours of (neighbours of j that arent j or neighbours of i)
+        	jjPath = setdiff.(neighbourdictfunc.(jPath),Ref(j))
+        	
+        	##4-PATH
+        	#4-path edge orbits, i-stem
+        	##get all neighours of i that have neighbours that are not connected to i or j
+        	istem = intersect.(iiPath,Ref(E))
+        	count_dict = add4graphlets(vertex_type_list,iPath,istem,count_dict,j,i,graphlet_type = "4-path-edge-orbit")
+        	#4-path edge orbits, j-stem
+        	#get all neighours of j that have neighbours that are not connected to i or j
+        	jstem = intersect.(jjPath,Ref(E))
+        	count_dict = add4graphlets(vertex_type_list,jPath,jstem,count_dict,i,j,graphlet_type = "4-path-edge-orbit")			
+        	#4-path centre orbits 
+        	#get all (uniquely) neighbours of j that are not connected to neighbours of i (note, this is symmetric, so do not need to do for the other way round as well)
+        	centres = Array{Array{Int,1},1}(undef,length(jPath))
+        	for p in 1:length(jPath)
+        		centres[p] = iPath[BitArray(in.(jPath[p],iiPath).*-1 .+1)]
+        	end
+        	count_dict = add4graphlets(vertex_type_list,jPath,centres,count_dict,i,j,graphlet_type = "4-path-centre-orbit")
+        
+        	## 4-STAR
+        	# 4-star istem
+        	# find pairs of neighbours of i that are not themselves connected.
+                # prioritises earlier nodes in iPath, so that later ones are not double
+                # counted.
+        	istars = Array{Array{Int,1},1}(undef,length(iPath))
+                for (ind,p) in enumerate(iPath)
+                        istars[ind] = setdiff(iPath[BitArray(in.(Ref(p),neighbourdictfunc.(iPath)).*-1 .+1)],iPath[1:ind])
+                end
+                count_dict = add4graphlets(vertex_type_list,iPath,istars,count_dict,i,j,graphlet_type = "4-star")
+        
+                #4-star jstem (as above)
+        	jstars = Array{Array{Int,1},1}(undef,length(jPath))
+                for (ind,p) in enumerate(jPath)
+                        jstars[ind] = setdiff(jPath[BitArray(in.(Ref(p),neighbourdictfunc.(jPath)).*-1 .+1)],jPath[1:ind])
+                end
+                count_dict = add4graphlets(vertex_type_list,jPath,jstars,count_dict,j,i,graphlet_type = "4-star")
+        
+        	## 4-TAIL
+        	#4-tail-edge-orbit istem
+        	#Similar to 4-star, but instead want those neighbour pairs that ARE connected
+        	itails = Array{Array{Int,1},1}(undef,length(iPath))
+                for (ind,p) in enumerate(iPath)
+                        itails[ind] = setdiff(iPath[in.(Ref(p),neighbourdictfunc.(iPath))],iPath[1:ind])
+                end
+                count_dict = add4graphlets(vertex_type_list,iPath,itails,count_dict,i,j,graphlet_type = "4-tail-edge-orbit")
+        	
+		
+
+                #4-tail-edge-orbit jstem (as above)
+        	jtails = Array{Array{Int,1},1}(undef,length(jPath))
+                for (ind,p) in enumerate(jPath)
+                        jtails[ind] = setdiff(jPath[in.(Ref(p),neighbourdictfunc.(jPath))],jPath[1:ind])
+                end
+                count_dict = add4graphlets(vertex_type_list,jPath,jtails,count_dict,j,i,graphlet_type = "4-tail-edge-orbit")
+        	
+		#4-tail-tri-edge
+		##this is instead based off protrusions off the triangles of i and j
+		#first we look at protrusions off of i:
+        	ittails = Array{Array{Int,1},1}(undef,length(iPath))
+		##find neighbours of i that are not neighbours of j (iPath) that are also not neighbours of k (Tri)
+		for (ind,p) in enumerate(iPath)
+                        ittails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
+                end
+                count_dict = add4graphlets(vertex_type_list,iPath,ittails,count_dict,i,j,graphlet_type = "4-tail-tri-edge-orbit")
+		
+		#the same for j:
+        	jttails = Array{Array{Int,1},1}(undef,length(jPath))
+		##find neighbours of j that are not neighbours of i (jPath) that are also not neighbours of k (Tri)
+		for (ind,p) in enumerate(jPath)
+                        jttails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
+                end
+                count_dict = add4graphlets(vertex_type_list,jPath,jttails,count_dict,j,i,graphlet_type = "4-tail-tri-edge-orbit")
+
+		#4-tail-tri-centre
+		## find neighbours of the third node in the triangle that are not connected to i or j
+                kttails = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(E))		
+                count_dict = add4graphlets(vertex_type_list,Tri,kttails,count_dict,i,j,graphlet_type = "4-tail-tri-centre-orbit")
+		
+
+
+        	## 4-CYCLE
+                #
+                #Again, this is symmetric, so we only need to count this from one perspective
+                cycles = Array{Array{Int,1},1}(undef,length(iPath))
+                for (ind,p) in enumerate(iPath)
+                        cycles[ind] = jPath[in.(Ref(p),neighbourdictfunc.(jPath))]
+                end
+                count_dict = add4graphlets(vertex_type_list,iPath,cycles,count_dict,i,j,graphlet_type = "4-cycle")
+                
+  		##4-CHORD
+		#
+		#4-chord, i edge
+		#similar to 4-tail-tri-centre, but we instead find neighbours of k that are connected to one of i or j
+		## find neighbours of the third node in the triangle that are not connected to i or j
+		ichord = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(iPath))		
+                count_dict = add4graphlets(vertex_type_list,Tri,ichord,count_dict,i,j,graphlet_type = "4-chord-edge-orbit")
+		
+		jchord = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(jPath))		
+                count_dict = add4graphlets(vertex_type_list,Tri,jchord,count_dict,j,i,graphlet_type = "4-chord-edge-orbit")
+
+		##4-chord centre orbit
+		#now we need to identify triangles (k in Tri) that don't share an edge with one another
+        	chord = Array{Array{Int,1},1}(undef,length(Tri))
+                for (ind,p) in enumerate(Tri)
+                        chord[ind] = setdiff(Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)],Tri[1:ind])
+                end
+                count_dict = add4graphlets(vertex_type_list,Tri,chord,count_dict,i,j,graphlet_type = "4-chord-centre-orbit")
+		
+		##4-CLIQUE
+		#Finally, we need to identify triangles (k in Tri) that DO share an edge with one another
+        	clique = Array{Array{Int,1},1}(undef,length(Tri))
+                for (ind,p) in enumerate(Tri)
+                        clique[ind] = setdiff(Tri[in.(Ref(p),neighbourdictfunc.(Tri))],Tri[1:ind])
+                end
+                count_dict = add4graphlets(vertex_type_list,Tri,clique,count_dict,i,j,graphlet_type = "4-clique")
+ 	end
+	return count_dict 
+end
+
 function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},neighbourdictfunc::Function,ordered_vertices::Array{Int,1})
 	count_dict = DefaultDict{String,Int}(0)
 	h=edge	
@@ -403,129 +551,6 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 				end
 	 		end
 	 	end
-
-
-#		#4-node graphlets		
-#        	#find nodes that aren't connected to either i or j
-#        	E = setdiff(ordered_vertices,union(gamma_j,gamma_i))
-#        	##get neighbours of (neighbours of i that aren't i or neighbours of j)
-#        	iiPath = setdiff.(neighbourdictfunc.(iPath),Ref(i))
-#        	##get neighbours of (neighbours of j that arent j or neighbours of i)
-#        	jjPath = setdiff.(neighbourdictfunc.(jPath),Ref(j))
-#        	
-#        	##4-PATH
-#        	#4-path edge orbits, i-stem
-#        	##get all neighours of i that have neighbours that are not connected to i or j
-#        	istem = intersect.(iiPath,Ref(E))
-#        	count_dict = add4graphlets(vertex_type_list,iPath,istem,count_dict,j,i,graphlet_type = "4-path-edge-orbit")
-#        	#4-path edge orbits, j-stem
-#        	#get all neighours of j that have neighbours that are not connected to i or j
-#        	jstem = intersect.(jjPath,Ref(E))
-#        	count_dict = add4graphlets(vertex_type_list,jPath,jstem,count_dict,i,j,graphlet_type = "4-path-edge-orbit")			
-#        	#4-path centre orbits 
-#        	#get all (uniquely) neighbours of j that are not connected to neighbours of i (note, this is symmetric, so do not need to do for the other way round as well)
-#        	centres = Array{Array{Int,1},1}(undef,length(jPath))
-#        	for p in 1:length(jPath)
-#        		centres[p] = iPath[BitArray(in.(jPath[p],iiPath).*-1 .+1)]
-#        	end
-#        	count_dict = add4graphlets(vertex_type_list,jPath,centres,count_dict,i,j,graphlet_type = "4-path-centre-orbit")
-#        
-#        	## 4-STAR
-#        	# 4-star istem
-#        	# find pairs of neighbours of i that are not themselves connected.
-#                # prioritises earlier nodes in iPath, so that later ones are not double
-#                # counted.
-#        	istars = Array{Array{Int,1},1}(undef,length(iPath))
-#                for (ind,p) in enumerate(iPath)
-#                        istars[ind] = setdiff(iPath[BitArray(in.(Ref(p),neighbourdictfunc.(iPath)).*-1 .+1)],iPath[1:ind])
-#                end
-#                count_dict = add4graphlets(vertex_type_list,iPath,istars,count_dict,i,j,graphlet_type = "4-star")
-#        
-#                #4-star jstem (as above)
-#        	jstars = Array{Array{Int,1},1}(undef,length(jPath))
-#                for (ind,p) in enumerate(jPath)
-#                        jstars[ind] = setdiff(jPath[BitArray(in.(Ref(p),neighbourdictfunc.(jPath)).*-1 .+1)],jPath[1:ind])
-#                end
-#                count_dict = add4graphlets(vertex_type_list,jPath,jstars,count_dict,j,i,graphlet_type = "4-star")
-#        
-#        	## 4-TAIL
-#        	#4-tail-edge-orbit istem
-#        	#Similar to 4-star, but instead want those neighbour pairs that ARE connected
-#        	itails = Array{Array{Int,1},1}(undef,length(iPath))
-#                for (ind,p) in enumerate(iPath)
-#                        itails[ind] = setdiff(iPath[in.(Ref(p),neighbourdictfunc.(iPath))],iPath[1:ind])
-#                end
-#                count_dict = add4graphlets(vertex_type_list,iPath,itails,count_dict,i,j,graphlet_type = "4-tail-edge-orbit")
-#        	
-#		
-#
-#                #4-tail-edge-orbit jstem (as above)
-#        	jtails = Array{Array{Int,1},1}(undef,length(jPath))
-#                for (ind,p) in enumerate(jPath)
-#                        jtails[ind] = setdiff(jPath[in.(Ref(p),neighbourdictfunc.(jPath))],jPath[1:ind])
-#                end
-#                count_dict = add4graphlets(vertex_type_list,jPath,jtails,count_dict,j,i,graphlet_type = "4-tail-edge-orbit")
-#        	
-#		#4-tail-tri-edge
-#		##this is instead based off protrusions off the triangles of i and j
-#		#first we look at protrusions off of i:
-#        	ittails = Array{Array{Int,1},1}(undef,length(iPath))
-#		##find neighbours of i that are not neighbours of j (iPath) that are also not neighbours of k (Tri)
-#		for (ind,p) in enumerate(iPath)
-#                        ittails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
-#                end
-#                count_dict = add4graphlets(vertex_type_list,iPath,ittails,count_dict,i,j,graphlet_type = "4-tail-tri-edge-orbit")
-#		
-#		#the same for j:
-#        	jttails = Array{Array{Int,1},1}(undef,length(jPath))
-#		##find neighbours of j that are not neighbours of i (jPath) that are also not neighbours of k (Tri)
-#		for (ind,p) in enumerate(jPath)
-#                        jttails[ind] = Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)]
-#                end
-#                count_dict = add4graphlets(vertex_type_list,jPath,jttails,count_dict,j,i,graphlet_type = "4-tail-tri-edge-orbit")
-#
-#		#4-tail-tri-centre
-#		## find neighbours of the third node in the triangle that are not connected to i or j
-#                kttails = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(E))		
-#                count_dict = add4graphlets(vertex_type_list,Tri,kttails,count_dict,i,j,graphlet_type = "4-tail-tri-centre-orbit")
-#		
-#
-#
-#        	## 4-CYCLE
-#                #
-#                #Again, this is symmetric, so we only need to count this from one perspective
-#                cycles = Array{Array{Int,1},1}(undef,length(iPath))
-#                for (ind,p) in enumerate(iPath)
-#                        cycles[ind] = jPath[in.(Ref(p),neighbourdictfunc.(jPath))]
-#                end
-#                count_dict = add4graphlets(vertex_type_list,iPath,cycles,count_dict,i,j,graphlet_type = "4-cycle")
-#                
-#  		##4-CHORD
-#		#
-#		#4-chord, i edge
-#		#similar to 4-tail-tri-centre, but we instead find neighbours of k that are connected to one of i or j
-#		## find neighbours of the third node in the triangle that are not connected to i or j
-#		ichord = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(iPath))		
-#                count_dict = add4graphlets(vertex_type_list,Tri,ichord,count_dict,i,j,graphlet_type = "4-chord-edge-orbit")
-#		
-#		jchord = intersect.(setdiff.(neighbourdictfunc.(Tri),Ref([i,j])),Ref(jPath))		
-#                count_dict = add4graphlets(vertex_type_list,Tri,jchord,count_dict,j,i,graphlet_type = "4-chord-edge-orbit")
-#
-#		##4-chord centre orbit
-#		#now we need to identify triangles (k in Tri) that don't share an edge with one another
-#        	chord = Array{Array{Int,1},1}(undef,length(Tri))
-#                for (ind,p) in enumerate(Tri)
-#                        chord[ind] = setdiff(Tri[BitArray(in.(Ref(p),neighbourdictfunc.(Tri)).*-1 .+1)],Tri[1:ind])
-#                end
-#                count_dict = add4graphlets(vertex_type_list,Tri,chord,count_dict,i,j,graphlet_type = "4-chord-centre-orbit")
-#		
-#		##4-CLIQUE
-#		#Finally, we need to identify triangles (k in Tri) that DO share an edge with one another
-#        	clique = Array{Array{Int,1},1}(undef,length(Tri))
-#                 for (ind,p) in enumerate(Tri)
-#                        clique[ind] = setdiff(Tri[in.(Ref(p),neighbourdictfunc.(Tri))],Tri[1:ind])
-#                end
-#                count_dict = add4graphlets(vertex_type_list,Tri,clique,count_dict,i,j,graphlet_type = "4-clique")
  	end
 	return count_dict 
 end
@@ -549,7 +574,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	
 	#per edge process
 	for h in 1 :size(edgelist,1)
-		count_dict = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
+		count_dict = per_edge_counts_old(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
 		Chi[h] = count_dict		
 	end
 	#total counts for each graphlet
