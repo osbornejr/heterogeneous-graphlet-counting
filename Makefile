@@ -15,6 +15,11 @@ update: ## update conda and julia environments
 build: ## build conda and julia environments from scratch
 	docker image build --file docker/env/Dockerfile --tag $(julia_env) ./
 
+full-build:## full build of all container dependencies. Needs to be done once in repository if the julia-env container is to be modified locally.
+	docker image build --file docker/conda/Dockerfile --tag  conda-base:latest ./
+	docker image build --file docker/julia/Dockerfile --tag julia:latest ./
+	docker image build --file docker/env/Dockerfile --tag $(julia_env) ./
+
 push: ## push julia environment docker image
 	docker push $(julia_env)
 
