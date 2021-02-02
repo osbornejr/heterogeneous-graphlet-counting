@@ -1,10 +1,8 @@
-FROM julia-env:latest
+FROM osbornejr/julia-env:latest
 USER root
 #add config files
-COPY environment.yml Project.toml Manifest.toml /tmp/
-RUN mkdir -p $HOME/.julia/config
-COPY docker/env/startup.jl $HOME/.julia/config/
-RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml
+COPY environment.yml Project.toml Manifest.toml docker/env/startup.jl /tmp/
+RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml /tmp/startup.jl
 #COPY postBuild /usr/local/bin/postBuild.sh
 #RUN chown $UID:$GID /usr/local/bin/postBuild.sh && \
     #chmod u+x /usr/local/bin/postBuild.sh
@@ -14,6 +12,9 @@ RUN chown $UID:$GID /usr/local/bin/entrypoint.sh && \
 
 #update environments
 USER $USER
+#setup startup file
+RUN mkdir -p $HOME/.julia/config
+RUN cp /tmp/startup.jl $HOME/.julia/config/
 RUN cp /tmp/environment.yml /tmp/Manifest.toml /tmp/Project.toml $PROJECT_DIR
 WORKDIR $PROJECT_DIR
 
