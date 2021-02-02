@@ -11,6 +11,8 @@ RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml /t
 COPY docker/entrypoint.sh /usr/local/bin/
 RUN chown $UID:$GID /usr/local/bin/entrypoint.sh && \
     chmod u+x /usr/local/bin/entrypoint.sh
+## WORKAROUND AS PER https://discourse.julialang.org/t/glibcxx-3-4-26-not-found-in-rcall/29113/10: need to replace the libstdc++ library from the system (ie what conda uses to determine all other packages including the R dependencies)
+RUN cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 $HOME/julia-${JULIA_VERSION}/lib/julia/
 
 USER $USER
 #setup startup file
@@ -31,7 +33,7 @@ RUN conda update --name base --channel defaults conda && \
 #build the julia environment TODO find out why RCall does not install properly
 ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
 RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
-RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.precompile()"
+RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
 # run the postBuild script to install any JupyterLab extensions
 #RUN conda activate $ENV_PREFIX && \
  #   /usr/local/bin/postBuild.sh && \
@@ -40,5 +42,5 @@ RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pk
 #setup entrypoint
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
-# default command will launch JupyterLab server for development
+# default command will launch julia
 CMD julia --project=$PROJECT_DIR/Project.toml
