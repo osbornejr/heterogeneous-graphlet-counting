@@ -76,10 +76,10 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
         Tri = intersect(gamma_i,gamma_j)
         count_dict = add3graphlets(vertex_type_list,Tri,count_dict,i,j,graphlet_type="3-tri")
         # Paths with j at centre
-        jPath = setdiff(gamma_j,union(gamma_i,i))
+	jPath = sort(setdiff(gamma_j,union(gamma_i,i)))
         count_dict = add3graphlets(vertex_type_list,jPath,count_dict,i,j,graphlet_type="3-path")
         # Paths with i at centre
-        iPath = setdiff(gamma_i,union(gamma_j,j))
+	iPath = sort(setdiff(gamma_i,union(gamma_j,j)))
         count_dict = add3graphlets(vertex_type_list,iPath,count_dict,j,i,graphlet_type="3-path")
         if (graphlet_size==4)
         delim = "_"
@@ -87,7 +87,7 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 	#four node graphlets
 		for w in iPath
 			for v in neighbourdict[w]
-				if (v==i|v==j)
+				if (v==i)
 
 				elseif (!(v in gamma_i) & !(v in gamma_j))
 						count_dict[graphlet_string(vertex_type_list[j],vertex_type_list[i],vertex_type_list[w],vertex_type_list[v],"4-path-edge-orbit",delim)]+=1
@@ -98,9 +98,9 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 			end
 		end
 						
-		for w in jPath
+		for w in jPath 
 			for v in neighbourdict[w]
-				if (v==i|v==j)
+				if (v==j)
 				#do nothing
 				elseif (!(v in gamma_i) & !(v in gamma_j))
 					count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[w],vertex_type_list[v],"4-path-edge-orbit",delim)]+=1
@@ -270,10 +270,14 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			
 			#paths (maintain and order centre edge, moving others accordingly)
 			if (graphlet_names[el][5] == "4-path")
-				#we only want to switch if interior needs switching
-				if (graphlet_names[el][[2,3]][1]!=sort(graphlet_names[el][[2,3]])[1])
+				#we iwant to switch if interior needs switching: 
+				if (graphlet_names[el][[2,3]][1] != sort(graphlet_names[el][[2,3]])[1])
 					graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
 					graphlet_names[el][[1,4]] = graphlet_names[el][[4,1]]
+				end
+				#or if interior is the same, we sort outer types:
+				if (graphlet_names[el][[2]] == graphlet_names[el][[3]])
+					graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]]) 
 				end
 			#stars (maintain star centre (3rd entry), order others)
 			elseif (graphlet_names[el][5] == "4-star")

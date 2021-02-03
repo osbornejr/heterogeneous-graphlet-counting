@@ -16,95 +16,95 @@ function add3graphlets(vertexlist::Array{String,1},nodelist::Array{Int,1},count_
 	return count_dict
 end
 
-function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelist2::Array{Array{Int,1},1},count_dict::Dict{String,Int},i::Int,j::Int;graphlet_type::String,order::Array{Int,1}=[1,2,3,4])
-
-	#check to see if candidate lists are empty
-	if length(nodelist1)==0 
-		return count_dict
-	elseif sum(length.(nodelist2))==0
-		return count_dict
-	else ##we do have some graphlets to add!
-		delim = "_"
-		for (ind,n) in enumerate(nodelist1)
-			#check if specific list is empty
-			if length(nodelist2[ind])==0
-				x = Dict{String,Int}()
-			else
-				list = fill("",sum(length(nodelist2[ind])))
-				if (graphlet_type=="4-path-edge-orbit")
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering i_j_jneigh_j_neighneigh
-						list[indd] = string(typelist[i],delim,typelist[j],delim,typelist[n],delim,typelist[m],delim,graphlet_type)
-					end
-				end
-				if (graphlet_type == "4-path-centre-orbit")
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering neigh_i_i_j_jneigh
-						list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[j],delim,typelist[n],delim,graphlet_type)
-					end
-				end
-                                if (graphlet_type == "4-tail-edge-orbit" )
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering neighi_neighi_i_j
-                                                list[indd] = string(typelist[n],delim,typelist[m],delim,typelist[i],delim,typelist[j],delim,graphlet_type)
-					end
-				end
-                                if (graphlet_type == "4-star")
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering j_neighi_neighi_i
-                                                list[indd] = string(typelist[j],delim,typelist[n],delim,typelist[m],delim,typelist[i],delim,graphlet_type)
-					end
-                                        
-                                end
-                                if (graphlet_type == "4-tail-tri-edge-orbit" )
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering k_j_i_neigh_i
-						list[indd] = string(typelist[m],delim,typelist[j],delim,typelist[i],delim,typelist[n],delim,graphlet_type)
-					end
-                                        
-                                end
-                                if (graphlet_type == "4-tail-tri-centre-orbit" )
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering i_j_k_neigh_k
-						list[indd] = string(typelist[i],delim,typelist[j],delim,typelist[n],delim,typelist[m],delim,graphlet_type)
-					end
-                                        
-                                end
-                                if (graphlet_type == "4-cycle")
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering neighi_i_j_neighj
-                                                list[indd] = string(typelist[n],delim,typelist[i],delim,typelist[j],delim,typelist[m],delim,graphlet_type)
-					end
-                                        
-                                end
-                                if (graphlet_type == "4-chord-edge-orbit")
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering neighik_i_k_j
-                                                list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[n],delim,typelist[j],delim,graphlet_type)
-					end
-                                        
-                                end
-                                if (graphlet_type == "4-chord-centre-orbit")
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering neighij_i_j_k
-                                                list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[j],delim,typelist[n],delim,graphlet_type)
-					end
-                                        
-                                end
-                                if (graphlet_type == "4-clique")
-					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering k_i_j_neigh_kij
-                                                list[indd] = string(typelist[n],delim,typelist[i],delim,typelist[j],delim,typelist[m],delim,graphlet_type)
-					end
-                                        
-                                end
-				x = Dict{String,Int}([(p,count(x->x==p,list)) for p in unique(list)])
-			end
-		merge!(+,count_dict,x)
-		end
-	end
-	return count_dict
-end
+#function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelist2::Array{Array{Int,1},1},count_dict::Dict{String,Int},i::Int,j::Int;graphlet_type::String,order::Array{Int,1}=[1,2,3,4])
+#
+#	#check to see if candidate lists are empty
+#	if length(nodelist1)==0 
+#		return count_dict
+#	elseif sum(length.(nodelist2))==0
+#		return count_dict
+#	else ##we do have some graphlets to add!
+#		delim = "_"
+#		for (ind,n) in enumerate(nodelist1)
+#			#check if specific list is empty
+#			if length(nodelist2[ind])==0
+#				x = Dict{String,Int}()
+#			else
+#				list = fill("",sum(length(nodelist2[ind])))
+#				if (graphlet_type=="4-path-edge-orbit")
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering i_j_jneigh_j_neighneigh
+#						list[indd] = string(typelist[i],delim,typelist[j],delim,typelist[n],delim,typelist[m],delim,graphlet_type)
+#					end
+#				end
+#				if (graphlet_type == "4-path-centre-orbit")
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering neigh_i_i_j_jneigh
+#						list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[j],delim,typelist[n],delim,graphlet_type)
+#					end
+#				end
+#                                if (graphlet_type == "4-tail-edge-orbit" )
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering neighi_neighi_i_j
+#                                                list[indd] = string(typelist[n],delim,typelist[m],delim,typelist[i],delim,typelist[j],delim,graphlet_type)
+#					end
+#				end
+#                                if (graphlet_type == "4-star")
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering j_neighi_neighi_i
+#                                                list[indd] = string(typelist[j],delim,typelist[n],delim,typelist[m],delim,typelist[i],delim,graphlet_type)
+#					end
+#                                        
+#                                end
+#                                if (graphlet_type == "4-tail-tri-edge-orbit" )
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering k_j_i_neigh_i
+#						list[indd] = string(typelist[m],delim,typelist[j],delim,typelist[i],delim,typelist[n],delim,graphlet_type)
+#					end
+#                                        
+#                                end
+#                                if (graphlet_type == "4-tail-tri-centre-orbit" )
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering i_j_k_neigh_k
+#						list[indd] = string(typelist[i],delim,typelist[j],delim,typelist[n],delim,typelist[m],delim,graphlet_type)
+#					end
+#                                        
+#                                end
+#                                if (graphlet_type == "4-cycle")
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering neighi_i_j_neighj
+#                                                list[indd] = string(typelist[n],delim,typelist[i],delim,typelist[j],delim,typelist[m],delim,graphlet_type)
+#					end
+#                                        
+#                                end
+#                                if (graphlet_type == "4-chord-edge-orbit")
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering neighik_i_k_j
+#                                                list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[n],delim,typelist[j],delim,graphlet_type)
+#					end
+#                                        
+#                                end
+#                                if (graphlet_type == "4-chord-centre-orbit")
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering neighij_i_j_k
+#                                                list[indd] = string(typelist[m],delim,typelist[i],delim,typelist[j],delim,typelist[n],delim,graphlet_type)
+#					end
+#                                        
+#                                end
+#                                if (graphlet_type == "4-clique")
+#					for (indd,m) in enumerate(nodelist2[ind])
+#						#ordering k_i_j_neigh_kij
+#                                                list[indd] = string(typelist[n],delim,typelist[i],delim,typelist[j],delim,typelist[m],delim,graphlet_type)
+#					end
+#                                        
+#                                end
+#				x = Dict{String,Int}([(p,count(x->x==p,list)) for p in unique(list)])
+#			end
+#		merge!(+,count_dict,x)
+#		end
+#	end
+#	return count_dict
+#end
 
 #improved version that should be faster? Using a default dict method
 function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelist2::Array{Array{Int,1},1},count_dict::DefaultDict{String,Int},i::Int,j::Int;graphlet_type::String,order::Array{Int,1}=[1,2,3,4])
@@ -141,8 +141,8 @@ function add4graphlets(typelist::Array{String,1},nodelist1::Array{Int,1},nodelis
 				end
                                 if (graphlet_type == "4-star")
 					for (indd,m) in enumerate(nodelist2[ind])
-						#ordering j_neighi_neighi_i
-						count_dict[string(typelist[j],delim,typelist[n],delim,typelist[m],delim,typelist[i],delim,graphlet_type)]+=1
+						#ordering neighi_neighi_i_j
+						count_dict[string(typelist[n],delim,typelist[m],delim,typelist[i],delim,typelist[j],delim,graphlet_type)]+=1
 					end
                                         
                                 end
@@ -390,6 +390,10 @@ function count_graphlets_old(vertex_type_list::Array{String,1},edgelist::Union{A
 				if (graphlet_names[el][[2,3]][1]!=sort(graphlet_names[el][[2,3]])[1])
 					graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
 					graphlet_names[el][[1,4]] = graphlet_names[el][[4,1]]
+				end
+				#or if interior is the same, we sort outer types:
+				if (graphlet_names[el][[2]] == graphlet_names[el][[3]])
+					graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]]) 
 				end
 			#stars (maintain star centre (3rd entry), order others)
 			elseif (graphlet_names[el][5] == "4-star")
