@@ -107,7 +107,7 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 				elseif ((v in jPath) & (v < w))
 						count_dict[graphlet_string(vertex_type_list[w],vertex_type_list[v],vertex_type_list[j],vertex_type_list[i],"4-tail-edge-orbit",delim)]+=1
 				elseif (v in iPath)
-						count_dict[graphlet_string(vertex_type_list[w],vertex_type_list[i],vertex_type_list[j],vertex_type_list[v],"4-cycle",delim)]+=1
+						count_dict[graphlet_string(vertex_type_list[v],vertex_type_list[i],vertex_type_list[j],vertex_type_list[w],"4-cycle",delim)]+=1
 				end
 
 			end
