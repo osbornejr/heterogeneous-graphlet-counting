@@ -18,6 +18,7 @@ testelist = [ 1=>2;1 =>3 ;3=>4]
 four_path_expected_1 = Dict{String,Int}("red_red_red_red_4-path"=>1,"red_red_red_3-path" =>2)
 
 four_path_test_1 = count_graphlets(testvlist[:,2],testelist,4)
+#--------------------------------------------------------------------------------------------
 
 #     1R-----2B
 #     |  
@@ -31,6 +32,7 @@ testelist = [ 1=>2;1 =>3 ;3=>4]
 four_path_expected_2 = Dict{String,Int}("blue_red_red_red_4-path"=>1,"red_red_red_3-path" =>1,"blue_red_red_3-path" =>1)
 
 four_path_test_2 = count_graphlets(testvlist[:,2],testelist,4)
+#--------------------------------------------------------------------------------------------
 
 #     1B-----2R
 #     |  
@@ -44,6 +46,7 @@ testelist = [ 1=>2;1 =>3 ;3=>4]
 four_path_expected_3 = Dict{String,Int}("red_blue_red_red_4-path"=>1,"red_blue_red_3-path" =>1,"blue_red_red_3-path" =>1)
 
 four_path_test_3 = count_graphlets(testvlist[:,2],testelist,4)
+#--------------------------------------------------------------------------------------------
 
 #     1B-----2B
 #     |  
@@ -57,10 +60,43 @@ testelist = [ 1=>2;1 =>3 ;3=>4]
 four_path_expected_4 = Dict{String,Int}("blue_blue_red_red_4-path"=>1,"blue_blue_red_3-path" =>1,"blue_red_red_3-path" =>1)
 
 four_path_test_4 = count_graphlets(testvlist[:,2],testelist,4)
+
+#--------------------------------------------------------------------------------------------
+
+#     1R-----2B
+#     |  
+#     |    
+#     |      
+#     3B-----4R
+
+testvlist = [ "1" "red"; "2" "blue";"3" "blue"; "4" "red"]
+testelist = [ 1=>2;1 =>3 ;3=>4]
+
+four_path_expected_5 = Dict{String,Int}("red_blue_red_blue_4-path"=>1,"red_blue_red_3-path" =>1,"blue_red_blue_3-path" =>1)
+
+four_path_test_5 = count_graphlets(testvlist[:,2],testelist,4)
+
+#--------------------------------------------------------------------------------------------
+#     1R-----2B
+#     |  
+#     |    
+#     |      
+#     3R-----4B
+
+testvlist = [ "1" "red"; "2" "blue";"3" "red"; "4" "blue"]
+testelist = [ 1=>2;1 =>3 ;3=>4]
+
+four_path_expected_6 = Dict{String,Int}("blue_red_red_blue_4-path"=>1,"blue_red_red_3-path" =>2)
+
+four_path_test_6 = count_graphlets(testvlist[:,2],testelist,4)
+#--------------------------------------------------------------------------------------------
+
 @test four_path_test_1 == four_path_expected_1
 @test four_path_test_2 == four_path_expected_2
 @test four_path_test_3 == four_path_expected_3
-@test four_path_test_4 == four_path_expected_4#=}}}=#
+@test four_path_test_4 == four_path_expected_4
+@test four_path_test_5 == four_path_expected_5
+@test four_path_test_6 == four_path_expected_6#=}}}=#
 
 ## 4-tail tests{{{
 
@@ -204,4 +240,5 @@ for graphlet in collect(keys(graphlet_counts))
 	end
 end
 errors = hcat(g,d)
-@test length(x)==0#=}}}=#
+@test length(errors)==0#=}}}=#
+
