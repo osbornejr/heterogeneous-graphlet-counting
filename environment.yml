@@ -14,5 +14,7 @@ dependencies:
         - bioconductor-edger
         - bioconductor-deseq2
         - bioconductor-ebseq
-        - jupyterlab
+        - openmpi
+        - cmake 
+        
 
