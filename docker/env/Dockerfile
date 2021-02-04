@@ -2,7 +2,7 @@ FROM julia:latest
 
 USER root
 #add config files
-RUN apt-get install unzip
+RUN apt-get install -y unzip ssh
 COPY environment.yml Project.toml Manifest.toml docker/env/startup.jl /tmp/
 RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml /tmp/startup.jl
 #COPY postBuild /usr/local/bin/postBuild.sh
@@ -32,8 +32,16 @@ RUN conda update --name base --channel defaults conda && \
 
 #build the julia environment TODO find out why RCall does not install properly
 ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
+#set up MPI variables
+ENV JULIA_MPI_BINARY system
+ENV JULIA_MPI_PATH $CONDA_DIR/envs/$ENV_PREFIX
 RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
 RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
+#set up MPI.jl to use openMPI 
+RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.build(\"MPI\");using MPI;MPI.install_mpiexecjl()"
+#add julia bin to path
+ENV  PATH $PATH:$HOME/.julia/bin
+
 # run the postBuild script to install any JupyterLab extensions
 #RUN conda activate $ENV_PREFIX && \
  #   /usr/local/bin/postBuild.sh && \
