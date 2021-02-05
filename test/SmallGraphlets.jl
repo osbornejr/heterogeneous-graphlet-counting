@@ -242,3 +242,15 @@ end
 errors = hcat(g,d)
 @test length(errors)==0#=}}}=#
 
+#Test a full run of the single thread method against multi thread method	
+g = Vector{String}()#={{{=#
+d =  Vector{Int}()
+for graphlet in collect(keys(graphlet_counts_single))
+	if graphlet_counts_single[graphlet]!==graphlet_counts_threaded[graphlet]
+		push!(g,graphlet)
+		push!(d,graphlet_counts_single[graphlet]-graphlet_counts_threaded[graphlet])
+	end
+end
+errors = hcat(g,d)
+@test length(errors)==0#=}}}=#
+
