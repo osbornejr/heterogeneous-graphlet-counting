@@ -17,7 +17,7 @@ include("test/SampleData.jl")
 vertexlist = Array(norm_counts_sample[:,[1,14]])
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
-similarity_matrix = coexpression_measure(data,"pcit")
+similarity_matrix = coexpression_measure(data,"pearson")
 ## Adjacency matrix
 threshold = 0.95
 adj_matrix = adjacency(similarity_matrix,threshold)
@@ -55,7 +55,7 @@ connected_components_html_table(adj_matrix,"cytoscape/connected_components.html"
 
 #Graphlet counting
 
-@time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4)
+@time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4,true)
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
 #@time motif_counts = find_motifs(adj_matrix,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg")
