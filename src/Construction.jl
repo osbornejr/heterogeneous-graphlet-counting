@@ -306,7 +306,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 					r = N
 				end
 				p_value = (r+1)/(N+1)
-				p_value_under = (r+1)/(N+1)			
+				p_value_under = (r_under+1)/(N+1)			
 				##Z-score method (assumes either normal or lognormal distribution of counts in sims)
 				#using real values
 			#	z_score = (abs(real_obs) - rand_exp)/std(rand_vals)
@@ -335,7 +335,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		html_table_maker(insig_graphlets,"$cache_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet)				
 		#save for website version
 		html_table_maker(sig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
-		html_table_maker(insig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/insig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")	
+		html_table_maker(insig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")	
 		##look at edge types in randomised networks
 		real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
 		rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
@@ -371,52 +371,53 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	#
 	#	end
 
-# 		graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
-# 		## combine relationships into one array
-# 		rel = vcat(Rel...)
-# 		#graphlet of interest... set manually for now 
-# 		goi = sig_graphlets.Graphlet[2]		
-# 		hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
-# 		#filter down to homogenous graphlet first
-# 		hogs = filter(x->x[end]==hogoi,rel)
-# 		hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
-# 		##sort and find unique copies of graphlet (TODO unique for each graphlet!)
-# 		if(hogoi == "4-star")
-# 			hogs_sorted = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
-# 		end
-# 		
-# 		#get those that match heterogeneous pattern as well
-# 		hogs_types = map(x->broadcast(y->vertexlist[y],x),hogs_sorted)	
-# 		hegs = hogs_sorted[findall(x->x== hegoi,hogs_types)]
-# 	 	#get names of transcripts in matching pattern 
-# 		hegs_names = map(x->broadcast(y->vertex_gene_names[y],x),hegs)	
-#		
-#		#restart R session	
-#		R"""
-#		sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
-#		"""
-#		#use small sample for now
-#		hegs_sample = sample(hegs_names,20)
-#		@rput hegs_sample	
-#		R"""
-#		library(biomaRt)
-#		library(httr)
-#		library(edgeR)
-#		library(tidyverse)
-#		hegs_sample_trimmed = lapply(hegs_sample,function (x) sapply(x,tools::file_path_sans_ext))
-#		## connect to biomart
-#		set_config(config(ssl_verifypeer = 0L))
-#		ensembl_version = "current"	
-#		if (ensembl_version=="current")
-#			{
-#			##mirrors to try: "useast" "uswest" "asia"
-#			ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
-#			} else
-#			{
-#			ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
-#			}
-#		hegs_ids <- lapply(hegs_sample_trimmed,function(x) getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",x, mart = ensembl,useCache=FALSE)) 
-#		keggs = lapply(hegs_ids,function(x) topKEGG(kegga(x[[2]]),n=15,truncate =34))
+ 		graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
+ 		## combine relationships into one array
+ 		rel = vcat(Rel...)
+ 		#graphlet of interest... set manually for now 
+ 		goi = sig_graphlets.Graphlet[2]		
+ 		hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
+ 		#filter down to homogenous graphlet first
+ 		hogs = filter(x->x[end]==hogoi,rel)
+ 		hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
+ 		##sort and find unique copies of graphlet (TODO unique for each graphlet!)
+ 		if(hogoi == "4-star")
+ 			hogs_sorted = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
+ 		end
+ 		
+ 		#get those that match heterogeneous pattern as well
+ 		hogs_types = map(x->broadcast(y->vertexlist[y],x),hogs_sorted)	
+ 		hegs = hogs_sorted[findall(x->x== hegoi,hogs_types)]
+ 	 	#get names of transcripts in matching pattern 
+ 		hegs_names = map(x->broadcast(y->vertex_gene_names[y],x),hegs)	
+		
+		#restart R session	
+		R"""
+		sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+		"""
+		#use small sample for now
+		hegs_sample = sample(hegs_names,20)
+		@rput hegs_sample	
+		R"""
+		library(biomaRt)
+		library(httr)
+		library(edgeR)
+		library(tidyverse)
+		hegs_sample_trimmed = lapply(hegs_sample,function (x) sapply(x,tools::file_path_sans_ext))
+		## connect to biomart
+		set_config(config(ssl_verifypeer = 0L))
+		ensembl_version = "current"	
+		if (ensembl_version=="current")
+			{
+			##mirrors to try: "useast" "uswest" "asia"
+			ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
+			} else
+			{
+			ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
+			}
+		hegs_ids <- lapply(hegs_sample_trimmed,function(x) getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",x, mart = ensembl,useCache=FALSE)) 
+		keggs = lapply(hegs_ids,function(x) topKEGG(kegga(x[[2]]),n=15,truncate =34))
+		"""
 		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 	end
 end
