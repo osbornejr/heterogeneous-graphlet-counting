@@ -225,7 +225,7 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 	return count_dict 
 end
 
-function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3)
+function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3,threads::Bool=false)
 
 
 	##INPUTS TO PER EDGE FUNCTION
@@ -243,8 +243,14 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	Chi=Array{Dict}(undef,size(edgelist,1));
 	
 	#per edge process
-	Threads.@threads for h in 1 :size(edgelist,1)
-		Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
+	if(threads == true)
+		Threads.@threads for h in 1 :size(edgelist,1)
+			Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
+		end
+	else
+		for h in 1 :size(edgelist,1)
+			Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
+		end
 	end
 	#total counts for each graphlet
 	total_counts = reduce(mergecum,Chi)
