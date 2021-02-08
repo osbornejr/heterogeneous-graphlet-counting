@@ -25,3 +25,11 @@ push: ## push julia environment docker image
 
 pull: ## pull julia environment docker image
 	docker pull $(julia_env)
+
+http: ## create http server so that plots etc can be viewed on local machine
+	python3 -m http.server 8787
+
+sudo-docker: ##make docker usable as non-sudo (linux only)
+	sudo groupadd docker
+	sudo gpasswd -a $USER docker
+	newgrp docker
