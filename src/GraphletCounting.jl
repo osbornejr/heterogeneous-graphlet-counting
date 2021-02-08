@@ -1,4 +1,5 @@
-using DataStructures
+using DataStructures,Distributed,ParallelDataTransfer
+
 #module GraphletCounting
 #export Neighbours, mergecum, add3graphlets
 #activate environment
@@ -225,7 +226,7 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 	return count_dict 
 end
 
-function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3,threads::Bool=false)
+function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3,run_method::String="serial")
 
 
 	##INPUTS TO PER EDGE FUNCTION
@@ -240,14 +241,30 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	
 	
 	#preallocate array to store each edge's graphlet dictionary 
-	Chi=Array{Dict}(undef,size(edgelist,1));
-	
+	Chi=Array{Dict{String,Int}}(undef,size(edgelist,1));
+
 	#per edge process
-	if(threads == true)
+	if(run_method == "threads")
 		Threads.@threads for h in 1 :size(edgelist,1)
 			Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
 		end
-	else
+	elseif(run_method == "distributed")
+		#need to fill Chi for now before distributing to all workers
+		for d in 1:length(Chi)
+			Chi[d]=Dict{String,Int}()
+		end
+		#pass the required inputs to each worker
+		passobj(1,workers(), [:vertex_type_list,:edgelist,:graphlet_size,:neighbourdict,:ordered_vertices,:Chi])
+		@everywhere neighbourdictfunc(x::Int) = neighbourdict[x]
+		# distribute per edge tasks to workers
+			@sync @distributed for h in 1 :size(edgelist,1)
+				Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
+			end
+		#merge each workers outputs  
+		for w in workers()
+       			Chi = merge.(Chi,getfrom(w,:Chi))
+       		end
+	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
 			Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
 		end
