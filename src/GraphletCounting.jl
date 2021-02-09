@@ -256,14 +256,6 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
 		end
 	elseif(run_method == "distributed")
-		@info "Passing inputs to workers..."
-		#pass the required inputs to each worker
-		#@passobj 1 workers() vertex_type_list
-		#@passobj 1 workers() edgelist
-		#@passobj 1 workers() graphlet_size
-		#@everywhere neighbourdict = Neighbours(edgelist)
-		#@everywhere neighbourdictfunc(x::Int) = neighbourdict[x]
-		#@everywhere ordered_vertices = unique(vcat(first.(edgelist),last.(edgelist)))		
 		@info "Distributing edges to workers..."
 		res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
 			[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices))]        
