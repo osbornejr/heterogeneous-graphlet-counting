@@ -33,9 +33,9 @@ function edgelists_null_model(adj_matrix::AbstractArray,n::Int,method::String,ty
 		end
 	end
 	if(method == "hetero_rewire")
-	       	@info "rewiring $n graphs..."
+	       	@info "Rewiring $n graphs..."
 		edgelists = @showprogress @distributed (t2) for i in 1:n	
-			hetero_rewire(edgelist,switching_factor,typelist)
+			[hetero_rewire(edgelist,switching_factor,typelist)]
 		end
 	end
 
@@ -46,7 +46,9 @@ end
 function null_model_counts(typelist::Array{String,1},edgelists::Array{Array{Pair,1},1}) 
 	null_num = size(edgelists,1)
 	null_model = Array{Dict{String,Int},1}(undef,null_num)
+	@info "Counting null graphs..."
 	for (i,el) in enumerate(edgelists)
+		@info "For null graph $i:" 
 		null_model[i] = count_graphlets(typelist,el,4,"distributed")
 	end
 	return null_model
