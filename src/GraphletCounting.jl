@@ -379,7 +379,7 @@ function find_motifs(adjacency_matrix::AbstractArray,null_model::String,null_num
 	null_model_df = null_model_dataframe(null_model_calc) 
 	
 	# calculate real network counts
-	graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4)
+	graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4,"distributed")
 	
 	#Statistical significance
 	zscores = Dict{String,Float64}()

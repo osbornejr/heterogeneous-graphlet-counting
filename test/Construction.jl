@@ -62,12 +62,10 @@ rmprocs(workers())
 #add workers equal to the number of available cpus	
 addprocs(Threads.nthreads())
 #addprocs(8)
-
-#@everywhere using ParallelDataTransfer
 @everywhere include(ENV["JULIA_PROJECT"]*"/src/GraphletCounting.jl")
-
+@everywhere include(ENV["JULIA_PROJECT"]*"/src/NullModel.jl")
 @time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4,"distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
-#@time motif_counts = find_motifs(adj_matrix,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg")
+@time motif_counts = find_motifs(adj_matrix,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg")
 

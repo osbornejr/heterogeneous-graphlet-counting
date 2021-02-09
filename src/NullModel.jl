@@ -1,4 +1,11 @@
-using LightGraphs, DataFrames, DataStructures
+using DataFrames, DataStructures,ProgressMeter,Distributed
+
+#aggregator function
+function t2(d1,d2)
+	append!(d1,d2)
+	d1
+		
+end
 
 function edgelists_null_model(adj_matrix::AbstractArray,n::Int,method::String,typelist::Array{String,1})
 	degrees = sum(adj_matrix,dims=2)
@@ -26,10 +33,9 @@ function edgelists_null_model(adj_matrix::AbstractArray,n::Int,method::String,ty
 		end
 	end
 	if(method == "hetero_rewire")
-		for i in 1:n	
-			print("Rewiring network $i...\n")
-			edgelists[i] = hetero_rewire(edgelist,switching_factor,typelist)
-			print("Successfully rewired edges.\n")	
+	       	@info "rewiring $n graphs..."
+		edgelists = @showprogress @distributed (t2) for i in 1:n	
+			hetero_rewire(edgelist,switching_factor,typelist)
 		end
 	end
 
@@ -41,7 +47,7 @@ function null_model_counts(typelist::Array{String,1},edgelists::Array{Array{Pair
 	null_num = size(edgelists,1)
 	null_model = Array{Dict{String,Int},1}(undef,null_num)
 	for (i,el) in enumerate(edgelists)
-		null_model[i] = count_graphlets(typelist,el,4)
+		null_model[i] = count_graphlets(typelist,el,4,"distributed")
 	end
 	return null_model
 end
@@ -131,39 +137,35 @@ function edge_switch(edgelist::Array{Pair,1},switches::Int)
 	return collect(keys(el))
 end
 
-## function to quickly implement r-igraph method in julia (as it is ~10 times faster than best method I could come up with in pure julia at present). 
-function rewire(adj::AbstractArray,switching_val::Int)
-	
-	@rput adj
-	@rput switching_val
-	print("Rewiring network...\n")
-	R"""
-	library(igraph)
-	g = graph.adjacency(adj,mode="undirected",diag=F)
-	ng = rewire(g,keeping_degseq(loops=FALSE,niter=switching_val))
-	a = as.matrix(get.adjacency(ng));
-	"""
-	adjacency = BitArray(@rget a)
-end	
+### function to quickly implement r-igraph method in julia (as it is ~10 times faster than best method I could come up with in pure julia at present). 
+#function rewire(adj::AbstractArray,switching_val::Int)
+#	
+#	@rput adj
+#	@rput switching_val
+#	print("Rewiring network...\n")
+#	R"""
+#	library(igraph)
+#	g = graph.adjacency(adj,mode="undirected",diag=F)
+#	ng = rewire(g,keeping_degseq(loops=FALSE,niter=switching_val))
+#	a = as.matrix(get.adjacency(ng));
+#	"""
+#	adjacency = BitArray(@rget a)
+#end	
 
 #uses the above rewire function to only switch edges that share the same typed end points. In this case, a switching factor is provided such that switching_factor*m = switching_val TODO maybe add this approach to all rewiring/switching algorithms? default 100
 function hetero_rewire(edgelist::Array{Pair,1},switching_factor::Int,typelist::Array{String,1})
 	##first subset the edgelist based on the unique endpoint pairs for edges 
-	print("Partitioning network based on edge endpoint types...\n")
 	edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(edgelist)),map(x-> typelist[x],last.(edgelist)))))
 	t = length(unique(edgetypes))	
-	print("Found $t unique edgetpyes to partition on:\n")
 	print(unique(edgetypes))
 	#now we form a subnetwork for each "edgetype", and rewire that. The results are 
 	#cumulatively stored in an intitially empty copy of the input adjacency matrix
 	adjusted_edges = Array{Pair,1}()
 	for type in unique(edgetypes)
-		print("Switching $type edges...\n")
 		s_edges = edgelist[edgetypes.==type]
 		s_adjust = edge_switch(s_edges,switching_factor*length(s_edges))
 		adjusted_edges = vcat(adjusted_edges,s_adjust)
 	end
-	print("Returning switched network.\n")
 	return adjusted_edges
 end
 
