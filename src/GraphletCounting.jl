@@ -258,28 +258,20 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	elseif(run_method == "distributed")
 		@info "Passing inputs to workers..."
 		#pass the required inputs to each worker
-		@passobj 1 workers() vertex_type_list
-		@passobj 1 workers() edgelist
-		@passobj 1 workers() graphlet_size
-		@everywhere neighbourdict = Neighbours(edgelist)
-		@everywhere neighbourdictfunc(x::Int) = neighbourdict[x]
-		@everywhere ordered_vertices = unique(vcat(first.(edgelist),last.(edgelist)))		
-		#@everywhere Chi=Array{Dict{String,Int}}(undef,size(edgelist,1));
-		#need to fill Chi for now before distributing to all workers
-		for d in 1:length(Chi)
-			Chi[d]=Dict{String,Int}()
-		end
-		@passobj 1 workers() Chi
-		# distribute per edge tasks to workers
+		#@passobj 1 workers() vertex_type_list
+		#@passobj 1 workers() edgelist
+		#@passobj 1 workers() graphlet_size
+		#@everywhere neighbourdict = Neighbours(edgelist)
+		#@everywhere neighbourdictfunc(x::Int) = neighbourdict[x]
+		#@everywhere ordered_vertices = unique(vcat(first.(edgelist),last.(edgelist)))		
 		@info "Distributing edges to workers..."
-		res = @showprogress @distributed (t2) for h in 1:10000#size(edgelist,1)
+		res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
 			[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices))]        
 		end
-		#merge each workers outputs
-		@info "Merging worker outputs..." 
-		for w in workers()
-       			Chi = merge.(Chi,getfrom(w,:Chi))
-       		end
+		#manipulate distributed output tuples into Chi array (for now in line iwth other methods)
+		for r in res
+			Chi[first(r)] = last(r)
+		end
 	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
 			Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
