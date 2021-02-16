@@ -395,11 +395,11 @@ function find_motifs(adjacency_matrix::AbstractArray,null_model::String,null_num
 		plots=Array{Plot}(undef,length(hom_graphlets))
 		for (i,g) in enumerate(hom_graphlets)
 			
-			plots[i] = plot(layer(filter(:graphlet=>x->occursin(g,x),null_model_df),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet),layer(filter(:graphlet=>x->occursin(g,x),graphlet_df),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=false));
+			plots[i] = plot(layer(filter(:graphlet=>x->occursin(g,x),null_model_df),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet),layer(filter(:graphlet=>x->occursin(g,x),graphlet_df),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none));
 		end
-		draw(SVG(plotfile,12inch,6inch),gridstack(plots))
-		@info "Stat plot saved to $plotfile."
+		draw(SVG(plotfile,12inch,6inch),vstack(plots))
+		@info "Stat plots saved to $plotfile."
 	end
 	#null_model_sum = reduce(mergecum,null_model_calc)
-	return zscores
+	return [zscores,edgelists,null_model_calc,graphlet_counts,plots]
 end	
