@@ -391,9 +391,14 @@ function find_motifs(adjacency_matrix::AbstractArray,null_model::String,null_num
 		null_model_df = null_model_dataframe(null_model_conc) 
 		graphlet_concentrations = concentrate(graphlet_counts) 
 		graphlet_df = DataFrame(graphlet = broadcast(first,collect(graphlet_concentrations)),value = broadcast(last,collect(graphlet_concentrations)))
-		p = plot(layer(null_model_df,x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet),layer(graphlet_df,x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=false));
-		draw(SVG(plotfile,12inch,6inch),p)
-		print("Stat plot saved to $plotfile.")
+		hom_graphlets = unique(last.(split.(graphlet_df[:graphlet],"_")))
+		plots=Array{Plot}(undef,length(hom_graphlets))
+		for (i,g) in enumerate(hom_graphlets)
+			
+			plots[i] = plot(layer(filter(:graphlet=>x->occursin(g,x),null_model_df),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet),layer(filter(:graphlet=>x->occursin(g,x),graphlet_df),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=false));
+		end
+		draw(SVG(plotfile,12inch,6inch),gridstack(plots))
+		@info "Stat plot saved to $plotfile."
 	end
 	#null_model_sum = reduce(mergecum,null_model_calc)
 	return zscores
