@@ -386,18 +386,41 @@ function find_motifs(adjacency_matrix::AbstractArray,null_model::String,null_num
 	end
 	
 	if (plotfile !="DONOTPLOT")	
+
+		#get graphlet counts in df form
+		graphlet_df = DataFrame(graphlet = broadcast(first,collect(graphlet_counts)),value = broadcast(last,collect(graphlet_counts)))
 		#convert to concentrations for plotting
 		null_model_conc = null_model_concentrations(null_model_calc)
-		null_model_df = null_model_dataframe(null_model_conc) 
+		conc_null_model_df = null_model_dataframe(null_model_conc) 
 		graphlet_concentrations = concentrate(graphlet_counts) 
-		graphlet_df = DataFrame(graphlet = broadcast(first,collect(graphlet_concentrations)),value = broadcast(last,collect(graphlet_concentrations)))
+		conc_graphlet_df = DataFrame(graphlet = broadcast(first,collect(graphlet_concentrations)),value = broadcast(last,collect(graphlet_concentrations)))
+		
+		
+		#trying log version (using counts not concentrations)
+		log_null_model_df = copy(null_model_df)
+		log_null_model_df.value = log.(null_model_df.value)
+		log_graphlet_df = copy(graphlet_df)
+		log_graphlet_df.value = log.(graphlet_df.value)
+		#trying log log version (using counts not concentrations)
+		log_log_null_model_df = copy(log_null_model_df)
+		log_log_null_model_df.value = log.(log_null_model_df.value)
+		log_log_graphlet_df = copy(log_graphlet_df)
+		log_log_graphlet_df.value = log.(graphlet_df.value)
+		#setting up plot matrix
 		hom_graphlets = unique(last.(split.(graphlet_df[:graphlet],"_")))
-		plots=Array{Plot}(undef,length(hom_graphlets))
+		xdim = 3
+		ydim = Int(ceil(length(hom_graphlets)/xdim))
+		plots=Array{Union{Plot,Context}}(undef,xdim,ydim)
 		for (i,g) in enumerate(hom_graphlets)
-			
-			plots[i] = plot(layer(filter(:graphlet=>x->occursin(g,x),null_model_df),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet),layer(filter(:graphlet=>x->occursin(g,x),graphlet_df),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none));
+			##without graphlet points (test)
+		#	plots[i] = plot(layer(filter(:graphlet=>x->occursin("coding_coding_coding_"*g,x),filter(:graphlet=>x->occursin(g,x),null_model_df)),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = false),color=:graphlet),Guide.xticks(label=true),Theme(key_position = :none));
+		plots[i] = plot(layer(filter(:graphlet=>x->occursin(g,x),log_null_model_df),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet),layer(filter(:graphlet=>x->occursin(g,x),log_graphlet_df),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical));
 		end
-		draw(SVG(plotfile,12inch,6inch),vstack(plots))
+		#add empty panels
+		for i in length(hom_graphlets)+1:length(plots)
+			plots[i] = context()
+		end
+		draw(SVG(plotfile,10inch,20inch),gridstack(plots))
 		@info "Stat plots saved to $plotfile."
 	end
 	#null_model_sum = reduce(mergecum,null_model_calc)
