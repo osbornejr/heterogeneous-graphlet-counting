@@ -33,6 +33,22 @@ adj_matrix = adj_matrix[:,vec(sum(adj_matrix,dims=1).!=0)]
 adj_matrix = adj_matrix[vec(sum(adj_matrix,dims=2).!=0),:]
 edgelist = edgelist_from_adj(adj_matrix)
 
+
+##Sanity check... run the motif detection on an ALREADY random set of edges on the same node set
+vertex_type_list = vertexlist[:,2]
+rand1 = rand(1:size(vertexlist,1),150000)
+rand2 = rand(1:size(vertexlist,1),150000)
+#first make sure there are no self loops
+sane_edgelist = splat(Pair).(eachrow(hcat(rand1[BitArray(((rand1.==rand2).-1).*-1)],rand2[BitArray(((rand1.==rand2).-1).*-1)])))
+
+#now we order edges so that lower vertex label is first
+for (i,p) in enumerate(sane_edgelist)
+	if (first(p)>last(p))
+           sane_edgelist[i] = Pair(last(p),first(p))
+       	end
+end
+#finally, get rid of multiedges
+sane_edgelist = unique(sane_edgelist)
 #get largest connected component TODO maybe have a way to select all components above a certain size, and plot them all separately?
 #using LightGraphs
 #using PrettyTables
@@ -64,8 +80,8 @@ addprocs(Threads.nthreads())
 #addprocs(8)
 @everywhere include(ENV["JULIA_PROJECT"]*"/src/GraphletCounting.jl")
 @everywhere include(ENV["JULIA_PROJECT"]*"/src/NullModel.jl")
-@time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4,"distributed")
+@time graphlet_counts = count_graphlets(vertexlist[:,2],sane_edgelist,4,"distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
-@time motif_counts = find_motifs(adj_matrix,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg")
+@time motif_counts = find_motifs(sane_edgelist,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg")
 
