@@ -7,9 +7,9 @@ function t2(d1,d2)
 		
 end
 
-function edgelists_null_model(adj_matrix::AbstractArray,n::Int,method::String,typelist::Array{String,1})
-	degrees = sum(adj_matrix,dims=2)
-	edgelist = edgelist_from_adj(adj_matrix) 
+function edgelists_null_model(edgelist::Union{Array{Pair{Int,Int},1},n::Int,method::String,typelist::Array{String,1})
+	#degrees = sum(adj_matrix,dims=2)
+	#edgelist = edgelist_from_adj(adj_matrix) 
 	edgelists = Array{Array{Pair,1},1}(undef,n)
 	##using default switching value of 100*m as per Milo et al TODO user can set this
 	switching_factor =100
@@ -155,7 +155,7 @@ end
 #end	
 
 #uses the above rewire function to only switch edges that share the same typed end points. In this case, a switching factor is provided such that switching_factor*m = switching_val TODO maybe add this approach to all rewiring/switching algorithms? default 100
-function hetero_rewire(edgelist::Array{Pair,1},switching_factor::Int,typelist::Array{String,1})
+function hetero_rewire(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switching_factor::Int,typelist::Array{String,1})
 	##first subset the edgelist based on the unique endpoint pairs for edges 
 	edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(edgelist)),map(x-> typelist[x],last.(edgelist)))))
 	t = length(unique(edgetypes))	

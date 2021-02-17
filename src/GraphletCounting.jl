@@ -364,9 +364,9 @@ function concentrate(graphlet_counts::Dict{String,Int})
 	return conc
 end
 
-function find_motifs(adjacency_matrix::AbstractArray,null_model::String,null_num::Int; typed::Bool=false, typelist::Array{String,1}=nothing,plotfile::String="DONOTPLOT")
+function find_motifs(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},null_model::String,null_num::Int; typed::Bool=false, typelist::Array{String,1}=nothing,plotfile::String="DONOTPLOT")
 	##Calculate null model counts
-	edgelists = edgelists_null_model(adjacency_matrix,null_num,null_model,typelist)
+	edgelists = edgelists_null_model(edgelist,null_num,null_model,typelist)
 	null_model_calc = null_model_counts(typelist,edgelists)
 	null_model_df = null_model_dataframe(null_model_calc) 
 	
