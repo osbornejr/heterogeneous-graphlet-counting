@@ -352,7 +352,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			graphlet_counts[g] = div(graphlet_counts[g],6)
 		end
 	end
-	return graphlet_counts
+	return [graphlet_counts,Chi]
 end
 
 function concentrate(graphlet_counts::Dict{String,Int})
