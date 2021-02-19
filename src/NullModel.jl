@@ -7,10 +7,10 @@ function t2(d1,d2)
 		
 end
 
-function edgelists_null_model(edgelist::Union{Array{Pair{Int,Int},1},n::Int,method::String,typelist::Array{String,1})
+function edgelists_null_model(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},n::Int,method::String,typelist::Array{String,1})
 	#degrees = sum(adj_matrix,dims=2)
 	#edgelist = edgelist_from_adj(adj_matrix) 
-	edgelists = Array{Array{Pair,1},1}(undef,n)
+	edgelists = Array{Union{Array{Pair{Int,Int},1},Array{Pair,1}}}(undef,n)
 	##using default switching value of 100*m as per Milo et al TODO user can set this
 	switching_factor =100
 	switching_val = switching_factor*length(edgelist)
@@ -80,7 +80,7 @@ end
 ##allows a function to be broadcast and splat each argument
 splat(f) = args->f(args...)
 
-function switch_edges(edgelist::Array{Pair,1},switches::Int)
+function switch_edges(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switches::Int)
 ##This works (seemingly) but it does not scale at all well to bigger switch requirements, which will be necessary on larger networks if we want num_of_switches = 100*m 
 	#convert edgelist to a two column array of ints (i.e. mutable)
 	el = hcat(first.(edgelist),last.(edgelist))
@@ -112,7 +112,7 @@ function switch_edges(edgelist::Array{Pair,1},switches::Int)
 end
 
 
-function edge_switch(edgelist::Array{Pair,1},switches::Int)
+function edge_switch(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switches::Int)
 	#convert edgelist to dictionary form
 	el = Dict{Pair,Bool}()
 	for e in edgelist
