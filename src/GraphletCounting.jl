@@ -58,8 +58,28 @@ function add3graphlets(vertexlist::Array{String,1},nodelist::Array{Int,1},count_
 	return count_dict
 end
 
+function graphlet_string(a::String,b::String,c::String,graphlet::String,delim::String)
+	return string(a,delim,b,delim,c,delim,graphlet)
+end
 function graphlet_string(a::String,b::String,c::String,d::String,graphlet::String,delim::String)
 	return string(a,delim,b,delim,c,delim,d,delim,graphlet)
+end
+
+function configuration_model(edgelistt::Union{Array{Pair{Int,Int},1},Array{Pair,1}})	
+	count = 0
+       	loops = 1
+	stubs = hcat(first.(edgelist),last.(edgelist))
+       	while (loops > 0)
+       		shuffle!(stubs)
+       		count += 1
+       		loops = sum(stubs[:,1].==stubs[:,2]) 
+       		if (loops < 30)
+       			@info "Graph $count had $loops self-loops"
+       		end
+       		if (mod(count,10000)==0)
+       			@info "Checked $count graphs"
+       		end
+       	end
 end
 
 function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},neighbourdictfunc::Function,ordered_vertices::Array{Int,1})
@@ -72,18 +92,42 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
         gamma_i = neighbourdict[i]	
         gamma_j = neighbourdict[j]
         
-        #three node graphlets
-        #Triangles: nodes connected to both i and j
-        Tri = intersect(gamma_i,gamma_j)
-        count_dict = add3graphlets(vertex_type_list,Tri,count_dict,i,j,graphlet_type="3-tri")
-        # Paths with j at centre
-	jPath = sort(setdiff(gamma_j,union(gamma_i,i)))
-        count_dict = add3graphlets(vertex_type_list,jPath,count_dict,i,j,graphlet_type="3-path")
-        # Paths with i at centre
-	iPath = sort(setdiff(gamma_i,union(gamma_j,j)))
-        count_dict = add3graphlets(vertex_type_list,iPath,count_dict,j,i,graphlet_type="3-path")
-        if (graphlet_size==4)
         delim = "_"
+        #three node graphlets
+	##more efficient loop based method
+	rel = DefaultDict{Int,Int}(0)
+	Tri = Array{Int,1}()
+	iPath = Array{Int,1}()
+	jPath = Array{Int,1}()
+	#prelim cycle through i neighbours
+	for k in gamma_i
+		if (k!=j)
+			rel[k] = 1
+		end
+	end	
+	for k in gamma_j
+		if (rel[k]==1)
+			##triangle
+			count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[k],"3-tri",delim)]+=1
+			append!(Tri,k)
+			rel[k] = 3
+		else
+			#j-path
+			count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[k],"3-path",delim)]+=1
+			append!(jPath,k)
+			rel[k] = 2
+		end
+
+	end
+   		
+	for k in gamma_i
+		if (rel[k]==1)
+			#ipaths
+			count_dict[graphlet_string(vertex_type_list[j],vertex_type_list[i],vertex_type_list[k],"3-path",delim)]+=1
+			append!(iPath,k)
+		end
+	end	
+        if (graphlet_size==4)
 	
 	#four node graphlets
 		for w in iPath
