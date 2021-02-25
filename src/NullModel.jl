@@ -112,6 +112,23 @@ function switch_edges(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},swit
 end
 
 
+function configuration_model(edgelistt::Union{Array{Pair{Int,Int},1},Array{Pair,1}})	
+	#this is a work in progress, and probably not usable! Impossible to find a network without a self loops, let alone also without multiedges! Note that there are \Prod_i k_i! possible networks in the space of all graphs with the same degree distribution as G-- for the 10% network, this corresponds to a search space of ~10^430000! 
+	count = 0
+       	loops = 1
+	stubs = hcat(first.(edgelist),last.(edgelist))
+       	while (loops > 0)
+       		shuffle!(stubs)
+       		count += 1
+       		loops = sum(stubs[:,1].==stubs[:,2]) 
+       		if (loops < 30)
+       			@info "Graph $count had $loops self-loops"
+       		end
+       		if (mod(count,10000)==0)
+       			@info "Checked $count graphs"
+       		end
+       	end
+end
 
 function edge_switch(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switches::Int,hetero::Bool = false)
 	#convert edgelist to dictionary form
