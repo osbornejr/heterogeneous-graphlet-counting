@@ -112,7 +112,8 @@ function switch_edges(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},swit
 end
 
 
-function edge_switch(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switches::Int)
+
+function edge_switch(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switches::Int,hetero::Bool = false)
 	#convert edgelist to dictionary form
 	el = Dict{Pair,Bool}()
 	for e in edgelist
@@ -122,15 +123,35 @@ function edge_switch(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switc
 		i = first(rand(el))
 		j = first(rand(el))
 		if(i!=j)
-			##SELF-LOOPS: check ends aren't shared in i and j
-			if(first(i)!=last(j) && first(j)!=last(i))
-
-				##MULTI-EDGES: check putative new edges aren't already in dict
+			if(hetero = true)
+				##in this case self-loops aren't a concern; by definition the different typed ends will be unique
+				
+				##MULTI-EDGES: check putative new edges aren't already in dict.
 				if(!haskey(el,Pair(first(i),last(j))) && !haskey(el,Pair(first(j),last(i))))
 					delete!(el,i)
 					delete!(el,j)
+					## just switch ahead in the only way possible (a la a pseudo directed network)
 					el[Pair(first(i),last(j))] = 1
 					el[Pair(first(j),last(i))] = 1
+				end
+			else
+			##SELF-LOOPS: check ends aren't shared in i and j
+			 	if(first(i)!=last(j) && first(j)!=last(i))
+	
+				##MULTI-EDGES: check putative new edges aren't already in dict
+				 	if(!haskey(el,Pair(first(i),last(j))) && !haskey(el,Pair(first(j),last(i))))
+					 	delete!(el,i)
+				 		delete!(el,j)
+						#to maintain unbiased sampling, we need to switch either fronts to ends or fronts to fronts (and ends to ends) with equal probability
+						if (rand()>0.5)	
+							el[Pair(first(i),last(j))] = 1
+				 			el[Pair(first(j),last(i))] = 1
+						else
+							el[Pair(first(i),first(j))] = 1
+				 			el[Pair(last(i),last(j))] = 1
+						end
+
+				 	end
 				end
 
 			end
@@ -159,14 +180,22 @@ function hetero_rewire(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},swi
 	##first subset the edgelist based on the unique endpoint pairs for edges 
 	edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(edgelist)),map(x-> typelist[x],last.(edgelist)))))
 	t = length(unique(edgetypes))	
-	print(unique(edgetypes))
+	@info "Found the unique edgetypes: $(unique(edgetypes))"
 	#now we form a subnetwork for each "edgetype", and rewire that. The results are 
-	#cumulatively stored in an intitially empty copy of the input adjacency matrix
+	#cumulatively stored in an intitially empty edgelist 
 	adjusted_edges = Array{Pair,1}()
 	for type in unique(edgetypes)
 		s_edges = edgelist[edgetypes.==type]
-		s_adjust = edge_switch(s_edges,switching_factor*length(s_edges))
-		adjusted_edges = vcat(adjusted_edges,s_adjust)
+		## to maintain uniformity, the switching algorithm should be implemented differently depending on whether the edgetype is homogeneous or heterogeneous
+		##homogeneous case
+		if (first(type)==last(type))
+                         s_adjust = edge_switch(s_edges,switching_factor*length(s_edges))
+		 	 adjusted_edges = vcat(adjusted_edges,s_adjust)
+		else
+		##heterogeneous case
+                         s_adjust = edge_switch(s_edges,switching_factor*length(s_edges),hetero = true)
+		 	 adjusted_edges = vcat(adjusted_edges,s_adjust)
+		end
 	end
 	return adjusted_edges
 end
