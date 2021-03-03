@@ -64,7 +64,7 @@ sane_edgelist = unique(sane_edgelist)
 #cytoscape_elements(vertexlist_comp,edgelist_comp,"cytoscape/elements.js")
 #
 #Network Analysis
-#degrees = sum(adj_matrix,dims=2)
+degrees = sum(adj_matrix,dims=2)
 #p = plot(DataFrame(sort(degrees,dims=1)),x = "x1",Geom.histogram,Guide.title("Degree Distribution"),Guide.xlabel("degree"));
 #draw(SVG("degree_distribution.svg"),p)
 #connected_components_html_table(adj_matrix,"cytoscape/connected_components.html")
@@ -83,5 +83,5 @@ addprocs(Threads.nthreads())
 @time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4,"distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
-@time motif_counts = find_motifs(sane_edgelist,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg")
+@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg",graphlet_size = 4)
 

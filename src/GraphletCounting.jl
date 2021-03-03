@@ -65,22 +65,6 @@ function graphlet_string(a::String,b::String,c::String,d::String,graphlet::Strin
 	return string(a,delim,b,delim,c,delim,d,delim,graphlet)
 end
 
-function configuration_model(edgelistt::Union{Array{Pair{Int,Int},1},Array{Pair,1}})	
-	count = 0
-       	loops = 1
-	stubs = hcat(first.(edgelist),last.(edgelist))
-       	while (loops > 0)
-       		shuffle!(stubs)
-       		count += 1
-       		loops = sum(stubs[:,1].==stubs[:,2]) 
-       		if (loops < 30)
-       			@info "Graph $count had $loops self-loops"
-       		end
-       		if (mod(count,10000)==0)
-       			@info "Checked $count graphs"
-       		end
-       	end
-end
 
 function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},neighbourdictfunc::Function,ordered_vertices::Array{Int,1})
 	count_dict = DefaultDict{String,Int}(0)
@@ -408,14 +392,14 @@ function concentrate(graphlet_counts::Dict{String,Int})
 	return conc
 end
 
-function find_motifs(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},null_model::String,null_num::Int; typed::Bool=false, typelist::Array{String,1}=nothing,plotfile::String="DONOTPLOT")
+function find_motifs(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},null_model::String,null_num::Int; typed::Bool=false, typelist::Array{String,1}=nothing,plotfile::String="DONOTPLOT",graphlet_size::Int=3)
 	##Calculate null model counts
-	edgelists = edgelists_null_model(edgelist,null_num,null_model,typelist)
+	edgelists = edgelists_null_model(edgelist,null_num,null_model,typelist,graphlet_size)
 	null_model_calc = null_model_counts(typelist,edgelists)
 	null_model_df = null_model_dataframe(null_model_calc) 
 	
 	# calculate real network counts
-	graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4,"distributed")
+	graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,graphlet_size,"distributed")
 	
 	#Statistical significance
 	zscores = Dict{String,Float64}()
