@@ -7,7 +7,7 @@ function t2(d1,d2)
 		
 end
 
-function edgelists_null_model(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},n::Int,method::String,typelist::Array{String,1})
+function edgelists_null_model(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},n::Int,method::String,typelist::Array{String,1},graphlet_size::Int=3)
 	#degrees = sum(adj_matrix,dims=2)
 	#edgelist = edgelist_from_adj(adj_matrix) 
 	edgelists = Array{Union{Array{Pair{Int,Int},1},Array{Pair,1}}}(undef,n)
@@ -34,9 +34,15 @@ function edgelists_null_model(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,
 	end
 	if(method == "hetero_rewire")
 	       	@info "Rewiring $n graphs..."
-		edgelists = @showprogress @distributed (t2) for i in 1:n	
-			[hetero_rewire(edgelist,switching_factor,typelist)]
-		end
+		#Distributed method
+		#edgelists = @showprogress @distributed (t2) for i in 1:n	
+		#	[hetero_rewire(edgelist,switching_factor,typelist,graphlet_size)]
+		#end
+
+		for i in 1:n
+			print("Switching network $i...\n")
+			hetero_rewire(edgelist,switching_factor,typelist,graphlet_size)
+	 	end
 	end
 
 	return edgelists
@@ -136,38 +142,46 @@ function edge_switch(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switc
 	for e in edgelist
 		el[e] = 1
 	end
+	diffo = 0
 	for s in 1:switches
 		i = first(rand(el))
 		j = first(rand(el))
 		if(i!=j)
-			if(hetero = true)
+			if(hetero == true)
 				##in this case self-loops aren't a concern; by definition the different typed ends will be unique
 				
 				##MULTI-EDGES: check putative new edges aren't already in dict.
-				if(!haskey(el,Pair(first(i),last(j))) && !haskey(el,Pair(first(j),last(i))))
+				if(!haskey(el,Pair(first(i),last(j))) && !haskey(el,Pair(first(j),last(i))) && !haskey(el,Pair(last(j),first(i))) && !haskey(el,Pair(last(i),first(j))))
 					delete!(el,i)
 					delete!(el,j)
 					## just switch ahead in the only way possible (a la a pseudo directed network)
 					el[Pair(first(i),last(j))] = 1
 					el[Pair(first(j),last(i))] = 1
 				end
-			else
-			##SELF-LOOPS: check ends aren't shared in i and j
-			 	if(first(i)!=last(j) && first(j)!=last(i))
+			else  #hetero = false i.e. homogeneous case
 	
-				##MULTI-EDGES: check putative new edges aren't already in dict
-				 	if(!haskey(el,Pair(first(i),last(j))) && !haskey(el,Pair(first(j),last(i))))
-					 	delete!(el,i)
-				 		delete!(el,j)
-						#to maintain unbiased sampling, we need to switch either fronts to ends or fronts to fronts (and ends to ends) with equal probability
-						if (rand()>0.5)	
+				#to maintain unbiased sampling, we need to switch either fronts to ends or fronts to fronts (and ends to ends) with equal probability
+				if (rand()>0.5)	#starts to ends
+					##SELF-LOOPS: check ends aren't shared in i and j
+			 		if(first(i)!=last(j) && first(j)!=last(i))
+					##MULTI-EDGES: check putative new edges aren't already in dict
+					 	if(!haskey(el,Pair(first(i),last(j))) && !haskey(el,Pair(first(j),last(i))) && !haskey(el,Pair(last(i),first(j))) && !haskey(el,Pair(last(j),first(i))))
+						 	delete!(el,i)
+					 		delete!(el,j)
 							el[Pair(first(i),last(j))] = 1
 				 			el[Pair(first(j),last(i))] = 1
-						else
+						end
+					end
+				else #starts to starts, ends to ends
+					##SELF-LOOPS: check starts and ends aren't shared in i and j
+			 		if(first(i)!=first(j) && last(j)!=last(i))
+					##MULTI-EDGES: check putative new edges aren't already in dict
+					 	if(!haskey(el,Pair(first(i),first(j))) && !haskey(el,Pair(last(j),last(i))) && !haskey(el,Pair(first(j),first(i))) && !haskey(el,Pair(last(i),last(j))))
+						 	delete!(el,i)
+					 		delete!(el,j)
 							el[Pair(first(i),first(j))] = 1
 				 			el[Pair(last(i),last(j))] = 1
 						end
-
 				 	end
 				end
 
@@ -193,7 +207,7 @@ end
 #end	
 
 #uses the above rewire function to only switch edges that share the same typed end points. In this case, a switching factor is provided such that switching_factor*m = switching_val TODO maybe add this approach to all rewiring/switching algorithms? default 100
-function hetero_rewire(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switching_factor::Int,typelist::Array{String,1})
+function hetero_rewire(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},switching_factor::Int,typelist::Array{String,1},graphlet_size::Int=3)
 	##first subset the edgelist based on the unique endpoint pairs for edges 
 	edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(edgelist)),map(x-> typelist[x],last.(edgelist)))))
 	t = length(unique(edgetypes))	
@@ -210,7 +224,7 @@ function hetero_rewire(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},swi
 		 	 adjusted_edges = vcat(adjusted_edges,s_adjust)
 		else
 		##heterogeneous case
-                         s_adjust = edge_switch(s_edges,switching_factor*length(s_edges),hetero = true)
+                         s_adjust = edge_switch(s_edges,switching_factor*length(s_edges),true)
 		 	 adjusted_edges = vcat(adjusted_edges,s_adjust)
 		end
 	end
