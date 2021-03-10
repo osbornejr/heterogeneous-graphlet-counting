@@ -8,43 +8,44 @@ transcript_names=select(samples[1],1)
 raw_counts=rename!(hcat(transcript_names,select.(samples,Symbol("FPKM"))...,makeunique=true),["transcript_id";sample_names])
 
 raw_counts.transcript_type = replace(x-> occursin("lnc",x) ? "noncoding" : "coding",raw_counts.transcript_id)
-data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts))))
+raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts))))
 
 
 ## Clean - remove transcripts with total counts across all samples less than X
 X = 25
-norm_counts=raw_counts[vec(sum(data,dims = 2 ).>=X),:]
-data = Array(select(norm_counts,filter(x->occursin("data",x),names(norm_counts))))
+clean_counts=raw_counts[vec(sum(raw_data,dims = 2 ).>=X),:]
+clean_data = Array(select(norm_counts,filter(x->occursin("data",x),names(norm_counts))))
 
 #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 
 ### Normalisation
-data=library_size_normalisation(data,"upperquartile")
-norm_counts[findall(x->occursin("data",x),names(norm_counts))] = data
+norm_data=library_size_normalisation(clean_data,"upperquartile")
+norm_counts = copy(clean_counts)
+norm_counts[findall(x->occursin("data",x),names(norm_counts))] = norm_data
 
 ##Sampling for most variable transcripts
 #add variance column to normalised data
-variance = vec(var(data, dims=2))
+variance = vec(var(norm_data, dims=2))
 norm_counts.variance = variance
-X = 0.01
-norm_counts_sample_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-X))):end,:]
-norm_counts_sample_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-X))):end,:]
-norm_counts_sample = outerjoin(norm_counts_sample_noncoding,norm_counts_sample_coding,on = names(norm_counts))
-data = Array(select(norm_counts_sample,filter(x->occursin("data",x),names(norm_counts_sample))))
+X = 0.1
+sample_counts_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-X))):end,:]
+sample_counts_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-X))):end,:]
+sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
+sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(sample_counts))))
 
 
 ##Network construction
 #maintain list of vertices in graph
-vertexlist = norm_counts_sample[:transcript_type]
+vertexlist = sample_counts[:transcript_type]
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
-similarity_matrix = coexpression_measure(data,"pearson")
+similarity_matrix = coexpression_measure(sample_data,"mutual_information")
 ## Adjacency matrix
-threshold = 0.95
+threshold = 0.2
 pre_adj_matrix = adjacency(similarity_matrix,threshold)
 #Trim nodes with degree zero
-network_df = norm_counts_sample[vec(sum(pre_adj_matrix,dims=2).!=0),:]
-data = data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 
 vertexlist = vertexlist[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 adj_matrix = copy(pre_adj_matrix)
