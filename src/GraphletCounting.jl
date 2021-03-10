@@ -284,7 +284,9 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	#per edge process
 	if(run_method == "threads")
 		Threads.@threads for h in 1 :size(edgelist,1)
-			Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
+			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)
+			Chi[h] = edge[1]
+			Rel[h] = edge[2]
 		end
 	elseif(run_method == "distributed")
 		@info "Distributing edges to workers..."
@@ -298,7 +300,9 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		end
 	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
-			Chi[h] = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)        
+			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)
+			Chi[h] = edge[1]
+			Rel[h] = edge[2]
 		end
 	end
 	#total counts for each graphlet
