@@ -90,18 +90,19 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 		end
 	end	
 	for k in gamma_j
-		if (rel[k]==1)
-			##triangle
-			count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[k],"3-tri",delim)]+=1
-			append!(Tri,k)
-			rel[k] = 3
-		else
-			#j-path
-			count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[k],"3-path",delim)]+=1
-			append!(jPath,k)
-			rel[k] = 2
+		if(k!=i)
+			if (rel[k]==1)
+				##triangle
+				count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[k],"3-tri",delim)]+=1
+				append!(Tri,k)
+				rel[k] = 3
+			else
+				#j-path
+				count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[k],"3-path",delim)]+=1
+				append!(jPath,k)
+				rel[k] = 2
+			end
 		end
-
 	end
    		
 	for k in gamma_i
