@@ -251,7 +251,7 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 	for g in collect(keys(count_dict))[collect(values(count_dict)).==0]
 		delete!(count_dict,g)
 	end
-	return count_dict 
+	return count_dict,rel 
 end
 
 #aggregator function
@@ -277,6 +277,8 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	
 	#preallocate array to store each edge's graphlet dictionary 
 	Chi=Array{Dict{String,Int}}(undef,size(edgelist,1));
+	#preallocate array to store each edge relationship dict 
+	Rel=Array{Dict{Int,Int}}(undef,size(edgelist,1));
 
 	#per edge process
 	if(run_method == "threads")
@@ -290,7 +292,8 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		end
 		#manipulate distributed output tuples into Chi array (for now in line iwth other methods)
 		for r in res
-			Chi[first(r)] = last(r)
+			Chi[first(r)] = last(r)[1]
+			Rel[first(r)] = last(r)[2]
 		end
 	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
@@ -380,7 +383,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			graphlet_counts[g] = div(graphlet_counts[g],6)
 		end
 	end
-	return [graphlet_counts,Chi]
+	return [graphlet_counts,Chi,Rel]
 end
 
 function concentrate(graphlet_counts::Dict{String,Int})
