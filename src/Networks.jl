@@ -1,11 +1,11 @@
 using LinearAlgebra
 function adjacency(data,threshold)
-	similarity_matrix=data
-	similarity_matrix[diagind(similarity_matrix)].= 0
-	similarity_matrix[broadcast(abs,similarity_matrix).<threshold].=0
-	similarity_matrix[broadcast(abs,similarity_matrix).>threshold].=1
-	similarity_matrix=BitArray(similarity_matrix)
-	return similarity_matrix
+	sim_matrix = copy(data)
+	sim_matrix[diagind(sim_matrix)].= 0
+	sim_matrix[broadcast(abs,sim_matrix).<threshold].=0
+	sim_matrix[broadcast(abs,sim_matrix).>threshold].=1
+	sim_matrix=BitArray(sim_matrix)
+	return sim_matrix
 end
 
 function edgelist_from_adj(adjacency_matrix)
