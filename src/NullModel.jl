@@ -238,7 +238,7 @@ function hetero_rewire(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},swi
 		Temp = 1
 		edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(adjusted_edges)),map(x-> typelist[x],last.(adjusted_edges)))))
 		@info "Need zero energy:"
-		count = 1
+		#count = 1
 		while (E>0.05)
 			trial = Array{Pair,1}()
 			## try an edge switch (we choose an edgetype and only switch in that subgraph)
@@ -274,19 +274,19 @@ function hetero_rewire(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},swi
 				#cool slightly
 				Temp = Temp*0.99
 				#reset search-count for new lower energy 
-				count = 1
-			elseif (count>1000 && crit<exp(-((1+E_trial-E))/Temp))
+				#count = 1
+			elseif (crit<exp(-((E_trial-E))/Temp))
 
-				prob = exp(-((1+E_trial-E))/Temp)
+				prob = exp(-((E_trial-E))/Temp)
 				adjusted_edges = trial
 				edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(adjusted_edges)),map(x-> typelist[x],last.(adjusted_edges)))))
 				E = E_trial
 				@info "Increased energy is $E, temperature is $Temp. Count was $count. Rand was $crit, probability was $prob."
 				#cool slightly
 				#Temp = Temp*0.99
-				count = 1
+				#count = 1
 			else
-				count +=1
+				#count +=1
 			end
 			##reheat if solidified too much
 			if (Temp<1e-300)
