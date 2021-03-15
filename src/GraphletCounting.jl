@@ -407,7 +407,7 @@ function find_motifs(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},null_
 	null_model_df = null_model_dataframe(null_model_calc) 
 	
 	# calculate real network counts
-	graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,graphlet_size,"distributed")
+	graphlet_counts = count_graphlets(typelist,edgelist,graphlet_size,"distributed")[1]
 	
 	#Statistical significance
 	zscores = Dict{String,Float64}()

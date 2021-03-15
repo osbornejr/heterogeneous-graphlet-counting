@@ -15,7 +15,7 @@ insertcols!(norm_counts,"variance"=>variance)
 #
 
 ## We really do want a better method to do this, preferably one that scales easily. It has been decided to go for a filter that takes the top X% of each transcript type, to maintain the ratios of each type without being too prescriptive on what does and doesn't end up in the network.
-X = 0.001
+X = 0.01
 norm_counts_sample_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-X))):end,:]
 norm_counts_sample_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-X))):end,:]
 norm_counts_sample = outerjoin(norm_counts_sample_noncoding,norm_counts_sample_coding,on = names(norm_counts))
