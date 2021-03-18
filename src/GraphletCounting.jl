@@ -279,14 +279,15 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	#preallocate array to store each edge's graphlet dictionary 
 	Chi=Array{Dict{String,Int}}(undef,size(edgelist,1));
 	#preallocate array to store each edge relationship dict 
-	Rel=Array{Dict{Int,Int}}(undef,size(edgelist,1));
-
+	#Rel=Array{Dict{Int,Int}}(undef,size(edgelist,1));
+	dummy_chi = Dict{String,Int}()
+	dummy_rel = Dict{Int,Int}()
 	#per edge process
 	if(run_method == "threads")
 		Threads.@threads for h in 1 :size(edgelist,1)
 			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)
 			Chi[h] = edge[1]
-			Rel[h] = edge[2]
+			#Rel[h] = edge[2]
 		end
 	elseif(run_method == "distributed")
 		@info "Distributing edges to workers..."
@@ -296,13 +297,13 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		#manipulate distributed output tuples into Chi array (for now in line iwth other methods)
 		for r in res
 			Chi[first(r)] = last(r)[1]
-			Rel[first(r)] = last(r)[2]
+			#Rel[first(r)] = last(r)[2]
 		end
 	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
 			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)
 			Chi[h] = edge[1]
-			Rel[h] = edge[2]
+			#Rel[h] = edge[2]
 		end
 	end
 	#total counts for each graphlet
@@ -388,7 +389,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			graphlet_counts[g] = div(graphlet_counts[g],6)
 		end
 	end
-	return [graphlet_counts,Chi,Rel]
+	return [graphlet_counts,Chi]#,Rel]
 end
 
 function concentrate(graphlet_counts::Dict{String,Int})

@@ -35,9 +35,10 @@ edgelist = edgelist_from_adj(adj_matrix)
 
 
 ##Sanity check... run the motif detection on an ALREADY random set of edges on the same node set
-vertex_type_list = vertexlist[:,2]
-rand1 = rand(1:size(vertexlist,1),150000)
-rand2 = rand(1:size(vertexlist,1),150000)
+sane_size = length(edgelist) 
+vertex_type_list = vec(vertexlist[:,2])
+rand1 = rand(1:size(vertexlist,1),sane_size)
+rand2 = rand(1:size(vertexlist,1),sane_size)
 #first make sure there are no self loops
 sane_edgelist = splat(Pair).(eachrow(hcat(rand1[BitArray(((rand1.==rand2).-1).*-1)],rand2[BitArray(((rand1.==rand2).-1).*-1)])))
 
@@ -83,5 +84,5 @@ addprocs(Threads.nthreads())
 @time graphlet_counts = count_graphlets(vertexlist[:,2],edgelist,4,"distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
-@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vertexlist[:,2],plotfile="test.svg",graphlet_size = 4)
+@time motif_counts = find_motifs(sane_edgelist,"hetero_rewire",1, typed = true, typelist = vertexlist[:,2],plotfile="test.svg",graphlet_size = 4)
 
