@@ -409,8 +409,19 @@ function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{
  			end
  		end
 	end
+	#collapse configuration into edgelist
+	el = Dict{Pair,Bool}()
+	##triangle collapse
+	for t in keys(tel)
+		el[Pair(t[1],t[2])] = 1
+       		el[Pair(t[1],t[3])] = 1
+       		el[Pair(t[2],t[3])] = 1
+       	end
+	##path collapse
+	new_edgelist = splat(Pair).(unique(sort.(eachrow(hcat(first.(collect(keys(el))),last.(collect(keys(el))))))))
+
 	#configuration_array = hcat(first.(first.(full_relationships)),last.(first.(full_relationships)),first.(last.(full_relationships)),last.(last.(full_relationships)))
-	return [tel,pel,t_suc,p_suc]
+	return new_edgelist
 end
 
 
