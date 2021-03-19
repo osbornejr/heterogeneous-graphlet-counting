@@ -21,13 +21,13 @@ clean_data = Array(select(norm_counts,filter(x->occursin("data",x),names(norm_co
 ### Normalisation
 norm_data=library_size_normalisation(clean_data,"upperquartile")
 norm_counts = copy(clean_counts)
-norm_counts[findall(x->occursin("data",x),names(norm_counts))] = norm_data
+norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
 
 ##Sampling for most variable transcripts
 #add variance column to normalised data
 variance = vec(var(norm_data, dims=2))
 norm_counts.variance = variance
-X = 0.1
+X = 0.01
 sample_counts_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-X))):end,:]
 sample_counts_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-X))):end,:]
 sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
