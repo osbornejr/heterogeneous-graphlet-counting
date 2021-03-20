@@ -1,4 +1,4 @@
-using Statistics, StatsBase, DataFrames, InformationMeasures, LinearAlgebra, RCall,Distributed
+using Statistics, StatsBase, DataFrames, InformationMeasures, LinearAlgebra, RCall,Distributed,ProgressMeter
 
 function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
 	if (method =="pearson")
