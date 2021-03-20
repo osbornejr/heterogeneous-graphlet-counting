@@ -1,4 +1,4 @@
-using Statistics, StatsBase, DataFrames, InformationMeasures, LinearAlgebra, RCall
+using Statistics, StatsBase, DataFrames, InformationMeasures, LinearAlgebra, RCall,Distributed
 
 function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
 	if (method =="pearson")
@@ -50,19 +50,32 @@ function mutual_information(data; discretizer = "uniform_width", estimator = "ma
 	return matrix
 
 end
-function partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
+function partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed::Bool = false )
 	## set up bins in advance, we can then calculate probabilities within triple loop 
 	nvars, nvals = size(data)
 	matrix = zeros(nvars,nvars)
-	for i in 1 : nvars, j in i : nvars
-		@info "Calculating for gene pair $i, $j..."
-		#reset unique vectors
-		ux_vector = Vector{Float64}(undef,nvars)
-		uy_vector = Vector{Float64}(undef,nvars)
-		##calculate unique scores for every triplet involving i and j 
-		for k in 1: nvars
-			ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:])["unique_1"]
-			uy_vector[k] = get_partial_information_decomposition(data[i,:],data[k,:],data[j,:])["unique_1"]
+	if (distributed = true)
+		##need shared array for data
+		uniques = @showprogress @distributed (append!) for t in [(x,y) for x in 1:nvars, y in 1 : nvars]
+			#set unique vectors
+			ux_vector = Vector{Float64}(undef,nvars)
+			##calculate unique scores for every triplet involving i and j 
+			for k in 1: nvars
+				ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:])["unique_1"]
+			end
+			[ux_vector]
+		end
+	else
+		for i in 1 : nvars, j in i : nvars
+			@info "Calculating for gene pair $i, $j..."
+			#reset unique vectors
+			ux_vector = Vector{Float64}(undef,nvars)
+			uy_vector = Vector{Float64}(undef,nvars)
+			##calculate unique scores for every triplet involving i and j 
+			for k in 1: nvars
+				ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:])["unique_1"]
+				uy_vector[k] = get_partial_information_decomposition(data[i,:],data[k,:],data[j,:])["unique_1"]
+			end
 		end
 	end
 	return [ux_vector,uy_vector]
