@@ -39,10 +39,11 @@ sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(samp
 vertexlist = sample_counts[:transcript_type]
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
-similarity_matrix = coexpression_measure(sample_data,"mutual_information")
-## Adjacency matrix
-threshold = 0.2
-pre_adj_matrix = adjacency(similarity_matrix,threshold)
+#similarity_matrix = coexpression_measure(sample_data,"mutual_information")
+similarity_matrix = coexpression_measure(sample_data,"PID")
+## Adjacency matrix (using empricial distribution method atm)
+threshold = 0.95
+pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,threshold)
 #Trim nodes with degree zero
 network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
