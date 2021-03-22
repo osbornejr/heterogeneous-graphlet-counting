@@ -16,6 +16,9 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
 	if (method=="mutual_information")
 		return mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
 	end
+	if (method=="PID")
+		return partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
+	end
 	if (method=="pcit")
 		return pcit(data)
 	end
