@@ -50,21 +50,34 @@ function mutual_information(data; discretizer = "uniform_width", estimator = "ma
 	return matrix
 
 end
+
+#aggregator function
+function t2(d1,d2)
+	append!(d1,d2)
+	d1
+		
+end
+function get_unique_values(data,i,j)		#set unique vectors
+	ux_vector = Vector{Float64}(undef,size(data,1))
+	##calculate unique scores for every triplet involving i and j 
+	for k in 1:size(data,1)
+		ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:])["unique_1"]
+	end
+	return sum(ux_vector)
+end
+
+
 function partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed::Bool = false )
 	## set up bins in advance, we can then calculate probabilities within triple loop 
 	nvars, nvals = size(data)
 	matrix = zeros(nvars,nvars)
 	if (distributed = true)
-		##need shared array for data
-		uniques = @showprogress @distributed (append!) for t in [(x,y) for x in 1:nvars, y in 1 : nvars]
-			#set unique vectors
-			ux_vector = Vector{Float64}(undef,nvars)
-			##calculate unique scores for every triplet involving i and j 
-			for k in 1: nvars
-				ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:])["unique_1"]
-			end
-			[ux_vector]
+		##TODO need shared array for larger data matrices?
+		uniques = @showprogress @distributed (t2) for t in [(x,y) for x in 1:nvars, y in 1 : nvars]
+			[get_unique_values(data,first(t),last(t))]
 		end
+		uniques = reshape(uniques,nvars,nvars)
+
 	else
 		for i in 1 : nvars, j in i : nvars
 			@info "Calculating for gene pair $i, $j..."
@@ -78,7 +91,12 @@ function partial_information_decomposition(data; discretizer = "uniform_width", 
 			end
 		end
 	end
-	return [ux_vector,uy_vector]
+	MI = mutual_information(data)
+	#add unique_xy and unique_yx together, maintaining symmetry in matrix
+	PUC = UpperTriangular(uniques)'+LowerTriangular(uniques)+UpperTriangular(uniques)+LowerTriangular(uniques)'
+	# normalise by MI values
+	PUC = PUC./MI
+	return PUC
 end
 function pcit(data::AbstractArray)
 	#implementing the R package PCIT here for now. In the long run it might be better/faster/more desirable to implement our own version in Julia?
