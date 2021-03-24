@@ -1,4 +1,4 @@
-using Statistics, StatsBase, DataFrames, InformationMeasures, LinearAlgebra, RCall,Distributed,ProgressMeter
+using Statistics, StatsBase, DataFrames, InformationMeasures, LinearAlgebra, RCall,Distributed,ProgressMeter,SharedArrays
 
 function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
 	if (method =="pearson")
@@ -76,8 +76,9 @@ function partial_information_decomposition(data; discretizer = "uniform_width", 
 	matrix = zeros(nvars,nvars)
 	if (distributed = true)
 		##TODO need shared array for larger data matrices?
+		S = SharedArray(data)
 		uniques = @showprogress @distributed (t2) for t in [(x,y) for x in 1:nvars, y in 1 : nvars]
-			[get_unique_values(data,first(t),last(t))]
+			[get_unique_values(S,first(t),last(t))]
 		end
 		uniques = reshape(uniques,nvars,nvars)
 
