@@ -26,14 +26,14 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
 	    as_tibble()
 	}
 	
-	if(method=="Quantile")
+	if(method=="quantile")
 	{
 	  ## Quantile method:
 	  # simple, rough method that uses the limma package (a dependency of edgeR)
 	  norm_counts=normalizeQuantiles(raw_counts) 
 	}
 	
-	if(method=="Median")
+	if(method=="median")
 	{
 	  ## Median method:
 	  # simple, rough method that uses the EBSeq package
