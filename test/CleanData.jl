@@ -7,7 +7,7 @@ data=Array(raw_counts[!,2:13]);
 boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 
 ### Normalisation
-data=library_size_normalisation(data,"upperquartile")
+data=library_size_normalisation(data,"median")
 #PCs,D_1,per_sample=pca(data')
 #p=pca_plot(PCs,3);
 #draw(SVG("output/Construction/test_per_sample.svg"),p)
