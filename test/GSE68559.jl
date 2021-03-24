@@ -27,12 +27,12 @@ raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts
 ## Clean - remove transcripts with total counts across all samples less than X
 X = 25
 clean_counts=raw_counts[vec(sum(raw_data,dims = 2 ).>=X),:]
-clean_data = Array(select(norm_counts,filter(x->occursin("data",x),names(norm_counts))))
+clean_data = Array(select(clean_counts,filter(x->occursin("data",x),names(clean_counts))))
 
 #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 
 ### Normalisation
-norm_data=library_size_normalisation(clean_data,"upperquartile")
+norm_data=library_size_normalisation(clean_data,"median")
 norm_counts = copy(clean_counts)
 norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
 
@@ -48,34 +48,51 @@ sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(samp
 
 
 ##Network construction
-#maintain list of vertices in graph
-vertexlist = sample_counts[:transcript_type]
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
-#similarity_matrix = coexpression_measure(sample_data,"mutual_information")
-similarity_matrix = coexpression_measure(sample_data,"PID")
-## Adjacency matrix (using empricial distribution method atm)
-threshold = 0.95
-pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,threshold)
-#Trim nodes with degree zero
-network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
-network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+## store similarity matrices for use later:
+methods =["pcit","mutual_information","pearson","PID"]
+SIMS_GSE = Array{Array{Float64,2}}(undef,length(methods))
 
-vertexlist = vertexlist[vec(sum(pre_adj_matrix,dims=2).!=0)]
-adj_matrix = copy(pre_adj_matrix)
-adj_matrix = adj_matrix[:,vec(sum(pre_adj_matrix,dims=1).!=0)]
-adj_matrix = adj_matrix[vec(sum(pre_adj_matrix,dims=2).!=0),:]
-edgelist = edgelist_from_adj(adj_matrix)
-
-#Network visualisation
-using LightGraphs, GraphPlot
-g = SimpleGraph(adj_matrix)
-nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
-draw(SVG("GSE68559.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
-
-#Network Analysis
-degrees = sum(adj_matrix,dims=2)
-
+for (i,method) in enumerate(methods)
+	@info "constructing network using $method method:"
+	coexpression = method
+ 	similarity_matrix = coexpression_measure(sample_data,coexpression)
+ 	SIMS_GSE[i] = similarity_matrix
+	## Adjacency matrix (using empricial distribution method atm)
+	threshold = 0.99
+	pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,threshold)
+	#maintain list of vertices in graph
+	vertexlist = sample_counts[:transcript_type]
+	#Trim nodes with degree zero
+	network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+	network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+	
+	vertexlist = vertexlist[vec(sum(pre_adj_matrix,dims=2).!=0)]
+	adj_matrix = copy(pre_adj_matrix)
+	adj_matrix = adj_matrix[:,vec(sum(pre_adj_matrix,dims=1).!=0)]
+	adj_matrix = adj_matrix[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+	edgelist = edgelist_from_adj(adj_matrix)
+	
+	#Network visualisation
+	using LightGraphs, GraphPlot
+	g = SimpleGraph(adj_matrix)
+	##get largest component
+	components = connected_components(g)
+	largest = components[length.(components).==max(length.(components)...)]
+	adj_matrix_comp = adj_matrix[largest[1],largest[1]]
+	g_comp = Graph(adj_matrix_comp)
+	##update vertexlist
+	vertexlist_comp = vertexlist[largest[1]]
+	##plot (either connected component or whole network
+	nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist_comp.=="coding").+1]
+	draw(SVG("GSE68559_$X$coexpression component.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
+	nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
+	draw(SVG("GSE68559_$X$coexpression.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+	
+	#Network Analysis
+	degrees = sum(adj_matrix,dims=2)
+end
 @time graphlet_counts = count_graphlets(vertexlist,edgelist,4,"distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
