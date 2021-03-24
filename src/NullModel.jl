@@ -536,72 +536,72 @@ function hetero_rewire(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},swi
 		 	 adjusted_edges = vcat(adjusted_edges,s_adjust)
 		end
 	end
-	if (graphlet_size == 4)
-		@info "Matching random graph to target 3-node graphlet vector..." 
-		#this involves calculating the 3 node subgraphs at every step (laborious! and probably not practical at present).
-		randomised = DefaultDict(0,count_graphlets(typelist,adjusted_edges)[1])
-		target = DefaultDict(0,count_graphlets(typelist,edgelist)[1])
-		##define energy on difference between adjusted and target counts
-		E = sum([abs(randomised[g]-target[g])/(randomised[g]+target[g]) for g in collect(keys(target))])
-		Temp = 1
-		edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(adjusted_edges)),map(x-> typelist[x],last.(adjusted_edges)))))
-		@info "Need zero energy:"
-		#count = 1
-		while (E>0.05)
-			trial = Array{Pair,1}()
-			## try an edge switch (we choose an edgetype and only switch in that subgraph)
-			chosen_type = rand(unique(edgetypes))
-			for type in unique(edgetypes)
-				s_edges = adjusted_edges[edgetypes.==type]
-				## to maintain uniformity, the switching algorithm should be implemented differently depending on whether the edgetype is homogeneous or heterogeneous
-				##homogeneous case
-				if (type == chosen_type)
-					if (first(type)==last(type))
-        		                	 s_adjust = edge_switch(s_edges,1)
-				 	 	trial = vcat(trial,s_adjust)
-					else
-				##heterogeneous case
-        		                	s_adjust = edge_switch(s_edges,1,true)
-				 	 	trial = vcat(trial,s_adjust)
-					end
-				else
-					trial = vcat(trial,s_edges)
-				end
-			end
-			#calculate new 3-node counts
-			randomised = DefaultDict(0,count_graphlets(typelist,trial)[1])
-			#E trial
-			E_trial = sum([abs(randomised[g]-target[g])/(randomised[g]+target[g]) for g in collect(keys(target))])
-			## update if change is accepted
-			crit = rand()
-			if (E_trial<E)
-				adjusted_edges = trial
-				edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(adjusted_edges)),map(x-> typelist[x],last.(adjusted_edges)))))
-				E = E_trial
-				@info "Energy is $E, temperature is $Temp. count was $count."
-				#cool slightly
-				Temp = Temp*0.99
-				#reset search-count for new lower energy 
-				#count = 1
-			elseif (crit<exp(-((E_trial-E))/Temp))
-
-				prob = exp(-((E_trial-E))/Temp)
-				adjusted_edges = trial
-				edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(adjusted_edges)),map(x-> typelist[x],last.(adjusted_edges)))))
-				E = E_trial
-				@info "Increased energy is $E, temperature is $Temp. Count was $count. Rand was $crit, probability was $prob."
-				#cool slightly
-				#Temp = Temp*0.99
-				#count = 1
-			else
-				#count +=1
-			end
-			##reheat if solidified too much
-			if (Temp<1e-300)
-				Temp = 1e-100
-			end
-		end
-	end
+#	if (graphlet_size == 4)
+#		@info "Matching random graph to target 3-node graphlet vector..." 
+#		#this involves calculating the 3 node subgraphs at every step (laborious! and probably not practical at present).
+#		randomised = DefaultDict(0,count_graphlets(typelist,adjusted_edges)[1])
+#		target = DefaultDict(0,count_graphlets(typelist,edgelist)[1])
+#		##define energy on difference between adjusted and target counts
+#		E = sum([abs(randomised[g]-target[g])/(randomised[g]+target[g]) for g in collect(keys(target))])
+#		Temp = 1
+#		edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(adjusted_edges)),map(x-> typelist[x],last.(adjusted_edges)))))
+#		@info "Need zero energy:"
+#		count = 1
+#		while (E>0.05)
+#			trial = Array{Pair,1}()
+#			## try an edge switch (we choose an edgetype and only switch in that subgraph)
+#			chosen_type = rand(unique(edgetypes))
+#			for type in unique(edgetypes)
+#				s_edges = adjusted_edges[edgetypes.==type]
+#				## to maintain uniformity, the switching algorithm should be implemented differently depending on whether the edgetype is homogeneous or heterogeneous
+#				##homogeneous case
+#				if (type == chosen_type)
+#					if (first(type)==last(type))
+#        		                	 s_adjust = edge_switch(s_edges,1)
+#				 	 	trial = vcat(trial,s_adjust)
+#					else
+#				##heterogeneous case
+#        		                	s_adjust = edge_switch(s_edges,1,true)
+#				 	 	trial = vcat(trial,s_adjust)
+#					end
+#				else
+#					trial = vcat(trial,s_edges)
+#				end
+#			end
+#			#calculate new 3-node counts
+#			randomised = DefaultDict(0,count_graphlets(typelist,trial)[1])
+#			#E trial
+#			E_trial = sum([abs(randomised[g]-target[g])/(randomised[g]+target[g]) for g in collect(keys(target))])
+#			## update if change is accepted
+#			crit = rand()
+#			if (E_trial<E)
+#				adjusted_edges = trial
+#				edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(adjusted_edges)),map(x-> typelist[x],last.(adjusted_edges)))))
+#				E = E_trial
+#				@info "Energy is $E, temperature is $Temp. count was $count."
+#				#cool slightly
+#				Temp = Temp*0.99
+#				#reset search-count for new lower energy 
+#				count = 1
+#			elseif (count>1000 && crit<exp(-((1+E_trial-E))/Temp))
+#
+#				prob = exp(-((E_trial-E))/Temp)
+#				adjusted_edges = trial
+#				edgetypes = splat(Pair).(eachrow(hcat(map(x-> typelist[x],first.(adjusted_edges)),map(x-> typelist[x],last.(adjusted_edges)))))
+#				E = E_trial
+#				@info "Increased energy is $E, temperature is $Temp. Count was $count. Rand was $crit, probability was $prob."
+#				#cool slightly
+#				#Temp = Temp*0.99
+#				#count = 1
+#			else
+#				count +=1
+#			end
+#			##reheat if solidified too much
+#			if (Temp<1e-300)
+#				Temp = 1e-100
+#			end
+#		end
+#	end
 	return adjusted_edges
 end
 
