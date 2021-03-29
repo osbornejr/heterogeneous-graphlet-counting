@@ -8,7 +8,20 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
 #Most methods are specifically designed for DE analysis, and may not be important or have adverse affects on GCE analysis.  
 #Note, library size methods should only be applied to raw counts, not TPM, FPKM etc as these have already adjusted for libraery size. 
 #TPM(transcripts per million) from RSEM is essentially a Total Count library normalisation adjusted to be per million instead of a strict proportion.
+	
+#fix to fit R package:
+ 	if(method=="upper_quartile")
+		method="upperquartile"
+	end
+	#ensure input method to R is valid!
+	avail = ["quantile","median","upperquartile","TMM","TMMswp","RLE"]
+	if (!(method in avail) )
+		@error "specified normalisation method is not available. Choose from $(avail)"
+		return Nothing
+	end
+	
 	raw_counts=Array(raw_counts)
+	
 	@rput raw_counts
 	@rput method
 	R"""
