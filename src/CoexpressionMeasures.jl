@@ -17,7 +17,7 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
 		return mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
 	end
 	if (method=="PID")
-		return partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
+		return partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed = true)
 	end
 	if (method=="pcit")
 		return pcit(data)
@@ -74,7 +74,7 @@ function partial_information_decomposition(data; discretizer = "uniform_width", 
 	## set up bins in advance, we can then calculate probabilities within triple loop 
 	nvars, nvals = size(data)
 	matrix = zeros(nvars,nvars)
-	if (distributed = true)
+	if (distributed == true)
 		##TODO need shared array for larger data matrices?
 		#S = SharedArray(data)
 		uniques = @showprogress @distributed (t2) for t in [(x,y) for x in 1:nvars, y in 1 : nvars]
