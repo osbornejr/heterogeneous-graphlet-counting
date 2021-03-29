@@ -96,318 +96,79 @@ function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{
 	# remove zero entries
 	filter!(x->last(last(x))!=0,full_relationships)
 	
-	##triangle switch
+	##find triangles
 	triangles = filter(x->last(last(x))==3,full_relationships)
 
-	triangle_array = hcat(first.(first.(triangles)),last.(first.(triangles)),first.(last.(triangles)),last.(last.(triangles)))[:,1:3]
+	triangle_array = hcat(first.(first.(triangles)),last.(first.(triangles)),first.(last.(triangles)))
 	triangle_array = unique(sort.(eachrow(triangle_array)))
-	triangle_types = Array{Array{String,1},1}(undef,length(triangle_array))
-	for (i,e) in enumerate(triangle_array)
-		triangle_types[i] = vertexlist[e]
-       	end
-	#convert to dictionary form
-	tel = Dict{Array{Int,1},Bool}()
-	for t in triangle_array 
-		tel[t] = 1
+	#find solo edges (defined by their absence from any triangle)
+	solos = setdiff(edgelist,unique(first.(triangles)))
+	## add "0" vertex to represent this 
+	solo_array = hcat(first.(solos),last.(solos),Array{Int}(undef,length(solos)).=0)
+	solo_array =  unique(sort.(eachrow(solo_array)))	
+	#convert configuration to a condensed (minimal) dictionary form
+	cel = Dict{Array{Int,1},Bool}()
+	for c in vcat(triangle_array,solo_array)
+		cel[c] = 1
 	end
-	#paths switch: for the i paths, we place the first entry second. This means that the central node in each path is always listed second
-	i_paths = filter(x->(last(last(x))==1),full_relationships)
-	i_path_array = hcat(last.(first.(i_paths)),first.(first.(i_paths)),first.(last.(i_paths)),last.(last.(i_paths)))[:,1:3]
-	j_paths = filter(x->(last(last(x))==2),full_relationships)
-	j_path_array = hcat(first.(first.(j_paths)),last.(first.(j_paths)),first.(last.(j_paths)),last.(last.(j_paths)))[:,1:3]
- 	#now we merge together, sorting about the central nodes to find doubles
-	path_array = vcat(i_path_array,j_path_array)
-	ord = sort.(eachrow(path_array[:,[1,3]]))
-	path_array[:,1] = first.(ord)
-	path_array[:,3] = last.(ord)
-	path_array = unique(eachrow(path_array))
-	path_types = Array{Array{String,1},1}(undef,length(path_array))
-	for (i,e) in enumerate(path_array)
-		path_types[i] = vertexlist[e]
-       	end
-
-	#convert to dictionary form
-	pel = Dict{Array{Int,1},Bool}()
-	for p in path_array 
-		pel[p] = 1
-	end
-	t_suc = 0
-	p_suc = 0
-	tel_l = length(tel)
-	pel_l = length(pel)
 
 	for s in 1:switches
-		
- 		##switch. To maintain uniformity, we want to select any random subgraph (path or triangle) with equal probability.
- 		cand1 = rand(1:length(path_array)+length(triangle_array))
- 		switching = "path"
+		#select first subgraph to switch	
+		sub1 = first(rand(cel))
  	
- 		if (cand1>length(path_array))
- 			## this is if a triangle switch was randomly selected
- 			switching = "tri"
- 			cand1 = cand1 - length(path_array)
- 		end
- 	 	if (switching == "tri")
- 			#select tri to switch with
- 			cand2 = rand(1:length(triangle_array))
- 			## get copy of paths
-			a = collect(keys(tel))[cand1]
-			b = collect(keys(tel))[cand2]
- 			if (sort(triangle_types[cand1])==sort(triangle_types[cand2]))	
- 				##types agree
- 				pos = rand(1:9) ##choose which of five possible switches to do (uniform random)
- 				if (pos ==1)
- 					##front switch
- 					if (a[1]!=b[1])
- 						#not a trivial switch
- 						if(!(a[1] in b) &&  !(b[1] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[1],a[2],a[3]]) && !haskey(tel,[a[2],b[1],a[3]])  && !haskey(tel,[a[2],a[3],b[1]]) && !haskey(tel,[b[1],a[3],a[2]]) && !haskey(tel,[a[3],b[1],a[2]])  && !haskey(tel,[a[3],a[2],b[1]]) && !haskey(tel,[a[1],b[2],b[3]]) && !haskey(tel,[b[2],a[1],b[3]])  && !haskey(tel,[b[2],b[3],a[1]]) && !haskey(tel,[a[1],b[3],b[2]]) && !haskey(tel,[b[3],a[1],b[2]])  && !haskey(tel,[b[3],b[2],a[1]]))
- 								## we would not create an already xexisting triangles and paths!, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[b[1],a[2],a[3]]] = 1
- 								tel[[a[1],b[2],b[3]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 				if (pos ==2)
- 					##middle switch
- 					if (a[2]!=b[2])
- 						#not a trivial switch
- 						if(!(a[2] in b) &&  !(b[2] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[2],a[1],a[3]]) && !haskey(tel,[a[1],b[2],a[3]])  && !haskey(tel,[a[1],a[3],b[2]]) && !haskey(tel,[b[2],a[3],a[1]]) && !haskey(tel,[a[3],b[2],a[1]])  && !haskey(tel,[a[3],a[1],b[2]]) && !haskey(tel,[a[2],b[1],b[3]]) && !haskey(tel,[b[1],a[2],b[3]])  && !haskey(tel,[b[1],b[3],a[2]]) && !haskey(tel,[a[2],b[3],b[1]]) && !haskey(tel,[b[3],a[2],b[1]])  && !haskey(tel,[b[3],b[1],a[2]]))
- 								## we would not create an already existing triangle, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[a[1],b[2],a[3]]] = 1
- 								tel[[b[1],a[2],b[3]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 				if (pos ==3)
- 					##end switch
- 					if (a[3]!=b[3])
- 						#not a trivial switch
- 						if(!(a[3] in b) &&  !(b[3] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[3],a[1],a[2]]) && !haskey(tel,[a[1],b[3],a[2]])  && !haskey(tel,[a[1],a[2],b[3]]) && !haskey(tel,[b[3],a[2],a[1]]) && !haskey(tel,[a[2],b[3],a[1]])  && !haskey(tel,[a[2],a[1],b[3]]) && !haskey(tel,[a[3],b[1],b[2]]) && !haskey(tel,[b[1],a[3],b[2]])  && !haskey(tel,[b[1],b[2],a[3]]) && !haskey(tel,[a[3],b[2],b[1]]) && !haskey(tel,[b[2],a[3],b[1]])  && !haskey(tel,[b[2],b[1],a[3]]))
- 								## we would not create an already existing triangle, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[a[1],a[2],b[3]]] = 1
- 								tel[[b[1],b[2],a[3]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 				if (pos ==4)
- 					##front-mid switch
- 					if (a[1]!=b[2])
- 						#not a trivial switch
- 						if(!(a[1] in b) &&  !(b[2] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[2],a[3],a[2]]) && !haskey(tel,[a[3],b[2],a[2]])  && !haskey(tel,[a[3],a[2],b[2]]) && !haskey(tel,[b[2],a[2],a[3]]) && !haskey(tel,[a[2],b[2],a[3]])  && !haskey(tel,[a[2],a[3],b[2]]) && 
- 							   !haskey(tel,[a[1],b[1],b[3]]) && !haskey(tel,[b[1],a[1],b[3]])  && !haskey(tel,[b[1],b[3],a[1]]) && !haskey(tel,[a[1],b[3],b[1]]) && !haskey(tel,[b[3],a[1],b[1]])  && !haskey(tel,[b[3],b[1],a[1]]))
- 								## we would not create an already existing triangle, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[a[2],a[3],b[2]]] = 1
- 								tel[[b[1],b[3],a[1]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end  
- 				if (pos ==5)
- 					##front-end switch
- 					if (a[1]!=b[3])
- 						#not a trivial switch
- 						if(!(a[1] in b) &&  !(b[3] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[3],a[3],a[2]]) && !haskey(tel,[a[3],b[3],a[2]])  && !haskey(tel,[a[3],a[2],b[3]]) && !haskey(tel,[b[3],a[2],a[3]]) && !haskey(tel,[a[2],b[3],a[3]])  && !haskey(tel,[a[2],a[3],b[3]]) && !haskey(tel,[a[1],b[1],b[2]]) && !haskey(tel,[b[1],a[1],b[2]])  && !haskey(tel,[b[1],b[2],a[1]]) && !haskey(tel,[a[1],b[2],b[1]]) && !haskey(tel,[b[2],a[1],b[1]])  && !haskey(tel,[b[2],b[1],a[1]]))
- 								## we would not create an already existing triangle, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[a[2],a[3],b[3]]] = 1
- 								tel[[b[1],b[2],a[1]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 				if (pos ==6)
- 					##mid-front switch
- 					if (a[2]!=b[1])
- 						#not a trivial switch
- 						if(!(a[2] in b) &&  !(b[1] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[1],a[3],a[1]]) && !haskey(tel,[a[3],b[1],a[1]])  && !haskey(tel,[a[3],a[1],b[1]]) && !haskey(tel,[b[1],a[1],a[3]]) && !haskey(tel,[a[1],b[1],a[3]])  && !haskey(tel,[a[1],a[3],b[1]]) && !haskey(tel,[a[2],b[3],b[2]]) && !haskey(tel,[b[3],a[2],b[2]])  && !haskey(tel,[b[3],b[2],a[2]]) && !haskey(tel,[a[2],b[2],b[3]]) && !haskey(tel,[b[2],a[2],b[3]])  && !haskey(tel,[b[2],b[3],a[2]]))
- 								## we would not create an already existing triangle, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[a[1],a[3],b[1]]] = 1
- 								tel[[b[2],b[3],a[2]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 				if (pos ==7)
- 					##mid-end switch
- 					if (a[2]!=b[3])
- 						#not a trivial switch
- 						if(!(a[2] in b) &&  !(b[3] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[3],a[3],a[1]]) && !haskey(tel,[a[3],b[3],a[1]])  && !haskey(tel,[a[3],a[1],b[3]]) && !haskey(tel,[b[3],a[1],a[3]]) && !haskey(tel,[a[1],b[3],a[3]])  && !haskey(tel,[a[1],a[3],b[3]]) && !haskey(tel,[a[2],b[1],b[2]]) && !haskey(tel,[b[1],a[2],b[2]])  && !haskey(tel,[b[1],b[2],a[2]]) && !haskey(tel,[a[2],b[2],b[1]]) && !haskey(tel,[b[2],a[2],b[1]])  && !haskey(tel,[b[2],b[1],a[2]]))
- 								## we would not create an already existing triangle, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[a[1],a[3],b[3]]] = 1
- 								tel[[b[1],b[2],a[2]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 				if (pos ==8)
- 					##end-front switch
- 					if (a[3]!=b[1])
- 						#not a trivial switch
- 						if(!(a[3] in b) &&  !(b[1] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[1],a[2],a[1]]) && !haskey(tel,[a[2],b[1],a[1]])  && !haskey(tel,[a[2],a[1],b[1]]) && !haskey(tel,[b[1],a[1],a[2]]) && !haskey(tel,[a[1],b[1],a[2]])  && !haskey(tel,[a[1],a[2],b[1]]) && !haskey(tel,[a[3],b[3],b[2]]) && !haskey(tel,[b[3],a[3],b[2]])  && !haskey(tel,[b[3],b[2],a[3]]) && !haskey(tel,[a[3],b[2],b[3]]) && !haskey(tel,[b[2],a[3],b[3]])  && !haskey(tel,[b[2],b[3],a[3]]))
- 								## we would not create an already existing triangle, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[a[1],a[2],b[1]]] = 1
- 								tel[[b[2],b[3],a[3]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 				if (pos ==9)
- 					##end-mid switch
- 					if (a[3]!=b[2])
- 						#not a trivial switch
- 						if(!(a[3] in b) &&  !(b[2] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(tel,[b[2],a[2],a[1]]) && !haskey(tel,[a[2],b[2],a[1]])  && !haskey(tel,[a[2],a[1],b[2]]) && !haskey(tel,[b[2],a[1],a[2]]) && !haskey(tel,[a[1],b[2],a[2]])  && !haskey(tel,[a[1],a[2],b[2]]) && !haskey(tel,[a[3],b[3],b[1]]) && !haskey(tel,[b[3],a[3],b[1]])  && !haskey(tel,[b[3],b[1],a[3]]) && !haskey(tel,[a[3],b[1],b[3]]) && !haskey(tel,[b[1],a[3],b[3]])  && !haskey(tel,[b[1],b[3],a[3]]))
- 								## we would not create an already existing triangle, so let's add in the new triangles!
- 								delete!(tel,a)
- 								delete!(tel,b)
- 								tel[[a[1],a[2],b[2]]] = 1
- 								tel[[b[1],b[3],a[3]]] = 1
-								t_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 			end
- 		end
- 		if (switching == "path")
- 			#select path to switch with
- 			cand2 = rand(1:length(path_array))
- 			## get copy of paths
-			a = collect(keys(pel))[cand1]
-			b = collect(keys(pel))[cand2]
- 			if ((path_types[cand1][2] == path_types[cand2][2]) && (((path_types[cand1][1] == path_types[cand2][1]) && (path_types[cand1][3] == path_types[cand2][3]))||((path_types[cand1][3] == path_types[cand2][1]) && (path_types[cand1][1] == path_types[cand2][3]))))	
- 				##types agree
- 				pos = rand(1:5) ##choose which of five possible switches to do (uniform random)
- 				if (pos ==1)
- 					##middle switch
- 					if (a[2]!=b[2])
- 						#not a trivial switch
- 						if(!(a[2] in b) &&  !(b[2] in a))
- 							#no self loops/multiedges would occur
- 							if(!haskey(pel,[a[1],b[2],a[3]]) && !haskey(pel,[a[3],b[2],a[1]])  && !haskey(pel,[b[1],a[2],b[3]]) && !haskey(pel,[b[3],a[2],b[1]]))
- 								## we would not create an already existing path, so let's add in the new paths!
- 								delete!(pel,a)
- 								delete!(pel,b)
- 								pel[[a[1],b[2],a[3]]] = 1
- 								pel[[b[1],a[2],b[3]]] = 1
-								p_suc += 1
- 							end
- 						end
- 					end
- 				end 
- 				if (pos ==2)
- 					##front switch
- 					if (a[1]!=b[1])
- 						#not a trivial switch
- 						if(!(a[1] in b) &&  !(b[1] in a))
- 							#no self loops would occur
- 							if(!haskey(pel,[b[1],a[2],a[3]]) && !haskey(pel,[a[3],a[2],b[1]]) && !haskey(pel,[a[1],b[2],b[3]]) && !haskey(pel,[b[3],b[2],a[1]]))
- 								## we would not create an already existing path, so let's add in the new paths!
- 								delete!(pel,a)
- 								delete!(pel,b)
- 								pel[[b[1],a[2],a[3]]] = 1
- 								pel[[a[1],b[2],b[3]]] = 1
-								p_suc += 1
- 							end
- 						end
- 					end
- 				end
- 				if (pos ==3)
- 					##back switch
- 					if (a[3]!=b[3])
- 						#not a trivial switch
- 						if(!(a[3] in b) &&  !(b[3] in a))
- 							#no self loops would occur
- 							if(!haskey(pel,[a[1],a[2],b[3]]) && !haskey(pel,[b[3],a[2],a[1]]) && !haskey(pel,[b[1],b[2],a[3]]) && !haskey(pel,[a[3],b[2],b[1]]))
- 								## we would not create an already existing path, so let's add in the new paths!
- 								delete!(pel,a)
- 								delete!(pel,b)
- 								pel[[a[1],a[2],b[3]]] = 1
- 								pel[[b[1],b[2],a[3]]] = 1
-								p_suc += 1
- 							end
- 						end
- 					end
- 				end
- 				if (pos ==4)
- 					##front switch
- 					if (a[1]!=b[3])
- 						#not a trivial switch
- 						if(!(a[1] in b) &&  !(b[3] in a))
- 							#no self loops would occur
- 							if(!haskey(pel,[b[3],a[2],a[3]]) && !haskey(pel,[a[3],a[2],b[3]]) && !haskey(pel,[a[1],b[2],b[1]]) && !haskey(pel,[b[1],b[2],a[1]]))
- 								## we would not create an already existing path, so let's add in the new paths!
- 								delete!(pel,a)
- 								delete!(pel,b)
- 								pel[[b[3],a[2],a[3]]] = 1
- 								pel[[a[1],b[2],b[1]]] = 1
-								p_suc += 1
- 							end
- 						end
- 					end
- 				end
- 				if (pos ==5)
- 					##front switch
- 					if (a[3]!=b[1])
- 						#not a trivial switch
- 						if(!(a[3] in b) &&  !(b[1] in a))
- 							#no self loops would occur
- 							if(!haskey(pel,[b[1],a[2],a[1]]) && !haskey(pel,[a[1],a[2],b[1]]) && !haskey(pel,[a[3],b[2],b[3]]) && !haskey(pel,[b[3],b[2],a[3]]))
- 								## we would not create an already existing path, so let's add in the new paths!
- 								delete!(pel,a)
- 								delete!(pel,b)
- 								pel[[b[1],a[2],a[1]]] = 1
- 								pel[[a[3],b[2],b[3]]] = 1
-								p_suc += 1
- 							end
- 						end
- 					end
- 				end
- 			end
- 		end
+ 		#select subgraph to switch with
+		sub2 = first(rand(cel))
+		if (sub1 != sub2) #not a trivial subgraph switch
+			#choose nodes from each subgraph
+			cand1 = rand(sub1)
+			cand2 = rand(sub2)
+			rem1 = sub1[sub1.!=cand1]
+			rem2 = sub2[sub2.!=cand2]
+			if (cand1!=cand2) ##not a trivial candidate switch
+				if(!(cand1 in sub2) && !(cand2 in sub1)) ## no self-loops would be created
+			    		if (!(0 in sub1) && !(0 in sub2)) ##switching two triangles 
+						#[a,b,c]<=> [d,e,f]
+						#complicated thing here is making sure that new triangles do not cancel out an exist solo. 
+						if (vertexlist[cand1]==vertexlist[cand2] || vertexlist[rem1]==vertexlist[rem2]) ##candidate types agree, and/or remaining edge types agree
+							if (!haskey(cel,sort([cand1,rem2[1],rem2[2]])) && !haskey(cel,sort([cand2,rem1[1],rem1[2]])) && !haskey(cel,sort([cand1,rem2[1],0])) && !haskey(cel,sort([cand1,rem2[2],0])) && !haskey(cel,sort([cand2,rem1[1],0])) && !haskey(cel,sort([cand2,rem1[2],0]))) ## new subgraphs do not already exist, and are not breaking an existing null node condition 
+ 						 		delete!(cel,sub1)
+ 						 		delete!(cel,sub2)
+								cel[sort([cand1,rem2[1],rem2[2]])] = 1
+								cel[sort([cand2,rem1[1],rem1[2]])] = 1
+							end
+						end 
+					elseif ((0 in sub1) && (0 in sub2)) ##switching two solos
+						#[0,a,b] <=>[0,c,d] 
+						#note that neither cands will be 0 due to earlier conditions, so this resolves to a simple edge switch
+						if ((vertexlist[cand1] == vertexlist[cand2]) && (vertexlist[rem1[2]] == vertexlist[rem2[2]])) ##candidate types agree AND remaining node types agree
+							if (!haskey(cel,sort([cand1,rem2[1],rem2[2]])) && !haskey(cel,sort([cand2,rem1[1],rem1[2]]))) ## new subgraphs do not already exist 
+ 						 		delete!(cel,sub1)
+ 						 		delete!(cel,sub2)
+								cel[sort([cand1,rem2[1],rem2[2]])] = 1
+								cel[sort([cand2,rem1[1],rem1[2]])] = 1
+							end
+						end
+					else ## switching a triangle and a solo
+						#[0,a,b]<=>[c,d,e]
+						#most complicated method, as we must move ALL other triangles associated with old triangle onto new triangle!
+						if (((cand1==0 || cand2 == 0) && vertexlist[rem1]==vertexlist[rem2]) || ((cand1!=0 && cand2!=0) && vertexlist[cand1] == vertexlist[cand2])) ##either one candidate is null node, and the remaining edge types agree, or neither candidates are the null node, and their types agree.
+							##note that by the null node definition, the new subgraphs will automatically not already exist. Only need to ensure that the new solo IS in fact solo (by moving all of its other triangles to new triangle (rem) edge
+							delete!(cel,sub1)
+							delete!(cel,sub2)
+							#deterime which new subgraph is the solo:
+							newsub1 = [cand2,rem1[1],rem1[2]]
+							newsub2 = [cand1,rem2[1],rem2[2]]
+							null = 0 in newsub1 ? newsub1[newsub1.>0] : newsub2[newsub2.>0]
+							##find the unlucky connected nodes that need to move
+							cel_array = collect(keys(cel))
+							dead = cel_array[in.(null[1],cel_array).*in.(null[2],cel_array)]
+							refugees = setdiff(unique(vcat(dead...)),null)
+							for (i,r) in enumerate(refugees)
+								delete!(cel,dead[i])
+								cel[sort([r,	
+				end
+			end 
+		end
 	end
 	#collapse configuration into edgelist
 	el = Dict{Pair,Bool}()
