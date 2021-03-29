@@ -262,7 +262,7 @@ function t2(d1,d2)
 		
 end
 
-function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3,run_method::String="serial")
+function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",relationships::Bool=false)
 
 
 	##INPUTS TO PER EDGE FUNCTION
@@ -279,7 +279,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	#preallocate array to store each edge's graphlet dictionary 
 	Chi=Array{Dict{String,Int}}(undef,size(edgelist,1));
 	#preallocate array to store each edge relationship dict 
-	#Rel=Array{Dict{Int,Int}}(undef,size(edgelist,1));
+	Rel=Array{Dict{Int,Int}}(undef,size(edgelist,1));
 	dummy_chi = Dict{String,Int}()
 	dummy_rel = Dict{Int,Int}()
 	#per edge process
@@ -295,15 +295,25 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices))]        
 		end
 		#manipulate distributed output tuples into Chi array (for now in line iwth other methods)
-		for r in res
-			Chi[first(r)] = last(r)[1]
-			#Rel[first(r)] = last(r)[2]
+		if (relationships == true)
+
+			for r in res
+				Chi[first(r)] = last(r)[1]
+				Rel[first(r)] = last(r)[2]
+			end
+		else
+			for r in res
+				Chi[first(r)] = last(r)[1]
+			end
 		end
+
 	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
 			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)
 			Chi[h] = edge[1]
-			#Rel[h] = edge[2]
+			if (relationships==true)
+				Rel[h] = edge[2]
+			end
 		end
 	end
 	#total counts for each graphlet
@@ -389,7 +399,11 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			graphlet_counts[g] = div(graphlet_counts[g],6)
 		end
 	end
-	return [graphlet_counts,Chi]#,Rel]
+	if (relationships==true)
+		return [graphlet_counts,Chi,Rel]
+	else
+		return [graphlet_counts,Chi]
+	end
 end
 
 function concentrate(graphlet_counts::Dict{String,Int})
@@ -408,7 +422,7 @@ function find_motifs(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},null_
 	null_model_df = null_model_dataframe(null_model_calc) 
 	
 	# calculate real network counts
-	graphlet_counts = count_graphlets(typelist,edgelist,graphlet_size,"distributed")[1]
+	graphlet_counts = count_graphlets(typelist,edgelist,graphlet_size,run_method="distributed")[1]
 	
 	#Statistical significance
 	zscores = Dict{String,Float64}()

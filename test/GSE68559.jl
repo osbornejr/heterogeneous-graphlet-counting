@@ -95,7 +95,7 @@ draw(SVG("GSE68559_$(norm_method)_$(threshold_method)_$(X)_$(coexpression).svg",
 #Network Analysis
 degrees = sum(adj_matrix,dims=2)
 
-@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,"distributed")
+@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
 @time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)

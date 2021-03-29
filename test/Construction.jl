@@ -148,7 +148,7 @@ addprocs(Threads.nthreads())
 #addprocs(8)
 @everywhere include(ENV["JULIA_PROJECT"]*"/src/GraphletCounting.jl")
 @everywhere include(ENV["JULIA_PROJECT"]*"/src/NullModel.jl")
-@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,"distributed")
+@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
 @time motif_counts = find_motifs(sane_edgelist,"hetero_rewire",1, typed = true, typelist = vertexlist,plotfile="test.svg",graphlet_size = 4)
