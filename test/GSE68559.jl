@@ -51,10 +51,15 @@ sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(samp
 ##Network construction
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
-## store similarity matrices for use later:
-
+## file to cache similarity matrix for use later:
+using JLD
+sim_file = ENV["JULIA_PROJECT"]*"/output/cache/GSE68559_similarity_matrix_$(norm_method)_$(X)_$(coexpression).jld"
 coexpression = "PID"
-similarity_matrix = coexpression_measure(sample_data,coexpression)
+if (isfile(sim_file))
+	similarity_matrix = JLD.load(sim_file,"$(coexpression)_similarity_matrix")
+else
+	similarity_matrix = coexpression_measure(sample_data,coexpression)
+end
 ## Adjacency matrix (using empricial distribution method atm)
 threshold = 0.95
 threshold_method = "empirical_dist"
