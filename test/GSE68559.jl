@@ -59,7 +59,9 @@ if (isfile(sim_file))
 	similarity_matrix = JLD.load(sim_file,"$(coexpression)_similarity_matrix")
 else
 	similarity_matrix = coexpression_measure(sample_data,coexpression)
+	JLD.save(sim_file,"$(coexpression)_similarity_matrix",similarity_matrix)
 end
+
 ## Adjacency matrix (using empricial distribution method atm)
 threshold = 0.95
 threshold_method = "empirical_dist"
