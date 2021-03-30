@@ -151,36 +151,41 @@ function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{
 					else ## switching a triangle and a solo
 						#[0,a,b]<=>[c,d,e]
 						#most complicated method, as we must move ALL other triangles associated with old triangle onto new triangle!
-						if (((cand1==0 || cand2 == 0) && vertexlist[rem1]==vertexlist[rem2]) || ((cand1!=0 && cand2!=0) && vertexlist[cand1] == vertexlist[cand2])) ##either one candidate is null node, and the remaining edge types agree, or neither candidates are the null node, and their types agree.
+						if (((cand1==0 || cand2 == 0) && vertexlist[rem1]==vertexlist[rem2])) #|| ((cand1!=0 && cand2!=0) && vertexlist[cand1] == vertexlist[cand2])) ##either one candidate is null node, and the remaining edge types agree, or neither candidates are the null node, and their types agree. Note that for now we only permit the former, as the latter is messy and is likely to cause IMPLICIT TRIANGLES. Implicit triangles may need attention in the triangle to triangle case as well.
 							##note that by the null node definition, the new subgraphs will automatically not already exist. Only need to ensure that the new solo IS in fact solo (by moving all of its other triangles to new triangle (rem) edge
 							delete!(cel,sub1)
 							delete!(cel,sub2)
 							#deterime which new subgraph is the solo:
 							newsub1 = [cand2,rem1[1],rem1[2]]
 							newsub2 = [cand1,rem2[1],rem2[2]]
-							null = 0 in newsub1 ? newsub1[newsub1.>0] : newsub2[newsub2.>0]
+							null,tri = 0 in newsub1 ? (newsub1[newsub1.>0],setdiff(newsub2,sub1)) : (newsub2[newsub2.>0],setdiff(newsub1,sub2))
 							##find the unlucky connected nodes that need to move
 							cel_array = collect(keys(cel))
 							dead = cel_array[in.(null[1],cel_array).*in.(null[2],cel_array)]
 							refugees = setdiff(unique(vcat(dead...)),null)
+							#switch these to newly minted triangle edge
 							for (i,r) in enumerate(refugees)
 								delete!(cel,dead[i])
-								cel[sort([r,	
+								cel[sort([r,tri[1],tri[2]])] = 1	
+							end
+						end
+					end
 				end
 			end 
 		end
 	end
 	#collapse configuration into edgelist
 	el = Dict{Pair,Bool}()
-	##triangle collapse
-	for t in keys(tel)
-		el[Pair(t[1],t[2])] = 1
-       		el[Pair(t[1],t[3])] = 1
-       		el[Pair(t[2],t[3])] = 1
+	##collapse (includes "edges" to null node)
+	for c in keys(cel)
+		el[Pair(c[1],c[2])] = 1
+       		el[Pair(c[1],c[3])] = 1
+       		el[Pair(c[2],c[3])] = 1
        	end
 	##path collapse
 	new_edgelist = splat(Pair).(unique(sort.(eachrow(hcat(first.(collect(keys(el))),last.(collect(keys(el))))))))
-
+	#filter out null edges
+ 	new_edgelist = filter(x->!(0 in x),new_edgelist)
 	#configuration_array = hcat(first.(first.(full_relationships)),last.(first.(full_relationships)),first.(last.(full_relationships)),last.(last.(full_relationships)))
 	return new_edgelist
 end
