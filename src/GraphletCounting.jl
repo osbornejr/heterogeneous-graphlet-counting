@@ -400,6 +400,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		end
 	end
 	if (relationships==true)
+		Rel = collect.(Rel)
 		return [graphlet_counts,Chi,Rel]
 	else
 		return [graphlet_counts,Chi]
