@@ -2,6 +2,8 @@
 for src in filter(x->endswith(x,".jl"),readdir("src"))
 	include(ENV["JULIA_PROJECT"]*"/src/"*src)
 end
+test_name = "GSE68559"
+run(`mkdir -p "output/$test_name"`)
 samples = CSV.read.(filter(x->occursin(".txt",x),readdir("data/GSE68559_RAW",join=true)))
 ##set up for distributed mode
 #first clean to make sure there are no stray workers already around
@@ -95,14 +97,16 @@ g_comp = Graph(adj_matrix_comp)
 vertexlist_comp = vertexlist[largest[1]]
 ##plot (either connected component or whole network
 nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist_comp.=="coding").+1]
-draw(SVG("GSE68559_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_component.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
+draw(SVG("output/$(test_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_component.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
 nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
-draw(SVG("GSE68559_$(norm_method)_$(threshold_method)_$(X)_$(coexpression).svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+draw(SVG("output/$(test_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression).svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 
 #Network Analysis
 degrees = sum(adj_matrix,dims=2)
+p = plot(DataFrame(sort(degrees,dims=1)),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
+draw(SVG("output/$(test_name)/degree_distribution.svg"),p)
 
 @time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
-@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)
+@time motif_counts = find_motifs(edgelist,"triangle_edge",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)

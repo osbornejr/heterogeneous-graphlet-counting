@@ -44,12 +44,25 @@ function edgelists_null_model(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,
 		#	edgelists[i] = hetero_rewire(edgelist,switching_factor,typelist,graphlet_size)
 	 	#end
 	end
+	if(method == "triangle_edge")
+	       	@info "Rewiring $n graphs..."
+		#Distributed method
+		relationships = count_graphlets(typelist,edgelist,relationships =true)[3]
+		edgelists = @showprogress @distributed (t2) for i in 1:n	
+			[triangle_edge_switch(typelist,edgelist,relationships,100000)]
+		end
+
+		#for i in 1:n
+		#	print("Switching network $i...\n")
+		#	edgelists[i] = hetero_rewire(edgelist,switching_factor,typelist,graphlet_size)
+	 	#end
+	end
 
 	return edgelists
 end
 
 
-function null_model_counts(typelist::Array{String,1},edgelists::Array{Array{Pair,1},1}) 
+function null_model_counts(typelist::Array{String,1},edgelists::Union{Array{Array{Pair{Int,Int},1},1},Array{Array{Pair,1},1}}) 
 	null_num = size(edgelists,1)
 	null_model = Array{Dict{String,Int},1}(undef,null_num)
 	@info "Counting null graphs..."
@@ -108,6 +121,7 @@ function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{
 	solo_array =  unique(sort.(eachrow(solo_array)))	
 	#convert configuration to a condensed (minimal) dictionary form
 	cel = Dict{Array{Int,1},Bool}()
+	suc = 0
 	for c in vcat(triangle_array,solo_array)
 		cel[c] = 1
 	end
@@ -127,7 +141,7 @@ function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{
 			if (cand1!=cand2) ##not a trivial candidate switch
 				if(!(cand1 in sub2) && !(cand2 in sub1)) ## no self-loops would be created
 			    		if (!(0 in sub1) && !(0 in sub2)) ##switching two triangles 
-						#[a,b,c]<=> [d,e,f]
+						#[a,b,c]<=> [d,e,f] ==> [d,b,c], [a,e,f]
 						#complicated thing here is making sure that new triangles do not cancel out an exist solo. 
 						if (vertexlist[cand1]==vertexlist[cand2] || vertexlist[rem1]==vertexlist[rem2]) ##candidate types agree, and/or remaining edge types agree
 							if (!haskey(cel,sort([cand1,rem2[1],rem2[2]])) && !haskey(cel,sort([cand2,rem1[1],rem1[2]])) && !haskey(cel,sort([cand1,rem2[1],0])) && !haskey(cel,sort([cand1,rem2[2],0])) && !haskey(cel,sort([cand2,rem1[1],0])) && !haskey(cel,sort([cand2,rem1[2],0]))) ## new subgraphs do not already exist, and are not breaking an existing null node condition 
@@ -135,6 +149,7 @@ function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{
  						 		delete!(cel,sub2)
 								cel[sort([cand1,rem2[1],rem2[2]])] = 1
 								cel[sort([cand2,rem1[1],rem1[2]])] = 1
+								suc += 1
 							end
 						end 
 					elseif ((0 in sub1) && (0 in sub2)) ##switching two solos
@@ -146,29 +161,31 @@ function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{
  						 		delete!(cel,sub2)
 								cel[sort([cand1,rem2[1],rem2[2]])] = 1
 								cel[sort([cand2,rem1[1],rem1[2]])] = 1
+								suc += 1
 							end
 						end
 					else ## switching a triangle and a solo
 						#[0,a,b]<=>[c,d,e]
 						#most complicated method, as we must move ALL other triangles associated with old triangle onto new triangle!
-						if (((cand1==0 || cand2 == 0) && vertexlist[rem1]==vertexlist[rem2])) #|| ((cand1!=0 && cand2!=0) && vertexlist[cand1] == vertexlist[cand2])) ##either one candidate is null node, and the remaining edge types agree, or neither candidates are the null node, and their types agree. Note that for now we only permit the former, as the latter is messy and is likely to cause IMPLICIT TRIANGLES. Implicit triangles may need attention in the triangle to triangle case as well.
-							##note that by the null node definition, the new subgraphs will automatically not already exist. Only need to ensure that the new solo IS in fact solo (by moving all of its other triangles to new triangle (rem) edge
-							delete!(cel,sub1)
-							delete!(cel,sub2)
-							#deterime which new subgraph is the solo:
-							newsub1 = [cand2,rem1[1],rem1[2]]
-							newsub2 = [cand1,rem2[1],rem2[2]]
-							null,tri = 0 in newsub1 ? (newsub1[newsub1.>0],setdiff(newsub2,sub1)) : (newsub2[newsub2.>0],setdiff(newsub1,sub2))
-							##find the unlucky connected nodes that need to move
-							cel_array = collect(keys(cel))
-							dead = cel_array[in.(null[1],cel_array).*in.(null[2],cel_array)]
-							refugees = setdiff(unique(vcat(dead...)),null)
-							#switch these to newly minted triangle edge
-							for (i,r) in enumerate(refugees)
-								delete!(cel,dead[i])
-								cel[sort([r,tri[1],tri[2]])] = 1	
-							end
-						end
+					#	if (((cand1==0 || cand2 == 0) && vertexlist[rem1]==vertexlist[rem2])) #|| ((cand1!=0 && cand2!=0) && vertexlist[cand1] == vertexlist[cand2])) ##either one candidate is null node, and the remaining edge types agree, or neither candidates are the null node, and their types agree. Note that for now we only permit the former, as the latter is messy and is likely to cause IMPLICIT TRIANGLES. Implicit triangles may need attention in the triangle to triangle case as well.
+					#		##note that by the null node definition, the new subgraphs will automatically not already exist. Only need to ensure that the new solo IS in fact solo (by moving all of its other triangles to new triangle (rem) edge
+					#		delete!(cel,sub1)
+					#		delete!(cel,sub2)
+					#		#deterime which new subgraph is the solo:
+					#		newsub1 = [cand2,rem1[1],rem1[2]]
+					#		newsub2 = [cand1,rem2[1],rem2[2]]
+					#		null,tri = 0 in newsub1 ? (newsub1[newsub1.>0],setdiff(newsub2,sub1)) : (newsub2[newsub2.>0],setdiff(newsub1,sub2))
+					#		##find the unlucky connected nodes that need to move
+					#		cel_array = collect(keys(cel))
+					#		dead = cel_array[in.(null[1],cel_array).*in.(null[2],cel_array)]
+					#		refugees = setdiff(unique(vcat(dead...)),null)
+					#		#switch these to newly minted triangle edge
+					#		for (i,r) in enumerate(refugees)
+					#			delete!(cel,dead[i])
+					#			cel[sort([r,tri[1],tri[2]])] = 1	
+					#		end
+					#			suc += 1
+					#	end
 					end
 				end
 			end 
@@ -187,7 +204,13 @@ function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{
 	#filter out null edges
  	new_edgelist = filter(x->!(0 in x),new_edgelist)
 	#configuration_array = hcat(first.(first.(full_relationships)),last.(first.(full_relationships)),first.(last.(full_relationships)),last.(last.(full_relationships)))
-	return new_edgelist
+	
+	#orig_cel = Dict{Array{Int,1},Bool}()
+	#suc = 0
+	#for c in vcat(triangle_array,solo_array)
+	#	orig_cel[c] = 1
+	#end
+	return new_edgelist #[cel,orig_cel]
 end
 
 
