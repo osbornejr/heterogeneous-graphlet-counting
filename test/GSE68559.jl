@@ -102,11 +102,27 @@ nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").
 draw(SVG("output/$(test_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression).svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 
 #Network Analysis
-degrees = sum(adj_matrix,dims=2)
-p = plot(DataFrame(sort(degrees,dims=1)),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
+#Degrees/hubs
+#homogonous degree distribution
+degrees = vec(sum(adj_matrix,dims=2))
+p = plot(DataFrame([sort(degrees)]),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
 draw(SVG("output/$(test_name)/degree_distribution.svg"),p)
+
+#degrees for each transcript type
+for type in unique(vertexlist)
+	p = plot(DataFrame([sort(degrees[vertexlist.==type])]),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
+	draw(SVG("output/$(test_name)/$(type)_degree_distribution.svg"),p)
+end
+
+##HTML output (concept atm)
+run(`mkdir -p output/$(test_name)/page`)
+open("output/$(test_name)/page/index.html","w") do io
+	show(io,"text/html",gplot(g,nodefillc = nodefillc))
+	show(io,"text/html",p)
+end
 
 @time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
+
 
 @time motif_counts = find_motifs(edgelist,"triangle_edge",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)
