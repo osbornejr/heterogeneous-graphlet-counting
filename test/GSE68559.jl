@@ -1,10 +1,14 @@
 ### Include all source files TODO make this occur more fluently and automatically by creating a package, and using Revise
+cwd = ENV["JULIA_PROJECT"]
 for src in filter(x->endswith(x,".jl"),readdir("src"))
-	include(ENV["JULIA_PROJECT"]*"/src/"*src)
+	include("$cwd/src/"*src)
 end
+#set up output directory
 test_name = "GSE68559"
-run(`mkdir -p "output/$test_name"`)
-samples = CSV.read.(filter(x->occursin(".txt",x),readdir("data/GSE68559_RAW",join=true)))
+run(`mkdir -p "$cwd/output/$test_name"`)
+using JLD
+
+
 ##set up for distributed mode
 #first clean to make sure there are no stray workers already around
 using Distributed
@@ -12,24 +16,36 @@ rmprocs(workers())
 #add workers equal to the number of available cpus	
 addprocs(Threads.nthreads())
 #addprocs(8)
-@everywhere include(ENV["JULIA_PROJECT"]*"/src/CoexpressionMeasures.jl")
-@everywhere include(ENV["JULIA_PROJECT"]*"/src/GraphletCounting.jl")
-@everywhere include(ENV["JULIA_PROJECT"]*"/src/NullModel.jl")
+@everywhere include("$cwd/src/CoexpressionMeasures.jl")
+@everywhere include("$cwd/src/GraphletCounting.jl")
+@everywhere include("$cwd/src/NullModel.jl")
 
 
-##read in raw samples
-sample_names = replace.(filter(x->occursin(".txt",x),readdir("data/GSE68559_RAW")),"_isoforms_expr.txt"=>"").*" data"
-transcript_names=select(samples[1],1)
-raw_counts=rename!(hcat(transcript_names,select.(samples,Symbol("FPKM"))...,makeunique=true),["transcript_id";sample_names])
-
-raw_counts.transcript_type = replace(x-> occursin("lnc",x) ? "noncoding" : "coding",raw_counts.transcript_id)
+#Read in raw counts (cached)
+raw_counts_file = "$cwd/output/cache/$(test_name)_raw_counts.jld"
+if (isfile(raw_counts_file))
+	raw_counts = JLD.load(raw_counts_file,"raw counts")
+else
+ 	samples = CSV.read.(filter(x->occursin(".txt",x),readdir("$cwd/data/GSE68559_RAW",join=true)))
+	sample_names = replace.(filter(x->occursin(".txt",x),readdir("$cwd/data/GSE68559_RAW")),"_isoforms_expr.txt"=>"").*" data"
+	transcript_names = select(samples[1],1)
+	raw_counts = rename!(hcat(transcript_names,select.(samples,Symbol("FPKM"))...,makeunique=true),["transcript_id";sample_names])
+	raw_counts.transcript_type = replace(x-> occursin("lnc",x) ? "noncoding" : "coding",raw_counts.transcript_id)
+	JLD.save(raw_counts_file,"raw counts",raw_counts)
+end
 raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts))))
 
 
-## Clean - remove transcripts with total counts across all samples less than X
-X = 25
-clean_counts=raw_counts[vec(sum(raw_data,dims = 2 ).>=X),:]
+##plot before cut
+histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/$(test_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+
+## Clean - remove transcripts with total counts across all samples less than Cut
+Cut = 25
+clean_counts=raw_counts[vec(sum(raw_data,dims = 2 ).>=Cut),:]
 clean_data = Array(select(clean_counts,filter(x->occursin("data",x),names(clean_counts))))
+
+##plot after cut
+histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/$(test_name)/clean_data_$(Cut)_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
 
 #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 
@@ -49,14 +65,12 @@ sample_counts_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:
 sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
 sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(sample_counts))))
 
-
 ##Network construction
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
 ## file to cache similarity matrix for use later:
-using JLD
-sim_file = ENV["JULIA_PROJECT"]*"/output/cache/GSE68559_similarity_matrix_$(norm_method)_$(X)_$(coexpression).jld"
 coexpression = "PID"
+sim_file = "$cwd/output/cache/$(test_name)_similarity_matrix_$(norm_method)_$(X)_$(coexpression).jld"
 if (isfile(sim_file))
 	similarity_matrix = JLD.load(sim_file,"$(coexpression)_similarity_matrix")
 else
@@ -97,22 +111,24 @@ g_comp = Graph(adj_matrix_comp)
 vertexlist_comp = vertexlist[largest[1]]
 ##plot (either connected component or whole network
 nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist_comp.=="coding").+1]
-draw(SVG("output/$(test_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_component.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
+draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
 nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
-draw(SVG("output/$(test_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression).svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 
 #Network Analysis
-#Degrees/hubs
+
+#Degrees
 #homogonous degree distribution
 degrees = vec(sum(adj_matrix,dims=2))
 p = plot(DataFrame([sort(degrees)]),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
-draw(SVG("output/$(test_name)/degree_distribution.svg"),p)
+draw(SVG("$cwd/output/pages/_assets/$(test_name)_degree_distribution.svg"),p)
 
 #degrees for each transcript type
 for type in unique(vertexlist)
 	p = plot(DataFrame([sort(degrees[vertexlist.==type])]),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
-	draw(SVG("output/$(test_name)/$(type)_degree_distribution.svg"),p)
+	draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(type)_degree_distribution.svg"),p)
 end
+
 
 ##HTML output (concept atm)
 run(`mkdir -p output/$(test_name)/page`)
