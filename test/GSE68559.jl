@@ -87,13 +87,14 @@ end
 if (threshold_method=="hard")
  	pre_adj_matrix = adjacency(similarity_matrix,threshold)
 end
-#maintain list of vertices in graph
-vertexlist = sample_counts[:transcript_type]
 #Trim nodes with degree zero
 network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+#maintain list of vertices in graph
+vertex_names = network_counts[:transcript_id]
+vertexlist = network_counts[:transcript_type]
 
-vertexlist = vertexlist[vec(sum(pre_adj_matrix,dims=2).!=0)]
+##form final adjacency matrix
 adj_matrix = copy(pre_adj_matrix)
 adj_matrix = adj_matrix[:,vec(sum(pre_adj_matrix,dims=1).!=0)]
 adj_matrix = adj_matrix[vec(sum(pre_adj_matrix,dims=2).!=0),:]
@@ -123,6 +124,7 @@ csv = csv*"Raw counts,"*string(size(raw_counts,1)-size(filter(:transcript_id=>x-
 csv = csv*"Clean counts,"*string(size(clean_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1)/size(clean_counts,1),sigdigits=3))*"\n"
 csv = csv*"Sample counts,"*string(size(sample_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1)/size(sample_counts,1),sigdigits=3))*"\n"
 csv = csv*"Network counts,"*string(size(network_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1)/size(network_counts,1),sigdigits=3))*"\n"
+write("$cwd/output/pages/_assets/page_1/tableinput/type_representation.csv",csv)
 
 #Degrees
 #homogonous degree distribution
@@ -140,6 +142,57 @@ end
 deg_thresh = mean(degrees)+2*std(degrees)
 nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
 draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_degree_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+deg_thresh = 70#mean(degrees)+2*std(degrees)
+nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
+draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_degree70_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+
+## Community structure
+using RCall
+@rput adj_matrix
+@rput vertex_names
+R"""
+library(RColorBrewer)
+library(igraph)
+library(threejs)
+#keep this last to mask other packages:
+library(htmlwidgets)
+library(tidyverse)
+
+##change to tibble
+vertex_names = tibble(vertex_names)
+pre_g <- graph.adjacency(adj_matrix,mode="undirected",diag=F)
+#Now we add attributes to graph by rebuilding it via edge and vertex lists
+edges <- as_tibble(as.data.frame(get.edgelist(pre_g)))
+vertices <- tibble(name = 1:nrow(vertex_names),vertex_names)%>% rename(label=vertex_names)
+
+g <- graph_from_data_frame(edges,directed = F, vertices)
+#
+##delete zero degree vertices
+g <- delete.vertices(g,degree(g)==0)
+##find maximum connected component
+g <- decompose(g, mode = "strong", max.comps = NA, min.vertices = 10)[[1]]
+#
+###Community structure
+##get only connected vertices
+vertices <- vertices %>% filter(name %in% names(V(g)))
+
+##cluster graph and colour by community
+communities <- cluster_louvain(g)
+
+##add colours to graph
+vertices <- vertices %>% mutate(group = as_factor(communities$membership),color = group)
+##if there are more than 11 communities, spectral colour palette is not sufficient. so we concat two palettes (if there are more than 22 comms, need another!)
+x = length(unique(communities$membership))-11
+colour_palette = c(brewer.pal(name = "Spectral", n = 11),brewer.pal(name = "BrBG", n = x))
+levels(vertices$color) <- colour_palette
+edges <- as_tibble(as.data.frame(get.edgelist(g)))
+g <- graph_from_data_frame(edges,directed = F, vertices)
+vertex_attr(g,"size") <- 0.5
+plot = graphjs(g,bg = "white");
+saveWidget(plot,"output/pages/communities.html")
+
+"""
+
 
 ##HTML output (concept atm)
 run(`mkdir -p output/$(test_name)/page`)
