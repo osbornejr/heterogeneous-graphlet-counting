@@ -129,6 +129,10 @@ for type in unique(vertexlist)
 	draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(type)_degree_distribution.svg"),p)
 end
 
+## Hubs
+deg_thresh = mean(degrees)+2*std(degrees)
+nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
+draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_degree_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 
 ##HTML output (concept atm)
 run(`mkdir -p output/$(test_name)/page`)
