@@ -672,7 +672,7 @@ div.title {text-align: center;}
 <p>There is a huge overrepresenation at <span class="math">$log_2(x)=0$</span>, which corresponds to a lot of transcripts with total expression count of ~1, and likely means there are a lot of cases where a &quot;transcript&quot; has been detected in the <em>de novo</em> assembly process even though it only occurs in one sample once&#33; This is almost certainly noise, and we should remove it. Notice too how there are a number of other &quot;spikes&quot; around about 1 before things start to smooth out. These correspond to other low integer values, further indicating that several transcripts are being represented by just a few counts across all samples. This is not to mention the huge prevalence of zero sum count transcripts, &#40;which do not show up here as <span class="math">$log2(0)=-\infty$</span>&#41;. Here are the top 25 values for transcript count sums &#40;left are the sum values, right are the occurences of it&#41;:     </p>
 
 <pre class="output">
-OrderedCollections.OrderedDict&#123;Float64,Int64&#125; with 25 entries:
+OrderedDict&#123;Float64,Int64&#125; with 25 entries:
   0.0  &#61;&gt; 33712
   1.0  &#61;&gt; 17556
   2.0  &#61;&gt; 12835
@@ -702,13 +702,22 @@ OrderedCollections.OrderedDict&#123;Float64,Int64&#125; with 25 entries:
 <h2>Raw data cleaned</h2>
 <p>One course of action then is to remove all transcripts below a certain total expression count sum. Choosing <span class="math">$x=25$</span> as the cutoff means that all of the integer &quot;spikes&quot; we see above are removed:   </p>
 <p><img src="../output/plots/raw_cleaned_sum_samples_histogram.svg" alt="image" /></p>
-<p>Having filtered out these low integer counts, we are left with 68843 transcripts, with 58586 coding transcripts and 10257 noncoding transcripts. The filtering does not seem to have affected any sample too much, although we do note that the polyA- samples have shifted a little. We would expect those to be more affected by low count removal.</p>
+<p>Having filtered out these low integer counts, we are left with 95441 transcripts, with 76180 coding transcripts and 19261 noncoding transcripts. The filtering does not seem to have affected any sample too much, although we do note that the polyA- samples have shifted a little. We would expect those to be more affected by low count removal.</p>
 <p><img src="../output/plots/raw_data_cleaned_boxplot.svg" alt="image" /></p>
 
 
 <h2>Raw data condensed</h2>
 <p>Before we go any further in terms of normalising and analysing the variance, we should merge the polyA&#43; and polyA- samples:</p>
 <p><img src="../output/plots/raw_data_condensed_boxplot.svg" alt="image" /></p>
+
+<pre class="julia-error">
+ERROR: MethodError: no method matching setindex&#33;&#40;::DataFrame, ::Type&#123;Nothing&#125;, ::typeof&#40;&#33;&#41;, ::UnitRange&#123;Int64&#125;&#41;
+Closest candidates are:
+  setindex&#33;&#40;::DataFrame, &#33;Matched::AbstractDataFrame, ::typeof&#40;&#33;&#41;, ::AbstractArray&#123;T,1&#125; where T&#41; at /home/osbornejr/.julia/packages/DataFrames/cdZCk/src/dataframe/dataframe.jl:624
+  setindex&#33;&#40;::DataFrame, &#33;Matched::AbstractArray&#123;T,2&#125; where T, ::typeof&#40;&#33;&#41;, ::AbstractArray&#123;T,1&#125; where T&#41; at /home/osbornejr/.julia/packages/DataFrames/cdZCk/src/dataframe/dataframe.jl:643
+  setindex&#33;&#40;::DataFrame, ::Any, &#33;Matched::AbstractArray&#123;T,1&#125; where T, ::AbstractArray&#123;T,1&#125; where T&#41; at /home/osbornejr/.julia/packages/DataFrames/cdZCk/src/deprecated.jl:199
+  ...
+</pre>
 
 
 <h2>Normalised data</h2>
@@ -729,7 +738,7 @@ OrderedCollections.OrderedDict&#123;Float64,Int64&#125; with 25 entries:
         <div class="footer">
           <p>
             Published from <a href="DataCleaning.jmd">DataCleaning.jmd</a>
-            using <a href="http://github.com/JunoLab/Weave.jl">Weave.jl</a> v0.10.3 on 2020-10-13.
+            using <a href="http://github.com/JunoLab/Weave.jl">Weave.jl</a> v0.10.3 on 2021-04-12.
           </p>
         </div>
       </div>
