@@ -116,6 +116,13 @@ nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").
 draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 
 #Network Analysis
+#Type representations 
+##set up csv string
+csv = "Step,Coding counts,Non-coding counts,Non-coding proportion\n"
+csv = csv*"Raw counts,"*string(size(raw_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1)/size(raw_counts,1),sigdigits=3))*"\n"
+csv = csv*"Clean counts,"*string(size(clean_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1)/size(clean_counts,1),sigdigits=3))*"\n"
+csv = csv*"Sample counts,"*string(size(sample_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1)/size(sample_counts,1),sigdigits=3))*"\n"
+csv = csv*"Network counts,"*string(size(network_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1)/size(network_counts,1),sigdigits=3))*"\n"
 
 #Degrees
 #homogonous degree distribution
