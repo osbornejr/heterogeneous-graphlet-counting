@@ -9,19 +9,19 @@ date: 9th October 2020
 ```julia; echo = false; results = "hidden"; cache = true
 projectdir = ENV["JULIA_PROJECT"]
 cd(projectdir)
-outputdir = projectdir*"/docs/"  
+outputdir = "$projectdir/docs/"  
 for src in filter(x->endswith(x ,".jl"),readdir("src"))
 	cd(projectdir)
 	include(projectdir*"/src/"*src)
 end
 
 ### Read in each set
-raw_counts=read_count_data("data/mayank-de-novo/isoforms",method="expected_count");
+raw_counts=read_count_data("$projectdir/data/mayank-de-novo/isoforms",method="expected_count");
 #raw_counts=RSEM.read_count_data("data/mayank-per-transcript/isoforms",method="expected_count");
 
 #filtering out into types
-code_counts=filter_count_data("data/mayank-de-novo/code-hits.list",raw_counts)
-noncode_counts=filter_count_data("data/mayank-de-novo/non-code-hits.list",raw_counts)	
+code_counts=filter_count_data("$projectdir/data/mayank-de-novo/code-hits.list",raw_counts)
+noncode_counts=filter_count_data("$projectdir/data/mayank-de-novo/non-code-hits.list",raw_counts)	
 insertcols!(code_counts,"transcript_type"=>"coding")
 insertcols!(noncode_counts,"transcript_type"=>"noncoding")
 #merging back into one dataframe, with 
@@ -43,9 +43,9 @@ for samp_name in names(raw_counts[:,2:25])
 	group_dict[samp_name] = split(samp_name,"_")[1]
 end
  
-boxplot(raw_counts,"output/plots/raw_data_boxplot.svg",group_dict)
+boxplot(raw_counts,"$projectdir/output/plots/raw_data_boxplot.svg",group_dict)
 
-histogram(DataFrame([log2.(vec(sum(data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/plots/raw_count_sum_samples_histogram.svg",xaxis = "sum of expression (log2 adjusted)")
+histogram(DataFrame([log2.(vec(sum(data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$projectdir/output/plots/raw_count_sum_samples_histogram.svg",xaxis = "sum of expression (log2 adjusted)")
 ```
 ## Raw data
 First let's look at the expression data in its raw form:
