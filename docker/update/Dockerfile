@@ -27,7 +27,7 @@ RUN conda update --name base --channel defaults conda && \
 #build the julia environment TODO find out why RCall does not install properly
 ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
 RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
-RUN julia --project=$PROJECT_DIR/Project.toml -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
+#RUN julia --project=$PROJECT_DIR/Project.toml -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
 #RUN julia --project=$PROJECT_DIR/Project.toml -e "using Pkg;using CSV"
 # run the postBuild script to install any JupyterLab extensions
 #RUN conda activate $ENV_PREFIX && \
