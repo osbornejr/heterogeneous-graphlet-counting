@@ -9,11 +9,14 @@ dependencies:
         - r-data.table
         - r-wgcna
         - r-igraph
+        - r-threejs
         - r-pcit
         - r-rnentropy
         - bioconductor-edger
         - bioconductor-deseq2
         - bioconductor-ebseq
+        - bioconductor-biomaRt
+        - bioconductor-go.db
         - openmpi
         - cmake 
         
