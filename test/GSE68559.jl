@@ -16,9 +16,9 @@ rmprocs(workers())
 #add workers equal to the number of available cpus	
 addprocs(Threads.nthreads())
 #addprocs(8)
-@everywhere include("$cwd/src/CoexpressionMeasures.jl")
-@everywhere include("$cwd/src/GraphletCounting.jl")
-@everywhere include("$cwd/src/NullModel.jl")
+@everywhere include("src/CoexpressionMeasures.jl")
+@everywhere include("src/GraphletCounting.jl")
+@everywhere include("src/NullModel.jl")
 
 
 #Read in raw counts (cached)
@@ -191,8 +191,30 @@ vertex_attr(g,"size") <- 0.5
 plot = graphjs(g,bg = "white");
 saveWidget(plot,"output/pages/communities.html")
 
-"""
+## Functional annotation of communities
+library(biomaRt)
+library(GO.db)
+library(httr)
+#get list of string arrays for transcript ids in each community
+comms <- split(vertices,vertices$group)
+comm_ids = lapply(comms,function(x) x$label)
 
+## connect to biomart
+set_config(config(ssl_verifypeer = 0L))
+ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") ##mirrors to try: "useast" "uswest" "asia"
+
+## get GO ids
+go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_transcript_id_version","go_id"),"ensembl_transcript_id_version",x,mart = ensembl,useCache = FALSE))
+go_terms = lapply(go_ids,function(x) select(GO.db,columns = "TERM",keys = x$go_id))	
+"""
+@rget comms
+@rget go_terms
+@rget vertices
+
+##write to CSV
+for key in keys(go_terms)
+	CSV.write("$cwd/output/pages/_assets/page_1/tableinput/$(test_name)_community_$(key)_annotations.csv",go_terms[key])
+end
 
 ##HTML output (concept atm)
 run(`mkdir -p output/$(test_name)/page`)
