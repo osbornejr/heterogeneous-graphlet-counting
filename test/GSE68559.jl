@@ -206,14 +206,29 @@ ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset 
 ## get GO ids
 go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_transcript_id_version","go_id"),"ensembl_transcript_id_version",x,mart = ensembl,useCache = FALSE))
 go_terms = lapply(go_ids,function(x) select(GO.db,columns = "TERM",keys = x$go_id))	
+
+	library(topGO)
+##Form Gene2GO list required for topGO
+merged_go_ids = bind_rows(go_ids)
+merged_go_ids[[1]] = factor(merged_go_ids[[1]])
+Genes2GO = split(merged_go_ids[[2]],merged_go_ids[[1])
+topGOinput = lapply(comm_ids, function (x) factor(as.integer(vertices$label %in% x)))
+#attach IDS
+for (i in 1:length(topGOinput)) {names(topGOinput[[i]]) = vertices$label}	
+#Generate topGO object for each community
+topGOdata = lapply(topGOinput,function(x) new("topGOdata",ontology = "BP",allGenes = x,annot=annFUN.gene2GO,gene2GO = Genes2GO))
+##run fisher test on each community
+topGOresults = lapply(topGOdata,function(x) runTest(x,statistic = "fisher"))
+topGOtable = lapply(1:length(topGOdata),function(x) GenTable(topGOdata[[x]],fisher = topGOresults[[x]],ranksOf = "fisher",orderBy="weight"))
+
 """
 @rget comms
-@rget go_terms
+@rget topGOtable
 @rget vertices
 
 ##write to CSV
-for key in keys(go_terms)
-	CSV.write("$cwd/output/pages/_assets/page_1/tableinput/$(test_name)_community_$(key)_annotations.csv",go_terms[key])
+for (key,i) in enumerate(topGOtable)	
+	CSV.write("$cwd/output/pages/_assets/page_1/tableinput/$(test_name)_community_$(key)_annotations.csv",i)
 end
 
 ##HTML output (concept atm)
