@@ -91,7 +91,7 @@ end
 
 function null_model_dataframe(null_model_dicts::Array{Dict{String,T},1} where T<:Real)
 #use this function to prepare null model for plot function, as a long format dataframe
-	null_collection = union(null_model_dicts...)
+	null_collection = vcat(collect.(null_model_dicts)...)
 	df = DataFrame(graphlet = broadcast(first,null_collection),value = broadcast(last,null_collection))
 	return df
 end
