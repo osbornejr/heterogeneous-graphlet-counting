@@ -17,6 +17,7 @@ dependencies:
         - bioconductor-ebseq
         - bioconductor-biomaRt
         - bioconductor-go.db
+        - bioconductor-topgo
         - openmpi
         - cmake 
         
