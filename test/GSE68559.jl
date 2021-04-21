@@ -241,5 +241,57 @@ end
 @time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
 
+## randomise node types
+using Random
+#number of randomised graphs
+N=100
+rand_types_set = [copy(vertexlist) for i in 1:N]
+#randomise each graph
+broadcast(shuffle!,rand_types_set) 
+
+rand_graphlets_file = "$cwd/output/cache/$(test_name)_rand_graphlets_$N.jld"
+if (isfile(raw_counts_file))
+	rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
+else
+	rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
+	rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
+	rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
+	JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection)
+end
+
+
+rand_df = DataFrame(graphlet = broadcast(first,rand_graphlet_collection),value = broadcast(last,rand_graphlet_collection))
+real_df = DataFrame(graphlet = broadcast(first,collect(graphlet_counts[1])),value = broadcast(last,collect(graphlet_counts[1])))
+
+##function to get the n permutations of a set xs
+all_perm(xs, n) = vec(map(collect, Iterators.product(ntuple(_ -> xs, n)...)))
+
+##convert graphlet_counts dict output to default dictionary, returning 0 for graphlets that don't exist in the real network
+real_dict = DefaultDict(0,graphlet_counts[1])
+hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
+##array to store all homogonous graphlet dfs
+hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))	
+
+ for (i,hog) in enumerate(hom_graphlets)
+	hog_df= DataFrame()
+	## restrict info to just hg 
+	real_fil = filter(:graphlet=>x->occursin(hog,x),real_df)
+	rand_fil = filter(:graphlet=>x->occursin(hog,x),rand_df)
+
+	#get hetero subgraphlets within homogonous type (problem: might not be complete set present in real/rand outputs?)
+	if (occursin("4",hog))
+		het_graphlets = union(first.(split.(real_fil[:graphlet],"_4")),first.(split.(rand_fil[:graphlet],"_4")))
+	elseif (occursin("3",hog))
+		het_graphlets = union(first.(split.(real_fil[:graphlet],"_3")),first.(split.(real_fil[:graphlet],"_3")))
+	end
+	for heg in het_graphlets
+		rand_vals = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)[!,:value]
+		rand_exp = sum(rand_vals)/N
+		real_obs = real_dict[heg*"_"*hog]
+		append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Exp = rand_exp,Obs = real_obs))	
+	end
+	hog_array[i] = hog_df
+end
+
 
 @time motif_counts = find_motifs(edgelist,"triangle_edge",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)
