@@ -298,6 +298,13 @@ hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))
 		real_obs = real_dict[heg*"_"*hog]
 		append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs))	
 	end
+	##take log values to plot
+	log_real_fil = copy(real_fil)
+	log_real_fil.value =log.(log_real_fil.value)
+	log_rand_fil = copy(rand_fil)
+	log_rand_fil.value =log.(log_rand_fil.value)
+	p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
+	draw(SVG("$cwd/output/TestWebsite/_assets/plots/$(hog)_histogram.svg",4inch,6inch),p)
 	hog_array[i] = hog_df
 end
 ##look at edge types in randomised networks
