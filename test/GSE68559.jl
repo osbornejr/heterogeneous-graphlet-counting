@@ -198,13 +198,20 @@ library(httr)
 #get list of string arrays for transcript ids in each community
 comms <- split(vertices,vertices$group)
 comm_ids = lapply(comms,function(x) x$label)
+comm_ids_trimmed = sapply(comm_ids,function(y) sapply(y,function(x) tools::file_path_sans_ext(x)))
 
 ## connect to biomart
 set_config(config(ssl_verifypeer = 0L))
-ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") ##mirrors to try: "useast" "uswest" "asia"
+
+##mirrors to try: "useast" "uswest" "asia"
+ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl",version=75) 
+
 
 ## get GO ids
-go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_transcript_id_version","go_id"),"ensembl_transcript_id_version",x,mart = ensembl,useCache = FALSE))
+#for current ensembl
+#go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_transcript_id_version","go_id"),"ensembl_transcript_id_version",x,mart = ensembl,useCache = FALSE))
+#for ensembl version 75
+go_ids = lapply(comm_ids_trimmed, function(x) getBM(attributes = c("ensembl_transcript_id","go_id"),"ensembl_transcript_id",x,mart = ensembl,useCache = FALSE))
 go_terms = lapply(go_ids,function(x) select(GO.db,columns = "TERM",keys = x$go_id))	
 
 	library(topGO)
@@ -246,7 +253,7 @@ using Random
 #number of randomised graphs
 N=100
 rand_types_set = [copy(vertexlist) for i in 1:N]
-#randomise each graph
+#randomise each graph by node
 broadcast(shuffle!,rand_types_set) 
 
 rand_graphlets_file = "$cwd/output/cache/$(test_name)_rand_graphlets_$N.jld"
@@ -283,8 +290,9 @@ hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))
 		het_graphlets = union(first.(split.(real_fil[:graphlet],"_4")),first.(split.(rand_fil[:graphlet],"_4")))
 	elseif (occursin("3",hog))
 		het_graphlets = union(first.(split.(real_fil[:graphlet],"_3")),first.(split.(real_fil[:graphlet],"_3")))
-	end
+	end 
 	for heg in het_graphlets
+		
 		rand_vals = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)[!,:value]
 		rand_exp = sum(rand_vals)/N
 		real_obs = real_dict[heg*"_"*hog]
@@ -304,4 +312,7 @@ for t in unique(rand_edge_df[:graphlet])
 	real_obs = real_type_edgecounts[t]
 	append!(random_edges,DataFrame(Graphlet = first(t)*"_"*last(t)*"_edge", Expected = rand_exp,Observed = real_obs))	
 end
+
+#pretty_table(random_edges,backend=:html,standalone = false)
+
 @time motif_counts = find_motifs(edgelist,"triangle_edge",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)
