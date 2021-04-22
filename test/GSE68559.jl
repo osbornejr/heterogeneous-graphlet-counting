@@ -92,7 +92,7 @@ network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 #maintain list of vertices in graph
 vertex_names = network_counts[:transcript_id]
-vertexlist = network_counts[:transcript_type]
+vertexlist = copy(network_counts[:transcript_type])
 
 ##form final adjacency matrix
 adj_matrix = copy(pre_adj_matrix)
@@ -288,10 +288,20 @@ hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))
 		rand_vals = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)[!,:value]
 		rand_exp = sum(rand_vals)/N
 		real_obs = real_dict[heg*"_"*hog]
-		append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Exp = rand_exp,Obs = real_obs))	
+		append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs))	
 	end
 	hog_array[i] = hog_df
 end
-
-
+##look at edge types in randomised networks
+real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
+rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
+rand_edge_collection = vcat(collect.(rand_types_edgecounts)...)
+rand_edge_df = DataFrame(graphlet = broadcast(first,rand_edge_collection),value = broadcast(last,rand_edge_collection))
+random_edges = DataFrame()
+for t in unique(rand_edge_df[:graphlet])
+	rand_vals = filter(:graphlet=>x->x==t,rand_edge_df)[!,:value]
+	rand_exp = sum(rand_vals)/N
+	real_obs = real_type_edgecounts[t]
+	append!(random_edges,DataFrame(Graphlet = first(t)*"_"*last(t)*"_edge", Expected = rand_exp,Observed = real_obs))	
+end
 @time motif_counts = find_motifs(edgelist,"triangle_edge",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)
