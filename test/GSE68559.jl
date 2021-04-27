@@ -29,7 +29,9 @@ else
  	samples = CSV.read.(filter(x->occursin(".txt",x),readdir("$cwd/data/GSE68559_RAW",join=true)))
 	sample_names = replace.(filter(x->occursin(".txt",x),readdir("$cwd/data/GSE68559_RAW")),"_isoforms_expr.txt"=>"").*" data"
 	transcript_names = select(samples[1],1)
-	raw_counts = rename!(hcat(transcript_names,select.(samples,Symbol("FPKM"))...,makeunique=true),["transcript_id";sample_names])
+	gene_names = select(samples[1],4)
+	gene_short_names = select(samples[1],5)
+	raw_counts = rename!(hcat(transcript_names,select.(samples,Symbol("FPKM"))...,makeunique=true,gene_names,gene_short_names),["transcript_id";sample_names;"gene_id";"gene_short_id"])
 	raw_counts.transcript_type = replace(x-> occursin("lnc",x) ? "noncoding" : "coding",raw_counts.transcript_id)
 	JLD.save(raw_counts_file,"raw counts",raw_counts)
 end
@@ -204,17 +206,18 @@ comm_ids_trimmed = sapply(comm_ids,function(y) sapply(y,function(x) tools::file_
 set_config(config(ssl_verifypeer = 0L))
 
 ##mirrors to try: "useast" "uswest" "asia"
-ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl",version=75) 
+ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
+#ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl",version=75) 
 
 
 ## get GO ids
 #for current ensembl
-#go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_transcript_id_version","go_id"),"ensembl_transcript_id_version",x,mart = ensembl,useCache = FALSE))
+go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_transcript_id_version","go_id"),"ensembl_transcript_id_version",x,mart = ensembl,useCache = FALSE))
 #for ensembl version 75
-go_ids = lapply(comm_ids_trimmed, function(x) getBM(attributes = c("ensembl_transcript_id","go_id"),"ensembl_transcript_id",x,mart = ensembl,useCache = FALSE))
+#go_ids = lapply(comm_ids_trimmed, function(x) getBM(attributes = c("ensembl_transcript_id","go_id"),"ensembl_transcript_id",x,mart = ensembl,useCache = FALSE))
 go_terms = lapply(go_ids,function(x) select(GO.db,columns = "TERM",keys = x$go_id))	
 
-	library(topGO)
+library(topGO)
 ##Form Gene2GO list required for topGO
 merged_go_ids = bind_rows(go_ids)
 merged_go_ids[[1]] = factor(merged_go_ids[[1]])
