@@ -93,7 +93,7 @@ end
 network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 #maintain list of vertices in graph
-vertex_names = network_counts[:transcript_id]
+vertex_names = network_counts[:gene_id]
 vertexlist = copy(network_counts[:transcript_type])
 
 ##form final adjacency matrix
@@ -158,14 +158,19 @@ library(igraph)
 library(threejs)
 #keep this last to mask other packages:
 library(htmlwidgets)
+library(biomaRt)
+library(GO.db)
+library(httr)
+library(topGO)
 library(tidyverse)
 
 ##change to tibble
 vertex_names = tibble(vertex_names)
+vertex_names_trimmed = sapply(vertex_names,tools::file_path_sans_ext)
 pre_g <- graph.adjacency(adj_matrix,mode="undirected",diag=F)
 #Now we add attributes to graph by rebuilding it via edge and vertex lists
 edges <- as_tibble(as.data.frame(get.edgelist(pre_g)))
-vertices <- tibble(name = 1:nrow(vertex_names),vertex_names)%>% rename(label=vertex_names)
+vertices <- tibble(name = 1:nrow(vertex_names),vertex_names)%>% dplyr::rename(label=vertex_names)
 
 g <- graph_from_data_frame(edges,directed = F, vertices)
 #
@@ -194,9 +199,6 @@ plot = graphjs(g,bg = "white");
 saveWidget(plot,"output/pages/communities.html")
 
 ## Functional annotation of communities
-library(biomaRt)
-library(GO.db)
-library(httr)
 #get list of string arrays for transcript ids in each community
 comms <- split(vertices,vertices$group)
 comm_ids = lapply(comms,function(x) x$label)
@@ -205,26 +207,31 @@ comm_ids_trimmed = sapply(comm_ids,function(y) sapply(y,function(x) tools::file_
 ## connect to biomart
 set_config(config(ssl_verifypeer = 0L))
 
-##mirrors to try: "useast" "uswest" "asia"
-ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
-#ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl",version=75) 
+ensembl_version = "75"
+if (ensembl_version=="current")
+	{
+	##mirrors to try: "useast" "uswest" "asia"
+	ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
+	go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_gene_id_version","go_id"),"ensembl_gene_id_version",x,mart = ensembl,useCache = FALSE))
+	go_names = vertex_names
+	} else
+	{
+	ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
+	go_ids = lapply(comm_ids_trimmed, function(x) getBM(attributes = c("ensembl_gene_id","go_id"),"ensembl_gene_id",x,mart = ensembl,useCache = FALSE))
+	go_names = vertex_names_trimmed
+	}
 
+##list of all go terms in each community (maybe not necessary with topGO method below now?)
+go_terms = lapply(go_ids,function(x) AnnotationDbi::select(GO.db,columns = "TERM",keys = x$go_id))	
 
-## get GO ids
-#for current ensembl
-go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_transcript_id_version","go_id"),"ensembl_transcript_id_version",x,mart = ensembl,useCache = FALSE))
-#for ensembl version 75
-#go_ids = lapply(comm_ids_trimmed, function(x) getBM(attributes = c("ensembl_transcript_id","go_id"),"ensembl_transcript_id",x,mart = ensembl,useCache = FALSE))
-go_terms = lapply(go_ids,function(x) select(GO.db,columns = "TERM",keys = x$go_id))	
-
-library(topGO)
-##Form Gene2GO list required for topGO
+##Form Gene2GO list required for topGO i.e. gene universe mapped to GO ids
 merged_go_ids = bind_rows(go_ids)
 merged_go_ids[[1]] = factor(merged_go_ids[[1]])
-Genes2GO = split(merged_go_ids[[2]],merged_go_ids[[1])
+Genes2GO = split(merged_go_ids[[2]],merged_go_ids[[1]])
+##list of inputs for topGO, significant genes denoted as those in community (for each community)
 topGOinput = lapply(comm_ids, function (x) factor(as.integer(vertices$label %in% x)))
 #attach IDS
-for (i in 1:length(topGOinput)) {names(topGOinput[[i]]) = vertices$label}	
+for (i in 1:length(topGOinput)) {names(topGOinput[[i]]) = go_names}	
 #Generate topGO object for each community
 topGOdata = lapply(topGOinput,function(x) new("topGOdata",ontology = "BP",allGenes = x,annot=annFUN.gene2GO,gene2GO = Genes2GO))
 ##run fisher test on each community
@@ -238,7 +245,7 @@ topGOtable = lapply(1:length(topGOdata),function(x) GenTable(topGOdata[[x]],fish
 
 ##write to CSV
 for (key,i) in enumerate(topGOtable)	
-	CSV.write("$cwd/output/pages/_assets/page_1/tableinput/$(test_name)_community_$(key)_annotations.csv",i)
+	CSV.write("$cwd/output/TestWebsite/_assets/menu1/tableinput/$(test_name)_community_$(key)_annotations.csv",i)
 end
 
 ##HTML output (concept atm)
