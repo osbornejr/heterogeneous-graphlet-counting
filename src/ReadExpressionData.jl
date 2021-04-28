@@ -4,7 +4,7 @@ import CSV
 function read_count_data(data_dir::String;method::String)
 	##method can be "expected_count","TPM", "FPKM" or "IsoPct"
 	samples=CSV.read.(readdir(data_dir,join=true))
-	sample_names=replace.(readdir(data_dir),"_RSEM.isoforms.results"=>"")
+	sample_names=replace.(readdir(data_dir),"_RSEM.isoforms.results"=>"").*"_data"
 	transcript_names=select(samples[1],1)
 	counts=rename!(hcat(transcript_names,select.(samples,Symbol(method))...,makeunique=true),["transcript_id";sample_names])
 end
