@@ -12,14 +12,15 @@ using JLD
 ##set up for distributed mode
 #first clean to make sure there are no stray workers already around
 using Distributed
-rmprocs(workers())
-#add workers equal to the number of available cpus	
-addprocs(Threads.nthreads())
-#addprocs(8)
-@everywhere include("src/CoexpressionMeasures.jl")
-@everywhere include("src/GraphletCounting.jl")
-@everywhere include("src/NullModel.jl")
-
+if(length(workers())!=Threads.nthreads())
+	rmprocs(workers())
+	#add workers equal to the number of available cpus	
+	addprocs(Threads.nthreads())
+	#addprocs(8)
+	@everywhere include("src/CoexpressionMeasures.jl")
+	@everywhere include("src/GraphletCounting.jl")
+	@everywhere include("src/NullModel.jl")
+end
 
 #Read in raw counts (cached)
 raw_counts_file = "$cwd/output/cache/$(test_name)_raw_counts.jld"
@@ -71,7 +72,7 @@ sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(samp
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
 ## file to cache similarity matrix for use later:
-coexpression = "PID"
+coexpression = "pidc"
 sim_file = "$cwd/output/cache/$(test_name)_similarity_matrix_$(norm_method)_$(X)_$(coexpression).jld"
 if (isfile(sim_file))
 	similarity_matrix = JLD.load(sim_file,"$(coexpression)_similarity_matrix")
