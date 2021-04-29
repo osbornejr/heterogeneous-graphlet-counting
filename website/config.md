@@ -2,7 +2,6 @@
 Add here global page variables to use throughout your website.
 -->
 +++
-prepath = "heterogeneous-graphlet-counting"
 author = "Joel Robertson"
 mintoclevel = 2
 menu1_name = "GSE68559"
@@ -33,6 +32,7 @@ website_descr = "outlining results of network construction and analysis."
 website_url   = "https://tlienart.github.io/FranklinTemplates.jl/"
 +++
 
+@def prepath = "heterogeneous-graphlet-counting"
 <!--
 Add here global latex commands to use throughout your pages.
 -->

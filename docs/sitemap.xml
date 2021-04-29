@@ -20,13 +20,13 @@
     <priority>0.5</priority>
 </url>
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu1/index.html</loc>
+    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu3/index.html</loc>
     <lastmod>2021-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
 </url>
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu3/index.html</loc>
+    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu1/index.html</loc>
     <lastmod>2021-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -38,13 +38,13 @@
     <priority>0.5</priority>
 </url>
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu2_communities/</loc>
+    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu1_communities/</loc>
     <lastmod>2021-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
 </url>
 <url>
-    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu1_communities/</loc>
+    <loc>https://tlienart.github.io/FranklinTemplates.jl/menu2_communities/</loc>
     <lastmod>2021-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
