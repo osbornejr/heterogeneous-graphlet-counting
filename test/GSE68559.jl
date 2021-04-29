@@ -3,9 +3,13 @@ cwd = ENV["JULIA_PROJECT"]
 for src in filter(x->endswith(x,".jl"),readdir("src"))
 	include("$cwd/src/"*src)
 end
-#set up output directory
+#set up output directories
 test_name = "GSE68559"
+site_name = "TestWebsite"
+page_name = "menu1"
 run(`mkdir -p "$cwd/output/$test_name"`)
+run(`mkdir -p "$cwd/output/$(site_name)/_assets/$(page_name)/tableinput"`)
+run(`mkdir -p "$cwd/output/$(site_name)/_assets/$(page_name)/plots"`)
 using JLD
 
 
@@ -14,9 +18,9 @@ using JLD
 using Distributed
 if(length(workers())!=Threads.nthreads())
 	rmprocs(workers())
-	#add workers equal to the number of available cpus	
+ 	#add workers equal to the number of available cpus	
 	addprocs(Threads.nthreads())
-	#addprocs(8)
+ 	#addprocs(8)
 	@everywhere include("src/CoexpressionMeasures.jl")
 	@everywhere include("src/GraphletCounting.jl")
 	@everywhere include("src/NullModel.jl")
@@ -40,7 +44,7 @@ raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts
 
 
 ##plot before cut
-histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/$(test_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/$(site_name)/_assets/$(page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
 
 ## Clean - remove transcripts with total counts across all samples less than Cut
 Cut = 25
@@ -48,7 +52,7 @@ clean_counts=raw_counts[vec(sum(raw_data,dims = 2 ).>=Cut),:]
 clean_data = Array(select(clean_counts,filter(x->occursin("data",x),names(clean_counts))))
 
 ##plot after cut
-histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/$(test_name)/clean_data_$(Cut)_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/$(site_name)/_assets/$(page_name)/clean_data_$(Cut)_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
 
 #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 
@@ -94,7 +98,7 @@ end
 network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 #maintain list of vertices in graph
-vertex_names = network_counts[:gene_id]
+vertex_names = network_counts[:transcript_id]
 vertexlist = copy(network_counts[:transcript_type])
 
 ##form final adjacency matrix
@@ -115,9 +119,9 @@ g_comp = Graph(adj_matrix_comp)
 vertexlist_comp = vertexlist[largest[1]]
 ##plot (either connected component or whole network
 nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist_comp.=="coding").+1]
-draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
+draw(SVG("$cwd/output/$(site_name)/_assets/$(page_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
 nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
-draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+draw(SVG("$cwd/output/$(site_name)/_assets/$(page_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 
 #Network Analysis
 #Type representations 
@@ -127,32 +131,33 @@ csv = csv*"Raw counts,"*string(size(raw_counts,1)-size(filter(:transcript_id=>x-
 csv = csv*"Clean counts,"*string(size(clean_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1)/size(clean_counts,1),sigdigits=3))*"\n"
 csv = csv*"Sample counts,"*string(size(sample_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1)/size(sample_counts,1),sigdigits=3))*"\n"
 csv = csv*"Network counts,"*string(size(network_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1)/size(network_counts,1),sigdigits=3))*"\n"
-write("$cwd/output/pages/_assets/page_1/tableinput/type_representation.csv",csv)
+write("$cwd/output/$(site_name)/_assets/$(page_name)/tableinput/type_representation.csv",csv)
 
 #Degrees
 #homogonous degree distribution
 degrees = vec(sum(adj_matrix,dims=2))
 p = plot(DataFrame([sort(degrees)]),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
-draw(SVG("$cwd/output/pages/_assets/$(test_name)_degree_distribution.svg"),p)
+draw(SVG("$cwd/output/$(site_name)/_assets/$(page_name)/degree_distribution.svg"),p)
 
 #degrees for each transcript type
 for type in unique(vertexlist)
 	p = plot(DataFrame([sort(degrees[vertexlist.==type])]),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
-	draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(type)_degree_distribution.svg"),p)
+	draw(SVG("$cwd/output/$(site_name)/_assets/$(page_name)/$(type)_degree_distribution.svg"),p)
 end
 
 ## Hubs
 deg_thresh = mean(degrees)+2*std(degrees)
 nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_degree_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+draw(SVG("$cwd/output/$(site_name)/_assets/$(page_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_degree_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 deg_thresh = 70#mean(degrees)+2*std(degrees)
 nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-draw(SVG("$cwd/output/pages/_assets/$(test_name)_$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_degree70_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+draw(SVG("$cwd/output/$(site_name)/_assets/$(page_name)/$(norm_method)_$(threshold_method)_$(X)_$(coexpression)_degree70_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 
 ## Community structure
 using RCall
 @rput adj_matrix
 @rput vertex_names
+@rput site_name
 R"""
 library(RColorBrewer)
 library(igraph)
@@ -197,7 +202,7 @@ edges <- as_tibble(as.data.frame(get.edgelist(g)))
 g <- graph_from_data_frame(edges,directed = F, vertices)
 vertex_attr(g,"size") <- 0.5
 plot = graphjs(g,bg = "white");
-saveWidget(plot,"output/pages/communities.html")
+saveWidget(plot,paste0("output/",site_name,"/communities.html"))
 
 ## Functional annotation of communities
 #get list of string arrays for transcript ids in each community
@@ -249,12 +254,6 @@ for (key,i) in enumerate(topGOtable)
 	CSV.write("$cwd/output/TestWebsite/_assets/menu1/tableinput/$(test_name)_community_$(key)_annotations.csv",i)
 end
 
-##HTML output (concept atm)
-run(`mkdir -p output/$(test_name)/page`)
-open("output/$(test_name)/page/index.html","w") do io
-	show(io,"text/html",gplot(g,nodefillc = nodefillc))
-	show(io,"text/html",p)
-end
 
 @time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 #graphlet_concentrations = concentrate(graphlet_counts) 
@@ -268,7 +267,7 @@ rand_types_set = [copy(vertexlist) for i in 1:N]
 broadcast(shuffle!,rand_types_set) 
 
 rand_graphlets_file = "$cwd/output/cache/$(test_name)_rand_graphlets_$N.jld"
-if (isfile(raw_counts_file))
+if (isfile(rand_graphlets_file))
 	rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
 else
 	rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
@@ -315,7 +314,7 @@ hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))
 	log_rand_fil = copy(rand_fil)
 	log_rand_fil.value =log.(log_rand_fil.value)
 	p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
-	draw(SVG("$cwd/output/TestWebsite/_assets/plots/$(hog)_histogram.svg",4inch,6inch),p)
+	draw(SVG("$cwd/output/TestWebsite/_assets/$(page_name)/plots/$(hog)_histogram.svg",4inch,6inch),p)
 	hog_array[i] = hog_df
 end
 ##look at edge types in randomised networks
