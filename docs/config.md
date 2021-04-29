@@ -2,7 +2,7 @@
 Add here global page variables to use throughout your website.
 -->
 +++
-@def prepath = "heterogeneous-graphlet-counting"
+prepath = "heterogeneous-graphlet-counting"
 author = "Joel Robertson"
 mintoclevel = 2
 menu1_name = "GSE68559"
