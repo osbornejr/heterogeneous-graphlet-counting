@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0006403,RNA localization,9,2,0.24,0.017
+GO:0043568,positive regulation of insulin-like grow...,1,1,0.03,0.018
+GO:0002277,myeloid dendritic cell activation involv...,1,1,0.03,0.018
+GO:0001766,membrane raft polarization,1,1,0.03,0.018
+GO:0001768,establishment of T cell polarity,1,1,0.03,0.018
+GO:0045720,negative regulation of integrin biosynth...,1,1,0.03,0.018
+GO:0045726,positive regulation of integrin biosynth...,1,1,0.03,0.018
+GO:0001771,immunological synapse formation,1,1,0.03,0.018
+GO:0044351,macropinocytosis,1,1,0.03,0.018
+GO:0060689,cell differentiation involved in salivar...,1,1,0.03,0.018

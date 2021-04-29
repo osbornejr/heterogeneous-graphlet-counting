@@ -1,0 +1,2 @@
+Test,Expression_cut_off,Normalisation,Variance_cut_off,Coexpression_measure,Edge_threshold,Threshold_method
+Mayank-de-novo,25,upper_quartile,0.01,pcit,0.95,empirical_dist

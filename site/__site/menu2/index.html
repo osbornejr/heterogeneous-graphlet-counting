@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     <link rel="stylesheet" href="/libs/katex/katex.min.css">
+     
+    
+    <link rel="stylesheet" href="/css/franklin.css">
+<link rel="stylesheet" href="/css/tufte.css">
+<link rel="stylesheet" href="/css/latex.css">
+<link rel="stylesheet" href="/css/adjust.css"> <!-- sheet to overwrite some clashing styles -->
+<link rel="icon" href="/assets/favicon.png">
+
+     <title>Mayank de novo</title>  
+</head>
+
+<body>
+<div id="layout">
+  <div id="menu">
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/menu1/">GSE68559</a></li>
+      <li><a href="/menu2/">Mayank de novo</a></li>
+      <li><a href="/menu3/">Coexpression measures</a></li>
+    </ul>
+  </div>
+  <div id="main">
+
+
+
+<!-- Content appended here -->
+<div class="franklin-content"><h1 id="menu2_desc_menu2_name"><a href="#menu2_desc_menu2_name" class="header-anchor">Chickpea salinity tolerance data &#40;Mayank_de_novo&#41;</a></h1>
+<p><div class="franklin-toc"><ol><li><a href="#run_parameters">Run parameters</a></li><li><a href="#data_preprocessing">Data preprocessing</a><ol><li><a href="#data_cleaning">Data cleaning</a></li></ol></li><li><a href="#network_construction">Network construction</a></li><li><a href="#network_analysis">Network analysis</a><ol><li><a href="#type_breakdown">Type breakdown</a></li><li><a href="#degree_distribution">Degree distribution</a></li><li><a href="#hubs">Hubs</a></li><li><a href="#community_detection">Community detection</a></li><li><a href="#graphlet_counting">Graphlet counting</a></li></ol></li></ol></div> </p>
+<h2 id="run_parameters"><a href="#run_parameters" class="header-anchor">Run parameters</a></h2>
+<table><tr><th align="right">Test</th><th align="right">Expression<em>cut</em>off</th><th align="right">Normalisation</th><th align="right">Variance<em>cut</em>off</th><th align="right">Coexpression_measure</th><th align="right">Edge_threshold</th><th align="right">Threshold_method</th></tr><tr><td align="right">Mayank-de-novo</td><td align="right">25</td><td align="right">upper_quartile</td><td align="right">0.01</td><td align="right">pcit</td><td align="right">0.95</td><td align="right">empirical_dist</td></tr></table>
+
+<h2 id="data_preprocessing"><a href="#data_preprocessing" class="header-anchor">Data preprocessing</a></h2>
+<h3 id="data_cleaning"><a href="#data_cleaning" class="header-anchor">Data cleaning</a></h3>
+<p>Cutoff point: 25</p>
+<p>Before cut: <img src="/assets/menu2/raw_data_histogram.svg" alt="image" /></p>
+<p>After cut: <img src="/assets/menu2/clean_data_25_cut_histogram.svg" alt="image" /></p>
+<h2 id="network_construction"><a href="#network_construction" class="header-anchor">Network construction</a></h2>
+<p><img src="/assets/menu2/upper_quartile_empirical_dist_0.01_pcit_network.svg" alt="image" /></p>
+<h2 id="network_analysis"><a href="#network_analysis" class="header-anchor">Network analysis</a></h2>
+<h3 id="type_breakdown"><a href="#type_breakdown" class="header-anchor">Type breakdown</a></h3>
+<table><tr><th align="right">Step</th><th align="right">Coding counts</th><th align="right">Non-coding counts</th><th align="right">Non-coding proportion</th></tr><tr><td align="right">Raw counts</td><td align="right">112879</td><td align="right">91870</td><td align="right">0.449</td></tr><tr><td align="right">Clean counts</td><td align="right">76180</td><td align="right">19261</td><td align="right">0.202</td></tr><tr><td align="right">Sample counts</td><td align="right">763</td><td align="right">194</td><td align="right">0.203</td></tr><tr><td align="right">Network counts</td><td align="right">763</td><td align="right">194</td><td align="right">0.203</td></tr></table>
+
+<h3 id="degree_distribution"><a href="#degree_distribution" class="header-anchor">Degree distribution</a></h3>
+<ul>
+<li><p><strong>All nodes:</strong></p>
+</li>
+</ul>
+<p><img src="/assets/menu2/degree_distribution.svg" alt="image" /></p>
+<ul>
+<li><p><strong>Coding transcripts:</strong></p>
+</li>
+</ul>
+<p><img src="/assets/menu2/coding_degree_distribution.svg" alt="image" /></p>
+<ul>
+<li><p><strong>Non-coding transcripts:</strong></p>
+</li>
+</ul>
+<p><img src="/assets/menu2/noncoding_degree_distribution.svg" alt="image" /></p>
+<h3 id="hubs"><a href="#hubs" class="header-anchor">Hubs</a></h3>
+<p><strong>Nodes with degree \(k>\bar{k}+2\sigma_{k}\):</strong> 
+<details>
+<summary> </summary>
+
+<br>
+<img src="/assets/menu2/upper_quartile_empirical_dist_0.01_pcit_degree_network.svg" alt="hubs"> 
+</details>
+</p>
+<h3 id="community_detection"><a href="#community_detection" class="header-anchor">Community detection</a></h3>
+<p><a href="/menu2_communities/">3D visualisation</a></p>
+<h3 id="graphlet_counting"><a href="#graphlet_counting" class="header-anchor">Graphlet counting</a></h3>
+<p>Comparing the typed representations of different graphlets in the real network to a set of networks with the same structure, but randomised node types.</p>
+<ul>
+<li><p>Tables</p>
+</li>
+</ul>
+
+<div class="flex-container">
+
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/2-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_edge</td>
+    <td style = "text-align: right;">1664.31</td>
+    <td style = "text-align: right;">1690</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_edge</td>
+    <td style = "text-align: right;">18184.0</td>
+    <td style = "text-align: right;">18149</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_edge</td>
+    <td style = "text-align: right;">36.72</td>
+    <td style = "text-align: right;">46</td>
+  </tr>
+</table>
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/3-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_3-path</td>
+    <td style = "text-align: right;">21473.3</td>
+    <td style = "text-align: right;">18915</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_3-path</td>
+    <td style = "text-align: right;">997.68</td>
+    <td style = "text-align: right;">547</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_noncoding_3-path</td>
+    <td style = "text-align: right;">480.34</td>
+    <td style = "text-align: right;">356</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_coding_3-path</td>
+    <td style = "text-align: right;">11246.4</td>
+    <td style = "text-align: right;">7095</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_3-path</td>
+    <td style = "text-align: right;">2.37068e5</td>
+    <td style = "text-align: right;">244366</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_3-path</td>
+    <td style ="text-align: right;">21.38</td>
+    <td style = "text-align: right;">8</td>
+  </tr>
+</table>
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/3-tri.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_3-tri</td>
+    <td style = "text-align: right;">893.66</td>    
+    <td style = "text-align: right;">2052</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_3-tri</td>
+    <td style = "text-align: right;">19884.7</td>
+    <td style = "text-align: right;">25026</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_3-tri</td>
+    <td style = "text-align: right;">1.41849e5</td>
+    <td style = "text-align: right;">135501</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_3-tri</td>
+    <td style = "text-align: right;">13.0</td>
+    <td style = "text-align: right;">61</td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">noncoding_coding_coding_noncoding_4-path</td>
+    <td style = "text-align: right;">7078.75</td>
+    <td style = "text-align: right;">5911</td>
+ </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-path</td>
+    <td style = "text-align: right;">3.42802e6</td>
+    <td style = "text-align: right;">3561835</td>
+  </tr>
+
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_coding_4-path</td>
+    <td style = "text-align: right;">3.21663e5</td>
+    <td style = "text-align: right;">219004</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-path</td>
+    <td style = "text-align: right;">3.12688e5</td>
+    <td style = "text-align: right;">299825</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_coding_4-path</td>
+    <td style = "text-align: right;">7209.26</td>
+    <td style = "text-align: right;">3529</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_noncoding_noncoding_4-path</td>
+    <td style = "text-align: right;">640.79</td>
+    <td style = "text-align: right;">292</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-path</td>
+    <td style = "text-align: right;">14248.7</td>
+    <td style = "text-align: right;">9301</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-path</td>
+    <td style = "text-align: right;">632.32</td>
+    <td style = "text-align: right;">97</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_noncoding_coding_4-path</td>
+    <td style = "text-align: right;">14316.5</td>
+    <td style = "text-align: right;">6719</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-path</td>
+    <td style = "text-align: right;">14.33</td>
+    <td style = "text-align: right;">0</td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-star.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-star</td>
+    <td style = "text-align: right;">2.43116e5</td>
+    <td style = "text-align: right;">206162</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_coding_4-star</td>
+    <td style = "text-align: right;">88314.3</td>
+    <td style = "text-align: right;">50863</td>
+  </tr>
+
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_coding_noncoding_4-star</td>
+    <td style = "text-align: right;">10829.5</td>
+    <td style = "text-align: right;">6930</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_coding_noncoding_4-star</td>
+    <td style = "text-align: right;">157.66</td>
+    <td style = "text-align: right;">72</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-star</td>
+    <td style = "text-align: right;">6.83</td>
+    <td style = "text-align: right;">2</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-star</td>
+    <td style = "text-align: right;">1.80134e6</td>
+    <td style = "text-align: right;">1885477</td>
+
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-star</td>
+    <td style = "text-align: right;">511.03</td>
+    <td style = "text-align: right;">200</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-star</td>
+    <td style = "text-align: right;">11865.7</td>
+    <td style = "text-align: right;">6439</
+td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-tail.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_coding_4-tail</td>
+    <td style = "text-align: right;">1.67961e5</td>
+    <td style = "text-align: right;">94217</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-tail</td>
+    <td style = "text-align: right;">7432.14</td>
+    <td style = "text-align: right;">3735</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-tail</td>
+    <td style = "text-align: right;">645.87</td>
+    <td style = "text-align: right;">230</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-tail</td>
+    <td style = "text-align: right;">3.54037e6</td>
+    <td style = "text-align: right;">3664555</td>
+  
+</tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_coding_coding_4-tail</td>
+    <td style = "text-align: right;">6861.39</td>
+    <td style = "text-align: right;">7372</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-tail</td>
+    <td style = "text-align: right;">1.59608e5</td>
+    <td style = "text-align: right;">141300</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_coding_noncoding_4-tail</td>
+    <td style = "text-align: right;">14438.6</td>
+    <td style = "text-align: right;">12601</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_coding_4-tail</td>
+    <td style = "text-align: right;">327.28</td>
+    <td style = "text-align: right;">220</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_coding_noncoding_4-tail</td>
+    <td style = "text-align: right;">307.19</td>
+    <td style = "text-align: right;">349</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-tail</td>
+    <td style = "text-align: right;">13.95</td>
+    <td style = "text-align: right;">5</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_coding_4-tail</td>
+    <td style = "text-align: right;">14946.7</td>
+    <td style = "text-align: right;">7308</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_coding_coding_4-tail</td>
+    <td style = "text-align: right;">3.21477e5</td>
+    <td style = "text-align: right;">302500</td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-cycle.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-cycle</td>
+    <td style = "text-align: right;">2980.68</td>
+    <td style = "text-align: right;">1613</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-cycle</td>
+    <td style = "text-align: right;">200.78</td>
+    <td style = "text-align: right;">50</td>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-cycle</td>
+    <td style = "text-align: right;">15564.5</td>
+    <td style = "text-align: right;">17089</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-cycle</td>
+    <td style = "text-align: right;">5.98</td>
+    <td style = "text-align: right;">0</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-cycle</td>
+    <td style = "text-align: right;">0.08</td>
+    <td style = "text-align: right;">0</td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet">
+<img src="/assets/graphlet-images/4-chord.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-chord</td>
+    <td style = "text-align: right;">
+50.53</td>
+    <td style = "text-align: right;">24</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-chord </td>
+    <td style = "text-align: right;">24504.8</td>
+    <td style = "text-align: right;">14353</td>
+  </tr>
+
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_coding_4-chord</td>
+    <td style = "text-align: right;">24458.5</td>
+    <td style = "text-align: right;">25984</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_coding_4-chord</td>
+    <td style = "text-align: right;">516.48</td>
+    <td style = "text-align: right;">1392</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_noncoding_noncoding_4-chord</td>
+    <td style = "text-align: right;">43.11</td>
+    <td style = "text-align: right;">1</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_coding_noncoding_4-chord</td>
+    <td style = "text-align: right;">536.98</td>
+    <td style = "text-align: right;">76</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-chord</td>
+    <td style = "text-align: right;">256059.0</td>
+    <td style = "text-align: right;">265812</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-chord</td>
+    <td style = "text-align: right;">2262.62</td>
+    <td style = "text-align: right;">791</td>
+ 
+ </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-chord</td>
+    <td style = "text-align: right;">0.96</td>
+    <td style = "text-align: right;">0</td>
+  </tr>
+</table>
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-clique.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</t
+h>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-clique</td>
+    <td style = "text-align: right;">15039.5</td>
+    <td style = "text-align: right;">54411</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-clique</td>
+    <td style = "text-align: right;">1.12363e6</td>
+    <td style = "text-align: right;">956621</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-clique</td>
+    <td style = "text-align: right;">2.16407e5</td>
+    <td style = "text-align: right;">340872</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-clique</td>
+    <td style = "text-align: right;">4.83</td>
+    <td style = "text-align: right;">71
+</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-clique</td>
+    <td style = "text-align: right;">446.83</td>
+    <td style = "text-align: right;">3553</td>
+  </tr>
+</table>
+
+</div>
+
+</div>
+
+<ul>
+<li><p>Histograms</p>
+</li>
+</ul>
+
+<div class="flex-container">
+
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/2-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/3-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<img src="/assets/menu2/plots/3-path_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/3-tri.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu2/plots/3-tri_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<img src="/assets/menu2/plots/4-path_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-star.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu2/plots/4-star_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-tail.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu2/plots/4-tail_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-cycle.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu2/plots/4-cycle_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet">
+<img src="/assets/graphlet-images/4-chord.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<img src="/assets/menu2/plots/4-chord_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-clique.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu2/plots/4-clique_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+</div>
+<div>
+</div>
+
+<div class="page-foot">
+  <div class="copyright">
+    &copy; Joel Robertson. Last modified: April 29, 2021. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+  </div>
+</div>
+</div><!-- CONTENT ENDS HERE -->
+        </div> <!-- end of id=main -->
+    </div> <!-- end of id=layout -->
+    
+        <script src="/libs/katex/katex.min.js"></script>
+<script src="/libs/katex/auto-render.min.js"></script>
+<script>renderMathInElement(document.body)</script>
+
+    
+    
+  </body>
+</html>

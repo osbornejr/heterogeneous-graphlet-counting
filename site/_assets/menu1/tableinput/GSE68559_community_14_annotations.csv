@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0006821,chloride transport,5,2,0.16,0.0041
+GO:0007026,negative regulation of microtubule depol...,1,1,0.03,0.0213
+GO:0010586,miRNA metabolic process,1,1,0.03,0.0213
+GO:0006378,mRNA polyadenylation,1,1,0.03,0.0213
+GO:0016075,rRNA catabolic process,1,1,0.03,0.0213
+GO:0019542,propionate biosynthetic process,1,1,0.03,0.0213
+GO:0000387,spliceosomal snRNP assembly,1,1,0.03,0.0213
+GO:0046785,microtubule polymerization,1,1,0.03,0.0213
+GO:0030328,prenylcysteine catabolic process,1,1,0.03,0.0213
+GO:0072659,protein localization to plasma membrane,1,1,0.03,0.0213
