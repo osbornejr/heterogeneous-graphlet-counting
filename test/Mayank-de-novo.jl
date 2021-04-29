@@ -3,12 +3,13 @@ cwd = ENV["JULIA_PROJECT"]
 for src in filter(x->endswith(x,".jl"),readdir("src"))
 	include("$cwd/src/"*src)
 end
-#set up output directory
+#set up output directories
 test_name = "Mayank-de-novo"
 site_name = "TestWebsite"
 page_name = "menu2"
 run(`mkdir -p "$cwd/output/$test_name"`)
 run(`mkdir -p "$cwd/output/$(site_name)/_assets/$(page_name)/tableinput"`)
+run(`mkdir -p "$cwd/output/$(site_name)/_assets/$(page_name)/plots"`)
 using JLD
 
 
@@ -239,7 +240,7 @@ rand_types_set = [copy(vertexlist) for i in 1:N]
 broadcast(shuffle!,rand_types_set) 
 
 rand_graphlets_file = "$cwd/output/cache/$(test_name)_rand_graphlets_$N.jld"
-if (isfile(raw_counts_file))
+if (isfile(rand_graphlets_file))
 	rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
 else
 	rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
