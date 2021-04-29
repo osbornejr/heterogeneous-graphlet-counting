@@ -3,10 +3,21 @@ cwd = ENV["JULIA_PROJECT"]
 for src in filter(x->endswith(x,".jl"),readdir("src"))
 	include("$cwd/src/"*src)
 end
-#set up output directories
+##Run parameters
 test_name = "Mayank-de-novo"
 site_name = "TestWebsite"
 page_name = "menu2"
+Cut = 25
+norm_method = "upper_quartile"
+variance_percent = 0.01
+coexpression = "pcit"
+threshold = 0.95
+threshold_method = "empirical_dist"
+
+run_parameter_df = DataFrame(Test = test_name, Expression_cut_off = Cut,Normalisation = norm_method, Variance_cut_off = variance_percent, Coexpression_measure = coexpression, Edge_threshold = threshold, Threshold_method = threshold_method)
+CSV.write("$cwd/output/$(site_name)/_assets/$(page_name)/tableinput/run_parameters.csv",run_parameter_df)
+
+#set up output directories
 run(`mkdir -p "$cwd/output/$test_name"`)
 run(`mkdir -p "$cwd/output/$(site_name)/_assets/$(page_name)/tableinput"`)
 run(`mkdir -p "$cwd/output/$(site_name)/_assets/$(page_name)/plots"`)
@@ -62,7 +73,6 @@ raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts
 histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"output/$(site_name)/_assets/$(page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
 
 ## Clean - remove transcripts with total counts across all samples less than Cut
-Cut = 25
 clean_counts=raw_counts[vec(sum(raw_data,dims = 2 ).>=Cut),:]
 clean_data = Array(select(clean_counts,filter(x->occursin("data",x),names(clean_counts))))
 
@@ -72,7 +82,6 @@ histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcri
 #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 
 ### Normalisation
-norm_method = "upper_quartile"
 norm_data=library_size_normalisation(clean_data,norm_method)
 norm_counts = copy(clean_counts)
 norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
@@ -81,9 +90,8 @@ norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
 #add variance column to normalised data
 variance = vec(var(norm_data, dims=2))
 norm_counts.variance = variance
-X = 0.01
-sample_counts_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-X))):end,:]
-sample_counts_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-X))):end,:]
+sample_counts_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+sample_counts_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
 sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
 sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(sample_counts))))
 
@@ -91,7 +99,6 @@ sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(samp
 ##Measure of coexpression
 #similarity_matrix=mutual_information(data)
 ## file to cache similarity matrix for use later:
-coexpression = "pcit"
 sim_file = "$cwd/output/cache/$(test_name)_similarity_matrix_$(norm_method)_$(X)_$(coexpression).jld"
 if (isfile(sim_file))
 	similarity_matrix = JLD.load(sim_file,"$(coexpression)_similarity_matrix")
@@ -101,8 +108,6 @@ else
 end
 
 ## Adjacency matrix (using empricial distribution method atm)
-threshold = 0.95
-threshold_method = "empirical_dist"
 if (threshold_method=="empirical_dist")
  	pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,threshold)
 end
@@ -142,10 +147,10 @@ draw(SVG("$cwd/output/$(site_name)/_assets/$(page_name)/$(norm_method)_$(thresho
 #Type representations 
 ##set up csv string
 csv = "Step,Coding counts,Non-coding counts,Non-coding proportion\n"
-csv = csv*"Raw counts,"*string(size(raw_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1)/size(raw_counts,1),sigdigits=3))*"\n"
-csv = csv*"Clean counts,"*string(size(clean_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1)/size(clean_counts,1),sigdigits=3))*"\n"
-csv = csv*"Sample counts,"*string(size(sample_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1)/size(sample_counts,1),sigdigits=3))*"\n"
-csv = csv*"Network counts,"*string(size(network_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1)/size(network_counts,1),sigdigits=3))*"\n"
+csv = csv*"Raw counts,"*string(size(raw_counts,1)-size(filter(:transcript_type=>x->x == "noncoding",raw_counts),1))*","*string(size(filter(:transcript_type=>x->x == "noncoding",raw_counts),1))*","*string(round(size(filter(:transcript_type=>x->x == "noncoding",raw_counts),1)/size(raw_counts,1),sigdigits=3))*"\n"
+csv = csv*"Clean counts,"*string(size(clean_counts,1)-size(filter(:transcript_type=>x->x == "noncoding",clean_counts),1))*","*string(size(filter(:transcript_type=>x->x == "noncoding",clean_counts),1))*","*string(round(size(filter(:transcript_type=>x->x == "noncoding",clean_counts),1)/size(clean_counts,1),sigdigits=3))*"\n"
+csv = csv*"Sample counts,"*string(size(sample_counts,1)-size(filter(:transcript_type=>x->x == "noncoding",sample_counts),1))*","*string(size(filter(:transcript_type=>x->x == "noncoding",sample_counts),1))*","*string(round(size(filter(:transcript_type=>x->x == "noncoding",sample_counts),1)/size(sample_counts,1),sigdigits=3))*"\n"
+csv = csv*"Network counts,"*string(size(network_counts,1)-size(filter(:transcript_type=>x->x == "noncoding",network_counts),1))*","*string(size(filter(:transcript_type=>x->x == "noncoding",network_counts),1))*","*string(round(size(filter(:transcript_type=>x->x == "noncoding",network_counts),1)/size(network_counts,1),sigdigits=3))*"\n"
 write("$cwd/output/$(site_name)/_assets/$(page_name)/tableinput/type_representation.csv",csv)
 
 #Degrees
@@ -173,6 +178,7 @@ using RCall
 @rput adj_matrix
 @rput vertex_names
 @rput site_name
+@rput page_name
 R"""
 library(RColorBrewer)
 library(igraph)
@@ -196,7 +202,7 @@ vertices <- tibble(name = 1:nrow(vertex_names),vertex_names)%>% dplyr::rename(la
 g <- graph_from_data_frame(edges,directed = F, vertices)
 #
 ##delete zero degree vertices
-g <- delete.vertices(g,degree(g)==0)
+g <- delete.vertices(g,igraph::degree(g)==0)
 ##find maximum connected component
 g <- decompose(g, mode = "strong", max.comps = NA, min.vertices = 10)[[1]]
 #
@@ -217,12 +223,16 @@ edges <- as_tibble(as.data.frame(get.edgelist(g)))
 g <- graph_from_data_frame(edges,directed = F, vertices)
 vertex_attr(g,"size") <- 0.5
 plot = graphjs(g,bg = "white");
-saveWidget(plot,paste0("output/",site_name,"/communities.html"))
-
-
+saveWidget(plot,paste0("output/",site_name,"/",page_name,"_communities.html"))
+##also save separate from website
+saveWidget(plot,paste0("output/cache/",page_name,"_communities.html"))
+## Functional annotation of communities
+#get list of string arrays for transcript ids in each community
+comms <- split(vertices,vertices$group)
+comm_ids = lapply(comms,function(x) x$label)
+comm_ids_trimmed = sapply(comm_ids,function(y) sapply(y,function(x) tools::file_path_sans_ext(x)))
 """
 @rget comms
-@rget topGOtable
 @rget vertices
 
 
