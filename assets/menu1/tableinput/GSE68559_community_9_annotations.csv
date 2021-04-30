@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0060789,hair follicle placode formation,2,2,0.1,0.00085
+GO:0043123,positive regulation of I-kappaB kinase/N...,3,2,0.15,0.00251
+GO:0042475,odontogenesis of dentin-containing tooth,4,2,0.2,0.00492
+GO:0043433,negative regulation of DNA-binding trans...,6,2,0.3,0.01187
+GO:0051764,actin crosslink formation,1,1,0.05,0.02987
+GO:0042177,negative regulation of protein catabolic...,1,1,0.05,0.02987
+GO:0061029,eyelid development in camera-type eye,1,1,0.05,0.02987
+GO:0010870,positive regulation of receptor biosynth...,1,1,0.05,0.02987
+GO:0060662,salivary gland cavitation,1,1,0.05,0.02987
+GO:0010025,wax biosynthetic process,1,1,0.05,0.02987

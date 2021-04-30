@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0007420,brain development,24,3,0.51,0.0051
+GO:0035050,embryonic heart tube development,3,2,0.06,0.0143
+GO:0002437,inflammatory response to antigenic stimu...,1,1,0.02,0.0156
+GO:0033198,response to ATP,1,1,0.02,0.0156
+GO:0051481,negative regulation of cytosolic calcium...,1,1,0.02,0.0156
+GO:1901660,calcium ion export,1,1,0.02,0.0156
+GO:0046951,ketone body biosynthetic process,1,1,0.02,0.0156
+GO:0003351,epithelial cilium movement,1,1,0.02,0.0156
+GO:0021997,neural plate axis specification,1,1,0.02,0.0156
+GO:0071313,cellular response to caffeine,1,1,0.02,0.0156
