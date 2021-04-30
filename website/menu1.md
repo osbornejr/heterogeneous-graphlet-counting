@@ -620,7 +620,7 @@ h>
 </div>
 ~~~
 
-* Histograms
+* Boxplots
 
 ~~~
 <div class="flex-container">
