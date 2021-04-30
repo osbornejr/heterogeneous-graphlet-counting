@@ -249,7 +249,6 @@ topGOdata = lapply(topGOinput,function(x) new("topGOdata",ontology = "BP",allGen
 ##run fisher test on each community
 topGOresults = lapply(topGOdata,function(x) runTest(x,statistic = "fisher"))
 topGOtable = lapply(1:length(topGOdata),function(x) GenTable(topGOdata[[x]],fisher = topGOresults[[x]],ranksOf = "fisher",orderBy="weight"))
-
 """
 @rget comms
 @rget topGOtable
