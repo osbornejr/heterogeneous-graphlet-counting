@@ -5,7 +5,7 @@
 *Library.bib
 .ipynb*
 data/
-site/
+*__site
 output/
 node_modules
 cytoscape/*
