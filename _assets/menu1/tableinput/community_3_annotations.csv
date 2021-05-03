@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0046716,muscle cell cellular homeostasis,2,2,0.1,0.0012
+GO:0007219,Notch signaling pathway,6,3,0.29,0.0033
+GO:0032088,negative regulation of NF-kappaB transcr...,4,2,0.19,0.0070
+GO:0007411,axon guidance,14,3,0.68,0.0112
+GO:0048754,branching morphogenesis of an epithelial...,5,2,0.24,0.0114
+GO:0007155,cell adhesion,41,8,1.98,0.0148
+GO:0006139,nucleobase-containing compound metabolic...,181,12,8.75,0.0268
+GO:0007159,leukocyte cell-cell adhesion,9,4,0.44,0.0317
+GO:0051090,regulation of DNA-binding transcription ...,16,4,0.77,0.0320
+GO:2000401,regulation of lymphocyte migration,2,2,0.1,0.0342

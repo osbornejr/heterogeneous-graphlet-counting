@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0019432,triglyceride biosynthetic process,2,2,0.09,0.00085
+GO:0032496,response to lipopolysaccharide,4,2,0.18,0.00492
+GO:0006629,lipid metabolic process,46,6,2.09,0.00594
+GO:0009749,response to glucose,5,2,0.23,0.00806
+GO:0045165,cell fate commitment,7,2,0.32,0.01632
+GO:0008152,metabolic process,325,17,14.79,0.02618
+GO:0023019,signal transduction involved in regulati...,1,1,0.05,0.02987
+GO:0071529,cementum mineralization,1,1,0.05,0.02987
+GO:0021983,pituitary gland development,1,1,0.05,0.02987
+GO:0006958,"complement activation, classical pathway",1,1,0.05,0.02987
