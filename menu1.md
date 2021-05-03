@@ -1,4 +1,4 @@
-@def title = "Test"
+@def title = "Menu1"
 @def tags = ["syntax", "code"]
 
 # {{menu1_desc}} ({{menu1_name}})
@@ -65,92 +65,92 @@ __Nodes with degree $k>70$:__
 Community 1:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_1_annotations.csv}
+\tableinput{}{./tableinput/community_1_annotations.csv}
 
 Community 2:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_2_annotations.csv}
+\tableinput{}{./tableinput/community_2_annotations.csv}
 
 Community 3:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_3_annotations.csv}
+\tableinput{}{./tableinput/community_3_annotations.csv}
 
 Community 4:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_4_annotations.csv}
+\tableinput{}{./tableinput/community_4_annotations.csv}
 
 Community 5:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_5_annotations.csv}
+\tableinput{}{./tableinput/community_5_annotations.csv}
 
 Community 6:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_6_annotations.csv}
+\tableinput{}{./tableinput/community_6_annotations.csv}
 
 Community 7:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_7_annotations.csv}
+\tableinput{}{./tableinput/community_7_annotations.csv}
 
 Community 8:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_8_annotations.csv}
+\tableinput{}{./tableinput/community_8_annotations.csv}
 
 Community 9:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_9_annotations.csv}
+\tableinput{}{./tableinput/community_9_annotations.csv}
 
 Community 10:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_10_annotations.csv}
+\tableinput{}{./tableinput/community_10_annotations.csv}
 
 Community 11:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_11_annotations.csv}
+\tableinput{}{./tableinput/community_11_annotations.csv}
 
 Community 12:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_12_annotations.csv}
+\tableinput{}{./tableinput/community_12_annotations.csv}
 
 Community 13:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_13_annotations.csv}
+\tableinput{}{./tableinput/community_13_annotations.csv}
 
 Community 14:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_14_annotations.csv}
+\tableinput{}{./tableinput/community_14_annotations.csv}
 
 Community 15:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_15_annotations.csv}
+\tableinput{}{./tableinput/community_15_annotations.csv}
 
 Community 16:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_16_annotations.csv}
+\tableinput{}{./tableinput/community_16_annotations.csv}
 
 Community 17:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_17_annotations.csv}
+\tableinput{}{./tableinput/community_17_annotations.csv}
 
 Community 18:
 Go annotation terms:
 
-\tableinput{}{./tableinput/GSE68559_community_18_annotations.csv}
+\tableinput{}{./tableinput/community_18_annotations.csv}
 
  
 [3D visualisation](/menu1_communities/)
