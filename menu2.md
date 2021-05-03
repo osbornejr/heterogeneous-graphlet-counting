@@ -48,7 +48,7 @@ __Nodes with degree $k>\bar{k}+2\sigma_{k}$:__
 <summary> </summary>
 
 <br>
-<img src="/assets/menu2/{{menu2_normalisation_method}}_{{menu2_threshold_method}}_{{menu2_variance_cut}}_{{menu2_coexpression_measure}}_degree_network.svg" alt="hubs"> 
+<img src="/assets/menu2/{{menu2_normalisation_method}}_{{menu2_threshold_method}}_{{menu2_variance_cut}}_{{menu2_coexpression_measure}}_two_std_hub_network.svg" alt="hubs"> 
 </details>
 ~~~
  
@@ -537,7 +537,7 @@ h>
 <img src="/assets/graphlet-images/3-path.svg" height=100 width=200 alt="hubs"> 
 </div>
 <div class="hide">
-<img src="/assets/menu2/plots/3-path_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+<img src="/assets/menu2/plots/3-path_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
 </div>
 
 <div class="graphlet" >
@@ -545,14 +545,14 @@ h>
 </div>
 <div class="hide">
 
-<img src="/assets/menu2/plots/3-tri_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+<img src="/assets/menu2/plots/3-tri_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
 </div>
 
 <div class="graphlet" >
 <img src="/assets/graphlet-images/4-path.svg" height=100 width=200 alt="hubs"> 
 </div>
 <div class="hide">
-<img src="/assets/menu2/plots/4-path_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+<img src="/assets/menu2/plots/4-path_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
 </div>
 
 <div class="graphlet" >
@@ -560,7 +560,7 @@ h>
 </div>
 <div class="hide">
 
-<img src="/assets/menu2/plots/4-star_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+<img src="/assets/menu2/plots/4-star_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
 </div>
 
 <div class="graphlet" >
@@ -568,7 +568,7 @@ h>
 </div>
 <div class="hide">
 
-<img src="/assets/menu2/plots/4-tail_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+<img src="/assets/menu2/plots/4-tail_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
 </div>
 
 <div class="graphlet" >
@@ -576,14 +576,14 @@ h>
 </div>
 <div class="hide">
 
-<img src="/assets/menu2/plots/4-cycle_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+<img src="/assets/menu2/plots/4-cycle_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
 </div>
 
 <div class="graphlet">
 <img src="/assets/graphlet-images/4-chord.svg" height=100 width=200 alt="hubs"> 
 </div>
 <div class="hide">
-<img src="/assets/menu2/plots/4-chord_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+<img src="/assets/menu2/plots/4-chord_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
 </div>
 
 <div class="graphlet" >
@@ -591,7 +591,7 @@ h>
 </div>
 <div class="hide">
 
-<img src="/assets/menu2/plots/4-clique_histogram.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+<img src="/assets/menu2/plots/4-clique_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
 </div>
 
 </div>
