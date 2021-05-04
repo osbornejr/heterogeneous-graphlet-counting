@@ -1,8 +1,3 @@
-### Include all source files TODO make this occur more fluently and automatically by creating a package, and using Revise
-cwd = ENV["JULIA_PROJECT"]
-for src in filter(x->endswith(x,".jl"),readdir("src"))
-	include("$cwd/src/"*src)
-end
 
 params = Construction.RunParameters("Mayank-de-novo","menu2","$cwd/website",25,"upper_quartile",0.01,"pcit",0.95,"empirical_dist",false)
 

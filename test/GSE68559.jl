@@ -1,14 +1,9 @@
-### Include all source files TODO make this occur more fluently and automatically by creating a package, and using Revise
-cwd = ENV["JULIA_PROJECT"]
-for src in filter(x->endswith(x,".jl"),readdir("src"))
-	include("$cwd/src/"*src)
-end
 params = Construction.RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist",true)
 
 
 using JLD
 #Read in raw counts (cached)
-raw_counts_file = "$cwd/output/cache/$(test_name)_raw_counts.jld"
+raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts.jld"
 if (isfile(raw_counts_file))
 	raw_counts = JLD.load(raw_counts_file,"raw counts")
 else
