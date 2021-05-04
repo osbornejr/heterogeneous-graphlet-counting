@@ -6,6 +6,7 @@ Base.atreplinit() do repl
 	          end
 using Weave
 using Debugger
+using Revise
 #using Pkg
 #Pkg.precompile()
 ENV["JULIA_PROJECT"] = "/home/osbornejr/app"
