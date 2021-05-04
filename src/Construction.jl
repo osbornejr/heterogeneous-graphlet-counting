@@ -1,17 +1,17 @@
-using Distributed, JLD, LightGraphs, GraphPlot, Random
+using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random
 module Construction
-struct RunParameters
-	test_name::String	
-	page_name::String
-	website_dir::String
-	expression_cutoff::Int
-	norm_method::String
-	variance_percent::Float64
-	coexpression::String
-	threshold::Float64
-	threshold_method::String
-	func_annotate::Bool
-end
+	struct RunParameters
+		test_name::String	
+		page_name::String
+		website_dir::String
+		expression_cutoff::Int
+		norm_method::String
+		variance_percent::Float64
+		coexpression::String
+		threshold::Float64
+		threshold_method::String
+		func_annotate::Bool
+	end
 end
 
 
@@ -33,8 +33,9 @@ function distributed_setup(inclusions::Array{String,1})
 		end
 	end
 end
-
 function webpage_construction(raw_counts::DataFrame,params::Construction.RunParameters)
+
+	@info "Building directory structure..."
 	##establish output directories	
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/plots"`)
@@ -46,10 +47,9 @@ function webpage_construction(raw_counts::DataFrame,params::Construction.RunPara
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/plots"`)
 		
- 	#set up distributed workers
-	distributed_setup(["src/CoexpressionMeasures.jl","src/GraphletCounting.jl","src/NullModel.jl"])
 	
 	#Processing data:
+	@info "Processing raw data..."
 	raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts))))
 	## Clean - remove transcripts with total counts across all samples less than Cut
 	##plot before cut
@@ -77,6 +77,7 @@ function webpage_construction(raw_counts::DataFrame,params::Construction.RunPara
 	sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
 	sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(sample_counts))))
 	##Network construction
+	@info "Constructing the network..."
 	##Measure of coexpression
 	#similarity_matrix=mutual_information(data)
 	## file to cache similarity matrix for use later:
@@ -109,6 +110,7 @@ function webpage_construction(raw_counts::DataFrame,params::Construction.RunPara
 	edgelist = edgelist_from_adj(adj_matrix)
 	
 	#Network visualisation
+	@info "Visualising network..."
 	g = SimpleGraph(adj_matrix)
 	##get largest component
 	components = connected_components(g)
@@ -124,6 +126,7 @@ function webpage_construction(raw_counts::DataFrame,params::Construction.RunPara
 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 
 	#Network Analysis
+	@info "Analysing network..."
 	#Type representations 
 	##set up csv string
 	csv = "Step,Coding counts,Non-coding counts,Non-coding proportion\n"
@@ -154,13 +157,18 @@ function webpage_construction(raw_counts::DataFrame,params::Construction.RunPara
 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_$(deg_thresh)_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	
 	## Community structure
+	@info "Identifying communities..."
 	##use gene ids here, as they have more chance of getting a GO annotation
-	vertex_gene_names = network_counts[:gene_id]
-	community_vertices = get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
+	if(params.func_annotate==true)
+		vertex_gene_names = network_counts[:gene_id]
+		community_vertices = get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 	
-	## functional annotations of communities
-	functional_annotations = get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")	
-	
+		## functional annotations of communities
+		functional_annotations = get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")	
+	else
+		community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
+	end
+	@info "Counting graphlets..."
 	@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 	#graphlet_concentrations = concentrate(graphlet_counts) 
 	
