@@ -151,7 +151,7 @@ function webpage_construction(raw_counts::DataFrame,params::Construction.RunPara
 	## Hubs
 	deg_thresh = Int(floor(mean(degrees)+2*std(degrees)))
 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_$(deg_thresh)_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	deg_thresh = 70#mean(degrees)+2*std(degrees)
 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_$(deg_thresh)_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
