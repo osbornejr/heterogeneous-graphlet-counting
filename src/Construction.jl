@@ -1,21 +1,4 @@
 using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random
-module Construction
-	struct RunParameters
-		test_name::String	
-		page_name::String
-		website_dir::String
-		expression_cutoff::Int
-		norm_method::String
-		variance_percent::Float64
-		coexpression::String
-		threshold::Float64
-		threshold_method::String
-		func_annotate::Bool
-	end
-end
-
-
-
 
 function distributed_setup(inclusions::Array{String,1})
 
@@ -33,7 +16,7 @@ function distributed_setup(inclusions::Array{String,1})
 		end
 	end
 end
-function webpage_construction(raw_counts::DataFrame,params::Construction.RunParameters)
+function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
 	@info "Building directory structure..."
 	##establish output directories	
@@ -201,7 +184,6 @@ function webpage_construction(raw_counts::DataFrame,params::Construction.RunPara
 	hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
 	##array to store all homogonous graphlet dfs
 	hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))	
-	
 	 for (i,hog) in enumerate(hom_graphlets)
 		hog_df= DataFrame()
 		## restrict info to just hg 
