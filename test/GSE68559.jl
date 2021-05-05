@@ -1,5 +1,4 @@
-params = Construction.RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist",true)
-
+params = RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist",false)
 
 using JLD
 #Read in raw counts (cached)

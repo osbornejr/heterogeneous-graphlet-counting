@@ -1,5 +1,5 @@
 
-params = Construction.RunParameters("Mayank-de-novo","menu2","$cwd/website",25,"upper_quartile",0.01,"pcit",0.95,"empirical_dist",false)
+params = RunParameters("Mayank-de-novo","menu2","$cwd/website",25,"upper_quartile",0.01,"pcit",0.95,"empirical_dist",false)
 
 using JLD
 
