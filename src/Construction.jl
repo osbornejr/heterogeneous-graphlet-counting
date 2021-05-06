@@ -150,10 +150,14 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	if(params.func_annotate==true)
 		vertex_gene_names = network_counts[:gene_id]
 		community_vertices = get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
-	
 		## functional annotations of communities
 		func_file = "$cache_dir/func_annotations.jld" 
-		functional_annotations = get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")	
+		if (isfile(func_file))
+			functional_annotations = JLD.load(func_file,"functional annotations")
+		else
+			functional_annotations = get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")	
+			JLD.save(func_file,"functional annotations",functional_annotations)
+		end
 	else
 		community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 	end
