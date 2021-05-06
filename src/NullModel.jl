@@ -291,6 +291,9 @@ end
 ### function to quickly implement r-igraph method in julia (as it is ~10 times faster than best method I could come up with in pure julia at present). 
 #function rewire(adj::AbstractArray,switching_val::Int)
 #	
+#	R"""
+#	sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+#	"""
 #	@rput adj
 #	@rput switching_val
 #	print("Rewiring network...\n")

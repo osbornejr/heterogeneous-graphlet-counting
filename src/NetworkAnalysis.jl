@@ -67,6 +67,9 @@ end
 
 function get_community_structure(adj_matrix::AbstractArray,vertex_names::Array{String,1},detection_method::String;plot_prefix::String = "", threejs_plot::Bool = false)
 	## Get community structure of a network using r-igraph package 
+	R"""
+	sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+	"""
 	@rput adj_matrix
 	@rput vertex_names
 	@rput detection_method
@@ -134,6 +137,9 @@ end
 
 function get_functional_annotations(comm_vertices::DataFrame;ensembl_version::String="current",write_csv::Bool = true,csv_dir::String)
 	
+	R"""
+	sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+	"""
 	@rput comm_vertices
 	@rput ensembl_version
 	R"""

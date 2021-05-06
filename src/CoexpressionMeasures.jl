@@ -105,6 +105,11 @@ end
 function pcit(data::AbstractArray)
 	#implementing the R package PCIT here for now. In the long run it might be better/faster/more desirable to implement our own version in Julia?
 	# outputs a correlation matrix with those values deemed insignificant by the pcit algorithm set to 0.
+	
+	#Clear R workspace. May be better implemented as a function?
+	R"""
+	sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+	"""
 	@rput data
 	R"""
 	library(PCIT)

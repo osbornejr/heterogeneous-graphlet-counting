@@ -22,8 +22,13 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
 	
 	raw_counts=Array(raw_counts)
 	
+	#Clear R workspace. May be better implemented as a function?
+	R"""
+	sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+	"""
 	@rput raw_counts
 	@rput method
+	
 	R"""
 	library(edgeR)
 	library(EBSeq)
