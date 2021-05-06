@@ -1,6 +1,5 @@
-params = RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist",false)
+params = RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist",true)
 
-using JLD
 #Read in raw counts (cached)
 raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts.jld"
 if (isfile(raw_counts_file))
@@ -18,6 +17,5 @@ end
 
 ##run code to generate plots and figures for website 
 webpage_construction(raw_counts,params)
-
 
 
