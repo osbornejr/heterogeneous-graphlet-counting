@@ -36,9 +36,9 @@ ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
 ENV JULIA_MPI_BINARY system
 ENV JULIA_MPI_PATH $CONDA_DIR/envs/$ENV_PREFIX
 RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
-RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
+#RUN julia --projec#t=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
 #set up MPI.jl to use openMPI 
-RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.build(\"MPI\");using MPI;MPI.install_mpiexecjl()"
+#RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.build(\"MPI\");using MPI;MPI.install_mpiexecjl()"
 #add julia bin to path
 ENV  PATH $PATH:$HOME/.julia/bin
 
