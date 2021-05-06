@@ -197,8 +197,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			het_graphlets = union(first.(split.(real_fil[:graphlet],"_3")),first.(split.(real_fil[:graphlet],"_3")))
 		end 
 		for heg in het_graphlets
-			
-			rand_vals = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)[!,:value]
+			rand_fil_fil = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)
+			transform!(rand_fil_fil,:value =>ByRow(x-> log(x))=>:log_value)
+			##histogram for each heterogeneous graphlet
+			histogram(rand_fil_fil,:log_value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
+			rand_vals = rand_fil_fil[!,:value]
 			rand_exp = sum(rand_vals)/N
 			real_obs = real_dict[heg*"_"*hog]
 			append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs))	
