@@ -18,6 +18,7 @@ function distributed_setup(inclusions::Array{String,1})
 end
 function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
+
 	@info "Building directory structure..."
 	##establish output directories	
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)
@@ -30,7 +31,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/plots"`)
 		
-	
+	##Cache setup
+	cache_dir = "$cwd/output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)"
+	run(`mkdir -p $(cache_dir)`)
+
+
 	#Processing data:
 	@info "Processing raw data..."
 	raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts))))
@@ -64,12 +69,12 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	##Measure of coexpression
 	#similarity_matrix=mutual_information(data)
 	## file to cache similarity matrix for use later:
-	sim_file = "$cwd/output/cache/$(params.test_name)_similarity_matrix_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression).jld"
+	sim_file = "$cache_dir/similarity_matrix.jld"
 	if (isfile(sim_file))
-		similarity_matrix = JLD.load(sim_file,"$(params.coexpression)_similarity_matrix")
+		similarity_matrix = JLD.load(sim_file,"similarity_matrix")
 	else
 		similarity_matrix = coexpression_measure(sample_data,params.coexpression)
-		JLD.save(sim_file,"$(params.coexpression)_similarity_matrix",similarity_matrix)
+		JLD.save(sim_file,"similarity_matrix",similarity_matrix)
 	end
 	
 	## Adjacency matrix (using empricial distribution method atm)
@@ -147,6 +152,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		community_vertices = get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 	
 		## functional annotations of communities
+		func_file = "$cache_dir/func_annotations.jld" 
 		functional_annotations = get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")	
 	else
 		community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
@@ -162,7 +168,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	#randomise each graph by node
 	broadcast(shuffle!,rand_types_set) 
 	
-	rand_graphlets_file = "$cwd/output/cache/$(params.test_name)_rand_graphlets_$N.jld"
+	rand_graphlets_file = "$cache_dir/rand_graphlets_$N.jld"
 	if (isfile(rand_graphlets_file))
 		rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
 	else
