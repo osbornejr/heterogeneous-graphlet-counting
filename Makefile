@@ -10,7 +10,7 @@ run: ## run julia
 	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -it --rm -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
 
 run-port: ## run julia with access to port 8000
-	docker run -it --rm -p 8000:8000 -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
+	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -it --rm -p 8000:8000 -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
 
 update: ## update conda and julia environments	
 	docker image build --file docker/update/Dockerfile --tag $(julia_env) ./
