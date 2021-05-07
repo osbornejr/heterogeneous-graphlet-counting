@@ -12,6 +12,7 @@ struct RunParameters
 	threshold::Float64
 	threshold_method::String
 	func_annotate::Bool
+	visualise::Bool
 end
 
 
