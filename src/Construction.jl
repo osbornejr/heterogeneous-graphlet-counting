@@ -107,21 +107,22 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	edgelist = edgelist_from_adj(adj_matrix)
 	
 	#Network visualisation
-	@info "Visualising network..."
-	g = SimpleGraph(adj_matrix)
-	##get largest component
-	components = connected_components(g)
-	largest = components[length.(components).==max(length.(components)...)]
-	adj_matrix_comp = adj_matrix[largest[1],largest[1]]
-	g_comp = Graph(adj_matrix_comp)
-	##update vertexlist
-	vertexlist_comp = vertexlist[largest[1]]
-	##plot (either connected component or whole network
-	nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist_comp.=="coding").+1]
-	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
-	nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
-	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
-
+	if (params.visualise==true)
+		@info "Visualising network..."
+		g = SimpleGraph(adj_matrix)
+		##get largest component
+		components = connected_components(g)
+		largest = components[length.(components).==max(length.(components)...)]
+		adj_matrix_comp = adj_matrix[largest[1],largest[1]]
+		g_comp = Graph(adj_matrix_comp)
+		##update vertexlist
+		vertexlist_comp = vertexlist[largest[1]]
+		##plot (either connected component or whole network
+		nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist_comp.=="coding").+1]
+		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
+		nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
+		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+	end
 	#Network Analysis
 	@info "Analysing network..."
 	#Type representations 
