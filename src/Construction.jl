@@ -184,9 +184,19 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	else
 		community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 	end
-	@info "Counting graphlets..."
-	@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
-	#graphlet_concentrations = concentrate(graphlet_counts) 
+	
+
+	graphlet_file = "$cache_dir/graphlets.jld" 
+	if (isfile(graphlet_file))
+		@info "Loading graphlet counts from $cache_dir..."
+		graphlet_counts = JLD.load(graphlet_file,"graphlets")
+	else
+		@info "Counting graphlets..."
+		@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
+		#graphlet_concentrations = concentrate(graphlet_counts) 
+		@info "Saving graphlet counts at $cache_dir..."
+		JLD.save(graphlet_file,"graphlets",graphlet_counts)
+	end
 	
 
 	@info "Looking at typed representations of graphlets..."
@@ -200,8 +210,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	
 	rand_graphlets_file = "$cache_dir/rand_graphlets_$N.jld"
 	if (isfile(rand_graphlets_file))
+		@info "Loading randomised graphlet counts from $cache_dir..."
 		rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
 	else
+		@info "Counting graphlets on null model 
 		rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
 		rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
 		rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
