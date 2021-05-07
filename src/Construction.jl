@@ -1,4 +1,4 @@
-using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random
+using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random, Glob
 
 function distributed_setup(inclusions::Array{String,1})
 
@@ -34,8 +34,16 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	##Cache setup
 	cache_dir = "$cwd/output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)"
 	run(`mkdir -p $(cache_dir)`)
-
-
+	## Check if there are cached files for runs with similar parameters (i.e. the same before irelevant parameters are invoked for a specific output)
+	#similarity matrix
+	sim_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)*/similarity*",cwd)
+ 	#check if any already exist
+	if(length(sim_check)>0)
+		#check if actual cache already exists
+		if (!(cache_dir in first.(splitdir.(sim_check))))
+			run(`cp $(sim_check[1]) $(cache_dir)/`)
+		end
+	end
 	#Processing data:
 	@info "Processing raw data..."
 	raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts))))
@@ -71,13 +79,14 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	## file to cache similarity matrix for use later:
 	sim_file = "$cache_dir/similarity_matrix.jld"
 	if (isfile(sim_file))
+		@info "Loading similarity matrix from $cache_dir..."
 		similarity_matrix = JLD.load(sim_file,"similarity_matrix")
 	else
 		similarity_matrix = coexpression_measure(sample_data,params.coexpression)
 		JLD.save(sim_file,"similarity_matrix",similarity_matrix)
 	end
 	
-	## Adjacency matrix (using empricial distribution method atm)
+	## Adjacency matrix (using empirical distribution method atm)
 	if (params.threshold_method=="empirical_dist")
 	 	pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
 	end
