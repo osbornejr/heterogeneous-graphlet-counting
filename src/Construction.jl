@@ -82,28 +82,39 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		@info "Loading similarity matrix from $cache_dir..."
 		similarity_matrix = JLD.load(sim_file,"similarity_matrix")
 	else
+		@info "Generating similarity matrix..."
 		similarity_matrix = coexpression_measure(sample_data,params.coexpression)
+		@info "Saving similarity matrix at $cache_dir..."
 		JLD.save(sim_file,"similarity_matrix",similarity_matrix)
 	end
 	
 	## Adjacency matrix (using empirical distribution method atm)
-	if (params.threshold_method=="empirical_dist")
-	 	pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
-	end
-	if (params.threshold_method=="hard")
-	 	pre_adj_matrix = adjacency(similarity_matrix,params.threshold)
+	adj_file = "$cache_dir/adjacency_matrix.jld"
+	if (isfile(adj_file))
+		@info "Loading adjacency matrix from $cache_dir..."
+		pre_adj_matrix = JLD.load(adj_file,"pre-adj_matrix")
+		adj_matrix = JLD.load(adj_file,"adjacency_matrix")
+	else
+		@info "Generating adjacency matrix..."
+		if (params.threshold_method=="empirical_dist")
+	 		pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
+		end
+		if (params.threshold_method=="hard")
+	 		pre_adj_matrix = adjacency(similarity_matrix,params.threshold)
+		end
+		##form final adjacency matrix
+		adj_matrix = copy(pre_adj_matrix)
+		adj_matrix = adj_matrix[:,vec(sum(pre_adj_matrix,dims=1).!=0)]
+		adj_matrix = adj_matrix[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+		@info "Saving adjacency matrix at $cache_dir..."
+		JLD.save(adj_file,"adjacency_matrix",adj_matrix,"pre-adj_matrix",pre_adj_matrix)
 	end
 	#Trim nodes with degree zero
 	network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 	network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
 	#maintain list of vertices in graph
 	vertex_names = network_counts[:transcript_id]
-	vertexlist = copy(network_counts[:transcript_type])
-	
-	##form final adjacency matrix
-	adj_matrix = copy(pre_adj_matrix)
-	adj_matrix = adj_matrix[:,vec(sum(pre_adj_matrix,dims=1).!=0)]
-	adj_matrix = adj_matrix[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+	vertexlist = copy(network_counts[:transcript_type])	
 	edgelist = edgelist_from_adj(adj_matrix)
 	
 	#Network visualisation
@@ -122,7 +133,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
 		nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
 		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
-
+	end
 	#Network Analysis
 	@info "Analysing network..."
 	#Type representations 
@@ -204,7 +215,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
 	##array to store all homogonous graphlet dfs
 	hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))	
-	 for (i,hog) in enumerate(hom_graphlets)
+	for (i,hog) in enumerate(hom_graphlets)
 		hog_df= DataFrame()
 		## restrict info to just hg 
 		real_fil = filter(:graphlet=>x->occursin(hog,x),real_df)
