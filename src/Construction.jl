@@ -139,10 +139,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	#Type representations 
 	##set up csv string
 	csv = "Step,Coding counts,Non-coding counts,Non-coding proportion\n"
-	csv = csv*"Raw counts,"*string(size(raw_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),raw_counts),1)/size(raw_counts,1),sigdigits=3))*"\n"
-	csv = csv*"Clean counts,"*string(size(clean_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),clean_counts),1)/size(clean_counts,1),sigdigits=3))*"\n"
-	csv = csv*"Sample counts,"*string(size(sample_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),sample_counts),1)/size(sample_counts,1),sigdigits=3))*"\n"
-	csv = csv*"Network counts,"*string(size(network_counts,1)-size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1))*","*string(round(size(filter(:transcript_id=>x->occursin("lnc",x),network_counts),1)/size(network_counts,1),sigdigits=3))*"\n"
+	csv = csv*"Raw counts,"*string(size(raw_counts,1)-size(filter(:transcript_type=>x->x=="noncoding",raw_counts),1))*","*string(size(filter(:transcript_type=>x->x=="noncoding",raw_counts),1))*","*string(round(size(filter(:transcript_type=>x->x=="noncoding",raw_counts),1)/size(raw_counts,1),sigdigits=3))*"\n"
+	csv = csv*"Clean counts,"*string(size(clean_counts,1)-size(filter(:transcript_type=>x->x=="noncoding",clean_counts),1))*","*string(size(filter(:transcript_type=>x->x=="noncoding",clean_counts),1))*","*string(round(size(filter(:transcript_type=>x->x=="noncoding",clean_counts),1)/size(clean_counts,1),sigdigits=3))*"\n"
+	csv = csv*"Sample counts,"*string(size(sample_counts,1)-size(filter(:transcript_type=>x->x=="noncoding",sample_counts),1))*","*string(size(filter(:transcript_type=>x->x=="noncoding",sample_counts),1))*","*string(round(size(filter(:transcript_type=>x->x=="noncoding",sample_counts),1)/size(sample_counts,1),sigdigits=3))*"\n"
+	csv = csv*"Network counts,"*string(size(network_counts,1)-size(filter(:transcript_type=>x->x=="noncoding",network_counts),1))*","*string(size(filter(:transcript_type=>x->x=="noncoding",network_counts),1))*","*string(round(size(filter(:transcript_type=>x->x=="noncoding",network_counts),1)/size(network_counts,1),sigdigits=3))*"\n"
 	write("$(params.website_dir)/_assets/$(params.page_name)/tableinput/type_representation.csv",csv)
 	
 	#Degrees
@@ -195,7 +195,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 		#graphlet_concentrations = concentrate(graphlet_counts) 
 		@info "Saving graphlet counts at $cache_dir..."
-		JLD.save(graphlet_file,"graphlets",graphlet_counts)
+		##save the per-edge array as well in case we need it in the future (exp for debugging)
+		JLD.save(graphlet_file,"graphlets",graphlet_counts[1],"Chi",graphlet_counts[2])
+
 	end
 	
 
@@ -213,7 +215,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		@info "Loading randomised graphlet counts from $cache_dir..."
 		rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
 	else
-		@info "Counting graphlets on null model 
+		@info "Counting graphlets on null model" 
 		rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
 		rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
 		rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
