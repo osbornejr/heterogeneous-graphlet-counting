@@ -252,7 +252,7 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 	for g in collect(keys(count_dict))[collect(values(count_dict)).==0]
 		delete!(count_dict,g)
 	end
-	return count_dict,rel 
+	return count_dict #,rel 
 end
 
 #aggregator function
@@ -303,7 +303,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			end
 		else
 			for r in res
-				Chi[first(r)] = last(r)[1]
+				Chi[first(r)] = last(r)
 			end
 		end
 
@@ -403,7 +403,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		Rel = collect.(Rel)
 		return [graphlet_counts,Chi,Rel]
 	else
-		return graphlet_counts
+		return [graphlet_counts,Chi]
 	end
 end
 
