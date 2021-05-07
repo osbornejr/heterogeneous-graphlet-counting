@@ -158,13 +158,15 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	end
 	
 	## Hubs
-	deg_thresh = Int(floor(mean(degrees)+2*std(degrees)))
-	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
-	deg_thresh = 70#mean(degrees)+2*std(degrees)
-	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_$(deg_thresh)_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
-	
+	if (params.visualise==true)
+		@info "Identifying hubs..."
+	 	deg_thresh = Int(floor(mean(degrees)+2*std(degrees)))
+	 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
+	 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+	 	deg_thresh = 70#mean(degrees)+2*std(degrees)
+	 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
+	 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_$(deg_thresh)_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+	end	
 	## Community structure
 	@info "Identifying communities..."
 	##use gene ids here, as they have more chance of getting a GO annotation
@@ -186,7 +188,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 	#graphlet_concentrations = concentrate(graphlet_counts) 
 	
+
+	@info "Looking at typed representations of graphlets..."
 	## randomise node types
+	
 	#number of randomised graphs
 	N=100
 	rand_types_set = [copy(vertexlist) for i in 1:N]
