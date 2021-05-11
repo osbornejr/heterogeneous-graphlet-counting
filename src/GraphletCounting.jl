@@ -287,21 +287,24 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		end
 	elseif(run_method == "distributed")
 		@info "Distributing edges to workers..."
-		res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
-			[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict))]        
-		end
-		#manipulate distributed output tuples into Chi array (for now in line iwth other methods)
-		if (relationships == true)
+		##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
+		Chi = @showprogress pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
 
-			for r in res
-				Chi[first(r)] = last(r)[1]
-				Rel[first(r)] = last(r)[2]
-			end
-		else
-			for r in res
-				Chi[first(r)] = last(r)
-			end
-		end
+		#res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
+		#	[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict))]        
+		#end
+		#manipulate distributed output tuples into Chi array (for now in line iwth other methods)
+		#if (relationships == true)
+#
+#			for r in res
+#				Chi[first(r)] = last(r)[1]
+#				Rel[first(r)] = last(r)[2]
+#			end
+#		else
+#			for r in res
+#				Chi[first(r)] = last(r)
+#			end
+#		end
 
 	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
