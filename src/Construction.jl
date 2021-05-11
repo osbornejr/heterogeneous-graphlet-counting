@@ -55,7 +55,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	clean_data = Array(select(clean_counts,filter(x->occursin("data",x),names(clean_counts))))
 	
 	##plot after cut
-	histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/clean_data_$(params.expression_cutoff)_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+	histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
 	
 	#boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 	
@@ -130,9 +130,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		@info "Visualising network..."
 		##plot (either connected component or whole network
 		nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist_comp.=="coding").+1]
-		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
+		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
 		nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
-		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	end
 	#Network Analysis
 	@info "Analysing network..."
@@ -162,10 +162,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		@info "Identifying hubs..."
 	 	deg_thresh = Int(floor(mean(degrees)+2*std(degrees)))
 	 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-	 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+	 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	 	deg_thresh = 70#mean(degrees)+2*std(degrees)
 	 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-	 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/$(params.norm_method)_$(params.threshold_method)_$(params.variance_percent)_$(params.coexpression)_$(deg_thresh)_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+	 	draw(SVG("$(params.website_dir)/_assets/alt_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	end	
 	## Community structure
 	@info "Identifying communities..."
@@ -192,11 +192,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		graphlet_counts = JLD.load(graphlet_file,"graphlets")
 	else
 		@info "Counting graphlets..."
-		@time graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
+		@time graphlet_counts,Chi = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
 		#graphlet_concentrations = concentrate(graphlet_counts) 
 		@info "Saving graphlet counts at $cache_dir..."
 		##save the per-edge array as well in case we need it in the future (exp for debugging)
-		JLD.save(graphlet_file,"graphlets",graphlet_counts[1],"Chi",graphlet_counts[2])
+		JLD.save(graphlet_file,"graphlets",graphlet_counts,"Chi",Chi)
 
 	end
 	
@@ -224,13 +224,13 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	
 	
 	rand_df = DataFrame(graphlet = broadcast(first,rand_graphlet_collection),value = broadcast(last,rand_graphlet_collection))
-	real_df = DataFrame(graphlet = broadcast(first,collect(graphlet_counts[1])),value = broadcast(last,collect(graphlet_counts[1])))
+	real_df = DataFrame(graphlet = broadcast(first,collect(graphlet_counts)),value = broadcast(last,collect(graphlet_counts)))
 	
 	##function to get the n permutations of a set xs
 	all_perm(xs, n) = vec(map(collect, Iterators.product(ntuple(_ -> xs, n)...)))
 	
 	##convert graphlet_counts dict output to default dictionary, returning 0 for graphlets that don't exist in the real network
-	real_dict = DefaultDict(0,graphlet_counts[1])
+	real_dict = DefaultDict(0,graphlet_counts)
 	hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
 	##array to store all homogonous graphlet dfs
 	hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))	
