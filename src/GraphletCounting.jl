@@ -66,7 +66,7 @@ function graphlet_string(a::String,b::String,c::String,d::String,graphlet::Strin
 end
 
 
-function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},neighbourdictfunc::Function,ordered_vertices::Array{Int,1})
+function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},neighbourdictfunc::Function)
 	count_dict = DefaultDict{String,Int}(0)
 	h=edge	
 #	# get nodes i and j for this edge
@@ -271,10 +271,6 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	# set up function to apply dict to arrays (maybe a better way exists, but this works?)
 	neighbourdictfunc(x::Int) = neighbourdict[x]
 	#vertex set derived from edgelist (allows for any arbritary vertex labelling)
-	##(important: not an ordered list that matches with vertexlist types!!) 
-	ordered_vertices = unique(vcat(first.(edgelist),last.(edgelist)))		
-	
-	
 	
 	#preallocate array to store each edge's graphlet dictionary 
 	Chi=Array{Dict{String,Int}}(undef,size(edgelist,1));
@@ -285,14 +281,14 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	#per edge process
 	if(run_method == "threads")
 		Threads.@threads for h in 1 :size(edgelist,1)
-			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)
+			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc)
 			Chi[h] = edge[1]
 			#Rel[h] = edge[2]
 		end
 	elseif(run_method == "distributed")
 		@info "Distributing edges to workers..."
 		res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
-			[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices))]        
+			[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc))]        
 		end
 		#manipulate distributed output tuples into Chi array (for now in line iwth other methods)
 		if (relationships == true)
@@ -309,7 +305,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 
 	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
-			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc,ordered_vertices)
+			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,neighbourdictfunc)
 			Chi[h] = edge[1]
 			if (relationships==true)
 				Rel[h] = edge[2]
