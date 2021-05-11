@@ -1,4 +1,4 @@
-params = RunParameters("Mayank-de-novo","menu2","$cwd/website",25,"upper_quartile",0.1,"pcit",0.99,"empirical_dist",false,false)
+params = RunParameters("Mayank-de-novo","menu2","$cwd/website",25,"median",0.1,"pcit",0.99,"empirical_dist",false,false)
 
 #Read in raw counts (cached)
 raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts.jld"
