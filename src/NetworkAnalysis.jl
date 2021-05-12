@@ -112,8 +112,23 @@ function get_community_structure(adj_matrix::AbstractArray,vertex_names::Array{S
 	##add colours to graph
 	vertices <- vertices %>% mutate(group = as_factor(communities$membership),color = group)
 	##if there are more than 11 communities, spectral colour palette is not sufficient. so we concat two palettes (if there are more than 22 comms, need another!)
-	x = length(unique(communities$membership))-11
-	colour_palette = c(brewer.pal(name = "Spectral", n = 11),brewer.pal(name = "BrBG", n = x))
+	n =  length(unique(communities$membership)) 
+	if(n<12)
+	{
+		colour_palette = brewer.pal(name = "Spectral", n = n)
+	} else if (n>12 & n<23)
+	{
+		x =n-11
+		colour_palette = c(brewer.pal(name = "Spectral", n = 11),brewer.pal(name = "BrBG", n = x))
+	}else if (n>23 & n<34)
+	{
+		x =n-22
+		colour_palette = c(brewer.pal(name = "Spectral", n = 11),brewer.pal(name = "BrBG", n = 11),brewer.pal(name = "RdYlBu", n = x))
+	}else
+	{
+	 	paste("ERROR: too many communiies to colour network")
+	}
+
 	levels(vertices$color) <- colour_palette
 	edges <- as_tibble(as.data.frame(get.edgelist(g)))
 	g <- graph_from_data_frame(edges,directed = F, vertices)
