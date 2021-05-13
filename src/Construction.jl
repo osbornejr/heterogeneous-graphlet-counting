@@ -88,7 +88,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		JLD.save(sim_file,"similarity_matrix",similarity_matrix)
 	end
 	
-	## Adjacency matrix (using empirical distribution method atm)
+	## Adjacency matrix 
 	adj_file = "$cache_dir/adjacency_matrix.jld"
 	if (isfile(adj_file))
 		@info "Loading adjacency matrix from $cache_dir..."
@@ -98,7 +98,6 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		@info "Generating adjacency matrix..."
 		if (params.threshold_method=="empirical_dist")
 	 		pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
-		end
 		if (params.threshold_method=="hard")
 	 		pre_adj_matrix = adjacency(similarity_matrix,params.threshold)
 		end
@@ -126,6 +125,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	g_comp = Graph(adj_matrix_comp)
 	##update vertexlist
 	vertexlist_comp = vertexlist[largest[1]]
+
 	if (params.visualise==true)
 		@info "Visualising network..."
 		##plot (either connected component or whole network
@@ -185,100 +185,102 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 	end
 	
+	if(params.graphlet_counting==true)
 
-	graphlet_file = "$cache_dir/graphlets.jld" 
-	if (isfile(graphlet_file))
-		@info "Loading graphlet counts from $cache_dir..."
-		graphlet_counts = JLD.load(graphlet_file,"graphlets")
-	else
-		@info "Counting graphlets..."
-		@time graphlet_counts,Chi = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
-		#graphlet_concentrations = concentrate(graphlet_counts) 
-		@info "Saving graphlet counts at $cache_dir..."
-		##save the per-edge array as well in case we need it in the future (exp for debugging)
-		JLD.save(graphlet_file,"graphlets",graphlet_counts,"Chi",Chi)
-
-	end
+		graphlet_file = "$cache_dir/graphlets.jld" 
+		if (isfile(graphlet_file))
+			@info "Loading graphlet counts from $cache_dir..."
+			graphlet_counts = JLD.load(graphlet_file,"graphlets")
+		else
+			@info "Counting graphlets..."
+			@time graphlet_counts,Chi = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
+			#graphlet_concentrations = concentrate(graphlet_counts) 
+			@info "Saving graphlet counts at $cache_dir..."
+			##save the per-edge array as well in case we need it in the future (exp for debugging)
+			JLD.save(graphlet_file,"graphlets",graphlet_counts,"Chi",Chi)
 	
-
-	@info "Looking at typed representations of graphlets..."
-	## randomise node types
-	
-	#number of randomised graphs
-	N=100
-	rand_types_set = [copy(vertexlist) for i in 1:N]
-	#randomise each graph by node
-	broadcast(shuffle!,rand_types_set) 
-	
-	rand_graphlets_file = "$cache_dir/rand_graphlets_$N.jld"
-	if (isfile(rand_graphlets_file))
-		@info "Loading randomised graphlet counts from $cache_dir..."
-		rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
-	else
-		@info "Counting graphlets on null model" 
-		rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
-		rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
-		rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
-		JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection)
-	end
-	
-	
-	rand_df = DataFrame(graphlet = broadcast(first,rand_graphlet_collection),value = broadcast(last,rand_graphlet_collection))
-	real_df = DataFrame(graphlet = broadcast(first,collect(graphlet_counts)),value = broadcast(last,collect(graphlet_counts)))
-	
-	##function to get the n permutations of a set xs
-	all_perm(xs, n) = vec(map(collect, Iterators.product(ntuple(_ -> xs, n)...)))
-	
-	##convert graphlet_counts dict output to default dictionary, returning 0 for graphlets that don't exist in the real network
-	real_dict = DefaultDict(0,graphlet_counts)
-	hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
-	##array to store all homogonous graphlet dfs
-	hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))	
-	for (i,hog) in enumerate(hom_graphlets)
-		hog_df= DataFrame()
-		## restrict info to just hg 
-		real_fil = filter(:graphlet=>x->occursin(hog,x),real_df)
-		rand_fil = filter(:graphlet=>x->occursin(hog,x),rand_df)
-	
-		#get hetero subgraphlets within homogonous type (problem: might not be complete set present in real/rand outputs?)
-		if (occursin("4",hog))
-			het_graphlets = union(first.(split.(real_fil[:graphlet],"_4")),first.(split.(rand_fil[:graphlet],"_4")))
-		elseif (occursin("3",hog))
-			het_graphlets = union(first.(split.(real_fil[:graphlet],"_3")),first.(split.(real_fil[:graphlet],"_3")))
-		end 
-		for heg in het_graphlets
-			rand_fil_fil = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)
-			transform!(rand_fil_fil,:value =>ByRow(x-> log(x))=>:log_value)
-			##histogram for each heterogeneous graphlet
-			histogram(rand_fil_fil,:log_value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
-			rand_vals = rand_fil_fil[!,:value]
-			rand_exp = sum(rand_vals)/N
-			real_obs = real_dict[heg*"_"*hog]
-			append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs))	
 		end
-		##take log values to plot
-		log_real_fil = copy(real_fil)
-		log_real_fil.value =log.(log_real_fil.value)
-		log_rand_fil = copy(rand_fil)
-		log_rand_fil.value =log.(log_rand_fil.value)
-		p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
-		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/plots/$(hog)_boxplot.svg",4inch,6inch),p)
-		hog_array[i] = hog_df
-	end
-	##look at edge types in randomised networks
-	real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
-	rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
-	rand_edge_collection = vcat(collect.(rand_types_edgecounts)...)
-	rand_edge_df = DataFrame(graphlet = broadcast(first,rand_edge_collection),value = broadcast(last,rand_edge_collection))
-	random_edges = DataFrame()
-	for t in unique(rand_edge_df[:graphlet])
-		rand_vals = filter(:graphlet=>x->x==t,rand_edge_df)[!,:value]
-		rand_exp = sum(rand_vals)/N
-		real_obs = real_type_edgecounts[t]
-		append!(random_edges,DataFrame(Graphlet = first(t)*"_"*last(t)*"_edge", Expected = rand_exp,Observed = real_obs))	
-	end
+		
 	
-	#pretty_table(random_edges,backend=:html,standalone = false)
-	
-	#@time motif_counts = find_motifs(edgelist,"triangle_edge",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)
+		@info "Looking at typed representations of graphlets..."
+		## randomise node types
+		
+		#number of randomised graphs
+		N=100
+		rand_types_set = [copy(vertexlist) for i in 1:N]
+		#randomise each graph by node
+		broadcast(shuffle!,rand_types_set) 
+		
+		rand_graphlets_file = "$cache_dir/rand_graphlets_$N.jld"
+		if (isfile(rand_graphlets_file))
+			@info "Loading randomised graphlet counts from $cache_dir..."
+			rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
+		else
+			@info "Counting graphlets on null model" 
+			rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
+			rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
+			rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
+			JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection)
+		end
+		
+		
+		rand_df = DataFrame(graphlet = broadcast(first,rand_graphlet_collection),value = broadcast(last,rand_graphlet_collection))
+		real_df = DataFrame(graphlet = broadcast(first,collect(graphlet_counts)),value = broadcast(last,collect(graphlet_counts)))
+		
+		##function to get the n permutations of a set xs
+		all_perm(xs, n) = vec(map(collect, Iterators.product(ntuple(_ -> xs, n)...)))
+		
+		##convert graphlet_counts dict output to default dictionary, returning 0 for graphlets that don't exist in the real network
+		real_dict = DefaultDict(0,graphlet_counts)
+		hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
+		##array to store all homogonous graphlet dfs
+		hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))	
+		for (i,hog) in enumerate(hom_graphlets)
+			hog_df= DataFrame()
+			## restrict info to just hg 
+			real_fil = filter(:graphlet=>x->occursin(hog,x),real_df)
+			rand_fil = filter(:graphlet=>x->occursin(hog,x),rand_df)
+		
+			#get hetero subgraphlets within homogonous type (problem: might not be complete set present in real/rand outputs?)
+			if (occursin("4",hog))
+				het_graphlets = union(first.(split.(real_fil[:graphlet],"_4")),first.(split.(rand_fil[:graphlet],"_4")))
+			elseif (occursin("3",hog))
+				het_graphlets = union(first.(split.(real_fil[:graphlet],"_3")),first.(split.(real_fil[:graphlet],"_3")))
+			end 
+			for heg in het_graphlets
+				rand_fil_fil = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)
+				transform!(rand_fil_fil,:value =>ByRow(x-> log(x))=>:log_value)
+				##histogram for each heterogeneous graphlet
+				histogram(rand_fil_fil,:log_value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
+				rand_vals = rand_fil_fil[!,:value]
+				rand_exp = sum(rand_vals)/N
+				real_obs = real_dict[heg*"_"*hog]
+				append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs))	
+			end
+			##take log values to plot
+			log_real_fil = copy(real_fil)
+			log_real_fil.value =log.(log_real_fil.value)
+			log_rand_fil = copy(rand_fil)
+			log_rand_fil.value =log.(log_rand_fil.value)
+			p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
+			draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/plots/$(hog)_boxplot.svg",4inch,6inch),p)
+			hog_array[i] = hog_df
+		end
+		##look at edge types in randomised networks
+		real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
+		rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
+		rand_edge_collection = vcat(collect.(rand_types_edgecounts)...)
+		rand_edge_df = DataFrame(graphlet = broadcast(first,rand_edge_collection),value = broadcast(last,rand_edge_collection))
+		random_edges = DataFrame()
+		for t in unique(rand_edge_df[:graphlet])
+			rand_vals = filter(:graphlet=>x->x==t,rand_edge_df)[!,:value]
+			rand_exp = sum(rand_vals)/N
+			real_obs = real_type_edgecounts[t]
+			append!(random_edges,DataFrame(Graphlet = first(t)*"_"*last(t)*"_edge", Expected = rand_exp,Observed = real_obs))	
+		end
+		
+		#pretty_table(random_edges,backend=:html,standalone = false)
+		
+		#@time motif_counts = find_motifs(edgelist,"triangle_edge",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)
+	end
 end

@@ -13,6 +13,7 @@ struct RunParameters
 	threshold_method::String
 	func_annotate::Bool
 	visualise::Bool
+	graphlet_counting::Bool
 end
 
 
