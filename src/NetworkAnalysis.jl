@@ -124,6 +124,10 @@ function get_community_structure(adj_matrix::AbstractArray,vertex_names::Array{S
 	{
 		x =n-22
 		colour_palette = c(brewer.pal(name = "Spectral", n = 11),brewer.pal(name = "BrBG", n = 11),brewer.pal(name = "RdYlBu", n = x))
+	}else if (n>34 & n<45)
+	{
+		x =n-33
+		colour_palette = c(brewer.pal(name = "Spectral", n = 11),brewer.pal(name = "BrBG", n = 11),brewer.pal(name = "RdYlBu", n = 11),brewer.pal(name="PiYG",n=x))
 	}else
 	{
 	 	paste("ERROR: too many communiies to colour network")
