@@ -98,8 +98,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		@info "Generating adjacency matrix..."
 		if (params.threshold_method=="empirical_dist")
 	 		pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
-		if (params.threshold_method=="hard")
+		elseif (params.threshold_method=="hard")
 	 		pre_adj_matrix = adjacency(similarity_matrix,params.threshold)
+		elseif (params.threshold_method=="top")
+			##TODO setting top x value here for now; should be a parameter, but as an Int rather than Float as threshold param is for other methods
+			pre_adj_matrix = top_adjacency(similarity_matrix,10)
 		end
 		##form final adjacency matrix
 		adj_matrix = copy(pre_adj_matrix)
