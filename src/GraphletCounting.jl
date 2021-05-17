@@ -234,7 +234,7 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 						count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda+indb-1]*jPathTypes[inda] - count_dict[graphlet_string(a,vertex_type_list[j],b,vertex_type_list[i],"4-chord-edge-orbit",delim)]
 						#j-centre, b tail
 						count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(b,vertex_type_list[j],a,vertex_type_list[i],"4-chord-edge-orbit",delim)]
-					else
+					else ##i and j are same type
 						##4-star
 						count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-star",delim)] += iPathTypes[inda]*iPathTypes[inda+indb-1] +  jPathTypes[inda]*jPathTypes[inda+indb-1]  - count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)] - count_dict[graphlet_string(b,a,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)]#unsure if both need to be subtracted here? TEST					
 						##4-tail tri-edge orbit
@@ -327,8 +327,10 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		#for 3 graphlets:
 		if(length(graphlet_names[el])==4)
 		   
-			#do not reorder for x-y-x paths (different orbit to other 3-paths) 
-			if !(graphlet_names[el][1]!=graphlet_names[el][2] && graphlet_names[el][1]==graphlet_names[el][3] && graphlet_names[el][4]=="3-path")
+			#for x-y-z paths such that y!=x AND y!=z (different orbit to other 3-paths) we reorder only the end nodes
+			if (graphlet_names[el][1]!=graphlet_names[el][2] && graphlet_names[el][3]!=graphlet_names[el][2] && graphlet_names[el][4]=="3-path")
+				graphlet_names[el][1,3] =sort(graphlet_names[el][1,3])
+			else
 	          		graphlet_names[el][1:3]=sort(graphlet_names[el][1:3])
  	        	end
 		end
