@@ -188,6 +188,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 	end
 	
+	##Network stats table
+	##set up csv string
+	csv = "Nodes,Edges,Components,Nodes in largest component,Maximal degree,communities detected\n"
+	csv = csv*string(length(vertexlist))*","*string(length(edgelist))*","*string(length(components))*","*string(length(largest...))*","*string(max(degrees...))*","*string(length(unique(community_vertices.group)))*"\n"
+	write("$(params.website_dir)/_assets/$(params.page_name)/tableinput/network_stats.csv",csv)
 	if(params.graphlet_counting==true)
 
 		graphlet_file = "$cache_dir/graphlets.jld" 
