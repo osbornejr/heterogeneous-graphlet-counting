@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0055085,transmembrane transport,47,4,2.67,0.030
-GO:0006281,DNA repair,23,4,1.31,0.036
-GO:0007156,homophilic cell adhesion via plasma memb...,8,2,0.46,0.039
-GO:0001503,ossification,11,2,0.63,0.040
-GO:0034660,ncRNA metabolic process,17,2,0.97,0.041
-GO:0032786,positive regulation of DNA-templated tra...,1,1,0.06,0.041
-GO:0046475,glycerophospholipid catabolic process,1,1,0.06,0.041
-GO:0048597,post-embryonic camera-type eye morphogen...,1,1,0.06,0.041
-GO:0007567,parturition,1,1,0.06,0.041
-GO:2000065,negative regulation of cortisol biosynth...,1,1,0.06,0.041
+GO:0042776,mitochondrial ATP synthesis coupled prot...,2,2,0.12,0.0018
+GO:0022904,respiratory electron transport chain,17,4,1.04,0.0048
+GO:0050772,positive regulation of axonogenesis,4,2,0.24,0.0100
+GO:0030163,protein catabolic process,30,4,1.83,0.0156
+GO:0006357,regulation of transcription by RNA polym...,65,7,3.96,0.0203
+GO:0035264,multicellular organism growth,6,2,0.37,0.0236
+GO:0006813,potassium ion transport,7,2,0.43,0.0321
+GO:0071880,adenylate cyclase-activating adrenergic ...,3,2,0.18,0.0415
+GO:0071870,cellular response to catecholamine stimu...,3,2,0.18,0.0415
+GO:0050688,regulation of defense response to virus,4,2,0.24,0.0416

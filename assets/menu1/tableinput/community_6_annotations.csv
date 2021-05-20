@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0006403,RNA localization,9,2,0.24,0.017
-GO:0043568,positive regulation of insulin-like grow...,1,1,0.03,0.018
-GO:0002277,myeloid dendritic cell activation involv...,1,1,0.03,0.018
-GO:0001766,membrane raft polarization,1,1,0.03,0.018
-GO:0001768,establishment of T cell polarity,1,1,0.03,0.018
-GO:0045720,negative regulation of integrin biosynth...,1,1,0.03,0.018
-GO:0045726,positive regulation of integrin biosynth...,1,1,0.03,0.018
-GO:0001771,immunological synapse formation,1,1,0.03,0.018
-GO:0044351,macropinocytosis,1,1,0.03,0.018
-GO:0060689,cell differentiation involved in salivar...,1,1,0.03,0.018
+GO:0008150,biological_process,799,55,66.25,0.00014
+GO:0006120,"mitochondrial electron transport, NADH t...",8,3,0.66,0.00453
+GO:0001958,endochondral ossification,4,2,0.33,0.01201
+GO:0030574,collagen catabolic process,4,2,0.33,0.01201
+GO:0006368,transcription elongation from RNA polyme...,4,2,0.33,0.01201
+GO:0022617,extracellular matrix disassembly,5,2,0.41,0.01943
+GO:0001894,tissue homeostasis,5,2,0.41,0.01943
+GO:0007275,multicellular organism development,230,15,19.07,0.03052
+GO:0043252,sodium-independent organic anion transpo...,1,1,0.08,0.04653
+GO:0030382,sperm mitochondrion organization,1,1,0.08,0.04653

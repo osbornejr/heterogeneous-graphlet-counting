@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0008150,biological_process,495,44,55.63,0.0027
-GO:2000045,regulation of G1/S transition of mitotic...,6,4,0.67,0.0035
-GO:0034220,ion transmembrane transport,30,7,3.37,0.0123
-GO:0010468,regulation of gene expression,115,9,12.92,0.0611
-GO:0042304,regulation of fatty acid biosynthetic pr...,2,2,0.22,0.0613
-GO:0016126,sterol biosynthetic process,3,2,0.34,0.0613
-GO:0051924,regulation of calcium ion transport,5,2,0.56,0.0615
-GO:0042770,signal transduction in response to DNA d...,5,2,0.56,0.0615
-GO:0072659,protein localization to plasma membrane,1,1,0.11,0.0626
-GO:0014904,myotube cell development,1,1,0.11,0.0626
+GO:0009790,embryo development,38,4,3.86,0.0020
+GO:0006370,7-methylguanosine mRNA capping,2,2,0.2,0.0023
+GO:0034063,stress granule assembly,2,2,0.2,0.0023
+GO:0019886,antigen processing and presentation of e...,8,3,0.81,0.0050
+GO:0008219,cell death,88,5,8.93,0.0110
+GO:0019048,modulation by virus of host morphology o...,20,4,2.03,0.0132
+GO:0006977,"DNA damage response, signal transduction...",5,2,0.51,0.0208
+GO:0006446,regulation of translational initiation,5,2,0.51,0.0208
+GO:0007018,microtubule-based movement,13,3,1.32,0.0216
+GO:0018279,protein N-linked glycosylation via aspar...,7,2,0.71,0.0411

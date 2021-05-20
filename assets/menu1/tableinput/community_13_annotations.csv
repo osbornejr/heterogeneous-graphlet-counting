@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0051496,positive regulation of stress fiber asse...,2,2,0.29,0.0092
-GO:0008380,RNA splicing,12,4,1.76,0.0138
-GO:0009790,embryo development,26,6,3.81,0.0246
-GO:0038096,Fc-gamma receptor signaling pathway invo...,3,2,0.44,0.0260
-GO:0051289,protein homotetramerization,3,2,0.44,0.0260
-GO:0033138,positive regulation of peptidyl-serine p...,3,2,0.44,0.0260
-GO:0045892,"negative regulation of transcription, DN...",25,5,3.66,0.0295
-GO:0006397,mRNA processing,16,4,2.34,0.0470
-GO:0042060,wound healing,20,4,2.93,0.0480
-GO:0009615,response to virus,11,3,1.61,0.0482
+GO:0090090,negative regulation of canonical Wnt sig...,4,2,0.18,0.0032
+GO:0030198,extracellular matrix organization,20,4,0.91,0.0041
+GO:0006355,"regulation of transcription, DNA-templat...",166,10,7.58,0.0066
+GO:0007596,blood coagulation,30,4,1.37,0.0071
+GO:0043433,negative regulation of DNA-binding trans...,7,2,0.32,0.0106
+GO:0007519,skeletal muscle tissue development,8,2,0.37,0.0139
+GO:0006508,proteolysis,56,5,2.56,0.0208
+GO:0010226,response to lithium ion,1,1,0.05,0.0237
+GO:0001843,neural tube closure,1,1,0.05,0.0237
+GO:0042631,cellular response to water deprivation,1,1,0.05,0.0237

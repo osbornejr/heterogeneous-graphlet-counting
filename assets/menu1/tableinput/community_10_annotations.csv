@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0006986,response to unfolded protein,4,2,0.23,0.0059
-GO:0007275,multicellular organism development,148,6,8.63,0.0085
-GO:0006120,"mitochondrial electron transport, NADH t...",7,2,0.41,0.0195
-GO:0010951,negative regulation of endopeptidase act...,3,2,0.17,0.0314
-GO:0051604,protein maturation,6,2,0.35,0.0315
-GO:0046689,response to mercury ion,1,1,0.06,0.0327
-GO:0030837,negative regulation of actin filament po...,1,1,0.06,0.0327
-GO:0046326,positive regulation of glucose import,1,1,0.06,0.0327
-GO:0016239,positive regulation of macroautophagy,1,1,0.06,0.0327
-GO:0010025,wax biosynthetic process,1,1,0.06,0.0327
+GO:0048011,neurotrophin TRK receptor signaling path...,13,3,0.62,0.0036
+GO:0045165,cell fate commitment,8,3,0.38,0.0056
+GO:0032496,response to lipopolysaccharide,11,3,0.52,0.0114
+GO:0045944,positive regulation of transcription by ...,39,5,1.85,0.0121
+GO:0009749,response to glucose,10,3,0.47,0.0188
+GO:0097190,apoptotic signaling pathway,25,5,1.18,0.0207
+GO:0045777,positive regulation of blood pressure,2,2,0.09,0.0246
+GO:0034616,response to laminar fluid shear stress,2,2,0.09,0.0246
+GO:0002262,myeloid cell homeostasis,6,2,0.28,0.0246
+GO:0007601,visual perception,10,2,0.47,0.0247
