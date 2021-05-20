@@ -168,7 +168,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	 	deg_thresh = 70#mean(degrees)+2*std(degrees)
 	 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-	 	draw(SVG("$(params.website_dir)/_assets/alt_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/alt_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	end	
 	## Community structure
 	@info "Identifying communities..."
