@@ -9,7 +9,9 @@ function adjacency(data::AbstractArray,threshold::Float64)
 end
 function empirical_dist_adjacency(sim_matrix::AbstractArray,prob::Float64)
 	##run each row of similarity matrix through its own empirical cdf to determine probability 
-	dists = hcat(map.(ecdf.(eachrow(sim_matrix)),eachrow(sim_matrix))...)
+	#dists = hcat(map.(ecdf.(eachrow(sim_matrix)),eachrow(sim_matrix))...)
+	##alternative method to ignore 0 values in ecdfs...
+	dists = hcat(map.(ecdf.(filter.(x->x!=0,eachrow(sim_matrix))),eachrow(sim_matrix))...)
 	##find which are significant for each row and column, then combine
 	adj = (dists.>prob).*(dists'.>prob)
 	adj[diagind(adj)].= 0
