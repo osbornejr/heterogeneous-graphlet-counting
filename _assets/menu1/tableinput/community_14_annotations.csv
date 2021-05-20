@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0006821,chloride transport,5,2,0.16,0.0041
-GO:0007026,negative regulation of microtubule depol...,1,1,0.03,0.0213
-GO:0010586,miRNA metabolic process,1,1,0.03,0.0213
-GO:0006378,mRNA polyadenylation,1,1,0.03,0.0213
-GO:0016075,rRNA catabolic process,1,1,0.03,0.0213
-GO:0019542,propionate biosynthetic process,1,1,0.03,0.0213
-GO:0000387,spliceosomal snRNP assembly,1,1,0.03,0.0213
-GO:0046785,microtubule polymerization,1,1,0.03,0.0213
-GO:0030328,prenylcysteine catabolic process,1,1,0.03,0.0213
-GO:0072659,protein localization to plasma membrane,1,1,0.03,0.0213
+GO:0007195,adenylate cyclase-inhibiting dopamine re...,2,2,0.09,0.00095
+GO:0045840,positive regulation of mitotic nuclear d...,3,2,0.13,0.00281
+GO:0030168,platelet activation,12,3,0.53,0.00512
+GO:0030316,osteoclast differentiation,4,2,0.18,0.00550
+GO:0045471,response to ethanol,5,2,0.22,0.00899
+GO:0006284,base-excision repair,6,2,0.26,0.01322
+GO:0000122,negative regulation of transcription by ...,19,3,0.84,0.01937
+GO:0002576,platelet degranulation,8,2,0.35,0.02371
+GO:0006879,cellular iron ion homeostasis,8,2,0.35,0.02371
+GO:0030099,myeloid cell differentiation,13,5,0.57,0.02821

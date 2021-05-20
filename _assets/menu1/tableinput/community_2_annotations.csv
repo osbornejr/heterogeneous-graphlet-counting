@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0007190,activation of adenylate cyclase activity,3,2,0.15,0.0030
-GO:0050796,regulation of insulin secretion,4,2,0.2,0.0059
-GO:0001958,endochondral ossification,4,2,0.2,0.0059
-GO:0006112,energy reserve metabolic process,7,2,0.35,0.0195
-GO:0043066,negative regulation of apoptotic process,19,3,0.95,0.0211
-GO:0007156,homophilic cell adhesion via plasma memb...,8,2,0.4,0.0254
-GO:0007565,female pregnancy,7,3,0.35,0.0301
-GO:0019933,cAMP-mediated signaling,3,2,0.15,0.0314
-GO:0055072,iron ion homeostasis,5,2,0.25,0.0315
-GO:0006825,copper ion transport,1,1,0.05,0.0327
+GO:0038096,Fc-gamma receptor signaling pathway invo...,3,2,0.15,0.0021
+GO:0019048,modulation by virus of host morphology o...,20,3,1.02,0.0150
+GO:2001224,positive regulation of neuron migration,2,2,0.1,0.0262
+GO:0048814,regulation of dendrite morphogenesis,3,2,0.15,0.0263
+GO:0097202,activation of cysteine-type endopeptidas...,1,1,0.05,0.0271
+GO:0032793,positive regulation of CREB transcriptio...,1,1,0.05,0.0271
+GO:0007080,mitotic metaphase plate congression,1,1,0.05,0.0271
+GO:0006895,Golgi to endosome transport,1,1,0.05,0.0271
+GO:2000969,positive regulation of AMPA receptor act...,1,1,0.05,0.0271
+GO:0038026,reelin-mediated signaling pathway,1,1,0.05,0.0271

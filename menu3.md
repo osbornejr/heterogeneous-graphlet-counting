@@ -1,92 +1,603 @@
-@def title = "Co-expression measures"
-@def hascode = true
-@def rss = "Running through various types of coexpression measures that we use to analyse genetic data."
-@def rss_title = "Coexpression measures"
-@def rss_pubdate = Date(2021, 4, 26)
+@def title = "Mayank de novo"
+@def tags = ["syntax", "code"]
 
-@def tags = ["syntax", "code", "image"]
+# {{menu2_desc}} ({{menu2_name}})
+\tableofcontents <!-- you can use \toc as well -->
 
-# Co-expression measures
-
-\toc
-
-## Gene expression data
-
-One obtainable output of RNA sequencing experiments is gene expression count data that represent how present the gene is in a particular sample. 
-This can be represented as an $n \times m$ count matrix, where $n$ is the number of genes, and $m$ is the number of samples in the experiment:
-
-|Gene | Sample 1 | Sample 2 | ... | Sample $m$
-|-----|----------|----------|-----|----------
-|Gene 1 | 12 | 100 |... | 23
-|Gene 2 | 0 | 11 |... | 341
-|Gene 3 | 223 | 1 |... | 1045
-|  .   |   .   |   .   |   . 
-|  .   |   .   |   .   |   . 
-|  .   |   .   |   .   |   . 
-|Gene $n$ | 0 | 0 |... | 19
-
-For the purposes of our analysis, we will view each of these genes as a random variable $X_g$ with $m$ observations:
-
-$$
-X_g = \{x_1,x_2,x_3,...,x_m\} 
-$$
+## Run parameters
+\tableinput{}{./tableinput/run_parameters.csv}
 
 
-## Calculating gene variance
+## Data preprocessing
+### Data cleaning
 
-Often the first thing we want to identify in the data is a subset of genes which are of interest, i.e. the genes that have the most change in their expression across samples.
-One way to do this is to look at the variance of each of our random variables $X_g$. Recall that the variance can be estimated using the formula
+Before cut:
+![image](/assets/menu3/raw_data_histogram.svg)
 
-$$
-\sigma_{X_g}^2 =\frac{1}{m-1}\sum_{i=1}^m (x_i - \bar{x})^2  
-$$
+After cut:
+![image](/assets/menu3/clean_data_cut_histogram.svg)
 
-If we then identify those genes that have the highest variance, we have a good way to restrict our analsyis to ony those genes that may be responding to changes in experimental conditions.
+## Network construction
 
-## Identifying interactions between genes
+![image](/assets/menu3/network.svg)
 
-We then want to see to what degree these genes of interest are interacting with one another. 
-The most simple approach here is to look at the (Pearson) correlation between each of our random variables: 
+## Network analysis
 
-\begin{align} 
-\rho_{XY} &= \frac{\sum_{i=1}^m (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^m (x_i - \bar{x})^2}\sqrt{\sum_{i=1}^m (y_i - \bar{y})^2}}  \\
-	&= \frac{cov(X,Y)}{\sigma_X \sigma{y}}
-\end{align}
+### Network statistics
+\tableinput{}{./tableinput/network_stats.csv}
 
-i.e. the correlation is the covariance of $X$ and $Y$ normalised by their standard deviations.
-This means that the correlation gives a value that is normalised between $-1$ and $1$, giving us a relative measure of how closely each random variable $X$ and $Y$ correspond to each other across the sample set.
+### Type breakdown
 
-## Forming a co-expression network 
+\tableinput{}{./tableinput/type_representation.csv}
 
-The correlation coefficient for every pair of genes can be arranged as an $n\times n$ similarity matrix $S$.   
-Note that $S$ is quite similar to an adjacency matrix representation of a network, and indeed if we were to take the correlation values as the weights for edges then it could be viewed as one.
-In our case, we want an unweighted network, so the simplest approach is to apply a hard threshold on the (absolute) correlation values to decide whether or not an edge exists between each gene pair.
+### Degree distribution
 
-## Indirect associations in the network
-One problem here is that the correlation between two genes may be largely dependent on their shared relationship with another gene.
-In our network, this will result in a large overrepresentation of triangle type structures.     
-Partial correlation seeks to eliminate this dependency on a third variable:
-$$
-\rho_{XY|Z} = \frac{\rho_{XY} - \rho_{XZ}\rho_{YZ}}{\sqrt{1-\rho_{XZ}^2}\sqrt{1-\rho_{YZ}^2}}
-$$
+* __All nodes:__
+![image](/assets/menu3/degree_distribution.svg)
 
-## Example
+* __Coding transcripts:__
+![image](/assets/menu3/coding_degree_distribution.svg)
 
-```julia:./code_pg1/ex1
-using Statistics
-## 4 gene vectors; B and C are both randomly perturbated from A
-A = LinRange(1,10,100) + randn(100,1)
-B = A + randn(100,1)
-C = A + randn(100,1)
+* __Non-coding transcripts:__
+![image](/assets/menu3/noncoding_degree_distribution.svg)
 
-##generate correlation matrix for genes
-S = cor(hcat(A,B,C))  
-@show S
-## partial correlation of B and C when we exclude the influence of A:
-parBCA = (S[2,3]-S[2,1]*S[3,1])/(sqrt(1-S[2,1]^2)*sqrt(1-S[3,1]^2))
-@show parBCA
-## partial correlation of B and A when we exclude the influence of C:
-parBAC = (S[1,2]-S[2,3]*S[1,3])/(sqrt(1-(S[2,3])^2)*sqrt(1-(S[1,3])^2))
-@show parBAC
-``` 
-\output{./code_pg1/ex1}
+
+### Hubs
+
+__Nodes with degree $k>\bar{k}+2\sigma_{k}$:__
+~~~
+<details>
+<summary> </summary>
+
+<br>
+<img src="/assets/menu3/two_std_hub_network.svg" alt="hubs"> 
+</details>
+~~~
+ 
+### Community detection
+
+[3D visualisation](/menu3_communities/)
+
+
+
+### Graphlet counting
+Comparing the typed representations of different graphlets in the real network to a set of networks with the same structure, but randomised node types.
+
+* Tables
+~~~
+<div class="flex-container">
+
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/2-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_edge</td>
+    <td style = "text-align: right;">1664.31</td>
+    <td style = "text-align: right;">1690</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_edge</td>
+    <td style = "text-align: right;">18184.0</td>
+    <td style = "text-align: right;">18149</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_edge</td>
+    <td style = "text-align: right;">36.72</td>
+    <td style = "text-align: right;">46</td>
+  </tr>
+</table>
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/3-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_3-path</td>
+    <td style = "text-align: right;">21473.3</td>
+    <td style = "text-align: right;">18915</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_3-path</td>
+    <td style = "text-align: right;">997.68</td>
+    <td style = "text-align: right;">547</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_noncoding_3-path</td>
+    <td style = "text-align: right;">480.34</td>
+    <td style = "text-align: right;">356</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_coding_3-path</td>
+    <td style = "text-align: right;">11246.4</td>
+    <td style = "text-align: right;">7095</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_3-path</td>
+    <td style = "text-align: right;">2.37068e5</td>
+    <td style = "text-align: right;">244366</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_3-path</td>
+    <td style ="text-align: right;">21.38</td>
+    <td style = "text-align: right;">8</td>
+  </tr>
+</table>
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/3-tri.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_3-tri</td>
+    <td style = "text-align: right;">893.66</td>    
+    <td style = "text-align: right;">2052</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_3-tri</td>
+    <td style = "text-align: right;">19884.7</td>
+    <td style = "text-align: right;">25026</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_3-tri</td>
+    <td style = "text-align: right;">1.41849e5</td>
+    <td style = "text-align: right;">135501</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_3-tri</td>
+    <td style = "text-align: right;">13.0</td>
+    <td style = "text-align: right;">61</td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">noncoding_coding_coding_noncoding_4-path</td>
+    <td style = "text-align: right;">7078.75</td>
+    <td style = "text-align: right;">5911</td>
+ </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-path</td>
+    <td style = "text-align: right;">3.42802e6</td>
+    <td style = "text-align: right;">3561835</td>
+  </tr>
+
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_coding_4-path</td>
+    <td style = "text-align: right;">3.21663e5</td>
+    <td style = "text-align: right;">219004</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-path</td>
+    <td style = "text-align: right;">3.12688e5</td>
+    <td style = "text-align: right;">299825</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_coding_4-path</td>
+    <td style = "text-align: right;">7209.26</td>
+    <td style = "text-align: right;">3529</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_noncoding_noncoding_4-path</td>
+    <td style = "text-align: right;">640.79</td>
+    <td style = "text-align: right;">292</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-path</td>
+    <td style = "text-align: right;">14248.7</td>
+    <td style = "text-align: right;">9301</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-path</td>
+    <td style = "text-align: right;">632.32</td>
+    <td style = "text-align: right;">97</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_noncoding_coding_4-path</td>
+    <td style = "text-align: right;">14316.5</td>
+    <td style = "text-align: right;">6719</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-path</td>
+    <td style = "text-align: right;">14.33</td>
+    <td style = "text-align: right;">0</td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-star.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-star</td>
+    <td style = "text-align: right;">2.43116e5</td>
+    <td style = "text-align: right;">206162</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_coding_4-star</td>
+    <td style = "text-align: right;">88314.3</td>
+    <td style = "text-align: right;">50863</td>
+  </tr>
+
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_coding_noncoding_4-star</td>
+    <td style = "text-align: right;">10829.5</td>
+    <td style = "text-align: right;">6930</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_coding_noncoding_4-star</td>
+    <td style = "text-align: right;">157.66</td>
+    <td style = "text-align: right;">72</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-star</td>
+    <td style = "text-align: right;">6.83</td>
+    <td style = "text-align: right;">2</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-star</td>
+    <td style = "text-align: right;">1.80134e6</td>
+    <td style = "text-align: right;">1885477</td>
+
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-star</td>
+    <td style = "text-align: right;">511.03</td>
+    <td style = "text-align: right;">200</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-star</td>
+    <td style = "text-align: right;">11865.7</td>
+    <td style = "text-align: right;">6439</
+td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-tail.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_coding_4-tail</td>
+    <td style = "text-align: right;">1.67961e5</td>
+    <td style = "text-align: right;">94217</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-tail</td>
+    <td style = "text-align: right;">7432.14</td>
+    <td style = "text-align: right;">3735</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-tail</td>
+    <td style = "text-align: right;">645.87</td>
+    <td style = "text-align: right;">230</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-tail</td>
+    <td style = "text-align: right;">3.54037e6</td>
+    <td style = "text-align: right;">3664555</td>
+  
+</tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_coding_coding_4-tail</td>
+    <td style = "text-align: right;">6861.39</td>
+    <td style = "text-align: right;">7372</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-tail</td>
+    <td style = "text-align: right;">1.59608e5</td>
+    <td style = "text-align: right;">141300</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_coding_noncoding_4-tail</td>
+    <td style = "text-align: right;">14438.6</td>
+    <td style = "text-align: right;">12601</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_coding_4-tail</td>
+    <td style = "text-align: right;">327.28</td>
+    <td style = "text-align: right;">220</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_coding_noncoding_4-tail</td>
+    <td style = "text-align: right;">307.19</td>
+    <td style = "text-align: right;">349</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-tail</td>
+    <td style = "text-align: right;">13.95</td>
+    <td style = "text-align: right;">5</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_coding_4-tail</td>
+    <td style = "text-align: right;">14946.7</td>
+    <td style = "text-align: right;">7308</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_coding_coding_4-tail</td>
+    <td style = "text-align: right;">3.21477e5</td>
+    <td style = "text-align: right;">302500</td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-cycle.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-cycle</td>
+    <td style = "text-align: right;">2980.68</td>
+    <td style = "text-align: right;">1613</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-cycle</td>
+    <td style = "text-align: right;">200.78</td>
+    <td style = "text-align: right;">50</td>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-cycle</td>
+    <td style = "text-align: right;">15564.5</td>
+    <td style = "text-align: right;">17089</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-cycle</td>
+    <td style = "text-align: right;">5.98</td>
+    <td style = "text-align: right;">0</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-cycle</td>
+    <td style = "text-align: right;">0.08</td>
+    <td style = "text-align: right;">0</td>
+  </tr>
+</table>
+
+</div>
+
+<div class="graphlet">
+<img src="/assets/graphlet-images/4-chord.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</th>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-chord</td>
+    <td style = "text-align: right;">
+50.53</td>
+    <td style = "text-align: right;">24</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-chord </td>
+    <td style = "text-align: right;">24504.8</td>
+    <td style = "text-align: right;">14353</td>
+  </tr>
+
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_coding_4-chord</td>
+    <td style = "text-align: right;">24458.5</td>
+    <td style = "text-align: right;">25984</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_coding_4-chord</td>
+    <td style = "text-align: right;">516.48</td>
+    <td style = "text-align: right;">1392</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_noncoding_noncoding_4-chord</td>
+    <td style = "text-align: right;">43.11</td>
+    <td style = "text-align: right;">1</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_coding_coding_noncoding_4-chord</td>
+    <td style = "text-align: right;">536.98</td>
+    <td style = "text-align: right;">76</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-chord</td>
+    <td style = "text-align: right;">256059.0</td>
+    <td style = "text-align: right;">265812</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-chord</td>
+    <td style = "text-align: right;">2262.62</td>
+    <td style = "text-align: right;">791</td>
+ 
+ </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-chord</td>
+    <td style = "text-align: right;">0.96</td>
+    <td style = "text-align: right;">0</td>
+  </tr>
+</table>
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-clique.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<table>
+  <tr class = "header">
+    <th style = "text-align: right;">Graphlet</th>
+    <th style = "text-align: right;">Expected</t
+h>
+    <th style = "text-align: right;">Observed</th>
+  </tr>
+ 
+ <tr>
+    <td style = "text-align: right;">coding_coding_noncoding_noncoding_4-clique</td>
+    <td style = "text-align: right;">15039.5</td>
+    <td style = "text-align: right;">54411</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_coding_4-clique</td>
+    <td style = "text-align: right;">1.12363e6</td>
+    <td style = "text-align: right;">956621</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_coding_coding_noncoding_4-clique</td>
+    <td style = "text-align: right;">2.16407e5</td>
+    <td style = "text-align: right;">340872</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">noncoding_noncoding_noncoding_noncoding_4-clique</td>
+    <td style = "text-align: right;">4.83</td>
+    <td style = "text-align: right;">71
+</td>
+  </tr>
+  <tr>
+    <td style = "text-align: right;">coding_noncoding_noncoding_noncoding_4-clique</td>
+    <td style = "text-align: right;">446.83</td>
+    <td style = "text-align: right;">3553</td>
+  </tr>
+</table>
+
+</div>
+
+</div>
+~~~
+
+* Boxplots
+
+~~~
+<div class="flex-container">
+
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/2-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/3-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<img src="/assets/menu3/plots/3-path_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/3-tri.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu3/plots/3-tri_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-path.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<img src="/assets/menu3/plots/4-path_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-star.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu3/plots/4-star_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-tail.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu3/plots/4-tail_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-cycle.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu3/plots/4-cycle_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet">
+<img src="/assets/graphlet-images/4-chord.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+<img src="/assets/menu3/plots/4-chord_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+<div class="graphlet" >
+<img src="/assets/graphlet-images/4-clique.svg" height=100 width=200 alt="hubs"> 
+</div>
+<div class="hide">
+
+<img src="/assets/menu3/plots/4-clique_boxplot.svg" height=400 width=200 alt="hubs" class="rotateimg90"> 
+</div>
+
+</div>
+<div>
+</div>
+~~~
+

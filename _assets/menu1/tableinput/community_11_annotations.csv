@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0007156,homophilic cell adhesion via plasma memb...,8,2,0.69,0.028
-GO:0006915,apoptotic process,48,4,4.17,0.033
-GO:0048638,regulation of developmental growth,5,2,0.43,0.033
-GO:0021965,spinal cord ventral commissure morphogen...,1,1,0.09,0.034
-GO:0006957,"complement activation, alternative pathw...",1,1,0.09,0.034
-GO:0060487,lung epithelial cell differentiation,1,1,0.09,0.034
-GO:0000090,mitotic anaphase,1,1,0.09,0.034
-GO:0021919,BMP signaling pathway involved in spinal...,1,1,0.09,0.034
-GO:0045945,positive regulation of transcription by ...,1,1,0.09,0.034
-GO:0033617,mitochondrial respiratory chain complex ...,1,1,0.09,0.034
+GO:0051092,positive regulation of NF-kappaB transcr...,7,4,0.63,0.00019
+GO:0007608,sensory perception of smell,2,2,0.18,0.00254
+GO:0032786,positive regulation of DNA-templated tra...,2,2,0.18,0.00254
+GO:0008150,biological_process,799,60,72.33,0.00282
+GO:0007218,neuropeptide signaling pathway,7,3,0.63,0.00377
+GO:0006833,water transport,3,2,0.27,0.00736
+GO:0032091,negative regulation of protein binding,3,2,0.27,0.00736
+GO:0030030,cell projection organization,64,4,5.79,0.00764
+GO:0016311,dephosphorylation,23,4,2.08,0.02215
+GO:0000082,G1/S transition of mitotic cell cycle,17,3,1.54,0.02266

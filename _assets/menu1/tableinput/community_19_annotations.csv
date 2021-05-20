@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0070374,positive regulation of ERK1 and ERK2 cas...,4,2,0.24,0.0071
+GO:0043547,positive regulation of GTPase activity,4,2,0.24,0.0071
+GO:0007156,homophilic cell adhesion via plasma memb...,13,3,0.79,0.0093
+GO:0019432,triglyceride biosynthetic process,5,2,0.3,0.0115
+GO:0006071,glycerol metabolic process,5,2,0.3,0.0115
+GO:0007399,nervous system development,112,6,6.82,0.0119
+GO:0006355,"regulation of transcription, DNA-templat...",166,10,10.11,0.0345
+GO:0051321,meiotic cell cycle,7,2,0.43,0.0349
+GO:0021919,BMP signaling pathway involved in spinal...,1,1,0.06,0.0355
+GO:0000090,mitotic anaphase,1,1,0.06,0.0355

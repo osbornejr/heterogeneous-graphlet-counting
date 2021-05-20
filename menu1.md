@@ -9,20 +9,22 @@
 
 ## Data preprocessing
 ### Data cleaning
-Cutoff point: {{menu1_cut}}
 
 Before cut:
 ![image](/assets/menu1/raw_data_histogram.svg)
 
 After cut:
-![image](/assets/menu1/clean_data_{{menu1_cut}}_cut_histogram.svg)
+![image](/assets/menu1/clean_data_cut_histogram.svg)
 
 ## Network construction
 
 
-![image](/assets/menu1/{{menu1_normalisation_method}}_{{menu1_threshold_method}}_{{menu1_variance_cut}}_{{menu1_coexpression_measure}}_network.svg)
+![image](/assets/menu1/network.svg)
 
 ## Network analysis
+
+### Network statistics
+\tableinput{}{./tableinput/network_stats.csv}
 
 ### Type breakdown
 
@@ -48,7 +50,7 @@ __Nodes with degree $k>\bar{k}+2\sigma_{k}$:__
 <summary> </summary>
 
 <br>
-<img src="/assets/menu1/{{menu1_normalisation_method}}_{{menu1_threshold_method}}_{{menu1_variance_cut}}_{{menu1_coexpression_measure}}_two_std_hub_network.svg" alt="hubs"> 
+<img src="/assets/menu1/two_std_hub_network.svg" alt="hubs"> 
 </details>
 ~~~
 __Nodes with degree $k>70$:__
@@ -57,7 +59,7 @@ __Nodes with degree $k>70$:__
 <summary> </summary>
 
 <br>
-<img src="/assets/menu1/{{menu1_normalisation_method}}_{{menu1_threshold_method}}_{{menu1_variance_cut}}_{{menu1_coexpression_measure}}_70_hub_network.svg" alt="hubs"> 
+<img src="/assets/menu1/alt_hub_network.svg" alt="hubs"> 
 </details>
 ~~~
 

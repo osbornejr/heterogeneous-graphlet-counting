@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0008150,biological_process,495,75,95.06,5.2e-06
-GO:0019886,antigen processing and presentation of e...,4,3,0.77,0.0043
-GO:0007399,nervous system development,68,12,13.06,0.0090
-GO:0006355,"regulation of transcription, DNA-templat...",102,20,19.59,0.0131
-GO:0060314,regulation of ryanodine-sensitive calciu...,3,2,0.58,0.0314
-GO:0007218,neuropeptide signaling pathway,3,2,0.58,0.0314
-GO:0010881,regulation of cardiac muscle contraction...,4,2,0.77,0.0585
-GO:0006397,mRNA processing,16,5,3.07,0.0585
-GO:0000278,mitotic cell cycle,33,5,6.34,0.0623
-GO:0048011,neurotrophin TRK receptor signaling path...,10,3,1.92,0.0808
+GO:0006412,translation,27,5,1.12,0.0044
+GO:0030317,flagellated sperm motility,4,2,0.17,0.0046
+GO:0007275,multicellular organism development,230,11,9.53,0.0124
+GO:0071356,cellular response to tumor necrosis fact...,8,2,0.33,0.0202
+GO:0055085,transmembrane transport,77,6,3.19,0.0257
+GO:0034097,response to cytokine,27,5,1.12,0.0260
+GO:0071398,cellular response to fatty acid,3,2,0.12,0.0280
+GO:0009566,fertilization,6,2,0.25,0.0280
+GO:0000090,mitotic anaphase,1,1,0.04,0.0288
+GO:1900825,regulation of membrane depolarization du...,1,1,0.04,0.0288

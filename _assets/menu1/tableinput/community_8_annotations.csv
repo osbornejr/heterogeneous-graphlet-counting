@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0007018,microtubule-based movement,5,3,0.29,0.0076
-GO:0030308,negative regulation of cell growth,8,2,0.47,0.0345
-GO:0043063,intercellular bridge organization,1,1,0.06,0.0384
-GO:2000785,regulation of autophagosome assembly,1,1,0.06,0.0384
-GO:0007094,mitotic spindle assembly checkpoint,1,1,0.06,0.0384
-GO:0086005,ventricular cardiac muscle cell action p...,1,1,0.06,0.0384
-GO:0002437,inflammatory response to antigenic stimu...,1,1,0.06,0.0384
-GO:0032466,negative regulation of cytokinesis,1,1,0.06,0.0384
-GO:0032481,positive regulation of type I interferon...,1,1,0.06,0.0384
-GO:0075733,intracellular transport of virus,1,1,0.06,0.0384
+GO:0008150,biological_process,799,87,123.03,6.6e-06
+GO:0030049,muscle filament sliding,2,2,0.31,0.0054
+GO:0010288,response to lead ion,2,2,0.31,0.0054
+GO:0071421,manganese ion transmembrane transport,2,2,0.31,0.0054
+GO:0050925,negative regulation of negative chemotax...,2,2,0.31,0.0054
+GO:0006415,translational termination,2,2,0.31,0.0054
+GO:0003032,detection of oxygen,2,2,0.31,0.0054
+GO:0006919,activation of cysteine-type endopeptidas...,6,3,0.92,0.0066
+GO:0000184,nuclear-transcribed mRNA catabolic proce...,6,3,0.92,0.0066
+GO:0034641,cellular nitrogen compound metabolic pro...,310,26,47.73,0.0146

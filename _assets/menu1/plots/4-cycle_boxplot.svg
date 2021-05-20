@@ -14,8 +14,8 @@
     <path d="M0,0 L15,3.5 L0,7 z" stroke="context-stroke" fill="context-stroke"/>
   </marker>
 </defs>
-<g class="plotroot yscalable" id="img-53751bd6-1">
-  <g class="guide xlabels" font-size="2.82" font-family="'PT Sans Caption','Helvetica Neue','Helvetica',sans-serif" fill="#6C606B" id="img-53751bd6-2">
+<g class="plotroot yscalable" id="img-7a1db70f-1">
+  <g class="guide xlabels" font-size="2.82" font-family="'PT Sans Caption','Helvetica Neue','Helvetica',sans-serif" fill="#6C606B" id="img-7a1db70f-2">
     <g transform="translate(23.42,71.77)">
       <g class="primitive">
         <text text-anchor="end" dy="0.35em" transform="rotate(-90,0, 0)">coding_coding_coding_noncoding_4-cycle</text>
@@ -42,156 +42,156 @@
       </g>
     </g>
   </g>
-  <g clip-path="url(#img-53751bd6-3)">
-    <g id="img-53751bd6-4">
-      <g pointer-events="visible" stroke-width="0.3" fill="#000000" fill-opacity="0.000" stroke="#000000" stroke-opacity="0.000" class="guide background" id="img-53751bd6-5">
-        <g transform="translate(55.94,37.89)" id="img-53751bd6-6">
+  <g clip-path="url(#img-7a1db70f-3)">
+    <g id="img-7a1db70f-4">
+      <g pointer-events="visible" stroke-width="0.3" fill="#000000" fill-opacity="0.000" stroke="#000000" stroke-opacity="0.000" class="guide background" id="img-7a1db70f-5">
+        <g transform="translate(55.94,37.89)" id="img-7a1db70f-6">
           <path d="M-40.66,-32.89 L 40.66 -32.89 40.66 32.89 -40.66 32.89 z" class="primitive"/>
         </g>
       </g>
-      <g class="guide ygridlines xfixed" stroke-dasharray="0.5,0.5" stroke-width="0.2" stroke="#D0D0E0" id="img-53751bd6-7">
-        <g transform="translate(55.94,68.77)" id="img-53751bd6-8">
+      <g class="guide ygridlines xfixed" stroke-dasharray="0.5,0.5" stroke-width="0.2" stroke="#D0D0E0" id="img-7a1db70f-7">
+        <g transform="translate(55.94,68.77)" id="img-7a1db70f-8">
           <path fill="none" d="M-40.66,0 L 40.66 0" class="primitive"/>
         </g>
-        <g transform="translate(55.94,37.89)" id="img-53751bd6-9">
+        <g transform="translate(55.94,37.89)" id="img-7a1db70f-9">
           <path fill="none" d="M-40.66,0 L 40.66 0" class="primitive"/>
         </g>
-        <g transform="translate(55.94,7)" id="img-53751bd6-10">
+        <g transform="translate(55.94,7)" id="img-7a1db70f-10">
           <path fill="none" d="M-40.66,0 L 40.66 0" class="primitive"/>
         </g>
       </g>
-      <g class="guide xgridlines yfixed" stroke-dasharray="0.5,0.5" stroke-width="0.2" stroke="#D0D0E0" id="img-53751bd6-11">
-        <g transform="translate(31.55,37.89)" id="img-53751bd6-12">
+      <g class="guide xgridlines yfixed" stroke-dasharray="0.5,0.5" stroke-width="0.2" stroke="#D0D0E0" id="img-7a1db70f-11">
+        <g transform="translate(31.55,37.89)" id="img-7a1db70f-12">
           <path fill="none" d="M0,-32.89 L 0 32.89" class="primitive"/>
         </g>
-        <g transform="translate(47.81,37.89)" id="img-53751bd6-13">
+        <g transform="translate(47.81,37.89)" id="img-7a1db70f-13">
           <path fill="none" d="M0,-32.89 L 0 32.89" class="primitive"/>
         </g>
-        <g transform="translate(64.07,37.89)" id="img-53751bd6-14">
+        <g transform="translate(64.07,37.89)" id="img-7a1db70f-14">
           <path fill="none" d="M0,-32.89 L 0 32.89" class="primitive"/>
         </g>
-        <g transform="translate(80.34,37.89)" id="img-53751bd6-15">
+        <g transform="translate(80.34,37.89)" id="img-7a1db70f-15">
           <path fill="none" d="M0,-32.89 L 0 32.89" class="primitive"/>
         </g>
       </g>
-      <g class="plotpanel" id="img-53751bd6-16">
+      <g class="plotpanel" id="img-7a1db70f-16">
         <metadata>
           <boundingbox value="15.284999999999997mm 5.0mm 81.315mm 65.7733333333333mm"/>
           <unitbox value="0.5 10.323764299589898 5.0 -10.647528599179799"/>
         </metadata>
-        <g class="geometry" stroke-width="0.3" id="img-53751bd6-17">
-          <g transform="translate(88.47,66.63)" id="img-53751bd6-18" fill="#FF6765" stroke="#FF6765">
+        <g class="geometry" stroke-width="0.3" id="img-7a1db70f-17">
+          <g transform="translate(88.47,66.63)" id="img-7a1db70f-18" fill="#FF6765" stroke="#FF6765">
             <path d="M-7.63,-2.14 L 7.63 -2.14 7.63 2.14 -7.63 2.14 z" class="primitive"/>
           </g>
-          <g transform="translate(23.42,19.55)" id="img-53751bd6-19" fill="#FF6DAE" stroke="#FF6DAE">
+          <g transform="translate(23.42,19.55)" id="img-7a1db70f-19" fill="#FF6DAE" stroke="#FF6DAE">
             <path d="M-7.63,-1.1 L 7.63 -1.1 7.63 1.1 -7.63 1.1 z" class="primitive"/>
           </g>
-          <g transform="translate(72.21,60.12)" id="img-53751bd6-20" fill="#D4CA3A" stroke="#D4CA3A">
+          <g transform="translate(72.21,60.12)" id="img-7a1db70f-20" fill="#D4CA3A" stroke="#D4CA3A">
             <path d="M-7.63,-4.37 L 7.63 -4.37 7.63 4.37 -7.63 4.37 z" class="primitive"/>
           </g>
-          <g transform="translate(39.68,37)" id="img-53751bd6-21" fill="#00B78D" stroke="#00B78D">
+          <g transform="translate(39.68,37)" id="img-7a1db70f-21" fill="#00B78D" stroke="#00B78D">
             <path d="M-7.63,-3.39 L 7.63 -3.39 7.63 3.39 -7.63 3.39 z" class="primitive"/>
           </g>
-          <g transform="translate(55.94,9.14)" id="img-53751bd6-22" fill="#BEA9FF" stroke="#BEA9FF">
+          <g transform="translate(55.94,9.14)" id="img-7a1db70f-22" fill="#BEA9FF" stroke="#BEA9FF">
             <path d="M-7.63,-0.25 L 7.63 -0.25 7.63 0.25 -7.63 0.25 z" class="primitive"/>
           </g>
-          <g transform="translate(88.47,61.99)" id="img-53751bd6-23" stroke="#FF6765">
+          <g transform="translate(88.47,61.99)" id="img-7a1db70f-23" stroke="#FF6765">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(23.42,15.77)" id="img-53751bd6-24" stroke="#FF6DAE">
+          <g transform="translate(23.42,15.77)" id="img-7a1db70f-24" stroke="#FF6DAE">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(72.21,49.14)" id="img-53751bd6-25" stroke="#D4CA3A">
+          <g transform="translate(72.21,49.14)" id="img-7a1db70f-25" stroke="#D4CA3A">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(39.68,27.07)" id="img-53751bd6-26" stroke="#00B78D">
+          <g transform="translate(39.68,27.07)" id="img-7a1db70f-26" stroke="#00B78D">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(55.94,8.41)" id="img-53751bd6-27" stroke="#BEA9FF">
+          <g transform="translate(55.94,8.41)" id="img-7a1db70f-27" stroke="#BEA9FF">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(88.47,68.77)" id="img-53751bd6-28" stroke="#FF6765">
+          <g transform="translate(88.47,68.77)" id="img-7a1db70f-28" stroke="#FF6765">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(23.42,23.09)" id="img-53751bd6-29" stroke="#FF6DAE">
+          <g transform="translate(23.42,23.09)" id="img-7a1db70f-29" stroke="#FF6DAE">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(72.21,68.77)" id="img-53751bd6-30" stroke="#D4CA3A">
+          <g transform="translate(72.21,68.77)" id="img-7a1db70f-30" stroke="#D4CA3A">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(39.68,48.19)" id="img-53751bd6-31" stroke="#00B78D">
+          <g transform="translate(39.68,48.19)" id="img-7a1db70f-31" stroke="#00B78D">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(55.94,10.02)" id="img-53751bd6-32" stroke="#BEA9FF">
+          <g transform="translate(55.94,10.02)" id="img-7a1db70f-32" stroke="#BEA9FF">
             <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
           </g>
-          <g transform="translate(88.47,63.24)" id="img-53751bd6-33" stroke="#FF6765">
+          <g transform="translate(88.47,63.24)" id="img-7a1db70f-33" stroke="#FF6765">
             <path fill="none" d="M0,1.25 L 0 -1.25" class="primitive"/>
           </g>
-          <g transform="translate(23.42,17.11)" id="img-53751bd6-34" stroke="#FF6DAE">
+          <g transform="translate(23.42,17.11)" id="img-7a1db70f-34" stroke="#FF6DAE">
             <path fill="none" d="M0,1.34 L 0 -1.34" class="primitive"/>
           </g>
-          <g transform="translate(72.21,52.44)" id="img-53751bd6-35" stroke="#D4CA3A">
+          <g transform="translate(72.21,52.44)" id="img-7a1db70f-35" stroke="#D4CA3A">
             <path fill="none" d="M0,3.3 L 0 -3.3" class="primitive"/>
           </g>
-          <g transform="translate(39.68,30.34)" id="img-53751bd6-36" stroke="#00B78D">
+          <g transform="translate(39.68,30.34)" id="img-7a1db70f-36" stroke="#00B78D">
             <path fill="none" d="M0,3.27 L 0 -3.27" class="primitive"/>
           </g>
-          <g transform="translate(55.94,8.65)" id="img-53751bd6-37" stroke="#BEA9FF">
+          <g transform="translate(55.94,8.65)" id="img-7a1db70f-37" stroke="#BEA9FF">
             <path fill="none" d="M0,0.24 L 0 -0.24" class="primitive"/>
           </g>
-          <g transform="translate(88.47,68.77)" id="img-53751bd6-38" stroke="#FF6765">
+          <g transform="translate(88.47,68.77)" id="img-7a1db70f-38" stroke="#FF6765">
             <path fill="none" d="M0,0 L 0 0" class="primitive"/>
           </g>
-          <g transform="translate(23.42,21.87)" id="img-53751bd6-39" stroke="#FF6DAE">
+          <g transform="translate(23.42,21.87)" id="img-7a1db70f-39" stroke="#FF6DAE">
             <path fill="none" d="M0,-1.22 L 0 1.22" class="primitive"/>
           </g>
-          <g transform="translate(72.21,66.63)" id="img-53751bd6-40" stroke="#D4CA3A">
+          <g transform="translate(72.21,66.63)" id="img-7a1db70f-40" stroke="#D4CA3A">
             <path fill="none" d="M0,-2.14 L 0 2.14" class="primitive"/>
           </g>
-          <g transform="translate(39.68,44.29)" id="img-53751bd6-41" stroke="#00B78D">
+          <g transform="translate(39.68,44.29)" id="img-7a1db70f-41" stroke="#00B78D">
             <path fill="none" d="M0,-3.9 L 0 3.9" class="primitive"/>
           </g>
-          <g transform="translate(55.94,9.7)" id="img-53751bd6-42" stroke="#BEA9FF">
+          <g transform="translate(55.94,9.7)" id="img-7a1db70f-42" stroke="#BEA9FF">
             <path fill="none" d="M0,-0.32 L 0 0.32" class="primitive"/>
           </g>
-          <g stroke-width="0.6" id="img-53751bd6-43">
-            <g transform="translate(88.47,68.77)" id="img-53751bd6-44" stroke="#FFD9CF">
+          <g stroke-width="0.6" id="img-7a1db70f-43">
+            <g transform="translate(88.47,68.77)" id="img-7a1db70f-44" stroke="#FFD9CF">
               <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
             </g>
-            <g transform="translate(23.42,19.68)" id="img-53751bd6-45" stroke="#FFDFFF">
+            <g transform="translate(23.42,19.68)" id="img-7a1db70f-45" stroke="#FFDFFF">
               <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
             </g>
-            <g transform="translate(72.21,60.21)" id="img-53751bd6-46" stroke="#FFFFAB">
+            <g transform="translate(72.21,60.21)" id="img-7a1db70f-46" stroke="#FFFFAB">
               <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
             </g>
-            <g transform="translate(39.68,37.99)" id="img-53751bd6-47" stroke="#9EFFFC">
+            <g transform="translate(39.68,37.99)" id="img-7a1db70f-47" stroke="#9EFFFC">
               <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
             </g>
-            <g transform="translate(55.94,9.07)" id="img-53751bd6-48" stroke="#FFFFFF">
+            <g transform="translate(55.94,9.07)" id="img-7a1db70f-48" stroke="#FFFFFF">
               <path fill="none" d="M-5.09,0 L 5.09 0" class="primitive"/>
             </g>
           </g>
         </g>
-        <g class="geometry" id="img-53751bd6-49">
-          <g stroke-width="0.3" id="img-53751bd6-50">
-            <g class="color_count_in_graph" fill-opacity="1" stroke="#FFFFFF" fill="#00BFFF" id="img-53751bd6-51">
-              <g class="marker" id="img-53751bd6-52">
-                <g transform="translate(55.94,8.57)" id="img-53751bd6-53">
+        <g class="geometry" id="img-7a1db70f-49">
+          <g stroke-width="0.3" id="img-7a1db70f-50">
+            <g class="color_count_in_graph" fill-opacity="1" stroke="#FFFFFF" fill="#00BFFF" id="img-7a1db70f-51">
+              <g class="marker" id="img-7a1db70f-52">
+                <g transform="translate(55.94,8.57)" id="img-7a1db70f-53">
                   <circle cx="0" cy="0" r="0.9" class="primitive"/>
                 </g>
               </g>
             </g>
-            <g class="color_count_in_graph" fill-opacity="1" stroke="#FFFFFF" fill="#00BFFF" id="img-53751bd6-54">
-              <g class="marker" id="img-53751bd6-55">
-                <g transform="translate(39.68,44.61)" id="img-53751bd6-56">
+            <g class="color_count_in_graph" fill-opacity="1" stroke="#FFFFFF" fill="#00BFFF" id="img-7a1db70f-54">
+              <g class="marker" id="img-7a1db70f-55">
+                <g transform="translate(39.68,44.61)" id="img-7a1db70f-56">
                   <circle cx="0" cy="0" r="0.9" class="primitive"/>
                 </g>
               </g>
             </g>
-            <g class="color_count_in_graph" fill-opacity="1" stroke="#FFFFFF" fill="#00BFFF" id="img-53751bd6-57">
-              <g class="marker" id="img-53751bd6-58">
-                <g transform="translate(23.42,23.15)" id="img-53751bd6-59">
+            <g class="color_count_in_graph" fill-opacity="1" stroke="#FFFFFF" fill="#00BFFF" id="img-7a1db70f-57">
+              <g class="marker" id="img-7a1db70f-58">
+                <g transform="translate(23.42,23.15)" id="img-7a1db70f-59">
                   <circle cx="0" cy="0" r="0.9" class="primitive"/>
                 </g>
               </g>
@@ -201,552 +201,552 @@
       </g>
     </g>
   </g>
-  <g class="guide ylabels" font-size="2.82" font-family="'PT Sans Caption','Helvetica Neue','Helvetica',sans-serif" fill="#6C606B" id="img-53751bd6-60">
-    <g transform="translate(14.28,161.43)" id="img-53751bd6-61" visibility="hidden" gadfly:scale="1.0">
+  <g class="guide ylabels" font-size="2.82" font-family="'PT Sans Caption','Helvetica Neue','Helvetica',sans-serif" fill="#6C606B" id="img-7a1db70f-60">
+    <g transform="translate(14.28,161.43)" id="img-7a1db70f-61" gadfly:scale="1.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -92.66)">-15</text>
       </g>
     </g>
-    <g transform="translate(14.28,130.55)" id="img-53751bd6-62" visibility="hidden" gadfly:scale="1.0">
+    <g transform="translate(14.28,130.55)" id="img-7a1db70f-62" gadfly:scale="1.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -92.66)">-10</text>
       </g>
     </g>
-    <g transform="translate(14.28,99.66)" id="img-53751bd6-63" visibility="hidden" gadfly:scale="1.0">
+    <g transform="translate(14.28,99.66)" id="img-7a1db70f-63" gadfly:scale="1.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -92.66)">-5</text>
       </g>
     </g>
-    <g transform="translate(14.28,68.77)" id="img-53751bd6-64" visibility="visible" gadfly:scale="1.0">
+    <g transform="translate(14.28,68.77)" id="img-7a1db70f-64" gadfly:scale="1.0" visibility="visible">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 0)">0</text>
       </g>
     </g>
-    <g transform="translate(14.28,37.89)" id="img-53751bd6-65" visibility="visible" gadfly:scale="1.0">
+    <g transform="translate(14.28,37.89)" id="img-7a1db70f-65" gadfly:scale="1.0" visibility="visible">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 0)">5</text>
       </g>
     </g>
-    <g transform="translate(14.28,7)" id="img-53751bd6-66" visibility="visible" gadfly:scale="1.0">
+    <g transform="translate(14.28,7)" id="img-7a1db70f-66" gadfly:scale="1.0" visibility="visible">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 0)">10</text>
       </g>
     </g>
-    <g transform="translate(14.28,-23.89)" id="img-53751bd6-67" visibility="hidden" gadfly:scale="1.0">
+    <g transform="translate(14.28,-23.89)" id="img-7a1db70f-67" gadfly:scale="1.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 92.66)">15</text>
       </g>
     </g>
-    <g transform="translate(14.28,-54.77)" id="img-53751bd6-68" visibility="hidden" gadfly:scale="1.0">
+    <g transform="translate(14.28,-54.77)" id="img-7a1db70f-68" gadfly:scale="1.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 92.66)">20</text>
       </g>
     </g>
-    <g transform="translate(14.28,-85.66)" id="img-53751bd6-69" visibility="hidden" gadfly:scale="1.0">
+    <g transform="translate(14.28,-85.66)" id="img-7a1db70f-69" gadfly:scale="1.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 92.66)">25</text>
       </g>
     </g>
-    <g transform="translate(14.28,130.55)" id="img-53751bd6-70" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,130.55)" id="img-7a1db70f-70" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -61.77)">-10.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,127.46)" id="img-53751bd6-71" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,127.46)" id="img-7a1db70f-71" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -89.57)">-9.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,124.37)" id="img-53751bd6-72" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,124.37)" id="img-7a1db70f-72" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -117.37)">-9.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,121.28)" id="img-53751bd6-73" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,121.28)" id="img-7a1db70f-73" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -52.51)">-8.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,118.19)" id="img-53751bd6-74" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,118.19)" id="img-7a1db70f-74" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -80.31)">-8.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,115.1)" id="img-53751bd6-75" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,115.1)" id="img-7a1db70f-75" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -108.1)">-7.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,112.01)" id="img-53751bd6-76" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,112.01)" id="img-7a1db70f-76" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -43.24)">-7.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,108.93)" id="img-53751bd6-77" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,108.93)" id="img-7a1db70f-77" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -71.04)">-6.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,105.84)" id="img-53751bd6-78" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,105.84)" id="img-7a1db70f-78" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -98.84)">-6.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,102.75)" id="img-53751bd6-79" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,102.75)" id="img-7a1db70f-79" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -33.98)">-5.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,99.66)" id="img-53751bd6-80" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,99.66)" id="img-7a1db70f-80" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -61.77)">-5.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,96.57)" id="img-53751bd6-81" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,96.57)" id="img-7a1db70f-81" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -89.57)">-4.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,93.48)" id="img-53751bd6-82" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,93.48)" id="img-7a1db70f-82" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -24.71)">-4.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,90.39)" id="img-53751bd6-83" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,90.39)" id="img-7a1db70f-83" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -52.51)">-3.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,87.31)" id="img-53751bd6-84" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,87.31)" id="img-7a1db70f-84" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -80.31)">-3.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,84.22)" id="img-53751bd6-85" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,84.22)" id="img-7a1db70f-85" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -15.44)">-2.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,81.13)" id="img-53751bd6-86" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,81.13)" id="img-7a1db70f-86" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -43.24)">-2.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,78.04)" id="img-53751bd6-87" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,78.04)" id="img-7a1db70f-87" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -71.04)">-1.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,74.95)" id="img-53751bd6-88" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,74.95)" id="img-7a1db70f-88" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -6.18)">-1.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,71.86)" id="img-53751bd6-89" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,71.86)" id="img-7a1db70f-89" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -33.98)">-0.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,68.77)" id="img-53751bd6-90" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,68.77)" id="img-7a1db70f-90" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -61.77)">0.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,65.68)" id="img-53751bd6-91" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,65.68)" id="img-7a1db70f-91" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 3.09)">0.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,62.6)" id="img-53751bd6-92" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,62.6)" id="img-7a1db70f-92" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -24.71)">1.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,59.51)" id="img-53751bd6-93" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,59.51)" id="img-7a1db70f-93" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -52.51)">1.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,56.42)" id="img-53751bd6-94" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,56.42)" id="img-7a1db70f-94" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 12.35)">2.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,53.33)" id="img-53751bd6-95" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,53.33)" id="img-7a1db70f-95" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -15.44)">2.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,50.24)" id="img-53751bd6-96" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,50.24)" id="img-7a1db70f-96" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -43.24)">3.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,47.15)" id="img-53751bd6-97" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,47.15)" id="img-7a1db70f-97" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 21.62)">3.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,44.06)" id="img-53751bd6-98" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,44.06)" id="img-7a1db70f-98" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -6.18)">4.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,40.98)" id="img-53751bd6-99" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,40.98)" id="img-7a1db70f-99" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -33.98)">4.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,37.89)" id="img-53751bd6-100" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,37.89)" id="img-7a1db70f-100" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 30.89)">5.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,34.8)" id="img-53751bd6-101" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,34.8)" id="img-7a1db70f-101" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 3.09)">5.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,31.71)" id="img-53751bd6-102" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,31.71)" id="img-7a1db70f-102" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -24.71)">6.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,28.62)" id="img-53751bd6-103" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,28.62)" id="img-7a1db70f-103" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 40.15)">6.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,25.53)" id="img-53751bd6-104" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,25.53)" id="img-7a1db70f-104" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 12.35)">7.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,22.44)" id="img-53751bd6-105" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,22.44)" id="img-7a1db70f-105" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -15.44)">7.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,19.35)" id="img-53751bd6-106" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,19.35)" id="img-7a1db70f-106" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 49.42)">8.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,16.27)" id="img-53751bd6-107" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,16.27)" id="img-7a1db70f-107" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 21.62)">8.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,13.18)" id="img-53751bd6-108" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,13.18)" id="img-7a1db70f-108" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -6.18)">9.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,10.09)" id="img-53751bd6-109" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,10.09)" id="img-7a1db70f-109" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 58.68)">9.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,7)" id="img-53751bd6-110" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,7)" id="img-7a1db70f-110" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 30.89)">10.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,3.91)" id="img-53751bd6-111" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,3.91)" id="img-7a1db70f-111" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 3.09)">10.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,0.82)" id="img-53751bd6-112" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,0.82)" id="img-7a1db70f-112" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 67.95)">11.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-2.27)" id="img-53751bd6-113" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-2.27)" id="img-7a1db70f-113" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 40.15)">11.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-5.35)" id="img-53751bd6-114" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-5.35)" id="img-7a1db70f-114" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 12.35)">12.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-8.44)" id="img-53751bd6-115" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-8.44)" id="img-7a1db70f-115" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 77.22)">12.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-11.53)" id="img-53751bd6-116" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-11.53)" id="img-7a1db70f-116" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 49.42)">13.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-14.62)" id="img-53751bd6-117" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-14.62)" id="img-7a1db70f-117" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 21.62)">13.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-17.71)" id="img-53751bd6-118" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-17.71)" id="img-7a1db70f-118" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 86.48)">14.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-20.8)" id="img-53751bd6-119" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-20.8)" id="img-7a1db70f-119" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 58.68)">14.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-23.89)" id="img-53751bd6-120" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-23.89)" id="img-7a1db70f-120" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 30.89)">15.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-26.98)" id="img-53751bd6-121" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-26.98)" id="img-7a1db70f-121" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 95.75)">15.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-30.06)" id="img-53751bd6-122" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-30.06)" id="img-7a1db70f-122" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 67.95)">16.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-33.15)" id="img-53751bd6-123" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-33.15)" id="img-7a1db70f-123" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 40.15)">16.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-36.24)" id="img-53751bd6-124" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-36.24)" id="img-7a1db70f-124" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 105.01)">17.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-39.33)" id="img-53751bd6-125" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-39.33)" id="img-7a1db70f-125" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 77.22)">17.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-42.42)" id="img-53751bd6-126" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-42.42)" id="img-7a1db70f-126" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 49.42)">18.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-45.51)" id="img-53751bd6-127" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-45.51)" id="img-7a1db70f-127" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 114.28)">18.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-48.6)" id="img-53751bd6-128" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-48.6)" id="img-7a1db70f-128" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 86.48)">19.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,-51.68)" id="img-53751bd6-129" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-51.68)" id="img-7a1db70f-129" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 58.68)">19.5</text>
       </g>
     </g>
-    <g transform="translate(14.28,-54.77)" id="img-53751bd6-130" visibility="hidden" gadfly:scale="10.0">
+    <g transform="translate(14.28,-54.77)" id="img-7a1db70f-130" gadfly:scale="10.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 123.55)">20.0</text>
       </g>
     </g>
-    <g transform="translate(14.28,130.55)" id="img-53751bd6-131" visibility="hidden" gadfly:scale="0.5">
+    <g transform="translate(14.28,130.55)" id="img-7a1db70f-131" gadfly:scale="0.5" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -92.66)">-10</text>
       </g>
     </g>
-    <g transform="translate(14.28,68.77)" id="img-53751bd6-132" visibility="hidden" gadfly:scale="0.5">
+    <g transform="translate(14.28,68.77)" id="img-7a1db70f-132" gadfly:scale="0.5" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -61.77)">0</text>
       </g>
     </g>
-    <g transform="translate(14.28,7)" id="img-53751bd6-133" visibility="hidden" gadfly:scale="0.5">
+    <g transform="translate(14.28,7)" id="img-7a1db70f-133" gadfly:scale="0.5" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 61.77)">10</text>
       </g>
     </g>
-    <g transform="translate(14.28,-54.77)" id="img-53751bd6-134" visibility="hidden" gadfly:scale="0.5">
+    <g transform="translate(14.28,-54.77)" id="img-7a1db70f-134" gadfly:scale="0.5" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 92.66)">20</text>
       </g>
     </g>
-    <g transform="translate(14.28,130.55)" id="img-53751bd6-135" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,130.55)" id="img-7a1db70f-135" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -123.55)">-10</text>
       </g>
     </g>
-    <g transform="translate(14.28,124.37)" id="img-53751bd6-136" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,124.37)" id="img-7a1db70f-136" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -55.6)">-9</text>
       </g>
     </g>
-    <g transform="translate(14.28,118.19)" id="img-53751bd6-137" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,118.19)" id="img-7a1db70f-137" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -80.31)">-8</text>
       </g>
     </g>
-    <g transform="translate(14.28,112.01)" id="img-53751bd6-138" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,112.01)" id="img-7a1db70f-138" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -105.01)">-7</text>
       </g>
     </g>
-    <g transform="translate(14.28,105.84)" id="img-53751bd6-139" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,105.84)" id="img-7a1db70f-139" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -37.06)">-6</text>
       </g>
     </g>
-    <g transform="translate(14.28,99.66)" id="img-53751bd6-140" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,99.66)" id="img-7a1db70f-140" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -61.77)">-5</text>
       </g>
     </g>
-    <g transform="translate(14.28,93.48)" id="img-53751bd6-141" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,93.48)" id="img-7a1db70f-141" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -86.48)">-4</text>
       </g>
     </g>
-    <g transform="translate(14.28,87.31)" id="img-53751bd6-142" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,87.31)" id="img-7a1db70f-142" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -18.53)">-3</text>
       </g>
     </g>
-    <g transform="translate(14.28,81.13)" id="img-53751bd6-143" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,81.13)" id="img-7a1db70f-143" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -43.24)">-2</text>
       </g>
     </g>
-    <g transform="translate(14.28,74.95)" id="img-53751bd6-144" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,74.95)" id="img-7a1db70f-144" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -67.95)">-1</text>
       </g>
     </g>
-    <g transform="translate(14.28,68.77)" id="img-53751bd6-145" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,68.77)" id="img-7a1db70f-145" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 0)">0</text>
       </g>
     </g>
-    <g transform="translate(14.28,62.6)" id="img-53751bd6-146" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,62.6)" id="img-7a1db70f-146" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -24.71)">1</text>
       </g>
     </g>
-    <g transform="translate(14.28,56.42)" id="img-53751bd6-147" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,56.42)" id="img-7a1db70f-147" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -49.42)">2</text>
       </g>
     </g>
-    <g transform="translate(14.28,50.24)" id="img-53751bd6-148" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,50.24)" id="img-7a1db70f-148" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 18.53)">3</text>
       </g>
     </g>
-    <g transform="translate(14.28,44.06)" id="img-53751bd6-149" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,44.06)" id="img-7a1db70f-149" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -6.18)">4</text>
       </g>
     </g>
-    <g transform="translate(14.28,37.89)" id="img-53751bd6-150" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,37.89)" id="img-7a1db70f-150" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -30.89)">5</text>
       </g>
     </g>
-    <g transform="translate(14.28,31.71)" id="img-53751bd6-151" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,31.71)" id="img-7a1db70f-151" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 37.06)">6</text>
       </g>
     </g>
-    <g transform="translate(14.28,25.53)" id="img-53751bd6-152" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,25.53)" id="img-7a1db70f-152" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 12.35)">7</text>
       </g>
     </g>
-    <g transform="translate(14.28,19.35)" id="img-53751bd6-153" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,19.35)" id="img-7a1db70f-153" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, -12.35)">8</text>
       </g>
     </g>
-    <g transform="translate(14.28,13.18)" id="img-53751bd6-154" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,13.18)" id="img-7a1db70f-154" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 55.6)">9</text>
       </g>
     </g>
-    <g transform="translate(14.28,7)" id="img-53751bd6-155" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,7)" id="img-7a1db70f-155" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 30.89)">10</text>
       </g>
     </g>
-    <g transform="translate(14.28,0.82)" id="img-53751bd6-156" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,0.82)" id="img-7a1db70f-156" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 6.18)">11</text>
       </g>
     </g>
-    <g transform="translate(14.28,-5.35)" id="img-53751bd6-157" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-5.35)" id="img-7a1db70f-157" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 74.13)">12</text>
       </g>
     </g>
-    <g transform="translate(14.28,-11.53)" id="img-53751bd6-158" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-11.53)" id="img-7a1db70f-158" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 49.42)">13</text>
       </g>
     </g>
-    <g transform="translate(14.28,-17.71)" id="img-53751bd6-159" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-17.71)" id="img-7a1db70f-159" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 24.71)">14</text>
       </g>
     </g>
-    <g transform="translate(14.28,-23.89)" id="img-53751bd6-160" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-23.89)" id="img-7a1db70f-160" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 92.66)">15</text>
       </g>
     </g>
-    <g transform="translate(14.28,-30.06)" id="img-53751bd6-161" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-30.06)" id="img-7a1db70f-161" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 67.95)">16</text>
       </g>
     </g>
-    <g transform="translate(14.28,-36.24)" id="img-53751bd6-162" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-36.24)" id="img-7a1db70f-162" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 43.24)">17</text>
       </g>
     </g>
-    <g transform="translate(14.28,-42.42)" id="img-53751bd6-163" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-42.42)" id="img-7a1db70f-163" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 111.19)">18</text>
       </g>
     </g>
-    <g transform="translate(14.28,-48.6)" id="img-53751bd6-164" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-48.6)" id="img-7a1db70f-164" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 86.48)">19</text>
       </g>
     </g>
-    <g transform="translate(14.28,-54.77)" id="img-53751bd6-165" visibility="hidden" gadfly:scale="5.0">
+    <g transform="translate(14.28,-54.77)" id="img-7a1db70f-165" gadfly:scale="5.0" visibility="hidden">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 61.77)">20</text>
       </g>
     </g>
   </g>
-  <g class="guide ylabels" font-size="2.82" font-family="'PT Sans Caption','Helvetica Neue','Helvetica',sans-serif" fill="#6C606B" id="img-53751bd6-166">
-    <g transform="translate(14.28,68.77)" id="img-53751bd6-167">
+  <g class="guide ylabels" font-size="2.82" font-family="'PT Sans Caption','Helvetica Neue','Helvetica',sans-serif" fill="#6C606B" id="img-7a1db70f-166">
+    <g transform="translate(14.28,68.77)" id="img-7a1db70f-167">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 0)">0</text>
       </g>
     </g>
-    <g transform="translate(14.28,37.89)" id="img-53751bd6-168">
+    <g transform="translate(14.28,37.89)" id="img-7a1db70f-168">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 0)">5</text>
       </g>
     </g>
-    <g transform="translate(14.28,7)" id="img-53751bd6-169">
+    <g transform="translate(14.28,7)" id="img-7a1db70f-169">
       <g class="primitive">
         <text text-anchor="middle" dy="-0em" transform="rotate(-90,0, 0)">10</text>
       </g>
     </g>
   </g>
-  <g font-size="3.88" font-family="'PT Sans','Helvetica Neue','Helvetica',sans-serif" fill="#564A55" stroke="#000000" stroke-opacity="0.000" id="img-53751bd6-170">
-    <g transform="translate(8.81,35.89)" id="img-53751bd6-171">
+  <g font-size="3.88" font-family="'PT Sans','Helvetica Neue','Helvetica',sans-serif" fill="#564A55" stroke="#000000" stroke-opacity="0.000" id="img-7a1db70f-170">
+    <g transform="translate(8.81,35.89)" id="img-7a1db70f-171">
       <g class="primitive">
         <text text-anchor="middle" dy="0.35em" transform="rotate(-90,0, 2)">log value</text>
       </g>
@@ -754,7 +754,7 @@
   </g>
 </g>
 <defs>
-  <clipPath id="img-53751bd6-3">
+  <clipPath id="img-7a1db70f-3">
     <path d="M15.28,5 L 96.6 5 96.6 70.77 15.28 70.77" />
   </clipPath>
 </defs>
