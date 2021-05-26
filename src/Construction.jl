@@ -289,6 +289,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		
 		#pretty_table(random_edges,backend=:html,standalone = false)
 		
-		#@time motif_counts = find_motifs(edgelist,"triangle_edge",100, typed = true, typelist = vec(vertexlist),plotfile="test.svg",graphlet_size = 4)
+		@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif-detection.svg",graphlet_size = 4)
 	end
+		@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif-detection.svg",graphlet_size = 4)
 end
