@@ -68,7 +68,7 @@ function null_model_counts(typelist::Array{String,1},edgelists::Union{Array{Arra
 	@info "Counting null graphs..."
 	for (i,el) in enumerate(edgelists)
 		@info "For null graph $i:" 
-		null_model[i] = count_graphlets(typelist,el,4,"distributed")[1]
+		null_model[i] = count_graphlets(typelist,el,4,run_method = "distributed")[1]
 	end
 	return null_model
 end
