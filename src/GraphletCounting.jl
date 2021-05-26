@@ -329,7 +329,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		   
 			#for x-y-z paths such that y!=x AND y!=z (different orbit to other 3-paths) we reorder only the end nodes
 			if (graphlet_names[el][1]!=graphlet_names[el][2] && graphlet_names[el][3]!=graphlet_names[el][2] && graphlet_names[el][4]=="3-path")
-				graphlet_names[el][1,3] =sort(graphlet_names[el][1,3])
+				graphlet_names[el][[1,3]] =sort(graphlet_names[el][[1,3]])
 			else
 	          		graphlet_names[el][1:3]=sort(graphlet_names[el][1:3])
  	        	end
