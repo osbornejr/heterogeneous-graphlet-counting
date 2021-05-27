@@ -1,4 +1,4 @@
-using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random, Glob
+using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions
 
 function distributed_setup(inclusions::Array{String,1})
 
@@ -263,7 +263,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 				rand_vals = rand_fil_fil[!,:value]
 				rand_exp = sum(rand_vals)/N
 				real_obs = real_dict[heg*"_"*hog]
-				append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs))	
+				z_score = (abs(real_obs) - rand_exp)/std(rand_vals)
+				p_value =pdf(Normal(0,1),z_score) 
+				append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs,Z_score= z_score, p_value = p_value))	
 			end
 			##take log values to plot
 			log_real_fil = copy(real_fil)
@@ -274,6 +276,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/plots/$(hog)_boxplot.svg",4inch,6inch),p)
 			hog_array[i] = hog_df
 		end
+		## find significant graphlets
+		sig_graphlets = outerjoin(filter.(:p_value=>x->x<0.05,hog_array)...,on = names(hog_array[1]))
+		html_table_maker(sig_graphlets,"$cache_dir/type_representations.html")				
+
 		##look at edge types in randomised networks
 		real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
 		rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
@@ -289,7 +295,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		
 		#pretty_table(random_edges,backend=:html,standalone = false)
 		
-		@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif-detection.svg",graphlet_size = 4)
+		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 	end
-		@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif-detection.svg",graphlet_size = 4)
+	#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 end
