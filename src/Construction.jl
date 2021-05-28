@@ -32,7 +32,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/plots"`)
 		
 	##Cache setup
-	cache_dir = "$cwd/output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)"
+	cache_dir = "$cwd/output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)_$(params.null_model_size)"
 	run(`mkdir -p $(cache_dir)`)
 	## Check if there are cached files for runs with similar parameters (i.e. the same before irelevant parameters are invoked for a specific output)
 	#similarity matrix
@@ -214,7 +214,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		## randomise node types
 		
 		#number of randomised graphs
-		N=100
+		N=params.null_model_size
 		rand_types_set = [copy(vertexlist) for i in 1:N]
 		#randomise each graph by node
 		broadcast(shuffle!,rand_types_set) 
@@ -259,13 +259,25 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 				rand_fil_fil = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)
 				transform!(rand_fil_fil,:value =>ByRow(x-> log(x))=>:log_value)
 				##histogram for each heterogeneous graphlet
-				histogram(rand_fil_fil,:log_value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
+				histogram(rand_fil_fil,:value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
+				##log version
+				histogram(rand_fil_fil,:log_value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_log_histogram.svg")
 				rand_vals = rand_fil_fil[!,:value]
+				log_rand_vals =rand_fil_fil[!,:log_value]
 				rand_exp = sum(rand_vals)/N
+				log_rand_exp = sum(log_rand_vals)/N
 				real_obs = real_dict[heg*"_"*hog]
-				z_score = (abs(real_obs) - rand_exp)/std(rand_vals)
-				p_value =pdf(Normal(0,1),z_score) 
-				append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs,Z_score= z_score, p_value = p_value))	
+				log_real_obs = log(real_dict[heg*"_"*hog]+1)
+				## Monte Carlo method
+				r = sum(rand_vals.>real_obs)
+				p_value = (r+1)/(N+1)
+				##Z-score method (assumes either normal or lognormal distribution of counts in sims)
+				#using real values
+			#	z_score = (abs(real_obs) - rand_exp)/std(rand_vals)
+				##using log values
+				#z_score = (abs(log_real_obs) - log_rand_exp)/std(log_rand_vals)
+				#p_value =pdf(Normal(0,1),z_score) 
+				append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs, p_value = p_value))	
 			end
 			##take log values to plot
 			log_real_fil = copy(real_fil)
@@ -277,8 +289,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			hog_array[i] = hog_df
 		end
 		## find significant graphlets
-		sig_graphlets = outerjoin(filter.(:p_value=>x->x<0.05,hog_array)...,on = names(hog_array[1]))
-		html_table_maker(sig_graphlets,"$cache_dir/type_representations.html")				
+		sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
+		html_table_maker(sig_graphlets,sig_graphlets.Graphlet,"$cache_dir/type_representations.html")				
 
 		##look at edge types in randomised networks
 		real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
