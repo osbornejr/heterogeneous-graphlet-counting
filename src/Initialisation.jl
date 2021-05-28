@@ -11,6 +11,7 @@ struct RunParameters
 	coexpression::String
 	threshold::Float64
 	threshold_method::String
+	null_model_size::Int
 	func_annotate::Bool
 	visualise::Bool
 	graphlet_counting::Bool

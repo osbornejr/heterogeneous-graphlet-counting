@@ -1,4 +1,4 @@
-params = RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist",true,false,true)
+params = RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist",1000,true,false,true)
 
 #Read in raw counts (cached)
 raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts.jld"
