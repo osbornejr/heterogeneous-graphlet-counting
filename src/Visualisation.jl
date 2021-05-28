@@ -17,7 +17,7 @@ function cytoscape_elements(vertices::Array{String,2},edges::Array{Pair},output_
 	close(io)
 end
 
-function html_table_maker(dataframe::DataFrame,imgs::Array{String,1},outfile::String)
+function html_table_maker(dataframe::DataFrame,imgs::Array{String,1}=[],outfile::String)
 	#begin table container with scoped styling
 	table ="""<div id="table container">\n\t<style type="text/css" scoped>\n\t\t.row {\n\t\t\tmargin-left:-5px;\n\t\t\tmargin-right:-5px;\n\t\t}\n\t\t.column {\n\t\t\tfloat: left;\n\t\t\twidth: 50%;\n\t\t}\n\t\ttd {\n\t\t\ttext-align:center;\n\t\t\tvertical-align:middle;\n\t\t}\n\t</style>\n\t<div class="row">\n\t\t<div class="column">\n"""
 	for (i,r) in enumerate(eachrow(dataframe))
