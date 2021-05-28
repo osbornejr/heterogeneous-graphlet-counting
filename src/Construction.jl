@@ -35,6 +35,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	cache_dir = "$cwd/output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)_$(params.null_model_size)"
 	run(`mkdir -p $(cache_dir)`)
 	## Check if there are cached files for runs with similar parameters (i.e. the same before irelevant parameters are invoked for a specific output)
+	#TODO improve this process to automatically detect via a dependency tree (will also tidy up cache dir)
 	#similarity matrix
 	sim_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)*/similarity*",cwd)
  	#check if any already exist
@@ -42,6 +43,15 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		#check if actual cache already exists
 		if (!(cache_dir in first.(splitdir.(sim_check))))
 			run(`cp $(sim_check[1]) $(cache_dir)/`)
+		end
+	end
+	#functional annotation
+	func_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)*/simil_$(params.threshold)_$(params.threshold_method)*/func*",cwd)
+ 	#check if any already exist
+	if(length(func_check)>0)
+		#check if actual cache already exists
+		if (!(cache_dir in first.(splitdir.(func_check))))
+			run(`cp $(func_check[1]) $(cache_dir)/`)
 		end
 	end
 	#Processing data:
