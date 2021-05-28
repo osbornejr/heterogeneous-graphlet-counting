@@ -54,8 +54,12 @@ function html_table_maker(dataframe::DataFrame,imgs::Array{String,1}=[],outfile:
 	end
 	#close last table
 	table = table*"\t\t\t\t</tbody>\n\t\t\t</table>\n"
- 	#close columns, rows and container
-	table = table*"\t\t</div>\n\t</div>\n</div>"
+ 	#close column 
+	table = table*"\t\t</div>\n"
+	#add legend to bottom
+	table = table*"""\t\t<div class="column">\n\t\t\t<table align="left">\n\t\t\t\t<tr>\n\t\t\t\t\t<td bgcolor="#fc3c7a"></td>\n\t\t\t\t\t<td>coding</td>\n\t\t\t\t\t<td bgcolor="#f4cd16"></td>\n\t\t\t\t\t<td>noncoding</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t</div>\n"""
+	#close row and container
+	table = table*"\t</div>\n</div>"
 	write(outfile,table)
 end
 
