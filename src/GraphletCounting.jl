@@ -262,7 +262,7 @@ function t2(d1,d2)
 		
 end
 
-function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",relationships::Bool=false)
+function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",relationships::Bool=false,progress::Bool=false)
 
 
 	##INPUTS TO PER EDGE FUNCTION
@@ -286,10 +286,14 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			#Rel[h] = edge[2]
 		end
 	elseif(run_method == "distributed")
-		@info "Distributing edges to workers..."
-		##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
-		Chi = @showprogress pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
-	
+		if(progress==true)
+			
+			@info "Distributing edges to workers..."
+			##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
+			Chi = @showprogress pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
+		else
+			Chi = pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
+		end
 	elseif(run_method == "distributed-old")
 		@info "Distributing edges to workers..."
 
