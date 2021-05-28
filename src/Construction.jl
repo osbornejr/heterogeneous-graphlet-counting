@@ -211,24 +211,27 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		
 	
 		@info "Looking at typed representations of graphlets..."
-		## randomise node types
 		
-		#number of randomised graphs
 		N=params.null_model_size
-		rand_types_set = [copy(vertexlist) for i in 1:N]
-		#randomise each graph by node
-		broadcast(shuffle!,rand_types_set) 
-		
 		rand_graphlets_file = "$cache_dir/rand_graphlets_$N.jld"
 		if (isfile(rand_graphlets_file))
-			@info "Loading randomised graphlet counts from $cache_dir..."
+			@info "Loading randomised vertices and graphlet counts from $cache_dir..."
+			rand_types_set = JLD.load(rand_graphlets_file,"rand vertices")
+
 			rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
 		else
+			## randomise node types
+			
+			#number of randomised graphs
+			rand_types_set = [copy(vertexlist) for i in 1:N]
+			#randomise each graph by node
+			broadcast(shuffle!,rand_types_set) 
 			@info "Counting graphlets on null model" 
 			rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
 			rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
 			rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
-			JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection)
+			@info "Saving random graphlet count information at $cache_dir..."
+			JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection,"rand vertices",rand_types_set)
 		end
 		
 		
@@ -290,7 +293,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		end
 		## find significant graphlets
 		sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
-		html_table_maker(sig_graphlets,sig_graphlets.Graphlet,"$cache_dir/type_representations.html")				
+		html_table_maker(sig_graphlets,"$cache_dir/type_representations.html",imgs=sig_graphlets.Graphlet)				
 
 		##look at edge types in randomised networks
 		real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
