@@ -295,10 +295,16 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			Chi = pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
 		end
 	elseif(run_method == "distributed-old")
-		@info "Distributing edges to workers..."
+		if(progress==true)
+			@info "Distributing edges to workers..."
 
-		res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
-			[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict))]        
+			res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
+				[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict))]        
+			end
+		else
+			res = @sync @distributed (t2) for h in 1:size(edgelist,1)
+				[(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict))]        
+			end
 		end
 		#manipulate distributed output tuples into Chi array (for now in line iwth other methods)
 		if (relationships == true)
