@@ -108,6 +108,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		@info "Generating adjacency matrix..."
 		if (params.threshold_method=="empirical_dist")
 	 		pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
+		elseif (params.threshold_method=="empirical_dist_zero")
+	 		pre_adj_matrix = empirical_dist_zero_adjacency(similarity_matrix,params.threshold)
 		elseif (params.threshold_method=="hard")
 	 		pre_adj_matrix = adjacency(similarity_matrix,params.threshold)
 		elseif (params.threshold_method=="top")
@@ -236,7 +238,6 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		if (isfile(rand_graphlets_file))
 			@info "Loading randomised vertices and graphlet counts from $cache_dir..."
 			rand_types_set = JLD.load(rand_graphlets_file,"rand vertices")
-
 			rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
 		else
 			## randomise node types
