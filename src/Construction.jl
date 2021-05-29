@@ -209,17 +209,26 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		if (isfile(graphlet_file))
 			@info "Loading graphlet counts from $cache_dir..."
 			graphlet_counts = JLD.load(graphlet_file,"graphlets")
+			timer = JLD.load(graphlet_file,"time")
 		else
 			@info "Counting graphlets..."
-			@time graphlet_counts,Chi = count_graphlets(vertexlist,edgelist,4,run_method="distributed")
+			timer=@elapsed graphlet_counts,Chi = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old")
 			#graphlet_concentrations = concentrate(graphlet_counts) 
 			@info "Saving graphlet counts at $cache_dir..."
 			##save the per-edge array as well in case we need it in the future (exp for debugging)
-			JLD.save(graphlet_file,"graphlets",graphlet_counts,"Chi",Chi)
+			JLD.save(graphlet_file,"graphlets",graphlet_counts,"Chi",Chi,"time",timer)
 	
 		end
-		
 	
+
+		#method to deduce which run method the null model should use given the run time of graphlets above ($timer)
+		if (timer<30)
+			null_run = "distributed-short"
+		else
+			null_run = "distributed-long"
+		end
+
+
 		@info "Looking at typed representations of graphlets..."
 		
 		N=params.null_model_size
@@ -237,7 +246,13 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			#randomise each graph by node
 			broadcast(shuffle!,rand_types_set) 
 			@info "Counting graphlets on null model" 
-			rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
+			if (null_run=="distributed-short")
+				#rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed-old")
+				rand_graphlet_counts = @showprogress pmap(x->count_graphlets(x,edgelist,4,run_method="distributed-old"),rand_types_set)
+			end
+			if (null_run=="distributed-long")
+				rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
+			end
 			rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
 			rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
 			@info "Saving random graphlet count information at $cache_dir..."
