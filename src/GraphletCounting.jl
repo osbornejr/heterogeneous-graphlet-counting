@@ -316,7 +316,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	elseif (run_method == "serial")
 		for h in 1 :size(edgelist,1)
 			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict)
-			Chi[h] = edge[1]
+			Chi[h] = edge
 			if (relationships==true)
 				Rel[h] = edge[2]
 			end
