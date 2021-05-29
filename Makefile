@@ -6,10 +6,10 @@ julia_env := "osbornejr/julia-env:latest"
 help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-run: ## run julia
+julia: ## run julia
 	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -it --rm -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
 
-run-port: ## run julia with access to port 8000
+julia-port: ## run julia with access to port 8000
 	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -it --rm -p 8000:8000 -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
 
 update: ## update conda and julia environments	
