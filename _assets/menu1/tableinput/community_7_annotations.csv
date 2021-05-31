@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0038096,Fc-gamma receptor signaling pathway invo...,3,2,0.16,0.0031
-GO:0000722,telomere maintenance via recombination,3,2,0.16,0.0031
-GO:0006986,response to unfolded protein,7,2,0.37,0.0201
-GO:0030036,actin cytoskeleton organization,29,3,1.55,0.0258
-GO:0060348,bone development,7,2,0.37,0.0323
-GO:0061384,heart trabecula morphogenesis,1,1,0.05,0.0330
-GO:0051639,actin filament network formation,1,1,0.05,0.0330
-GO:0060715,syncytiotrophoblast cell differentiation...,1,1,0.05,0.0330
-GO:0060717,chorion development,1,1,0.05,0.0330
-GO:0045717,negative regulation of fatty acid biosyn...,1,1,0.05,0.0330
+GO:0030308,negative regulation of cell growth,8,3,0.37,0.0014
+GO:0003417,growth plate cartilage development,1,1,0.05,0.0317
+GO:1902259,regulation of delayed rectifier potassiu...,1,1,0.05,0.0317
+GO:0070830,bicellular tight junction assembly,1,1,0.05,0.0317
+GO:0001946,lymphangiogenesis,1,1,0.05,0.0317
+GO:0000731,DNA synthesis involved in DNA repair,1,1,0.05,0.0317
+GO:0060484,lung-associated mesenchyme development,1,1,0.05,0.0317
+GO:0090037,positive regulation of protein kinase C ...,1,1,0.05,0.0317
+GO:0061101,neuroendocrine cell differentiation,1,1,0.05,0.0317
+GO:1901979,regulation of inward rectifier potassium...,1,1,0.05,0.0317

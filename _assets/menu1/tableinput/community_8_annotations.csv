@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0008150,biological_process,799,87,123.03,6.6e-06
-GO:0030049,muscle filament sliding,2,2,0.31,0.0054
-GO:0010288,response to lead ion,2,2,0.31,0.0054
-GO:0071421,manganese ion transmembrane transport,2,2,0.31,0.0054
-GO:0050925,negative regulation of negative chemotax...,2,2,0.31,0.0054
-GO:0006415,translational termination,2,2,0.31,0.0054
-GO:0003032,detection of oxygen,2,2,0.31,0.0054
-GO:0006919,activation of cysteine-type endopeptidas...,6,3,0.92,0.0066
-GO:0000184,nuclear-transcribed mRNA catabolic proce...,6,3,0.92,0.0066
-GO:0034641,cellular nitrogen compound metabolic pro...,310,26,47.73,0.0146
+GO:0006521,regulation of cellular amino acid metabo...,1,1,0.03,0.022
+GO:0045662,negative regulation of myoblast differen...,1,1,0.03,0.022
+GO:0006384,transcription initiation from RNA polyme...,1,1,0.03,0.022
+GO:0010025,wax biosynthetic process,1,1,0.03,0.022
+GO:0061153,trachea gland development,1,1,0.03,0.022
+GO:0060662,salivary gland cavitation,1,1,0.03,0.022
+GO:0009303,rRNA transcription,1,1,0.03,0.022
+GO:0009304,tRNA transcription,1,1,0.03,0.022
+GO:0090261,positive regulation of inclusion body as...,1,1,0.03,0.022
+GO:0090263,positive regulation of canonical Wnt sig...,1,1,0.03,0.022

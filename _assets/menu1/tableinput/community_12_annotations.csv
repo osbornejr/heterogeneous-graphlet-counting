@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0005980,glycogen catabolic process,2,2,0.13,0.0013
-GO:0055119,relaxation of cardiac muscle,4,2,0.25,0.0074
-GO:0051384,response to glucocorticoid,7,3,0.44,0.0116
-GO:0010881,regulation of cardiac muscle contraction...,5,2,0.31,0.0121
-GO:0002027,regulation of heart rate,9,3,0.56,0.0232
-GO:0006006,glucose metabolic process,7,2,0.44,0.0242
-GO:0007268,chemical synaptic transmission,35,5,2.19,0.0264
-GO:0008360,regulation of cell shape,8,2,0.5,0.0315
-GO:0019886,antigen processing and presentation of e...,8,2,0.5,0.0315
-GO:0008156,negative regulation of DNA replication,4,2,0.25,0.0356
+GO:0030501,positive regulation of bone mineralizati...,2,2,0.13,0.002
+GO:0001707,mesoderm formation,2,2,0.13,0.002
+GO:0030155,regulation of cell adhesion,15,6,0.98,0.038
+GO:0007159,leukocyte cell-cell adhesion,8,3,0.52,0.042
+GO:0030336,negative regulation of cell migration,10,3,0.65,0.043
+GO:0031124,mRNA 3'-end processing,2,2,0.13,0.043
+GO:2000401,regulation of lymphocyte migration,2,2,0.13,0.043
+GO:0010812,negative regulation of cell-substrate ad...,2,2,0.13,0.043
+GO:0030509,BMP signaling pathway,2,2,0.13,0.043
+GO:0048678,response to axon injury,2,2,0.13,0.043

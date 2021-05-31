@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0007156,homophilic cell adhesion via plasma memb...,8,2,0.27,0.011
+GO:0000289,nuclear-transcribed mRNA poly(A) tail sh...,1,1,0.03,0.022
+GO:0045766,positive regulation of angiogenesis,1,1,0.03,0.022
+GO:0021965,spinal cord ventral commissure morphogen...,1,1,0.03,0.022
+GO:0043312,neutrophil degranulation,1,1,0.03,0.022
+GO:0007030,Golgi organization,1,1,0.03,0.022
+GO:0033504,floor plate development,1,1,0.03,0.022
+GO:0021919,BMP signaling pathway involved in spinal...,1,1,0.03,0.022
+GO:0043928,exonucleolytic nuclear-transcribed mRNA ...,1,1,0.03,0.022
+GO:0038007,netrin-activated signaling pathway,1,1,0.03,0.022

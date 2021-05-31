@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0006412,translation,27,5,1.12,0.0044
-GO:0030317,flagellated sperm motility,4,2,0.17,0.0046
-GO:0007275,multicellular organism development,230,11,9.53,0.0124
-GO:0071356,cellular response to tumor necrosis fact...,8,2,0.33,0.0202
-GO:0055085,transmembrane transport,77,6,3.19,0.0257
-GO:0034097,response to cytokine,27,5,1.12,0.0260
-GO:0071398,cellular response to fatty acid,3,2,0.12,0.0280
-GO:0009566,fertilization,6,2,0.25,0.0280
-GO:0000090,mitotic anaphase,1,1,0.04,0.0288
-GO:1900825,regulation of membrane depolarization du...,1,1,0.04,0.0288
+GO:2001273,regulation of glucose import in response...,1,1,0.03,0.02
+GO:0032703,negative regulation of interleukin-2 pro...,1,1,0.03,0.02
+GO:0046784,viral mRNA export from host cell nucleus,1,1,0.03,0.02
+GO:0006957,"complement activation, alternative pathw...",1,1,0.03,0.02
+GO:2000191,regulation of fatty acid transport,1,1,0.03,0.02
+GO:0045648,positive regulation of erythrocyte diffe...,1,1,0.03,0.02
+GO:0016973,poly(A)+ mRNA export from nucleus,1,1,0.03,0.02
+GO:2000369,regulation of clathrin-dependent endocyt...,1,1,0.03,0.02
+GO:0030204,chondroitin sulfate metabolic process,2,1,0.07,0.04
+GO:0032964,collagen biosynthetic process,2,1,0.07,0.04

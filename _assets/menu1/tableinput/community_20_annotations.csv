@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0033148,positive regulation of intracellular est...,2,2,0.24,0.0063
+GO:0009790,embryo development,24,6,2.88,0.0162
+GO:0030900,forebrain development,15,4,1.8,0.0171
+GO:0038096,Fc-gamma receptor signaling pathway invo...,3,2,0.36,0.0179
+GO:0016049,cell growth,16,3,1.92,0.0179
+GO:0051092,positive regulation of NF-kappaB transcr...,5,2,0.6,0.0538
+GO:0007601,visual perception,5,2,0.6,0.0538
+GO:0006367,transcription initiation from RNA polyme...,5,2,0.6,0.0538
+GO:0046777,protein autophosphorylation,5,2,0.6,0.0538
+GO:0008150,biological_process,422,48,50.72,0.0635

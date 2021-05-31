@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0009790,embryo development,38,4,3.86,0.0020
-GO:0006370,7-methylguanosine mRNA capping,2,2,0.2,0.0023
-GO:0034063,stress granule assembly,2,2,0.2,0.0023
-GO:0019886,antigen processing and presentation of e...,8,3,0.81,0.0050
-GO:0008219,cell death,88,5,8.93,0.0110
-GO:0019048,modulation by virus of host morphology o...,20,4,2.03,0.0132
-GO:0006977,"DNA damage response, signal transduction...",5,2,0.51,0.0208
-GO:0006446,regulation of translational initiation,5,2,0.51,0.0208
-GO:0007018,microtubule-based movement,13,3,1.32,0.0216
-GO:0018279,protein N-linked glycosylation via aspar...,7,2,0.71,0.0411
+GO:0007411,axon guidance,12,2,0.16,0.0053
+GO:0021987,cerebral cortex development,7,2,0.09,0.0084
+GO:0061003,positive regulation of dendritic spine m...,1,1,0.01,0.0100
+GO:0014068,positive regulation of phosphatidylinosi...,1,1,0.01,0.0100
+GO:1902078,positive regulation of lateral motor col...,1,1,0.01,0.0100
+GO:0051968,positive regulation of synaptic transmis...,1,1,0.01,0.0100
+GO:0038026,reelin-mediated signaling pathway,1,1,0.01,0.0100
+GO:1900273,positive regulation of long-term synapti...,1,1,0.01,0.0100
+GO:0060244,negative regulation of cell proliferatio...,1,1,0.01,0.0100
+GO:0043507,positive regulation of JUN kinase activi...,1,1,0.01,0.0100

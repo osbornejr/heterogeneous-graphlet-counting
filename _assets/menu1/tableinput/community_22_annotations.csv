@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0006629,lipid metabolic process,38,4,1.65,0.0044
+GO:0006071,glycerol metabolic process,4,2,0.17,0.0049
+GO:0045454,cell redox homeostasis,4,2,0.17,0.0049
+GO:0008150,biological_process,422,18,18.32,0.0050
+GO:0045200,establishment of neuroblast polarity,1,1,0.04,0.0301
+GO:0019432,triglyceride biosynthetic process,1,1,0.04,0.0301
+GO:1900087,positive regulation of G1/S transition o...,1,1,0.04,0.0301
+GO:0072659,protein localization to plasma membrane,1,1,0.04,0.0301
+GO:0048505,regulation of timing of cell differentia...,1,1,0.04,0.0301
+GO:0021895,cerebral cortex neuron differentiation,1,1,0.04,0.0301

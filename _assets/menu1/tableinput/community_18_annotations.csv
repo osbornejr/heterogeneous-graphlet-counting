@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0008150,biological_process,799,50,54.75,0.00014
-GO:0043488,regulation of mRNA stability,3,2,0.21,0.00512
-GO:0045893,"positive regulation of transcription, DN...",57,5,3.91,0.00586
-GO:2000045,regulation of G1/S transition of mitotic...,12,4,0.82,0.00932
-GO:0071320,cellular response to cAMP,4,2,0.27,0.00997
-GO:0070301,cellular response to hydrogen peroxide,4,2,0.27,0.00997
-GO:0006629,lipid metabolic process,76,7,5.21,0.01485
-GO:0006071,glycerol metabolic process,5,2,0.34,0.01617
-GO:0032880,regulation of protein localization,27,3,1.85,0.04152
-GO:0043044,ATP-dependent chromatin remodeling,3,2,0.21,0.04153
+GO:0007190,activation of adenylate cyclase activity,2,2,0.09,0.00095
+GO:0001958,endochondral ossification,4,2,0.19,0.00551
+GO:0050796,regulation of insulin secretion,4,2,0.19,0.00551
+GO:0043066,negative regulation of apoptotic process,15,3,0.7,0.00969
+GO:0006112,energy reserve metabolic process,6,2,0.28,0.01327
+GO:0034641,cellular nitrogen compound metabolic pro...,163,9,7.62,0.02517
+GO:0007565,female pregnancy,6,3,0.28,0.02862
+GO:0030316,osteoclast differentiation,2,2,0.09,0.03010
+GO:0019933,cAMP-mediated signaling,3,2,0.14,0.03015
+GO:0055072,iron ion homeostasis,4,2,0.19,0.03020
