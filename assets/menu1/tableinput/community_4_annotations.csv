@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0042776,mitochondrial ATP synthesis coupled prot...,2,2,0.12,0.0018
-GO:0022904,respiratory electron transport chain,17,4,1.04,0.0048
-GO:0050772,positive regulation of axonogenesis,4,2,0.24,0.0100
-GO:0030163,protein catabolic process,30,4,1.83,0.0156
-GO:0006357,regulation of transcription by RNA polym...,65,7,3.96,0.0203
-GO:0035264,multicellular organism growth,6,2,0.37,0.0236
-GO:0006813,potassium ion transport,7,2,0.43,0.0321
-GO:0071880,adenylate cyclase-activating adrenergic ...,3,2,0.18,0.0415
-GO:0071870,cellular response to catecholamine stimu...,3,2,0.18,0.0415
-GO:0050688,regulation of defense response to virus,4,2,0.24,0.0416
+GO:0010628,positive regulation of gene expression,35,5,2.4,0.00071
+GO:0002755,MyD88-dependent toll-like receptor signa...,3,2,0.21,0.00572
+GO:0007519,skeletal muscle tissue development,4,2,0.27,0.01111
+GO:0019886,antigen processing and presentation of e...,4,2,0.27,0.01111
+GO:0007411,axon guidance,12,3,0.82,0.01371
+GO:0007507,heart development,12,3,0.82,0.01711
+GO:0006367,transcription initiation from RNA polyme...,5,2,0.34,0.01801
+GO:0007219,Notch signaling pathway,6,2,0.41,0.02626
+GO:0043687,post-translational protein modification,6,2,0.41,0.02626
+GO:0006139,nucleobase-containing compound metabolic...,153,13,10.47,0.03356

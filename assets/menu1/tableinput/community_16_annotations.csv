@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0051496,positive regulation of stress fiber asse...,2,2,0.16,0.0021
-GO:0033148,positive regulation of intracellular est...,2,2,0.16,0.0021
-GO:0006333,chromatin assembly or disassembly,10,3,0.8,0.0060
-GO:0072177,mesonephric duct development,3,2,0.24,0.0062
-GO:0030308,negative regulation of cell growth,11,3,0.87,0.0121
-GO:0030336,negative regulation of cell migration,12,3,0.95,0.0156
-GO:0050852,T cell receptor signaling pathway,5,2,0.4,0.0194
-GO:0050821,protein stabilization,5,2,0.4,0.0194
-GO:0002479,antigen processing and presentation of e...,6,2,0.48,0.0283
-GO:0038095,Fc-epsilon receptor signaling pathway,7,2,0.56,0.0384
+GO:0006112,energy reserve metabolic process,6,3,0.23,0.0015
+GO:0001958,endochondral ossification,4,2,0.15,0.0034
+GO:0050796,regulation of insulin secretion,4,2,0.15,0.0034
+GO:0007596,blood coagulation,13,3,0.5,0.0102
+GO:0051216,cartilage development,9,2,0.35,0.0191
+GO:0071379,cellular response to prostaglandin stimu...,2,2,0.08,0.0234
+GO:0007603,"phototransduction, visible light",2,2,0.08,0.0234
+GO:0000910,cytokinesis,3,2,0.12,0.0235
+GO:0038110,interleukin-2-mediated signaling pathway,1,1,0.04,0.0250
+GO:0038111,interleukin-7-mediated signaling pathway,1,1,0.04,0.0250

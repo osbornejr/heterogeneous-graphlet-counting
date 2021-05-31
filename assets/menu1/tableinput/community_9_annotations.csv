@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0000413,protein peptidyl-prolyl isomerization,3,2,0.19,0.0036
-GO:0007276,gamete generation,30,5,1.9,0.0064
-GO:0030968,endoplasmic reticulum unfolded protein r...,4,2,0.25,0.0071
-GO:0034660,ncRNA metabolic process,20,4,1.27,0.0335
-GO:0032943,mononuclear cell proliferation,12,3,0.76,0.0342
-GO:0010972,negative regulation of G2/M transition o...,3,2,0.19,0.0347
-GO:0042779,tRNA 3'-trailer cleavage,1,1,0.06,0.0355
-GO:0007567,parturition,1,1,0.06,0.0355
-GO:0022417,protein maturation by protein folding,1,1,0.06,0.0355
-GO:0007066,female meiosis sister chromatid cohesion,1,1,0.06,0.0355
+GO:0044267,cellular protein metabolic process,97,5,2.59,0.018
+GO:0001541,ovarian follicle development,2,2,0.05,0.020
+GO:0006309,apoptotic DNA fragmentation,1,1,0.03,0.022
+GO:0018125,peptidyl-cysteine methylation,1,1,0.03,0.022
+GO:0072385,minus-end-directed organelle transport a...,1,1,0.03,0.022
+GO:0002092,positive regulation of receptor internal...,1,1,0.03,0.022
+GO:0034314,Arp2/3 complex-mediated actin nucleation,1,1,0.03,0.022
+GO:0042699,follicle-stimulating hormone signaling p...,1,1,0.03,0.022
+GO:0046784,viral mRNA export from host cell nucleus,1,1,0.03,0.022
+GO:0035774,positive regulation of insulin secretion...,1,1,0.03,0.022

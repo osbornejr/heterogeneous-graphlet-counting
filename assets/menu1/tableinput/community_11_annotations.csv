@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0051092,positive regulation of NF-kappaB transcr...,7,4,0.63,0.00019
-GO:0007608,sensory perception of smell,2,2,0.18,0.00254
-GO:0032786,positive regulation of DNA-templated tra...,2,2,0.18,0.00254
-GO:0008150,biological_process,799,60,72.33,0.00282
-GO:0007218,neuropeptide signaling pathway,7,3,0.63,0.00377
-GO:0006833,water transport,3,2,0.27,0.00736
-GO:0032091,negative regulation of protein binding,3,2,0.27,0.00736
-GO:0030030,cell projection organization,64,4,5.79,0.00764
-GO:0016311,dephosphorylation,23,4,2.08,0.02215
-GO:0000082,G1/S transition of mitotic cell cycle,17,3,1.54,0.02266
+GO:0042177,negative regulation of protein catabolic...,1,1,0.03,0.020
+GO:0051764,actin crosslink formation,1,1,0.03,0.020
+GO:0007195,adenylate cyclase-inhibiting dopamine re...,1,1,0.03,0.020
+GO:0007196,adenylate cyclase-inhibiting G protein-c...,1,1,0.03,0.020
+GO:0045022,early endosome to late endosome transpor...,1,1,0.03,0.020
+GO:0051220,cytoplasmic sequestering of protein,1,1,0.03,0.020
+GO:0042789,mRNA transcription by RNA polymerase II,1,1,0.03,0.020
+GO:0021997,neural plate axis specification,1,1,0.03,0.020
+GO:1901687,glutathione derivative biosynthetic proc...,1,1,0.03,0.020
+GO:0007411,axon guidance,12,2,0.4,0.022

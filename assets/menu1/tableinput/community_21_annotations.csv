@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0008150,biological_process,422,52,71.86,0.0002
+GO:0019886,antigen processing and presentation of e...,4,3,0.68,0.0023
+GO:0007399,nervous system development,62,9,10.56,0.0051
+GO:0005977,glycogen metabolic process,3,2,0.51,0.0210
+GO:0045944,positive regulation of transcription by ...,21,5,3.58,0.0283
+GO:0051489,regulation of filopodium assembly,4,2,0.68,0.0856
+GO:0042770,signal transduction in response to DNA d...,4,2,0.68,0.0856
+GO:0043043,peptide biosynthetic process,10,2,1.7,0.0864
+GO:0006812,cation transport,24,3,4.09,0.0868
+GO:1900017,positive regulation of cytokine producti...,1,1,0.17,0.0868

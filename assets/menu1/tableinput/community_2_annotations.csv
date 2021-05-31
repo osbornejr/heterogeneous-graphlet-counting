@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0038096,Fc-gamma receptor signaling pathway invo...,3,2,0.15,0.0021
-GO:0019048,modulation by virus of host morphology o...,20,3,1.02,0.0150
-GO:2001224,positive regulation of neuron migration,2,2,0.1,0.0262
-GO:0048814,regulation of dendrite morphogenesis,3,2,0.15,0.0263
-GO:0097202,activation of cysteine-type endopeptidas...,1,1,0.05,0.0271
-GO:0032793,positive regulation of CREB transcriptio...,1,1,0.05,0.0271
-GO:0007080,mitotic metaphase plate congression,1,1,0.05,0.0271
-GO:0006895,Golgi to endosome transport,1,1,0.05,0.0271
-GO:2000969,positive regulation of AMPA receptor act...,1,1,0.05,0.0271
-GO:0038026,reelin-mediated signaling pathway,1,1,0.05,0.0271
+GO:0008360,regulation of cell shape,3,2,0.2,0.0045
+GO:0046677,response to antibiotic,6,3,0.39,0.0132
+GO:0006091,generation of precursor metabolites and ...,28,3,1.82,0.0142
+GO:0006397,mRNA processing,15,3,0.98,0.0188
+GO:0006413,translational initiation,3,3,0.2,0.0369
+GO:0045738,negative regulation of DNA repair,1,1,0.07,0.0401
+GO:0038110,interleukin-2-mediated signaling pathway,1,1,0.07,0.0401
+GO:0071529,cementum mineralization,1,1,0.07,0.0401
+GO:0038111,interleukin-7-mediated signaling pathway,1,1,0.07,0.0401
+GO:2000785,regulation of autophagosome assembly,1,1,0.07,0.0401

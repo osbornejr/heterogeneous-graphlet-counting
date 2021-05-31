@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0048011,neurotrophin TRK receptor signaling path...,13,4,0.84,0.00086
-GO:0006355,"regulation of transcription, DNA-templat...",166,12,10.67,0.00314
-GO:0010977,negative regulation of neuron projection...,8,3,0.51,0.00365
-GO:0007411,axon guidance,20,4,1.29,0.00482
-GO:0045445,myoblast differentiation,5,3,0.32,0.00708
-GO:0034605,cellular response to heat,4,2,0.26,0.00741
-GO:0021766,hippocampus development,4,2,0.26,0.00741
-GO:0044255,cellular lipid metabolic process,58,8,3.73,0.01972
-GO:0010628,positive regulation of gene expression,64,4,4.12,0.02424
-GO:0009058,biosynthetic process,289,19,18.58,0.02796
+GO:0014829,vascular smooth muscle contraction,1,1,0.03,0.022
+GO:1901984,negative regulation of protein acetylati...,1,1,0.03,0.022
+GO:0090398,cellular senescence,1,1,0.03,0.022
+GO:0071313,cellular response to caffeine,1,1,0.03,0.022
+GO:0010763,positive regulation of fibroblast migrat...,1,1,0.03,0.022
+GO:0033600,negative regulation of mammary gland epi...,1,1,0.03,0.022
+GO:0060763,mammary duct terminal end bud growth,1,1,0.03,0.022
+GO:0050772,positive regulation of axonogenesis,1,1,0.03,0.022
+GO:0002042,cell migration involved in sprouting ang...,1,1,0.03,0.022
+GO:2001032,regulation of double-strand break repair...,1,1,0.03,0.022

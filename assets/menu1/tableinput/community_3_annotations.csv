@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0008150,biological_process,799,90,113.56,0.00014
-GO:0030207,chondroitin sulfate catabolic process,2,2,0.28,0.00574
-GO:0060009,Sertoli cell development,2,2,0.28,0.00574
-GO:0060324,face development,2,2,0.28,0.00574
-GO:0045944,positive regulation of transcription by ...,39,8,5.54,0.00713
-GO:0007399,nervous system development,112,16,15.92,0.01081
-GO:0050900,leukocyte migration,14,4,1.99,0.01776
-GO:0019886,antigen processing and presentation of e...,8,3,1.14,0.01806
-GO:0007596,blood coagulation,30,7,4.26,0.02083
-GO:0030183,B cell differentiation,5,3,0.71,0.03049
+GO:0006986,response to unfolded protein,3,2,0.13,0.0011
+GO:0010951,negative regulation of endopeptidase act...,3,2,0.13,0.0184
+GO:0045200,establishment of neuroblast polarity,1,1,0.04,0.0200
+GO:0030837,negative regulation of actin filament po...,1,1,0.04,0.0200
+GO:0046785,microtubule polymerization,1,1,0.04,0.0200
+GO:0007026,negative regulation of microtubule depol...,1,1,0.04,0.0200
+GO:0010025,wax biosynthetic process,1,1,0.04,0.0200
+GO:0072659,protein localization to plasma membrane,1,1,0.04,0.0200
+GO:0032781,positive regulation of ATPase activity,1,1,0.04,0.0200
+GO:0060710,chorio-allantoic fusion,1,1,0.04,0.0200

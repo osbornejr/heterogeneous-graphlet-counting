@@ -1,0 +1,11 @@
+GO_ID,Term,Annotated,Significant,Expected,fisher
+GO:0008045,motor neuron axon guidance,2,2,0.21,0.0041
+GO:0006120,"mitochondrial electron transport, NADH t...",7,3,0.74,0.0075
+GO:0046777,protein autophosphorylation,5,3,0.53,0.0114
+GO:0007049,cell cycle,49,6,5.15,0.0215
+GO:0043113,receptor clustering,4,2,0.42,0.0228
+GO:0045892,"negative regulation of transcription, DN...",21,4,2.21,0.0362
+GO:0048812,neuron projection morphogenesis,21,6,2.21,0.0587
+GO:0021697,cerebellar cortex formation,2,2,0.21,0.0635
+GO:0006413,translational initiation,3,2,0.32,0.0637
+GO:1900119,positive regulation of execution phase o...,1,1,0.11,0.0651

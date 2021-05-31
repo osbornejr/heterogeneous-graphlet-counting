@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0090090,negative regulation of canonical Wnt sig...,4,2,0.18,0.0032
-GO:0030198,extracellular matrix organization,20,4,0.91,0.0041
-GO:0006355,"regulation of transcription, DNA-templat...",166,10,7.58,0.0066
-GO:0007596,blood coagulation,30,4,1.37,0.0071
-GO:0043433,negative regulation of DNA-binding trans...,7,2,0.32,0.0106
-GO:0007519,skeletal muscle tissue development,8,2,0.37,0.0139
-GO:0006508,proteolysis,56,5,2.56,0.0208
-GO:0010226,response to lithium ion,1,1,0.05,0.0237
-GO:0001843,neural tube closure,1,1,0.05,0.0237
-GO:0042631,cellular response to water deprivation,1,1,0.05,0.0237
+GO:0006915,apoptotic process,40,4,1.2,0.006
+GO:0043568,positive regulation of insulin-like grow...,1,1,0.03,0.018
+GO:0055093,response to hyperoxia,1,1,0.03,0.018
+GO:0071421,manganese ion transmembrane transport,1,1,0.03,0.018
+GO:0045777,positive regulation of blood pressure,1,1,0.03,0.018
+GO:0045720,negative regulation of integrin biosynth...,1,1,0.03,0.018
+GO:0045726,positive regulation of integrin biosynth...,1,1,0.03,0.018
+GO:0045730,respiratory burst,1,1,0.03,0.018
+GO:0060689,cell differentiation involved in salivar...,1,1,0.03,0.018
+GO:0014823,response to activity,1,1,0.03,0.018

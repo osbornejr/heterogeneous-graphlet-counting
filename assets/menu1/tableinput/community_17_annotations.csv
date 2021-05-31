@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0008150,biological_process,799,86,106.8,0.00014
-GO:0006805,xenobiotic metabolic process,9,4,1.2,0.00249
-GO:0045669,positive regulation of osteoblast differ...,2,2,0.27,0.00524
-GO:0030501,positive regulation of bone mineralizati...,2,2,0.27,0.00524
-GO:0030199,collagen fibril organization,3,2,0.4,0.01496
-GO:0055114,oxidation-reduction process,61,9,8.15,0.02400
-GO:0030900,forebrain development,25,6,3.34,0.02694
-GO:0001707,mesoderm formation,4,2,0.53,0.02852
-GO:0007601,visual perception,10,3,1.34,0.03071
-GO:0050896,response to stimulus,360,35,48.12,0.03558
+GO:0006120,"mitochondrial electron transport, NADH t...",7,3,0.51,0.002
+GO:0043523,regulation of neuron apoptotic process,6,2,0.44,0.023
+GO:0019048,modulation by virus of host morphology o...,8,2,0.59,0.040
+GO:0051924,regulation of calcium ion transport,5,2,0.37,0.040
+GO:0043043,peptide biosynthetic process,10,2,0.73,0.041
+GO:0043031,negative regulation of macrophage activa...,1,1,0.07,0.042
+GO:0007229,integrin-mediated signaling pathway,1,1,0.07,0.042
+GO:0060487,lung epithelial cell differentiation,1,1,0.07,0.042
+GO:0033137,negative regulation of peptidyl-serine p...,1,1,0.07,0.042
+GO:0051865,protein autoubiquitination,1,1,0.07,0.042
