@@ -298,7 +298,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 				real_obs = real_dict[heg*"_"*hog]
 				log_real_obs = log(real_dict[heg*"_"*hog]+1)
 				## Monte Carlo method
-				r = sum(rand_vals.>real_obs)
+				r = sum(rand_vals.>=real_obs)
 				p_value = (r+1)/(N+1)
 				##Z-score method (assumes either normal or lognormal distribution of counts in sims)
 				#using real values
