@@ -41,7 +41,7 @@ function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{Strin
 		for d in r
 			# format floats and ints	
 			if (typeof(d)<:AbstractFloat)
-				table = table*"\t\t\t\t\t\t<td>$(@sprintf "%.5g" d)</td>\n"
+				table = table*"\t\t\t\t\t\t<td>$(@sprintf "%.3g" d)</td>\n"
 			# add image to table (asssumes image is located at figs/$d.svg)
 			elseif (d in imgs)
 				table = table*"""\t\t\t\t\t\t<td><img  width=80% src="./figs/$d.svg" title="$d"/></td>\n"""				
