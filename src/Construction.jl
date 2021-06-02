@@ -299,6 +299,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 				log_real_obs = log(real_dict[heg*"_"*hog]+1)
 				## Monte Carlo method
 				r = sum(rand_vals.>=real_obs)
+				##special case: real_obs is zero.. Zero occurences do not register in rand_vals table, but clearly every rand network has equal or greater count 
+				if(real_obs==0)
+					r = N
+				end
 				p_value = (r+1)/(N+1)
 				##Z-score method (assumes either normal or lognormal distribution of counts in sims)
 				#using real values
@@ -319,8 +323,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		end
 		## find significant graphlets
 		sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
+		#save in output cache
 		html_table_maker(sig_graphlets,"$cache_dir/type_representations.html",imgs=sig_graphlets.Graphlet)				
-
+		#save for website version
+		html_table_maker(sig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")				
 		##look at edge types in randomised networks
 		real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
 		rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
