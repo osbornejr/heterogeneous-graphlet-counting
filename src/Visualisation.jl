@@ -17,7 +17,7 @@ function cytoscape_elements(vertices::Array{String,2},edges::Array{Pair},output_
 	close(io)
 end
 
-function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{String,1}=[])
+function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{String,1}=[],figpath::String=".figs/")
 	#begin table container with scoped styling
 	table ="""<div id="table container">\n\t<style type="text/css" scoped>\n\t\t.row {\n\t\t\tmargin-left:-5px;\n\t\t\tmargin-right:-5px;\n\t\t}\n\t\t.column {\n\t\t\tfloat: left;\n\t\t\twidth: 50%;\n\t\t}\n\t\ttd {\n\t\t\ttext-align:center;\n\t\t\tvertical-align:middle;\n\t\t}\n\t</style>\n\t<div class="row">\n\t\t<div class="column">\n"""
 	for (i,r) in enumerate(eachrow(dataframe))
@@ -44,7 +44,7 @@ function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{Strin
 				table = table*"\t\t\t\t\t\t<td>$(@sprintf "%.3g" d)</td>\n"
 			# add image to table (asssumes image is located at figs/$d.svg)
 			elseif (d in imgs)
-				table = table*"""\t\t\t\t\t\t<td><img  width=80% src="./figs/$d.svg" title="$d"/></td>\n"""				
+				table = table*"""\t\t\t\t\t\t<td><img  width=80% src="$figpath/$d.svg" title="$d"/></td>\n"""				
 				
 			else
 				table = table*"\t\t\t\t\t\t<td>$(d)</td>\n"
@@ -57,9 +57,9 @@ function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{Strin
  	#close column 
 	table = table*"\t\t</div>\n"
 	#add legend to bottom
-	table = table*"""\t\t<div class="column">\n\t\t\t<table align="left">\n\t\t\t\t<tr>\n\t\t\t\t\t<td bgcolor="#fc3c7a"></td>\n\t\t\t\t\t<td>coding</td>\n\t\t\t\t\t<td bgcolor="#f4cd16"></td>\n\t\t\t\t\t<td>noncoding</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t</div>\n"""
+	table = table*"""\t\t<div class="column">\n\t\t\t<table align="left">\n\t\t\t\t<tr>\n\t\t\t\t\t<td bgcolor="#fc3c7a">&nbsp;&nbsp;&nbsp;</td>\n\t\t\t\t\t<td>coding</td>\n\t\t\t\t\t<td bgcolor="#f4cd16">&nbsp;&nbsp;&nbsp;</td>\n\t\t\t\t\t<td>noncoding</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t</div>\n"""
 	#close row and container
-	table = table*"\t</div>\n</div>"
+	table = table*"\t</div>\n</div>\n"
 	write(outfile,table)
 end
 
