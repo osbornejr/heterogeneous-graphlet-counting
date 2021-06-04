@@ -25,7 +25,12 @@ function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{Strin
 		if (mod(i,5)==1)
 			#close previous column
 			if(i>1)
-				table = table*"""\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t</div>\n\t\t<div class="column">\n"""		 
+				#close table
+				table = table*"""\t\t\t\t</tbody>\n\t\t\t</table>\n"""		 
+				#add legend to bottom of first row
+				table = table*"""\t\t<div class="column">\n\t\t\t<table align="left">\n\t\t\t\t<tr>\n\t\t\t\t\t<td bgcolor="#fc3c7a">&nbsp;&nbsp;&nbsp;</td>\n\t\t\t\t\t<td>coding</td>\n\t\t\t\t\t<td bgcolor="#f4cd16">&nbsp;&nbsp;&nbsp;</td>\n\t\t\t\t\t<td>noncoding</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t</div>\n"""
+				#close column
+				table = table*"""\n\t\t</div>\n\t\t<div class="column">\n"""		 
 			end
 			#begin table...create header from dataframe names
 			table = table*"\t\t\t<table>\n\t\t\t\t<thead>\n\t\t\t\t\t<tr>\n"
@@ -56,10 +61,10 @@ function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{Strin
 	table = table*"\t\t\t\t</tbody>\n\t\t\t</table>\n"
  	#close column 
 	table = table*"\t\t</div>\n"
-	#add legend to bottom
-	table = table*"""\t\t<div class="column">\n\t\t\t<table align="left">\n\t\t\t\t<tr>\n\t\t\t\t\t<td bgcolor="#fc3c7a">&nbsp;&nbsp;&nbsp;</td>\n\t\t\t\t\t<td>coding</td>\n\t\t\t\t\t<td bgcolor="#f4cd16">&nbsp;&nbsp;&nbsp;</td>\n\t\t\t\t\t<td>noncoding</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t</div>\n"""
-	#close row and container
-	table = table*"\t</div>\n</div>\n"
+	#close row
+	table = table*"\t</div>\n"
+	#close container
+	table = table*"</div>\n"
 	write(outfile,table)
 end
 
