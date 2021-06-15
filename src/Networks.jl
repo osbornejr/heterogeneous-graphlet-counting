@@ -117,6 +117,31 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
 	plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut",  dendroLabels = FALSE, hang = 0.03,addGuide = TRUE, guideHang = 0.05,main = "Gene dendrogram and module colors")  
 	#dev.off()
 	
+	# Calculate eigengenes  
+	MEList = moduleEigengenes(data, colors = dynamicColors)  
+	MEs = MEList$eigengenes  
+	# Calculate dissimilarity of module eigengenes  
+	MEDiss = 1-cor(MEs);  
+	# Cluster module eigengenes  
+	METree = hclust(as.dist(MEDiss), method = "average");  
+	# Plot the result  
+	#pdf("eigengenes.pdf")
+	plot(METree, main = "Clustering of module eigengenes",  xlab = "", sub = "")  
+	MEDissThres = 0.25  
+	# Plot the cut line into the dendrogram  
+	abline(h=MEDissThres, col = "red")  
+	#dev.off()
+	# Call an automatic merging function  
+	merge = mergeCloseModules(data, dynamicColors, cutHeight = MEDissThres, verbose = 3)  
+	# The merged module colors  
+	mergedColors = merge$colors;  
+	# Eigengenes of the new merged modules:  
+	mergedMEs = merge$newMEs;  
+	#pdf(file = "eigen-merged-dendro.pdf", wi = 9, he = 6)  
+	plotDendroAndColors(geneTree, cbind(dynamicColors, mergedColors),  c("Dynamic Tree Cut", "Merged dynamic"),  dendroLabels = FALSE, hang = 0.03, addGuide = TRUE, guideHang = 0.05)  
+	#dev.off()  
+	str(mergedMEs)  
+	
 	
 	 
 	"""
