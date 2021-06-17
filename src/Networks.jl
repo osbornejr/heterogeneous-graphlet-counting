@@ -143,6 +143,15 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
 	str(mergedMEs)  
 	
 	
+	##Heat map
+	# Transform dissTOM with a power to make moderately strong connections more visible in the heatmap 
+	plotTOM = dissTOM^7; 
+	# Set diagonal to NA for a nicer plot 
+	diag(plotTOM) = NA; 
+	# Call the plot function 
+	#pdf('heatmap.pdf') 
+	TOMplot(plotTOM, geneTree, dynamicColors, main = "Network heatmap plot, all genes") 
+	dev.off()	 
 	 
 	"""
 
