@@ -15,6 +15,7 @@ struct RunParameters
 	func_annotate::Bool
 	visualise::Bool
 	graphlet_counting::Bool
+	wgcna::Bool
 end
 
 
