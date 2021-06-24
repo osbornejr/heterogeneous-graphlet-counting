@@ -1,4 +1,4 @@
-using LightGraphs,RCall
+using LightGraphs,RCall,DataFrames
 #using PrettyTables
 
 function connected_components_html_table(adjacency_matrix::AbstractArray,filename::String)
@@ -151,7 +151,36 @@ function get_community_structure(adj_matrix::AbstractArray,vertex_names::Array{S
 	return vertices
 end
 
+function get_community_node_types(adj_matrix::AbstractArray,community_vector::Array{Int,1},type_vector::Array{String,1})
+	if (size(adj_matrix,1) != length(community_vector))
+	    @error "Community vector is of different size to adjacency matrix. Some nodes do not have a community assigned (use 0 for nodes in no community)."
+    	end
 
+	#modify adjacency matrix so that every non-zero entry indicates the community of the connecting (columnwise) node and every zero entry indicates the community of the (rowwise) node
+	comm_matrix = (adj_matrix.*community_vector)'+(.!adj_matrix.*community_vector)
+	##the communities that each nodes is connected to
+	connections = unique.(eachrow(comm_matrix))
+	## all nodes that are only connected to their own community
+	interior_nodes = length.(connections).==1
+	#per community:
+	comm_df = DataFrame()
+	for comm in unique(community_vector)
+		##boolean of nodes in community
+		comm_nodes = community_vector.== comm
+		## nodes that are connected to nodes in that community.
+		conn_nodes = in.(comm,connections)
+		##nodes in commmunity that are only connected community
+		comm_interiors = comm_nodes.*interior_nodes
+		##nodes in community that are connected to nodes in another community
+		comm_boundaries = comm_nodes.*.!interior_nodes
+		##nodes not in community that are connected to nodes in community
+		comm_neighbours = conn_nodes.*.!comm_nodes
+		##nodes not in community that are not connected to nodes in community
+		comm_exteriors = .!conn_nodes.*.!comm_nodes
+		append!(comm_df,DataFrame(Community = comm, Size = sum(comm_nodes),Coding_Interiors = sum(type_vector[comm_interiors].=="coding" ),Noncoding_Interiors = sum(type_vector[comm_interiors].=="noncoding" ),Coding_Boundaries = sum(type_vector[comm_boundaries].=="coding" ),Noncoding_Boundaries = sum(type_vector[comm_boundaries].=="noncoding" ),Coding_Neighbours = sum(type_vector[comm_neighbours].=="coding" ),Noncoding_Neighbours = sum(type_vector[comm_neighbours].=="noncoding" ),Coding_Exteriors = sum(type_vector[comm_exteriors].=="coding" ),Noncoding_Exteriors = sum(type_vector[comm_exteriors].=="noncoding" )))
+
+	end
+end
 
 
 function get_functional_annotations(comm_vertices::DataFrame;ensembl_version::String="current",write_csv::Bool = true,csv_dir::String)
