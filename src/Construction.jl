@@ -213,11 +213,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			timer = JLD.load(graphlet_file,"time")
 		else
 			@info "Counting graphlets..."
-			timer=@elapsed graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true)
+			timer=@elapsed graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old")
 			#graphlet_concentrations = concentrate(graphlet_counts) 
 			@info "Saving graphlet counts at $cache_dir..."
 			##save the per-edge array as well in case we need it in the future (exp for debugging)
-			JLD.save(graphlet_file,"graphlets",graphlet_counts,"Chi",Chi,"time",timer)
+			JLD.save(graphlet_file,"graphlets",graphlet_counts,"time",timer)
 	
 		end
 	
@@ -342,6 +342,45 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		#pretty_table(random_edges,backend=:html,standalone = false)
 		
 		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
+
+		### Validation steps
+		# looking at identified significant graphlets and seeing if they check out biologically
+		#To do this we require the node-level relationships output of the graphlet counting algorithm. We it is generally quicker to run this than save and load it via JLD, as it is quite large) 
+		
+	#	if (isfile(graphlet_file))
+	#		@info "Loading graphlet counts from $cache_dir..."
+	#		Rel = JLD.load(graphlet_file,"Rel")
+	#	else
+	#		@info "Counting graphlets..."
+	#		##Do full relationships run in case per-node relationships are required (TODO add toggle for this?)
+	#		timer=@elapsed graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true)
+	#		#graphlet_concentrations = concentrate(graphlet_counts) 
+	#		@info "Saving graphlet counts at $cache_dir..."
+	#		##save the per-edge array as well in case we need it in the future (exp for debugging)
+	#		JLD.save(graphlet_file,"graphlets",graphlet_counts,"Chi",Chi,"Rel",Rel,"time",timer)
+	#
+	#	end
+
+ 		graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
+ 		## combine relationships into one array
+ 		rel = vcat(Rel...)
+ 		#graphlet of interest... set manually for now 
+ 		goi = sig_graphlets.Graphlet[2]		
+ 		hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
+ 		#filter down to homogenous graphlet first
+ 		hogs = filter(x->x[end]==hogoi,rel)
+ 		hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
+ 		##sort and find unique copies of graphlet (TODO unique for each graphlet!)
+ 		if(hogoi == "4-star")
+ 			hogs_sorted = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
+ 		end
+ 		
+ 		#get those that match heterogeneous pattern as well
+ 		hogs_types = map(x->broadcast(y->vertexlist[y],x),hogs_sorted)	
+ 		hegs = hogs_sorted[findall(x->x== hegoi,hogs_types)]
+ 	 	#get names of transcripts in matching pattern 
+ 		hegs_names = map(x->broadcast(y->vertex_names[y],x),hegs)	
+ 	
 	end
 	#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 end
