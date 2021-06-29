@@ -213,7 +213,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			timer = JLD.load(graphlet_file,"time")
 		else
 			@info "Counting graphlets..."
-			timer=@elapsed graphlet_counts,Chi = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old")
+			timer=@elapsed graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true)
 			#graphlet_concentrations = concentrate(graphlet_counts) 
 			@info "Saving graphlet counts at $cache_dir..."
 			##save the per-edge array as well in case we need it in the future (exp for debugging)
