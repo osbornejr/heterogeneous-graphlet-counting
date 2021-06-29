@@ -427,10 +427,16 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	end
 	if (relationships==true)
 		##when per node graphlet information is required. note that this does demand large memory storage TODO make more efficient?
-		three_paths = Array{Tuple{Int,Int,Int}}()
+		three_paths = Array{Tuple{Int,Int,Int},1}()
+		triangles = Array{Tuple{Int,Int,Int},1}()
 		for i in 1:length(edgelist)
+			#ipaths
        			append!(three_paths,[(last(edgelist[i]),first(edgelist[i]),x) for x in findall(==(1),Rel[i])])
-       			append!(three_paths,[(first(edgelist[i]),last(edgelist[i]),x) for x in findall(==(2),Rel[i])])
+       			#jpaths
+			append!(three_paths,[(first(edgelist[i]),last(edgelist[i]),x) for x in findall(==(2),Rel[i])])
+			#triangles
+			append!(triangles,[(first(edgelist[i]),last(edgelist[i]),x) for x in findall(==(3),Rel[i])])
+
        		end
 
 
