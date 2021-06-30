@@ -125,10 +125,9 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 		end
 	end	
         if (graphlet_size==4)
-		#matrix to store 4 node relationships in
+		#matrix to store 4 node relationships in; each row corresponds to the relevant entry in rel TODO might be better for memory to only have rows associated with
+		#nonzero entries in rel?
 		Rel = zeros(Int,length(vertex_type_list),length(vertex_type_list))
-		#first column represents 3 node relationships	
-		Rel[:,1] = rel
 		##for reference, relationships are coded as follows:
 		#1 = threepath i centre
 		#2 = threepath j centre
@@ -137,11 +136,12 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 		#5 = fourstar
 		#6 = fourtail
 		#7 = fourcycle
-		#8 = fourchord
-		#9 = fourclique
+		#8 = fourchord iedge
+		#9 = fourchord jedge
+		#10 = fourclique
 		#The specific orbits of each four node graphlet should be recoverable from the first column in Rel (1,2 or 3) but otherwise we might need more relationship types 
 		#in the fournode case
-		for w in iPath
+		for w in  iPath
 			for v in neighbourdict[w]
 				if (v==i)
 
@@ -156,7 +156,7 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 			end
 		end
 						
-		for w in jPath 
+		for w in j Path 
 			for v in neighbourdict[w]
 				if (v==j)
 				#do nothing
@@ -180,14 +180,14 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 				#do nothing
 				elseif ((v in Tri) & (v < w)) 
 					count_dict[graphlet_string(vertex_type_list[w],vertex_type_list[i],vertex_type_list[j],vertex_type_list[v],"4-clique",delim)]+=1
-						Rel[w,v] = 9
+						Rel[w,v] = 10
 				## separating the processes here so that we can maintain the right type ordering 
 				elseif (v in iPath) 
 					count_dict[graphlet_string(vertex_type_list[v],vertex_type_list[i],vertex_type_list[w],vertex_type_list[j],"4-chord-edge-orbit",delim)]+=1
 						Rel[w,v] = 8
 				elseif (v in jPath) 
 					count_dict[graphlet_string(vertex_type_list[v],vertex_type_list[j],vertex_type_list[w],vertex_type_list[i],"4-chord-edge-orbit",delim)]+=1
-						Rel[w,v] = 8
+						Rel[w,v] = 9
 				elseif (!(v in gamma_i) & !(v in gamma_j))
 						count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[w],vertex_type_list[v],"4-tail-tri-centre-orbit",delim)]+=1
 						Rel[w,v] = 6
@@ -282,7 +282,7 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 				end
 	 		end
 	 	end
- 	end
+ 	end 
 	#combinatorial process currently adds 0 entries if no candidates exist. Not an issue per se, but makes readability on smaller graphs annoying. for now we tidy up at the end, but might be more efficient to do during combinatorial loop?
 	for g in collect(keys(count_dict))[collect(values(count_dict)).==0]
 		delete!(count_dict,g)
@@ -298,14 +298,35 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 	append!(ships,[(0,i,j,x,"threepath") for x in findall(==(2),rel)])
 	#triangles
 	append!(ships,[(0,i,j,x,"triangle") for x in findall(==(3),rel)])
+
 	#fourpaths iedge
 	append!(ships,[(j,i,x,y,"fourpath") for x in findall(==(1),rel) for y in findall(==(4),Rel[x,:])])
 	#fourpaths jedge
 	append!(ships,[(i,j,x,y,"fourpath") for x in findall(==(2),rel) for y in findall(==(4),Rel[x,:])])
 
 
-	#fourtails jedge
-	append!(ships,[(i,j,x,y,"fourpath") for x in findall(==(2),rel) for y in findall(==(4),Rel[x,:])])
+	#fourtails icentre
+	append!(ships,[(y,x,i,j,"fourtail") for x in findall(==(1),rel) for y in findall(==(6),Rel[x,:])])
+	#fourtails jcentre
+	append!(ships,[(y,x,j,i,"fourtail") for x in findall(==(2),rel) for y in findall(==(6),Rel[x,:])])
+	#fourtails tricentre
+	append!(ships,[(i,j,x,y,"fourtail") for x in findall(==(3),rel) for y in findall(==(6),Rel[x,:])])
+
+	#fourcycles
+	append!(ships,[(i,j,x,y,"fourcycle") for x in findall(==(2),rel) for y in findall(==(7),Rel[x,:])])
+	
+	#fourchord iedge orbit
+	append!(ships,[(j,i,x,y,"fourchord") for x in findall(==(3),rel) for y in findall(==(8),Rel[x,:])])
+	#fourchord jedge orbit
+	append!(ships,[(i,j,x,y,"fourchord") for x in findall(==(3),rel) for y in findall(==(9),Rel[x,:])])
+
+	#fourclique
+	append!(ships,[(i,j,x,y,"fourclique") for x in findall(==(3),rel) for y in findall(==(10),Rel[x,:])])
+
+	##combinatorials might be more difficult...
+	#fourpath centre orbit
+	append!(ships,[(x,i,j,y,"fourpath") for x in findall(==(1),rel) for y in findall(==(2),rel) if Rel[y,x]!=7])
+
 
 	return count_dict
 
