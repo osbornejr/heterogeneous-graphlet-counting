@@ -68,10 +68,9 @@ end
 
 function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}};relationships::Bool)
 	if (relationships==true)
-		per_edge_counts(edge,vertex_type_list,edgelist,graphlet_size,neighbourdict)
-	end
-	if (relationships==false)
-		per_edge_counts_relationships(edge,vertex_type_list,edgelist,graphlet_size,neighbourdict)
+		return per_edge_counts_relationships(edge,vertex_type_list,edgelist,graphlet_size,neighbourdict)
+	else
+		return per_edge_counts_no_relationships(edge,vertex_type_list,edgelist,graphlet_size,neighbourdict)
 	end
 
 
@@ -156,7 +155,7 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 			end
 		end
 						
-		for w in j Path 
+		for w in jPath 
 			for v in neighbourdict[w]
 				if (v==j)
 				#do nothing
@@ -346,7 +345,7 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 
 end
 
-function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+function per_edge_counts_no_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
 	count_dict = DefaultDict{String,Int}(0)
 	h=edge	
 #	# get nodes i and j for this edge
@@ -557,7 +556,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 	if (relationships==true)
 		##when per node graphlet information is required. note that this does demand large memory storage TODO make more efficient?
 		#preallocate array to store each edge relationship dict 
-		Rel=Array{Array{Int,1}}(undef,size(edgelist,1));
+		Rel=Array{Array{Tuple{Int,Int,Int,Int,String},1}}(undef,size(edgelist,1));
 		#Rel = Array{Int,3}(undef,length(vertex_type_list),length(vertex_type_list),length(vertex_type_list))
 
 
@@ -569,16 +568,22 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		Threads.@threads for h in 1 :size(edgelist,1)
 			edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships)
 			Chi[h] = edge[1]
-			#Rel[h] = edge[2]
+			if (relationships=true)
+				Rel[h] = edge[2]
+			end
 		end
 	elseif(run_method == "distributed")
 		if(progress==true)
 			
 			@info "Distributing edges to workers..."
 			##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
-			Chi = @showprogress pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000,relationships=relationships)
+			Chi = @showprogress pmap(x->per_edge_counts_no_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
 		else
-			Chi = pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000,relationships=relationships)
+			Chi = pmap(x->per_edge_counts_no_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
+		end
+		if (relationships=true)
+			@info "Per-node relationships not provided as they are unsupported using the distributed run_method. Try serial or distributed-old if relationships are required."   
+			relationships = false
 		end
 	elseif(run_method == "distributed-old")
 		if(progress==true)
@@ -700,20 +705,6 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		end
 	end
 	if (relationships==true)
-		##when per node graphlet information is required. note that this does demand large memory storage TODO make more efficient?
-		#Rel = collect.(Rel)
-		three_paths = Array{Tuple{Int,Int,Int},1}()
-		triangles = Array{Tuple{Int,Int,Int},1}()
-		for i in 1:length(edgelist)
-			#ipaths
-       			append!(three_paths,[(last(edgelist[i]),first(edgelist[i]),x) for x in findall(==(1),Rel[i])])
-       			#jpaths
-			append!(three_paths,[(first(edgelist[i]),last(edgelist[i]),x) for x in findall(==(2),Rel[i])])
-			#triangles
-			append!(triangles,[(first(edgelist[i]),last(edgelist[i]),x) for x in findall(==(3),Rel[i])])
-
-       		end
-
 
 		return [graphlet_counts,Chi,Rel]
 	else
