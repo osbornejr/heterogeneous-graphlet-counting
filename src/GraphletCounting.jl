@@ -214,9 +214,9 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 		end
 
 				##Now we loop per type combination
-		for (inda,a) in enumerate(types)	
+		for (inda,a) in enumerate(types)	 
 			for (indb,b) in enumerate(types[inda:end])
-				if (a == b)
+				if (a == b) 
 					##4-path centre orbit
 					#order doesn't matter here
 					count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-path-centre-orbit",delim)] += iPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-cycle",delim)]
@@ -321,14 +321,28 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 	append!(ships,[(i,j,x,y,"fourchord") for x in findall(==(3),rel) for y in findall(==(9),Rel[x,:])])
 
 	#fourclique
-	append!(ships,[(i,j,x,y,"fourclique") for x in findall(==(3),rel) for y in findall(==(10),Rel[x,:])])
+	append!(ships,[(x,i,j,y,"fourclique") for x in findall(==(3),rel) for y in findall(==(10),Rel[x,:])])
 
 	##combinatorials might be more difficult...
-	#fourpath centre orbit
+	#fourpaths centre orbit
 	append!(ships,[(x,i,j,y,"fourpath") for x in findall(==(1),rel) for y in findall(==(2),rel) if Rel[y,x]!=7])
+	
+	#fourchords centre orbit
+	append!(ships,[(x,i,j,y,"fourchord") for x in findall(==(3),rel) for y in findall(==(3),rel) if (y<x && Rel[x,y]!=10)])
+	
+	#fourstars i centre
+	append!(ships,[(x,j,i,y,"fourstar") for x in findall(==(1),rel) for y in findall(==(1),rel) if (y<x && Rel[x,y]!=6)])
+	
+	#fourstars j centre
+	append!(ships,[(x,i,j,y,"fourstar") for x in findall(==(2),rel) for y in findall(==(2),rel) if (y<x && Rel[x,y]!=6)])
 
-
-	return count_dict
+	#fourtails tri i edge
+	append!(ships,[(x,j,i,y,"fourtail") for x in findall(==(3),rel) for y in findall(==(1),rel) if (Rel[x,y]!=8)])
+	
+	#fourtails tri j edge
+	append!(ships,[(x,i,j,y,"fourtail") for x in findall(==(3),rel) for y in findall(==(2),rel) if (Rel[x,y]!=9)])
+	
+	return [count_dict,ships]
 
 end
 
