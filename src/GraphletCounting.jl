@@ -129,11 +129,6 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 		Rel = zeros(Int,length(vertex_type_list),length(vertex_type_list))
 		#first column represents 3 node relationships	
 		Rel[:,1] = rel
-		#four node graphlets
-		if(relationships == true)
-			## if relationships are requried, we need to capture 4 node relationships too using a matrix.
-			Rel = zeros(Int,length(vertex_type_list),length(vertex_type_list))
-		end
 		for w in iPath
 			for v in neighbourdict[w]
 				if (v==i)
@@ -324,10 +319,6 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 	end	
         if (graphlet_size==4)
 		#four node graphlets
-		if(relationships == true)
-			## if relationships are requried, we need to capture 4 node relationships too using a matrix.
-			Rel = zeros(Int,length(vertex_type_list),length(vertex_type_list))
-		end
 		for w in iPath
 			for v in neighbourdict[w]
 				if (v==i)
