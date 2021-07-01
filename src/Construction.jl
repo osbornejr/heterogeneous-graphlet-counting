@@ -271,8 +271,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
 		##array to store all homogonous graphlet dfs
 		hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))	
+		hog_array_under=Array{DataFrame,1}(undef,length(hom_graphlets))	
 		for (i,hog) in enumerate(hom_graphlets)
 			hog_df= DataFrame()
+			hog_df_under= DataFrame()
 			## restrict info to just hg 
 			real_fil = filter(:graphlet=>x->occursin(hog,x),real_df)
 			rand_fil = filter(:graphlet=>x->occursin(hog,x),rand_df)
@@ -298,11 +300,13 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 				log_real_obs = log(real_dict[heg*"_"*hog]+1)
 				## Monte Carlo method
 				r = sum(rand_vals.>=real_obs)
+				r_under = sum(rand_vals.<=real_obs)
 				##special case: real_obs is zero.. Zero occurences do not register in rand_vals table, but clearly every rand network has equal or greater count 
 				if(real_obs==0)
 					r = N
 				end
 				p_value = (r+1)/(N+1)
+				p_value_under = (r+1)/(N+1)			
 				##Z-score method (assumes either normal or lognormal distribution of counts in sims)
 				#using real values
 			#	z_score = (abs(real_obs) - rand_exp)/std(rand_vals)
@@ -310,6 +314,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 				#z_score = (abs(log_real_obs) - log_rand_exp)/std(log_rand_vals)
 				#p_value =pdf(Normal(0,1),z_score) 
 				append!(hog_df,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs, p_value = p_value))	
+				append!(hog_df_under,DataFrame(Graphlet = heg*"_"*hog, Expected = rand_exp,Observed = real_obs, p_value = p_value_under))	
 			end
 			##take log values to plot
 			log_real_fil = copy(real_fil)
@@ -322,10 +327,14 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		end
 		## find significant graphlets
 		sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
+		insig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array_under)...)
+		
 		#save in output cache
-		html_table_maker(sig_graphlets,"$cache_dir/type_representations.html",imgs=sig_graphlets.Graphlet)				
+		html_table_maker(sig_graphlets,"$cache_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet)				
+		html_table_maker(insig_graphlets,"$cache_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet)				
 		#save for website version
-		html_table_maker(sig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")				
+		html_table_maker(sig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
+		html_table_maker(insig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/insig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")	
 		##look at edge types in randomised networks
 		real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
 		rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
