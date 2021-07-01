@@ -184,8 +184,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	## Community structure
 	@info "Identifying communities..."
 	##use gene ids here, as they have more chance of getting a GO annotation
+	vertex_gene_names = network_counts[:gene_id]
 	if(params.func_annotate==true)
-		vertex_gene_names = network_counts[:gene_id]
 		community_vertices = get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 		## functional annotations of communities
 		func_file = "$cache_dir/func_annotations.jld" 
@@ -379,8 +379,33 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
  		hogs_types = map(x->broadcast(y->vertexlist[y],x),hogs_sorted)	
  		hegs = hogs_sorted[findall(x->x== hegoi,hogs_types)]
  	 	#get names of transcripts in matching pattern 
- 		hegs_names = map(x->broadcast(y->vertex_names[y],x),hegs)	
- 	
+ 		hegs_names = map(x->broadcast(y->vertex_gene_names[y],x),hegs)	
+		
+		#restart R session	
+		R"""
+		sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+		"""
+		#use small sample for now
+		hegs_sample = sample(hegs_names,20)
+		@rput hegs_sample	
+		R"""
+		library(biomaRt)
+		library(httr)
+		library(tidyverse)
+		hegs_sample_trimmed = lapply(hegs_sample,function (x) sapply(x,tools::file_path_sans_ext))
+		## connect to biomart
+		set_config(config(ssl_verifypeer = 0L))
+		ensembl_version = "current"	
+		if (ensembl_version=="current")
+			{
+			##mirrors to try: "useast" "uswest" "asia"
+			ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
+			} else
+			{
+			ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
+			}
+			hegs_ids <- lapply(hegs_sample_trimmed,function(x) getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",x, mart = ensembl,useCache=FALSE)) 
+		"""
+		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 	end
-	#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 end
