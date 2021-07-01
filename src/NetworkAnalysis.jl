@@ -184,7 +184,7 @@ end
 
 
 function get_functional_annotations(comm_vertices::DataFrame;ensembl_version::String="current",write_csv::Bool = true,csv_dir::String)
-	
+	#restart R session	
 	R"""
 	sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
 	"""
