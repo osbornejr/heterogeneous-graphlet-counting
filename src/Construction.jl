@@ -391,6 +391,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		R"""
 		library(biomaRt)
 		library(httr)
+		library(edgeR)
 		library(tidyverse)
 		hegs_sample_trimmed = lapply(hegs_sample,function (x) sapply(x,tools::file_path_sans_ext))
 		## connect to biomart
@@ -404,7 +405,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			{
 			ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
 			}
-			hegs_ids <- lapply(hegs_sample_trimmed,function(x) getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",x, mart = ensembl,useCache=FALSE)) 
+		hegs_ids <- lapply(hegs_sample_trimmed,function(x) getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",x, mart = ensembl,useCache=FALSE)) 
+		keggs = lapply(hegs_ids,function(x) topKEGG(kegga(x[[2]]),n=15,truncate =34))
 		"""
 		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 	end
