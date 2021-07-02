@@ -180,6 +180,7 @@ function get_community_node_types(adj_matrix::AbstractArray,community_vector::Ar
 		append!(comm_df,DataFrame(Community = comm, Size = sum(comm_nodes),Coding_Interiors = sum(type_vector[comm_interiors].=="coding" ),Noncoding_Interiors = sum(type_vector[comm_interiors].=="noncoding" ),Coding_Boundaries = sum(type_vector[comm_boundaries].=="coding" ),Noncoding_Boundaries = sum(type_vector[comm_boundaries].=="noncoding" ),Coding_Neighbours = sum(type_vector[comm_neighbours].=="coding" ),Noncoding_Neighbours = sum(type_vector[comm_neighbours].=="noncoding" ),Coding_Exteriors = sum(type_vector[comm_exteriors].=="coding" ),Noncoding_Exteriors = sum(type_vector[comm_exteriors].=="noncoding" )))
 
 	end
+	return comm_df
 end
 
 
