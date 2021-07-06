@@ -487,9 +487,13 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		test = topKEGG(kegga(entrez_from_transcripts[[2]],n=Inf,truncate = 34))
 		##Selecting nicotine addiction
 		Nicotine_addiction <- KEGG$GeneID[ KEGG$PathwayID == row.names(test)[7]]
-
+		transcripts$nicotine_addiction = transcripts$entrez_id %in% Nicotine_addiction
+		genes$nicotine_addiction = genes$entrez_id %in% Nicotine_addiction
+		nicotine = transcripts$nicotine_addiction
 
 		"""
+		@rget nicotine
+		cands = findall(.==(true),nicotine)
 		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 	end
 end
