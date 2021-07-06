@@ -374,7 +374,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
  		graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
  		## combine relationships into one array
  		rel = vcat(Rel...)
- 		#graphlet of interest... set manually for now 
+ 		rel_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],rel))
+		#graphlet of interest... set manually for now 
  		goi = sig_graphlets.Graphlet[2]		
  		hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
  		#filter down to homogenous graphlet first
@@ -390,14 +391,16 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
  		hegs = hogs_sorted[findall(x->x== hegoi,hogs_types)]
  	 	#get names of transcripts in matching pattern 
  		hegs_names = map(x->broadcast(y->vertex_gene_names[y],x),hegs)	
-		
+ 		hegs_transcript_names = map(x->broadcast(y->vertex_names[y],x),hegs)	
 		#restart R session	
 		R"""
 		sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
 		"""
 		#use small sample for now
 		hegs_sample = sample(hegs_names,20)
-		@rput hegs_sample	
+		@rput hegs_sample
+		@rput vertex_names
+		@rput vertex_gene_names
 		R"""
 		library(biomaRt)
 		library(httr)
@@ -417,6 +420,33 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			}
 		hegs_ids <- lapply(hegs_sample_trimmed,function(x) getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",x, mart = ensembl,useCache=FALSE)) 
 		keggs = lapply(hegs_ids,function(x) topKEGG(kegga(x[[2]]),n=15,truncate =34))
+		
+
+		
+
+		##Alternative approach: select KEGG terms of interest from whole set of transcripts first, and then look for those in graphlets
+		## full list of entrez_ids mapped to transcripts/genes (neither will be one-to-one, use whichever offers better coverage. Transcripts also preferred as a better reflection of the data rather than expanding to the gene level).
+		##transcripts
+		transcripts_trimmed = sapply(vertex_names,tools::file_path_sans_ext)	
+		transcripts = data.frame(trimmed_names = transcripts_trimmed)
+		entrez_from_transcripts = getBM(attributes=c("ensembl_transcript_id","ensembl_gene_id","entrezgene_id"),"ensembl_transcript_id",transcripts_trimmed, mart = ensembl,useCache=FALSE)	
+		transcript_coverage = length(entrez_from_transcripts[[3]])-sum(is.na(entrez_from_transcripts[[3]]))
+		transcripts$entrez_id = entrez_from_transcripts[match(transcripts_trimmed,entrez_from_transcripts[[1]]),3]
+		
+		##genes
+		genes_trimmed = sapply(vertex_gene_names,tools::file_path_sans_ext)	
+		genes = data.frame(trimmed_names = genes_trimmed)
+		entrez_from_genes = getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",genes_trimmed, mart = ensembl,useCache=FALSE)	
+		gene_coverage = length(entrez_from_genes[[2]])-sum(is.na(entrez_from_genes[[2]]))
+		genes$entrez_id = entrez_from_genes[match(genes_trimmed,entrez_from_genes[[1]]),2]
+		#get list of entrez ids mapped to KEGG pathways 
+		KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+		## get top hits to select from
+		test = topKEGG(kegga(entrez_from_transcripts[[2]],n=Inf,truncate = 34))
+		##Selecting nicotine addiction
+		Nicotine_addiction <- KEGG$GeneID[ KEGG$PathwayID == row.names(test)[7]]
+
+
 		"""
 		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 	end
