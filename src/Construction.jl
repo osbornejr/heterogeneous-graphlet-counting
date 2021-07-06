@@ -374,7 +374,49 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
  		graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
  		## combine relationships into one array
  		rel = vcat(Rel...)
- 		rel_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],rel))
+ 		#rel_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],rel))
+		##remove 0 from 3-node entries
+		#rel_array = map(y->filter(x->x!=0,y),rel_array)
+ 		#rel_names = map(x->broadcast(y->vertex_gene_names[y],x),rel_array)	
+ 		#rel_transcript_names = map(x->broadcast(y->vertex_names[y],x),rel_array)	
+		
+
+		##split into each homogeneous graphlet and sort there
+		##sort and find unique copies of graphlet (TODO unique for each graphlet!)
+ 		graphlet_types = string.(unique(last.(split.(collect(keys(graphlet_counts)),"_"))))
+		graphlet_rels = Dict{String,Array{Array{Int64,1},1}}()
+		@time for g in graphlet_types
+ 			hogs = filter(x->x[end]==g,rel)
+ 			hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
+			if(g == "3-path")
+				#get rid of leading zero
+				hogs_array = map(y->filter(x->x!=0,y),hogs_array)
+				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,3]])[1],x[2],sort(x[[1,3]])[2]],hogs_array))
+ 			end
+			if(g == "3-tri")
+				#get rid of leading zero
+				hogs_array = map(y->filter(x->x!=0,y),hogs_array)
+				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3]])...],hogs_array))
+ 			end
+			if(g == "4-path")
+				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,4]])[1],sort(x[[2,3]])...,sort(x[[1,4]])[2]],hogs_array))
+ 			end
+			if(g == "4-star")
+				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
+ 			end
+			if(g == "4-tail")
+				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2]])...,x[3],x[4]],hogs_array))
+ 			end
+			if(g == "4-cycle")
+				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3,4]])...],hogs_array))
+ 			end
+			if(g == "4-chord")
+				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,4]])[1],sort(x[[2,3]])...,sort(x[[1,4]])[2]],hogs_array))
+ 			end
+			if(g == "4-clique")
+				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3,4]])...],hogs_array))
+ 			end
+		end
 		#graphlet of interest... set manually for now 
  		goi = sig_graphlets.Graphlet[2]		
  		hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
