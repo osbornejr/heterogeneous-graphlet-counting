@@ -294,7 +294,7 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
 	#jpaths
 	append!(ships,[(0,i,j,x,"3-path") for x in findall(==(2),rel)])
 	#triangles
-	append!(ships,[(0,i,j,x,"triangle") for x in findall(==(3),rel)])
+	append!(ships,[(0,i,j,x,"3-tri") for x in findall(==(3),rel)])
 
 	#4-paths iedge
 	append!(ships,[(j,i,x,y,"4-path") for x in findall(==(1),rel) for y in findall(==(4),Rel[x,:])])
