@@ -481,10 +481,12 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		entrez_from_genes = getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",genes_trimmed, mart = ensembl,useCache=FALSE)	
 		gene_coverage = length(entrez_from_genes[[2]])-sum(is.na(entrez_from_genes[[2]]))
 		genes$entrez_id = entrez_from_genes[match(genes_trimmed,entrez_from_genes[[1]]),2]
+		
+
 		#get list of entrez ids mapped to KEGG pathways 
 		KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
 		## get top hits to select from
-		test = topKEGG(kegga(entrez_from_transcripts[[2]],n=Inf,truncate = 34))
+		test = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34))
 		##Selecting nicotine addiction
 		Nicotine_addiction <- KEGG$GeneID[ KEGG$PathwayID == row.names(test)[7]]
 		transcripts$nicotine_addiction = transcripts$entrez_id %in% Nicotine_addiction
@@ -494,6 +496,16 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		"""
 		@rget nicotine
 		cands = findall(.==(true),nicotine)
+		two_coincidents = Array{Array{Int64,1}}(undef,length(graphlet_types)) 
+		three_coincidents = Array{Array{Int64,1}}(undef,length(graphlet_types)) 
+		four_coincidents = Array{Array{Int64,1}}(undef,length(graphlet_types)) 
+		for (i,g) in enumerate(graphlet_types)
+			#graphlets with at least two candidate transcripts involved
+			two_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g])
+			three_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g])
+			four_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g])
+
+		end
 		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 	end
 end
