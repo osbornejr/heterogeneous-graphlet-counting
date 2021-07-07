@@ -279,8 +279,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			if (null_run=="distributed-long")
 				rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
 			end
-			rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
-			rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
+			rand_graphlet_collection = vcat(collect.(rand_graphlet_counts)...)
 			@info "Saving random graphlet count information at $cache_dir..."
 			JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection,"rand vertices",rand_types_set)
 		end
