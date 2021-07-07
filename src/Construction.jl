@@ -489,35 +489,44 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		#get list of entrez ids mapped to KEGG pathways 
 		KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
 		## get top hits to select from
-		test = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34))
-		##Selecting nicotine addiction
-		Nicotine_addiction <- KEGG$GeneID[ KEGG$PathwayID == row.names(test)[7]]
-		transcripts$nicotine_addiction = transcripts$entrez_id %in% Nicotine_addiction
-		genes$nicotine_addiction = genes$entrez_id %in% Nicotine_addiction
-		nicotine = transcripts$nicotine_addiction
+		top_terms = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34))
+		##get the network candidates for each pathway
+		per_pathway = sapply(1:nrow(top_terms),function(x) KEGG$GeneID[ KEGG$PathwayID == row.names(top_terms)[x]])
+		in_network = lapply(test,function(x) transcripts$entrez_id %in% x)
+			
 
 		"""
-		@rget nicotine
-		cands = findall(.==(true),nicotine)
-	 	#one_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
-		#two_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
-		#three_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
-		#four_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
-		#one_coincidents = Array{Tuple,1}()
-		two_coincidents = Array{Tuple,1}()
-		three_coincidents = Array{Tuple,1}()
-		four_coincidents = Array{Tuple,1}()
-		for g in keys(graphlet_rels)
-			#graphlets with at least two candidate transcripts involved
-			#one_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])
-			#two_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g])
-			#three_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g])
-			#four_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g])
-			#push!(one_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])...))
-			push!(two_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g]))...)
-			push!(three_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g]))...)
-			push!(four_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g]))...)
-
+		@rget in_network
+		candidates = Dict{String,Array{Int,1}}()
+		for e in in_network
+			candidates[string(first(e))] = findall(.==(true),last(e))
+		end
+	 	
+		Coincidents = Dict{String,Dict{String,Array{Tuple,1}}}()
+		for ent in candidates
+			@info "checking candidates for $(first(ent))..."
+			cands = last(ent)
+			#one_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
+			#two_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
+			#three_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
+			#four_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
+			#one_coincidents = Array{Tuple,1}()
+			two_coincidents = Array{Tuple,1}()
+			three_coincidents = Array{Tuple,1}()
+			four_coincidents = Array{Tuple,1}()
+			for g in keys(graphlet_rels) 
+				#graphlets with at least two candidate transcripts involved
+				#one_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])
+				#two_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g])
+				#three_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g])
+				#four_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g])
+				#push!(one_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])...))
+				push!(two_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g]))...)
+				push!(three_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g]))...)
+				push!(four_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g]))...)
+			end
+			#save each in dictionary for candidate
+			Coincidents[first(ent)] = Dict("two"=>two_coincidents,"three"=>three_coincidents,"four"=>four_coincidents) 
 		end
 		#@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 	end
