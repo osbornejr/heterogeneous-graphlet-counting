@@ -417,6 +417,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3,4]])...],hogs_array))
  			end
 		end
+		## add edges to graphlet_rels as separate entry
+		graphlet_rels["2-path"] = [[x...] for x in eachrow(hcat(first.(edgelist),last.(edgelist)))]
+
 		#graphlet of interest... set manually for now 
  		goi = sig_graphlets.Graphlet[2]		
  		hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
@@ -496,10 +499,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		"""
 		@rget nicotine
 		cands = findall(.==(true),nicotine)
-		two_coincidents = Array{Array{Int64,1}}(undef,length(graphlet_types)) 
-		three_coincidents = Array{Array{Int64,1}}(undef,length(graphlet_types)) 
-		four_coincidents = Array{Array{Int64,1}}(undef,length(graphlet_types)) 
-		for (i,g) in enumerate(graphlet_types)
+		two_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
+		three_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
+		four_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
+		for (i,g) in enumerate(keys(graphlet_rels))
 			#graphlets with at least two candidate transcripts involved
 			two_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g])
 			three_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g])
