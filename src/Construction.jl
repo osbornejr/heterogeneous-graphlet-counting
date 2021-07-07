@@ -31,32 +31,37 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/plots"`)
 		
 	##Cache setup
-	cache_dir = "$cwd/output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)_$(params.null_model_size)"
+	#New method: cache directory updates folder by folder as we go. Avoids need for moving files around,symbolic links etc. 
+	cache_dir = "$cwd/output/cache/$(params.test_name)"
 	run(`mkdir -p $(cache_dir)`)
 	## Check if there are cached files for runs with similar parameters (i.e. the same before irelevant parameters are invoked for a specific output)
 	#TODO improve this process to automatically detect via a dependency tree (will also tidy up cache dir)
 	#similarity matrix
-	sim_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)*/similarity*",cwd)
+	#sim_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)*/similarity*",cwd)
  	#check if any already exist
-	if(length(sim_check)>0)
+	#if(length(sim_check)>0)
 		#check if actual cache already exists
-		if (!(cache_dir in first.(splitdir.(sim_check))))
-			run(`cp $(sim_check[1]) $(cache_dir)/`)
-		end
-	end
+	#	if (!(cache_dir in first.(splitdir.(sim_check))))
+	#		run(`cp $(sim_check[1]) $(cache_dir)/`)
+	#	end
+	#end
 	#functional annotation
-	func_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)*/simil_$(params.threshold)_$(params.threshold_method)*/func*",cwd)
+	#func_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)*/simil_$(params.threshold)_$(params.threshold_method)*/func*",cwd)
  	#check if any already exist
-	if(length(func_check)>0)
+	#if(length(func_check)>0)
 		#check if actual cache already exists
-		if (!(cache_dir in first.(splitdir.(func_check))))
-			run(`cp $(func_check[1]) $(cache_dir)/`)
-		end
-	end
+	#	if (!(cache_dir in first.(splitdir.(func_check))))
+	#		run(`cp $(func_check[1]) $(cache_dir)/`)
+	#	end
+	#end
 	#Processing data:
 	@info "Processing raw data..."
 	raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts))))
+	
 	## Clean - remove transcripts with total counts across all samples less than Cut
+	##update cache
+	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)"
+	run(`mkdir -p $(cache_dir)`)
 	##plot before cut
 	histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
 	
@@ -69,11 +74,17 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	#boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 	
 	### Normalisation
+	##update cache
+	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)"
+	run(`mkdir -p $(cache_dir)`)
 	norm_data=library_size_normalisation(clean_data,params.norm_method)
 	norm_counts = copy(clean_counts)
 	norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
 	
 	##Sampling for most variable transcripts
+	##update cache
+	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)"
+	run(`mkdir -p $(cache_dir)`)
 	#add variance column to normalised data
 	variance = vec(var(norm_data, dims=2))
 	norm_counts.variance = variance
@@ -84,6 +95,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	##Network construction
 	@info "Constructing the network..."
 	##Measure of coexpression
+	##update cache
+	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)"
+	run(`mkdir -p $(cache_dir)`)
 	#similarity_matrix=mutual_information(data)
 	## file to cache similarity matrix for use later:
 	sim_file = "$cache_dir/similarity_matrix.jld"
@@ -98,6 +112,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	end
 	
 	## Adjacency matrix 
+	##update cache
+	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)"
+	run(`mkdir -p $(cache_dir)`)
 	adj_file = "$cache_dir/adjacency_matrix.jld"
 	if (isfile(adj_file))
 		@info "Loading adjacency matrix from $cache_dir..."
@@ -182,6 +199,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/alt_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	end	
 	## Community structure
+	##update cache
+	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/"
+	run(`mkdir -p $(cache_dir)`)
 	@info "Identifying communities..."
 	##use gene ids here, as they have more chance of getting a GO annotation
 	if(params.func_annotate==true)
@@ -206,6 +226,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	write("$(params.website_dir)/_assets/$(params.page_name)/tableinput/network_stats.csv",csv)
 	if(params.graphlet_counting==true)
 
+	##update cache
+	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/$(params.null_model_size)"
+	run(`mkdir -p $(cache_dir)`)
 		graphlet_file = "$cache_dir/graphlets.jld" 
 		if (isfile(graphlet_file))
 			@info "Loading graphlet counts from $cache_dir..."
@@ -232,8 +255,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
 		@info "Looking at typed representations of graphlets..."
 		
+		##update cache
+		cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/typed_representations/$(params.null_model_size)"
+		run(`mkdir -p $(cache_dir)`)
 		N=params.null_model_size
-		rand_graphlets_file = "$cache_dir/rand_graphlets_$N.jld"
+		rand_graphlets_file = "$cache_dir/rand_graphlets.jld"
 		if (isfile(rand_graphlets_file))
 			@info "Loading randomised vertices and graphlet counts from $cache_dir..."
 			rand_types_set = JLD.load(rand_graphlets_file,"rand vertices")

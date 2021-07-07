@@ -54,7 +54,6 @@ raw_counts = vcat(filter(:transcript_type=>x->x=="noncoding",raw_counts),filter(
 ## set transcripts that biomart identifies as lncRNA to noncoding
 raw_counts.transcript_type = @. ifelse(raw_counts.biomart_type=="lncRNA","noncoding",raw_counts.transcript_type)
 
-
 ##run code to generate plots and figures for website 
 webpage_construction(raw_counts,params)
 
