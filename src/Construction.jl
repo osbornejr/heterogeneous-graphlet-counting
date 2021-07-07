@@ -227,7 +227,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	if(params.graphlet_counting==true)
 
 	##update cache
-	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/$(params.null_model_size)"
+	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/"
 	run(`mkdir -p $(cache_dir)`)
 		graphlet_file = "$cache_dir/graphlets.jld" 
 		if (isfile(graphlet_file))
@@ -252,11 +252,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			null_run = "distributed-long"
 		end
 
-
+ 	 	##Typed representations
 		@info "Looking at typed representations of graphlets..."
 		
 		##update cache
-		cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/typed_representations/$(params.null_model_size)"
+		cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/typed_representations/nullmodel/$(params.null_model_size)_simulations"
 		run(`mkdir -p $(cache_dir)`)
 		N=params.null_model_size
 		rand_graphlets_file = "$cache_dir/rand_graphlets.jld"
