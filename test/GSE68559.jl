@@ -1,4 +1,4 @@
-params = RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist_zero",1000,true,false,true,true)
+params = RunParameters("GSE68559_old","menu1","$cwd/website",25,"upper_quartile",0.01,"pidc",0.95,"empirical_dist_zero",1000,true,false,true,true)
 
 #Read in raw counts (cached)
 raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts.jld"
@@ -19,40 +19,40 @@ end
 
 
 #restart R session	
-R"""
-sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
-"""
-transcripts = raw_counts.transcript_id
-@rput transcripts
-R"""
-library(biomaRt)
-library(httr)
-library(edgeR)
-library(tidyverse)
-transcripts_trimmed = sapply(transcripts,tools::file_path_sans_ext)
-## connect to biomart
-set_config(config(ssl_verifypeer = 0L))
-ensembl_version = "current"	
-if (ensembl_version=="current")
-	{
-	##mirrors to try: "useast" "uswest" "asia"
-	ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
-	} else
-	{
-	ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
-	}
-
-transcripts_biotypes = getBM(attributes=c("ensembl_transcript_id","transcript_biotype"),"ensembl_transcript_id",transcripts_trimmed, mart = ensembl,useCache=FALSE)
-transcript_types= transcripts_biotypes[match(transcripts_trimmed,transcripts_biotypes[[1]]),2]
-"""
-
-@rget transcript_types
-## get rid of missing values and add to raw counts data
-raw_counts.biomart_types = replace(transcript_types,missing=>"none")
-##cut down raw counts to only those with coding or lncRNA labels (as well as those explicitly labelled lncRNA in input data).
-raw_counts = vcat(filter(:transcript_type=>x->x=="noncoding",raw_counts),filter(:biomart_type=>x->x in ["lncRNA","protein_coding"],raw_counts))
-## set transcripts that biomart identifies as lncRNA to noncoding
-raw_counts.transcript_type = @. ifelse(raw_counts.biomart_type=="lncRNA","noncoding",raw_counts.transcript_type)
+#R"""
+#sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+#"""
+#transcripts = raw_counts.transcript_id
+#@rput transcripts
+#R"""
+#library(biomaRt)
+#library(httr)
+#library(edgeR)
+#library(tidyverse)
+#transcripts_trimmed = sapply(transcripts,tools::file_path_sans_ext)
+### connect to biomart
+#set_config(config(ssl_verifypeer = 0L))
+#ensembl_version = "current"	
+#if (ensembl_version=="current")
+#	{
+#	##mirrors to try: "useast" "uswest" "asia"
+#	ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
+#	} else
+#	{
+#	ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
+#	}
+#
+#transcripts_biotypes = getBM(attributes=c("ensembl_transcript_id","transcript_biotype"),"ensembl_transcript_id",transcripts_trimmed, mart = ensembl,useCache=FALSE)
+#transcript_types= transcripts_biotypes[match(transcripts_trimmed,transcripts_biotypes[[1]]),2]
+#"""
+#
+#@rget transcript_types
+### get rid of missing values and add to raw counts data
+#raw_counts.biomart_types = replace(transcript_types,missing=>"none")
+###cut down raw counts to only those with coding or lncRNA labels (as well as those explicitly labelled lncRNA in input data).
+#raw_counts = vcat(filter(:transcript_type=>x->x=="noncoding",raw_counts),filter(:biomart_type=>x->x in ["lncRNA","protein_coding"],raw_counts))
+### set transcripts that biomart identifies as lncRNA to noncoding
+#raw_counts.transcript_type = @. ifelse(raw_counts.biomart_type=="lncRNA","noncoding",raw_counts.transcript_type)
 
 ##run code to generate plots and figures for website 
 webpage_construction(raw_counts,params)
