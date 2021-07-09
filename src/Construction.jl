@@ -396,6 +396,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 #	#
 #	#	end
 #
+		#Now moved into a function
+ 	 	#Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
+#
+#
 # 		graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
 # 		## combine relationships into one array
 # 		rel = vcat(Rel...)
