@@ -571,7 +571,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 			end
 		end
 	elseif(run_method == "distributed")
-		if(progress==true)
+		if(progress == true)
 			
 			@info "Distributing edges to workers..."
 			##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
@@ -579,7 +579,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
 		else
 			Chi = pmap(x->per_edge_counts_no_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
 		end
-		if (relationships=true)
+		if (relationships == true)
 			@info "Per-node relationships not provided as they are unsupported using the distributed run_method. Try serial or distributed-old if relationships are required."   
 			relationships = false
 		end
