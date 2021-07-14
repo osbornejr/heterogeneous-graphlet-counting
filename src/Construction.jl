@@ -277,7 +277,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 				rand_graphlet_counts = @showprogress pmap(x->count_graphlets(x,edgelist,4,run_method="serial"),rand_types_set,batch_size =10)
 			end
 			if (null_run=="distributed-long")
-				rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
+				#rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
+				rand_graphlet_counts = @showprogress map(x->count_graphlets(x,edgelist,4,run_method="distributed"),rand_types_set)
 			end
 			rand_graphlet_collection = vcat(collect.(rand_graphlet_counts)...)
 			@info "Saving random graphlet count information at $cache_dir..."
