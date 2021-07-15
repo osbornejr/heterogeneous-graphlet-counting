@@ -226,9 +226,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	write("$(params.website_dir)/_assets/$(params.page_name)/tableinput/network_stats.csv",csv)
 	if(params.graphlet_counting==true)
 
-	##update cache
-	cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/"
-	run(`mkdir -p $(cache_dir)`)
+		##update cache
+		cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/"
+		run(`mkdir -p $(cache_dir)`)
 		graphlet_file = "$cache_dir/graphlets.jld" 
 		if (isfile(graphlet_file))
 			@info "Loading graphlet counts from $cache_dir..."
