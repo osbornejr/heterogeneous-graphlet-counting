@@ -14,8 +14,8 @@ data=library_size_normalisation(data,"median")
 
 ## update data to normalised version
 #data=per_sample
-norm_counts=copy(raw_counts)
-norm_counts[!,2:13]=data
+norm_counts = copy(raw_counts)
+norm_counts[!,2:13] = data
 
 #boxplot(norm_counts,"norm_data_boxplot.svg")
 
