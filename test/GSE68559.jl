@@ -1,4 +1,4 @@
-params = RunParameters("GSE68559","menu1","$cwd/website",1,"upper_quartile",0.05,"pidc",0.95,"empirical_dist_zero",1000,true,false,true,true)
+params = RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.025,"pidc",0.95,"empirical_dist_zero",1000,true,false,true,true)
 
 #Read in raw counts (cached)
 raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts.jld"
@@ -65,5 +65,3 @@ if(biomart_modification = true)
 end
 ##run code to generate plots and figures for website 
 webpage_construction(raw_counts,params)
-
-
