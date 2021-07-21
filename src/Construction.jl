@@ -18,6 +18,7 @@ function distributed_setup(inclusions::Array{String,1})
 end
 function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
+
 	@info "Building directory structure..."
 	##establish output directories	
 	run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)
@@ -102,12 +103,18 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	## file to cache similarity matrix for use later:
 	sim_file = "$cache_dir/similarity_matrix.jld"
 	if (isfile(sim_file))
+<<<<<<< HEAD
+=======
 		@info "Loading similarity matrix from $cache_dir..."
+>>>>>>> 716ff9c2266c1067d2ac0dd90fc66bcaa1f2cdc9
 		similarity_matrix = JLD.load(sim_file,"similarity_matrix")
 	else
 		@info "Generating similarity matrix..."
 		similarity_matrix = coexpression_measure(sample_data,params.coexpression)
+<<<<<<< HEAD
+=======
 		@info "Saving similarity matrix at $cache_dir..."
+>>>>>>> 716ff9c2266c1067d2ac0dd90fc66bcaa1f2cdc9
 		JLD.save(sim_file,"similarity_matrix",similarity_matrix)
 	end
 	
@@ -219,6 +226,31 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 	end
 	
+<<<<<<< HEAD
+	## randomise node types
+	#number of randomised graphs
+	N=100
+	rand_types_set = [copy(vertexlist) for i in 1:N]
+	#randomise each graph by node
+	broadcast(shuffle!,rand_types_set) 
+	
+	rand_graphlets_file = "$cache_dir/rand_graphlets_$N.jld"
+	if (isfile(rand_graphlets_file))
+		rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
+	else
+		rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
+		rand_graphlet_dicts = broadcast(first,rand_graphlet_counts)
+		rand_graphlet_collection = vcat(collect.(rand_graphlet_dicts)...)
+		JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection)
+	end
+	
+	
+	rand_df = DataFrame(graphlet = broadcast(first,rand_graphlet_collection),value = broadcast(last,rand_graphlet_collection))
+	real_df = DataFrame(graphlet = broadcast(first,collect(graphlet_counts[1])),value = broadcast(last,collect(graphlet_counts[1])))
+	
+	##function to get the n permutations of a set xs
+	all_perm(xs, n) = vec(map(collect, Iterators.product(ntuple(_ -> xs, n)...)))
+=======
 	##Network stats table
 	##set up csv string
 	csv = "Nodes,Edges,Components,Nodes in largest component,Maximal degree,communities detected\n"
@@ -241,9 +273,24 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			@info "Saving graphlet counts at $cache_dir..."
 			##save the per-edge array as well in case we need it in the future (exp for debugging)
 			JLD.save(graphlet_file,"graphlets",graphlet_counts,"time",timer)
+>>>>>>> 716ff9c2266c1067d2ac0dd90fc66bcaa1f2cdc9
 	
 		end
 	
+<<<<<<< HEAD
+		#get hetero subgraphlets within homogonous type (problem: might not be complete set present in real/rand outputs?)
+		if (occursin("4",hog))
+			het_graphlets = union(first.(split.(real_fil[:graphlet],"_4")),first.(split.(rand_fil[:graphlet],"_4")))
+		elseif (occursin("3",hog))
+			het_graphlets = union(first.(split.(real_fil[:graphlet],"_3")),first.(split.(real_fil[:graphlet],"_3")))
+		end 
+		for heg in het_graphlets
+			rand_fil_fil = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)
+			transform!(rand_fil_fil,:value =>ByRow(x-> log(x))=>:log_value)
+			##histogram for each heterogeneous graphlet
+			histogram(rand_fil_fil,:log_value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
+			rand_vals = rand_fil_fil[!,:value]
+=======
 
 		#method to deduce which run method the null model should use given the run time of graphlets above ($timer)
 		if (timer<30)
@@ -370,6 +417,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 		random_edges = DataFrame()
 		for t in unique(rand_edge_df[:graphlet])
 			rand_vals = filter(:graphlet=>x->x==t,rand_edge_df)[!,:value]
+>>>>>>> 716ff9c2266c1067d2ac0dd90fc66bcaa1f2cdc9
 			rand_exp = sum(rand_vals)/N
 			real_obs = real_type_edgecounts[t]
 			append!(random_edges,DataFrame(Graphlet = first(t)*"_"*last(t)*"_edge", Expected = rand_exp,Observed = real_obs))	
