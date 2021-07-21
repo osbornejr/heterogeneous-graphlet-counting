@@ -138,7 +138,6 @@ degrees = sum(adj_matrix,dims=2)
 #connected_components_html_table(adj_matrix,"cytoscape/connected_components.html")
 #
 #Graphlet counting
-
 ##set up for distributed mode
 #first clean to make sure there are no stray workers already around
 using Distributed

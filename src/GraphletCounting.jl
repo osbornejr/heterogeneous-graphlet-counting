@@ -783,3 +783,4 @@ function find_motifs(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},null_
 	#null_model_sum = reduce(mergecum,null_model_calc)
 	return [zscores,edgelists,null_model_calc,graphlet_counts,plots]
 end	
+
