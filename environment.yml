@@ -8,6 +8,8 @@ dependencies:
         - r-tidyverse 
         - r-data.table
         - r-wgcna
+        - r-dendextend
+        - r-ggdendro
         - r-igraph
         - r-threejs
         - r-pcit
