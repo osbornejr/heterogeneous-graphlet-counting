@@ -9,3 +9,4 @@ website/
 output/
 node_modules
 cytoscape/*
+bin/
