@@ -7,9 +7,9 @@ function distributed_setup(inclusions::Array{String,1})
 	#first clean to make sure there are no stray workers already around
 	if(length(workers())!=Threads.nthreads())
 		rmprocs(workers())
-	 	#add workers equal to the number of available cpus	
+		#add workers equal to the number of available cpus	
 		addprocs(Threads.nthreads())
-	 	#addprocs(8)
+		#addprocs(8)
 		@everywhere inclusions
 		for inc in inclusions
 			@everywhere include(inc)
@@ -39,7 +39,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	#TODO improve this process to automatically detect via a dependency tree (will also tidy up cache dir)
 	#similarity matrix
 	#sim_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)*/similarity*",cwd)
- 	#check if any already exist
+	#check if any already exist
 	#if(length(sim_check)>0)
 		#check if actual cache already exists
 	#	if (!(cache_dir in first.(splitdir.(sim_check))))
@@ -48,7 +48,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	#end
 	#functional annotation
 	#func_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)*/simil_$(params.threshold)_$(params.threshold_method)*/func*",cwd)
- 	#check if any already exist
+	#check if any already exist
 	#if(length(func_check)>0)
 		#check if actual cache already exists
 	#	if (!(cache_dir in first.(splitdir.(func_check))))
@@ -124,11 +124,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	else
 		@info "Generating adjacency matrix..."
 		if (params.threshold_method=="empirical_dist")
-	 		pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
+			pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
 		elseif (params.threshold_method=="empirical_dist_zero")
-	 		pre_adj_matrix = empirical_dist_zero_adjacency(similarity_matrix,params.threshold)
+			pre_adj_matrix = empirical_dist_zero_adjacency(similarity_matrix,params.threshold)
 		elseif (params.threshold_method=="hard")
-	 		pre_adj_matrix = adjacency(similarity_matrix,params.threshold)
+			pre_adj_matrix = adjacency(similarity_matrix,params.threshold)
 		elseif (params.threshold_method=="top")
 			##TODO setting top x value here for now; should be a parameter, but as an Int rather than Float as threshold param is for other methods
 			pre_adj_matrix = top_adjacency(similarity_matrix,10)
@@ -192,11 +192,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	## Hubs
 	if (params.visualise==true)
 		@info "Identifying hubs..."
-	 	deg_thresh = Int(floor(mean(degrees)+2*std(degrees)))
-	 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
-	 	draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
-	 	deg_thresh = 70#mean(degrees)+2*std(degrees)
-	 	nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
+		deg_thresh = Int(floor(mean(degrees)+2*std(degrees)))
+		nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
+		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+		deg_thresh = 70#mean(degrees)+2*std(degrees)
+		nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
 		draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/alt_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
 	end	
 	## Community structure
@@ -206,7 +206,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 	@info "Identifying communities..."
 	##use gene ids here, as they have more chance of getting a GO annotation
 	if(params.func_annotate==true)
-	 	vertex_gene_names = network_counts[:gene_id]
+		vertex_gene_names = network_counts[:gene_id]
 		community_vertices = get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
 		## functional annotations of communities
 		func_file = "$cache_dir/func_annotations.jld" 
@@ -253,7 +253,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 			null_run = "distributed-long"
 		end
 
- 	 	##Typed representations
+		##Typed representations
 		@info "Looking at typed representations of graphlets..."
 		
 		##update cache
@@ -399,75 +399,75 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 #	#	end
 #
 		#Now moved into a function
- 	 	#Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
+		Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
 #
 #
-# 		graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
-# 		## combine relationships into one array
-# 		rel = vcat(Rel...)
-# 		#rel_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],rel))
+#		graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
+#		## combine relationships into one array
+#		rel = vcat(Rel...)
+#		#rel_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],rel))
 #		##remove 0 from 3-node entries
 #		#rel_array = map(y->filter(x->x!=0,y),rel_array)
-# 		#rel_names = map(x->broadcast(y->vertex_gene_names[y],x),rel_array)	
-# 		#rel_transcript_names = map(x->broadcast(y->vertex_names[y],x),rel_array)	
+#		#rel_names = map(x->broadcast(y->vertex_gene_names[y],x),rel_array)	
+#		#rel_transcript_names = map(x->broadcast(y->vertex_names[y],x),rel_array)	
 #		
 #
 #		##split into each homogeneous graphlet and sort there
 #		##sort and find unique copies of graphlet (TODO unique for each graphlet!)
-# 		graphlet_types = string.(unique(last.(split.(collect(keys(graphlet_counts)),"_"))))
+#		graphlet_types = string.(unique(last.(split.(collect(keys(graphlet_counts)),"_"))))
 #		graphlet_rels = Dict{String,Array{Array{Int64,1},1}}()
 #		@time for g in graphlet_types
-# 			hogs = filter(x->x[end]==g,rel)
-# 			hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
+#			hogs = filter(x->x[end]==g,rel)
+#			hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
 #			if(g == "3-path")
 #				#get rid of leading zero
 #				hogs_array = map(y->filter(x->x!=0,y),hogs_array)
 #				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,3]])[1],x[2],sort(x[[1,3]])[2]],hogs_array))
-# 			end
+#			end
 #			if(g == "3-tri")
 #				#get rid of leading zero
 #				hogs_array = map(y->filter(x->x!=0,y),hogs_array)
 #				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3]])...],hogs_array))
-# 			end
+#			end
 #			if(g == "4-path")
 #				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,4]])[1],sort(x[[2,3]])...,sort(x[[1,4]])[2]],hogs_array))
-# 			end
+#			end
 #			if(g == "4-star")
 #				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
-# 			end
+#			end
 #			if(g == "4-tail")
 #				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2]])...,x[3],x[4]],hogs_array))
-# 			end
+#			end
 #			if(g == "4-cycle")
 #				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3,4]])...],hogs_array))
-# 			end
+#			end
 #			if(g == "4-chord")
 #				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,4]])[1],sort(x[[2,3]])...,sort(x[[1,4]])[2]],hogs_array))
-# 			end
+#			end
 #			if(g == "4-clique")
 #				graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3,4]])...],hogs_array))
-# 			end
+#			end
 #		end
 #		## add edges to graphlet_rels as separate entry
 #		graphlet_rels["2-path"] = [[x...] for x in eachrow(hcat(first.(edgelist),last.(edgelist)))]
 #
 #		#graphlet of interest... set manually for now 
-# 		goi = sig_graphlets.Graphlet[2]		
-# 		hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
-# 		#filter down to homogenous graphlet first
-# 		hogs = filter(x->x[end]==hogoi,rel)
-# 		hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
-# 		##sort and find unique copies of graphlet (TODO unique for each graphlet!)
-# 		if(hogoi == "4-star")
-# 			hogs_sorted = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
-# 		end
-# 		
-# 		#get those that match heterogeneous pattern as well
-# 		hogs_types = map(x->broadcast(y->vertexlist[y],x),hogs_sorted)	
-# 		hegs = hogs_sorted[findall(x->x== hegoi,hogs_types)]
-# 	 	#get names of transcripts in matching pattern 
-# 		hegs_names = map(x->broadcast(y->vertex_gene_names[y],x),hegs)	
-# 		hegs_transcript_names = map(x->broadcast(y->vertex_names[y],x),hegs)	
+#		goi = sig_graphlets.Graphlet[2]		
+#		hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
+#		#filter down to homogenous graphlet first
+#		hogs = filter(x->x[end]==hogoi,rel)
+#		hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
+#		##sort and find unique copies of graphlet (TODO unique for each graphlet!)
+#		if(hogoi == "4-star")
+#			hogs_sorted = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
+#		end
+#		
+#		#get those that match heterogeneous pattern as well
+#		hogs_types = map(x->broadcast(y->vertexlist[y],x),hogs_sorted)	
+#		hegs = hogs_sorted[findall(x->x== hegoi,hogs_types)]
+#		#get names of transcripts in matching pattern 
+#		hegs_names = map(x->broadcast(y->vertex_gene_names[y],x),hegs)	
+#		hegs_transcript_names = map(x->broadcast(y->vertex_names[y],x),hegs)	
 #		#restart R session	
 #		R"""
 #		sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
@@ -532,7 +532,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 #		for e in in_network
 #			candidates[string(first(e))] = findall(.==(true),last(e))
 #		end
-#	 	
+#		
 #		Coincidents = Dict{String,Dict{String,Array{Tuple,1}}}()
 #		for ent in candidates
 #			@info "checking candidates for $(first(ent))..."

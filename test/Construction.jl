@@ -1,6 +1,6 @@
 ### Include all source files TODO make this occur more fluently and automatically by creating a package, and using Revise
 for src in filter(x->endswith(x,".jl"),readdir("src"))
-	include(ENV["JULIA_PROJECT"]*"/src/"*src)
+    include(ENV["JULIA_PROJECT"]*"/src/"*src)
 end
 
 ### Read in each set- generate (condensed) raw_counts and data matrix 
@@ -9,7 +9,7 @@ raw_counts=read_count_data("data/mayank-de-novo/isoforms",method="expected_count
 
 #filtering out into types
 code_counts=filter_count_data("data/mayank-de-novo/code-hits.list",raw_counts)
-noncode_counts=filter_count_data("data/mayank-de-novo/non-code-hits.list",raw_counts)	
+noncode_counts=filter_count_data("data/mayank-de-novo/non-code-hits.list",raw_counts)   
 insertcols!(code_counts,"transcript_type"=>"coding")
 insertcols!(noncode_counts,"transcript_type"=>"noncoding")
 
@@ -23,7 +23,7 @@ raw_data=Array(raw_counts[!,2:25]);
 ## Condense - merge polyA- and polyA+ counts for the same sample
 condensed=raw_counts[!,[1:13;26]]
 for i in 2:13
-	condensed[!,i]=raw_counts[!,i]+raw_counts[!,i+12]
+    condensed[!,i]=raw_counts[!,i]+raw_counts[!,i+12]
 end
 raw_counts=condensed
 raw_data=Array(raw_counts[!,2:13]);
@@ -67,10 +67,10 @@ similarity_matrix = coexpression_measure(sample_data,coexpression)
 threshold = 0.95
 threshold_method = "empirical_dist"
 if (threshold_method=="empirical_dist")
- 	pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,threshold)
+    pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,threshold)
 end
 if (threshold_method=="hard")
- 	pre_adj_matrix = adjacency(similarity_matrix,threshold)
+    pre_adj_matrix = adjacency(similarity_matrix,threshold)
 end
 ## Adjacency matrix
 
@@ -100,9 +100,9 @@ edgelist = edgelist_from_adj(adj_matrix)
 #
 #now we order edges so that lower vertex label is first
 #for (i,p) in enumerate(sane_edgelist)
-#	if (first(p)>last(p))
+#   if (first(p)>last(p))
 #           sane_edgelist[i] = Pair(last(p),first(p))
-#       	end
+#           end
 #end
 ##finally, get rid of multiedges
 #sane_edgelist = unique(sane_edgelist)
@@ -142,7 +142,7 @@ degrees = sum(adj_matrix,dims=2)
 #first clean to make sure there are no stray workers already around
 using Distributed
 rmprocs(workers())
-#add workers equal to the number of available cpus	
+#add workers equal to the number of available cpus  
 addprocs(Threads.nthreads())
 #addprocs(8)
 @everywhere include(ENV["JULIA_PROJECT"]*"/src/GraphletCounting.jl")

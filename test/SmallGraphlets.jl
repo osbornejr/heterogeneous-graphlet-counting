@@ -18,8 +18,7 @@ testelist = [ 1=>2;1 =>3 ;3=>4]
 four_path_expected_1 = Dict{String,Int}("red_red_red_red_4-path"=>1,"red_red_red_3-path" =>2)
 
 four_path_test_1 = count_graphlets(testvlist[:,2],testelist,4)
-#--------------------------------------------------------------------------------------------
-
+#-----------------------------------------------------------------------------------------
 #     1R-----2B
 #     |  
 #     |    
@@ -221,7 +220,7 @@ four_tail_test_8 = count_graphlets(testvlist[:,2],testelist,4)
 #     |   \
 #     |     \
 #     3B     4B
-	
+    
 testelist = [ 1=>2;1 =>3 ;1=>4]
 
 four_star_expected = Dict{String,Int}("blue_red_blue_3-path"=>1,"blue_blue_red_red_4-star"=>1,"blue_red_red_3-path" =>2)
@@ -230,26 +229,26 @@ four_star_test = count_graphlets(testvlist[:,2],testelist,4)
 @test four_star_test == four_star_expected
 #=}}}=#
 
-#Test a full run of the old method against the new method	
+#Test a full run of the old method against the new method   
 g = Vector{String}()#={{{=#
 d =  Vector{Int}()
 for graphlet in collect(keys(graphlet_counts))
-	if graphlet_counts[graphlet]!==graphlet_counts_old[graphlet]
-		push!(g,graphlet)
-		push!(d,graphlet_counts[graphlet]-graphlet_counts_old[graphlet])
-	end
+    if graphlet_counts[graphlet]!==graphlet_counts_old[graphlet]
+        push!(g,graphlet)
+        push!(d,graphlet_counts[graphlet]-graphlet_counts_old[graphlet])
+    end
 end
 errors = hcat(g,d)
 @test length(errors)==0#=}}}=#
 
-#Test a full run of the single thread method against multi thread method	
+#Test a full run of the single thread method against multi thread method    
 g = Vector{String}()#={{{=#
 d =  Vector{Int}()
 for graphlet in collect(keys(graphlet_counts_single))
-	if graphlet_counts_single[graphlet]!==graphlet_counts_threaded[graphlet]
-		push!(g,graphlet)
-		push!(d,graphlet_counts_single[graphlet]-graphlet_counts_threaded[graphlet])
-	end
+    if graphlet_counts_single[graphlet]!==graphlet_counts_threaded[graphlet]
+        push!(g,graphlet)
+        push!(d,graphlet_counts_single[graphlet]-graphlet_counts_threaded[graphlet])
+    end
 end
 errors = hcat(g,d)
 @test length(errors)==0#=}}}=#

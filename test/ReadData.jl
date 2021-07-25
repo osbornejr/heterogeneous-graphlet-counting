@@ -5,7 +5,7 @@ raw_counts=read_count_data("data/mayank-de-novo/isoforms",method="expected_count
 
 #filtering out into types
 code_counts=filter_count_data("data/mayank-de-novo/code-hits.list",raw_counts)
-noncode_counts=filter_count_data("data/mayank-de-novo/non-code-hits.list",raw_counts)	
+noncode_counts=filter_count_data("data/mayank-de-novo/non-code-hits.list",raw_counts)   
 insertcols!(code_counts,"transcript_type"=>"coding")
 insertcols!(noncode_counts,"transcript_type"=>"noncoding")
 
@@ -19,7 +19,7 @@ data=Array(raw_counts[!,2:25]);
 ## Condense - merge polyA- and polyA+ counts for the same sample
 condensed=raw_counts[!,[1:13;26]]
 for i in 2:13
-	condensed[!,i]=raw_counts[!,i]+raw_counts[!,i+12]
+    condensed[!,i]=raw_counts[!,i]+raw_counts[!,i+12]
 end
 raw_counts=condensed
 data=Array(raw_counts[!,2:13]);

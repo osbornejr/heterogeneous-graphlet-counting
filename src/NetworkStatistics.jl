@@ -2,10 +2,10 @@ using LightGraphs
 #using PrettyTables
 
 function connected_components_html_table(adjacency_matrix::AbstractArray,filename::String)
-	g = Graph(adjacency_matrix)
-	cc = size.(connected_components(g),1)
-	io = open(filename, "w")
-	println(io,"""<!DOCTYPE html>
+    g = Graph(adjacency_matrix)
+    cc = size.(connected_components(g),1)
+    io = open(filename, "w")
+    println(io,"""<!DOCTYPE html>
 <html>
 <meta charset="UTF-8">
 <style>
@@ -48,19 +48,19 @@ th.rowNumber, td.rowNumber {
 
 </style>
 <body>""")
-	println(io,"""<p style="margin-bottom:3cm;">
-		<big> Number of vertices: """,size(adjacency_matrix,1),"""</big>
-		</p>""")
-	println(io,"""<p style="margin-bottom:3cm;">
-		<big> Number of edges: """,Int(sum(adjacency_matrix)/2),"""</big>
-		</p>""")
-	println(io,"""<p style="margin-bottom:3cm;">
-		<big> Connected Components:</big>
-		</p>""")
-	header = string.(1:length(cc))
-	#table = pretty_table(String,cc', vec(header), backend = :html,standalone = false);
-	println(io,table)
-	println(io,"""</body>
-		</html>""")
-	close(io)
+    println(io,"""<p style="margin-bottom:3cm;">
+        <big> Number of vertices: """,size(adjacency_matrix,1),"""</big>
+        </p>""")
+    println(io,"""<p style="margin-bottom:3cm;">
+        <big> Number of edges: """,Int(sum(adjacency_matrix)/2),"""</big>
+        </p>""")
+    println(io,"""<p style="margin-bottom:3cm;">
+        <big> Connected Components:</big>
+        </p>""")
+    header = string.(1:length(cc))
+    #table = pretty_table(String,cc', vec(header), backend = :html,standalone = false);
+    println(io,table)
+    println(io,"""</body>
+        </html>""")
+    close(io)
 end
