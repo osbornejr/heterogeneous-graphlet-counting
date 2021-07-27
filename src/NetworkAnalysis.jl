@@ -390,9 +390,11 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
         ##get the network candidates for each pathway
         per_pathway = sapply(1:nrow(top_terms),function(x) KEGG$GeneID[ KEGG$PathwayID == row.names(top_terms)[x]])
         in_network = lapply(per_pathway,function(x) transcripts$entrez_id %in% x)
-            
+        names(in_network) = top_terms$Pathway
+   
 
         """
+        
         @rget in_network
         @info "Finding candidates that match top KEGG pathways..."
         candidates = Dict{String,Array{Int,1}}()
@@ -400,7 +402,6 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
             candidates[string(first(e))] = findall(.==(true),last(e))
         end
         
-
 
         @info "Checking for coincident candidates..."
         Coincidents = Dict{String,Dict{String,Array{Tuple,1}}}()
