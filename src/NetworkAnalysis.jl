@@ -405,6 +405,8 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
 
         """
         @rget entrez_id_vector 
+        ##get rid of missing ids (sset to 0 --for now?)
+        replace!(entrez_id_vector,missing=>0)
         @rget in_network
         @info "Finding candidates that match top KEGG pathways..."
         candidates = Dict{String,Array{Int,1}}()
@@ -440,5 +442,23 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
             #save each in dictionary for candidate
             Coincidents[first(ent)] = Dict("two"=>two_coincidents,"three"=>three_coincidents,"four"=>four_coincidents) 
         end
-    return Coincidents
+
+        #Get data into wide form dataframe, with info on transcript type, ensembl code, entrez id etc...
+        Coincidents_df = DataFrame(Pathway=String[],Coincident_type = String[], Hom_graphlet = String[],Vertices = Array{Int64,1}[],Ensembl = Array{String,1}[],Entrez = Array{Int64,1}[],Transcript_type = Array{String,1}[])
+        for e in Coincidents
+            @info "expanding $(first(e))"
+            for ee in last(e)
+                for eee in last(ee)
+                    push!(Coincidents_df,(first(e),first(ee),last(eee),first(eee),broadcast(x->vertex_names[x],first(eee)),broadcast(x->entrez_id_vector[x],first(eee)),broadcast(x->vertexlist[x],first(eee))))
+                end
+            end
+        end
+
+
+
+
+        #coincident_names = map(x->broadcast(y->vertex_names[y],x),first.(Coincidents["Morphine addiction"]["three"]))
+        #coincident_types = map(x->broadcast(y->vertexlist[y],x),first.(Coincidents["Morphine addiction"]["three"]))
+        #coincident_entrez_ids = map(x->broadcast(y->entrez_id_vector[y],x),first.(Coincidents["Morphine addiction"]["three"]))
+    return Coincidents_df
 end
