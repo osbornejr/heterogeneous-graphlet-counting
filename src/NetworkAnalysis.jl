@@ -401,10 +401,10 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
         per_pathway = sapply(1:nrow(top_terms),function(x) KEGG$GeneID[ KEGG$PathwayID == row.names(top_terms)[x]])
         in_network = lapply(per_pathway,function(x) transcripts$entrez_id %in% x)
         names(in_network) = top_terms$Pathway
-   
+        entrez_id_vector = transcripts$entrez_id
 
         """
-        
+        @rget entrez_id_vector 
         @rget in_network
         @info "Finding candidates that match top KEGG pathways..."
         candidates = Dict{String,Array{Int,1}}()
@@ -433,9 +433,9 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
                 #three_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g])
                 #four_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g])
                 #push!(one_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])...))
-                push!(two_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g]))...)
-                push!(three_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g]))...)
-                push!(four_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g]))...)
+                push!(two_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g]))...)
+                push!(three_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g]))...)
+                push!(four_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g]))...)
             end
             #save each in dictionary for candidate
             Coincidents[first(ent)] = Dict("two"=>two_coincidents,"three"=>three_coincidents,"four"=>four_coincidents) 
