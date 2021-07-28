@@ -268,7 +268,13 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
 
         ## combine relationships into one array
         rel = vcat(Rel...)
-        #rel_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],rel))
+        
+        #convert into "nicer" format
+        rel_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],rel))
+        rel_types = last.(rel)
+        #clear big rel and Rel TODO do we even need Chi?
+        rel = Nothing
+        GC.gc()
         ##remove 0 from 3-node entries
         #rel_array = map(y->filter(x->x!=0,y),rel_array)
         #rel_names = map(x->broadcast(y->vertex_gene_names[y],x),rel_array) 
@@ -281,8 +287,12 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
         graphlet_types = string.(unique(last.(split.(collect(keys(graphlet_counts)),"_"))))
         graphlet_rels = Dict{String,Array{Array{Int64,1},1}}()
         @time for g in graphlet_types
-            hogs = filter(x->x[end]==g,rel)
-            hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
+            
+            #hogs = filter(x->x[end]==g,rel)
+            #hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
+            hogs_array = rel_array[findall(x->x==g,rel_types)]
+
+            @info "sorting $g..."
             if(g == "3-path")
                 #get rid of leading zero
                 hogs_array = map(y->filter(x->x!=0,y),hogs_array)
