@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0007411,axon guidance,12,2,0.16,0.0053
-GO:0021987,cerebral cortex development,7,2,0.09,0.0084
-GO:0061003,positive regulation of dendritic spine m...,1,1,0.01,0.0100
-GO:0014068,positive regulation of phosphatidylinosi...,1,1,0.01,0.0100
-GO:1902078,positive regulation of lateral motor col...,1,1,0.01,0.0100
-GO:0051968,positive regulation of synaptic transmis...,1,1,0.01,0.0100
-GO:0038026,reelin-mediated signaling pathway,1,1,0.01,0.0100
-GO:1900273,positive regulation of long-term synapti...,1,1,0.01,0.0100
-GO:0060244,negative regulation of cell proliferatio...,1,1,0.01,0.0100
-GO:0043507,positive regulation of JUN kinase activi...,1,1,0.01,0.0100
+GO:0008150,biological_process,1329,153,203.24,1.2e-06
+GO:0035666,TRIF-dependent toll-like receptor signal...,9,6,1.38,2.0e-05
+GO:0051403,stress-activated MAPK cascade,23,7,3.52,4.4e-05
+GO:0002755,MyD88-dependent toll-like receptor signa...,10,6,1.53,4.7e-05
+GO:0034138,toll-like receptor 3 signaling pathway,10,6,1.53,4.7e-05
+GO:0034142,toll-like receptor 4 signaling pathway,11,6,1.68,9.7e-05
+GO:0034162,toll-like receptor 9 signaling pathway,8,5,1.22,0.00017
+GO:0034166,toll-like receptor 10 signaling pathway,8,5,1.22,0.00017
+GO:0034146,toll-like receptor 5 signaling pathway,8,5,1.22,0.00017
+GO:0038123,toll-like receptor TLR1:TLR2 signaling p...,9,5,1.38,0.00035

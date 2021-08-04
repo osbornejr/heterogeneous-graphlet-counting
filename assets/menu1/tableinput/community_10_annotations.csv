@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0050896,response to stimulus,186,14,12.42,0.036
-GO:0034660,ncRNA metabolic process,15,3,1.0,0.044
-GO:0042254,ribosome biogenesis,6,2,0.4,0.045
-GO:0006873,cellular ion homeostasis,11,2,0.73,0.046
-GO:0021670,lateral ventricle development,1,1,0.07,0.047
-GO:1901303,negative regulation of cargo loading int...,1,1,0.07,0.047
-GO:0019427,acetyl-CoA biosynthetic process from ace...,1,1,0.07,0.047
-GO:0021960,anterior commissure morphogenesis,1,1,0.07,0.047
-GO:0006400,tRNA modification,1,1,0.07,0.047
-GO:0019413,acetate biosynthetic process,1,1,0.07,0.047
+GO:0008219,cell death,184,29,29.93,2.3e-06
+GO:0008150,biological_process,1329,166,216.21,3.8e-05
+GO:0006355,"regulation of transcription, DNA-templat...",288,39,46.85,0.00034
+GO:0051402,neuron apoptotic process,29,5,4.72,0.00269
+GO:0007268,chemical synaptic transmission,71,14,11.55,0.00779
+GO:0034501,protein localization to kinetochore,2,2,0.33,0.00806
+GO:0021554,optic nerve development,2,2,0.33,0.00806
+GO:0032463,negative regulation of protein homooligo...,2,2,0.33,0.00806
+GO:0007080,mitotic metaphase plate congression,2,2,0.33,0.00806
+GO:0015701,bicarbonate transport,2,2,0.33,0.00806

@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:2000253,positive regulation of feeding behavior,1,1,0.03,0.018
-GO:0032289,central nervous system myelin formation,1,1,0.03,0.018
-GO:0043063,intercellular bridge organization,1,1,0.03,0.018
-GO:0015991,ATP hydrolysis coupled proton transport,1,1,0.03,0.018
-GO:0043252,sodium-independent organic anion transpo...,1,1,0.03,0.018
-GO:0075733,intracellular transport of virus,1,1,0.03,0.018
-GO:0032786,positive regulation of DNA-templated tra...,1,1,0.03,0.018
-GO:0000720,pyrimidine dimer repair by nucleotide-ex...,1,1,0.03,0.018
-GO:0015721,bile acid and bile salt transport,1,1,0.03,0.018
-GO:0030512,negative regulation of transforming grow...,1,1,0.03,0.018
+GO:0016310,phosphorylation,161,7,4.63,0.016
+GO:0030705,cytoskeleton-dependent intracellular tra...,9,2,0.26,0.017
+GO:0010517,regulation of phospholipase activity,10,2,0.29,0.017
+GO:0010466,negative regulation of peptidase activit...,13,2,0.37,0.017
+GO:0050869,negative regulation of B cell activation,1,1,0.03,0.018
+GO:0001830,trophectodermal cell fate commitment,1,1,0.03,0.018
+GO:0042245,RNA repair,1,1,0.03,0.018
+GO:0051585,negative regulation of dopamine uptake i...,1,1,0.03,0.018
+GO:0002408,myeloid dendritic cell chemotaxis,1,1,0.03,0.018
+GO:0007529,establishment of synaptic specificity at...,1,1,0.03,0.018

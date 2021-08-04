@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:2001273,regulation of glucose import in response...,1,1,0.03,0.02
-GO:0032703,negative regulation of interleukin-2 pro...,1,1,0.03,0.02
-GO:0046784,viral mRNA export from host cell nucleus,1,1,0.03,0.02
-GO:0006957,"complement activation, alternative pathw...",1,1,0.03,0.02
-GO:2000191,regulation of fatty acid transport,1,1,0.03,0.02
-GO:0045648,positive regulation of erythrocyte diffe...,1,1,0.03,0.02
-GO:0016973,poly(A)+ mRNA export from nucleus,1,1,0.03,0.02
-GO:2000369,regulation of clathrin-dependent endocyt...,1,1,0.03,0.02
-GO:0030204,chondroitin sulfate metabolic process,2,1,0.07,0.04
-GO:0032964,collagen biosynthetic process,2,1,0.07,0.04
+GO:0008150,biological_process,1329,47,59.82,0.0012
+GO:0042059,negative regulation of epidermal growth ...,3,2,0.14,0.0019
+GO:0000278,mitotic cell cycle,82,4,3.69,0.0249
+GO:0042228,interleukin-8 biosynthetic process,2,2,0.09,0.0250
+GO:0042267,natural killer cell mediated cytotoxicit...,4,2,0.18,0.0250
+GO:0002495,antigen processing and presentation of p...,16,2,0.72,0.0252
+GO:0030382,sperm mitochondrion organization,1,1,0.05,0.0255
+GO:0048240,sperm capacitation,1,1,0.05,0.0255
+GO:0042245,RNA repair,1,1,0.05,0.0255
+GO:1900017,positive regulation of cytokine producti...,1,1,0.05,0.0255

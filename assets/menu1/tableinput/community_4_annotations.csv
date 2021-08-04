@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0010628,positive regulation of gene expression,35,5,2.4,0.00071
-GO:0002755,MyD88-dependent toll-like receptor signa...,3,2,0.21,0.00572
-GO:0007519,skeletal muscle tissue development,4,2,0.27,0.01111
-GO:0019886,antigen processing and presentation of e...,4,2,0.27,0.01111
-GO:0007411,axon guidance,12,3,0.82,0.01371
-GO:0007507,heart development,12,3,0.82,0.01711
-GO:0006367,transcription initiation from RNA polyme...,5,2,0.34,0.01801
-GO:0007219,Notch signaling pathway,6,2,0.41,0.02626
-GO:0043687,post-translational protein modification,6,2,0.41,0.02626
-GO:0006139,nucleobase-containing compound metabolic...,153,13,10.47,0.03356
+GO:0016266,O-glycan processing,4,2,0.27,0.0056
+GO:0050885,neuromuscular process controlling balanc...,5,2,0.33,0.0091
+GO:1900181,negative regulation of protein localizat...,4,2,0.27,0.0310
+GO:0030705,cytoskeleton-dependent intracellular tra...,9,2,0.6,0.0310
+GO:0008045,motor neuron axon guidance,1,1,0.07,0.0315
+GO:0042245,RNA repair,1,1,0.07,0.0315
+GO:0015747,urate transport,1,1,0.07,0.0315
+GO:0034063,stress granule assembly,1,1,0.07,0.0315
+GO:0019885,antigen processing and presentation of e...,1,1,0.07,0.0315
+GO:0006982,response to lipid hydroperoxide,1,1,0.07,0.0315

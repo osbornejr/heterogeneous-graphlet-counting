@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0014829,vascular smooth muscle contraction,1,1,0.03,0.022
-GO:1901984,negative regulation of protein acetylati...,1,1,0.03,0.022
-GO:0090398,cellular senescence,1,1,0.03,0.022
-GO:0071313,cellular response to caffeine,1,1,0.03,0.022
-GO:0010763,positive regulation of fibroblast migrat...,1,1,0.03,0.022
-GO:0033600,negative regulation of mammary gland epi...,1,1,0.03,0.022
-GO:0060763,mammary duct terminal end bud growth,1,1,0.03,0.022
-GO:0050772,positive regulation of axonogenesis,1,1,0.03,0.022
-GO:0002042,cell migration involved in sprouting ang...,1,1,0.03,0.022
-GO:2001032,regulation of double-strand break repair...,1,1,0.03,0.022
+GO:0031424,keratinization,2,2,0.13,0.0026
+GO:0006656,phosphatidylcholine biosynthetic process,2,2,0.13,0.0026
+GO:0007399,nervous system development,209,18,13.6,0.0034
+GO:0042127,regulation of cell proliferation,127,14,8.26,0.0036
+GO:0001649,osteoblast differentiation,23,4,1.5,0.0059
+GO:0032206,positive regulation of telomere maintena...,3,2,0.2,0.0075
+GO:0070198,"protein localization to chromosome, telo...",3,2,0.2,0.0075
+GO:0000122,negative regulation of transcription by ...,46,7,2.99,0.0075
+GO:0019221,cytokine-mediated signaling pathway,31,8,2.02,0.0098
+GO:0030593,neutrophil chemotaxis,9,3,0.59,0.0229

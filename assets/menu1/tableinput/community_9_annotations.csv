@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0044267,cellular protein metabolic process,97,5,2.59,0.018
-GO:0001541,ovarian follicle development,2,2,0.05,0.020
-GO:0006309,apoptotic DNA fragmentation,1,1,0.03,0.022
-GO:0018125,peptidyl-cysteine methylation,1,1,0.03,0.022
-GO:0072385,minus-end-directed organelle transport a...,1,1,0.03,0.022
-GO:0002092,positive regulation of receptor internal...,1,1,0.03,0.022
-GO:0034314,Arp2/3 complex-mediated actin nucleation,1,1,0.03,0.022
-GO:0042699,follicle-stimulating hormone signaling p...,1,1,0.03,0.022
-GO:0046784,viral mRNA export from host cell nucleus,1,1,0.03,0.022
-GO:0035774,positive regulation of insulin secretion...,1,1,0.03,0.022
+GO:0055085,transmembrane transport,120,12,8.39,0.0035
+GO:0007596,blood coagulation,52,6,3.64,0.0038
+GO:0035999,tetrahydrofolate interconversion,3,2,0.21,0.0044
+GO:0006357,regulation of transcription by RNA polym...,126,6,8.81,0.0119
+GO:0007269,neurotransmitter secretion,16,3,1.12,0.0137
+GO:0032781,positive regulation of ATPase activity,5,2,0.35,0.0139
+GO:0030049,muscle filament sliding,5,2,0.35,0.0139
+GO:0001523,retinoid metabolic process,5,2,0.35,0.0139
+GO:0051384,response to glucocorticoid,15,3,1.05,0.0185
+GO:0042476,odontogenesis,19,4,1.33,0.0196

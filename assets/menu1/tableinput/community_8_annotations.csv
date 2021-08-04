@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0006521,regulation of cellular amino acid metabo...,1,1,0.03,0.022
-GO:0045662,negative regulation of myoblast differen...,1,1,0.03,0.022
-GO:0006384,transcription initiation from RNA polyme...,1,1,0.03,0.022
-GO:0010025,wax biosynthetic process,1,1,0.03,0.022
-GO:0061153,trachea gland development,1,1,0.03,0.022
-GO:0060662,salivary gland cavitation,1,1,0.03,0.022
-GO:0009303,rRNA transcription,1,1,0.03,0.022
-GO:0009304,tRNA transcription,1,1,0.03,0.022
-GO:0090261,positive regulation of inclusion body as...,1,1,0.03,0.022
-GO:0090263,positive regulation of canonical Wnt sig...,1,1,0.03,0.022
+GO:0034641,cellular nitrogen compound metabolic pro...,528,20,19.76,0.00049
+GO:0033540,fatty acid beta-oxidation using acyl-CoA...,2,2,0.07,0.00061
+GO:1901687,glutathione derivative biosynthetic proc...,4,2,0.15,0.00354
+GO:0006805,xenobiotic metabolic process,16,3,0.6,0.00648
+GO:0044281,small molecule metabolic process,239,12,8.94,0.00695
+GO:0014047,glutamate secretion,8,2,0.3,0.01549
+GO:0007283,spermatogenesis,40,4,1.5,0.01607
+GO:0032504,multicellular organism reproduction,60,6,2.25,0.02297
+GO:0070564,positive regulation of vitamin D recepto...,1,1,0.04,0.02495
+GO:0060391,positive regulation of SMAD protein sign...,1,1,0.04,0.02495

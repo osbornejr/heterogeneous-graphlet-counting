@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0006986,response to unfolded protein,3,2,0.13,0.0011
-GO:0010951,negative regulation of endopeptidase act...,3,2,0.13,0.0184
-GO:0045200,establishment of neuroblast polarity,1,1,0.04,0.0200
-GO:0030837,negative regulation of actin filament po...,1,1,0.04,0.0200
-GO:0046785,microtubule polymerization,1,1,0.04,0.0200
-GO:0007026,negative regulation of microtubule depol...,1,1,0.04,0.0200
-GO:0010025,wax biosynthetic process,1,1,0.04,0.0200
-GO:0072659,protein localization to plasma membrane,1,1,0.04,0.0200
-GO:0032781,positive regulation of ATPase activity,1,1,0.04,0.0200
-GO:0060710,chorio-allantoic fusion,1,1,0.04,0.0200
+GO:0033603,positive regulation of dopamine secretio...,2,2,0.17,0.0019
+GO:2000065,negative regulation of cortisol biosynth...,2,2,0.17,0.0019
+GO:0048484,enteric nervous system development,2,2,0.17,0.0019
+GO:0032695,negative regulation of interleukin-12 pr...,2,2,0.17,0.0019
+GO:0032348,negative regulation of aldosterone biosy...,2,2,0.17,0.0019
+GO:0006941,striated muscle contraction,21,4,1.75,0.0054
+GO:0048485,sympathetic nervous system development,3,2,0.25,0.0056
+GO:0048208,COPII vesicle coating,3,2,0.25,0.0056
+GO:0018279,protein N-linked glycosylation via aspar...,10,3,0.84,0.0078
+GO:0051607,defense response to virus,16,4,1.34,0.0102

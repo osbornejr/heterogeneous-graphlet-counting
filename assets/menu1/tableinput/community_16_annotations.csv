@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0006112,energy reserve metabolic process,6,3,0.23,0.0015
-GO:0001958,endochondral ossification,4,2,0.15,0.0034
-GO:0050796,regulation of insulin secretion,4,2,0.15,0.0034
-GO:0007596,blood coagulation,13,3,0.5,0.0102
-GO:0051216,cartilage development,9,2,0.35,0.0191
-GO:0071379,cellular response to prostaglandin stimu...,2,2,0.08,0.0234
-GO:0007603,"phototransduction, visible light",2,2,0.08,0.0234
-GO:0000910,cytokinesis,3,2,0.12,0.0235
-GO:0038110,interleukin-2-mediated signaling pathway,1,1,0.04,0.0250
-GO:0038111,interleukin-7-mediated signaling pathway,1,1,0.04,0.0250
+GO:0071280,cellular response to copper ion,2,2,0.2,0.0023
+GO:0043691,reverse cholesterol transport,2,2,0.2,0.0023
+GO:0006359,regulation of transcription by RNA polym...,3,2,0.29,0.0067
+GO:0048013,ephrin receptor signaling pathway,4,2,0.39,0.0130
+GO:0035329,hippo signaling,4,2,0.39,0.0130
+GO:0010951,negative regulation of endopeptidase act...,12,4,1.18,0.0202
+GO:0008219,cell death,184,13,18.06,0.0206
+GO:0090263,positive regulation of canonical Wnt sig...,5,2,0.49,0.0209
+GO:0007218,neuropeptide signaling pathway,13,3,1.28,0.0219
+GO:0033138,positive regulation of peptidyl-serine p...,6,2,0.59,0.0304
