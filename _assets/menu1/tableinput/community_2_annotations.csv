@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0008360,regulation of cell shape,3,2,0.2,0.0045
-GO:0046677,response to antibiotic,6,3,0.39,0.0132
-GO:0006091,generation of precursor metabolites and ...,28,3,1.82,0.0142
-GO:0006397,mRNA processing,15,3,0.98,0.0188
-GO:0006413,translational initiation,3,3,0.2,0.0369
-GO:0045738,negative regulation of DNA repair,1,1,0.07,0.0401
-GO:0038110,interleukin-2-mediated signaling pathway,1,1,0.07,0.0401
-GO:0071529,cementum mineralization,1,1,0.07,0.0401
-GO:0038111,interleukin-7-mediated signaling pathway,1,1,0.07,0.0401
-GO:2000785,regulation of autophagosome assembly,1,1,0.07,0.0401
+GO:0000165,MAPK cascade,55,4,2.95,0.002
+GO:0048011,neurotrophin TRK receptor signaling path...,36,4,1.93,0.014
+GO:0043547,positive regulation of GTPase activity,9,2,0.48,0.022
+GO:0003338,metanephros morphogenesis,6,3,0.32,0.026
+GO:0001823,mesonephros development,13,3,0.7,0.026
+GO:0048806,genitalia development,8,2,0.43,0.026
+GO:0060054,positive regulation of epithelial cell p...,1,1,0.05,0.027
+GO:0019800,peptide cross-linking via chondroitin 4-...,1,1,0.05,0.027
+GO:0072287,metanephric distal tubule morphogenesis,1,1,0.05,0.027
+GO:0033227,dsRNA transport,1,1,0.05,0.027

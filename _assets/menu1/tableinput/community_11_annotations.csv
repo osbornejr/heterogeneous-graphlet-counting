@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0042177,negative regulation of protein catabolic...,1,1,0.03,0.020
-GO:0051764,actin crosslink formation,1,1,0.03,0.020
-GO:0007195,adenylate cyclase-inhibiting dopamine re...,1,1,0.03,0.020
-GO:0007196,adenylate cyclase-inhibiting G protein-c...,1,1,0.03,0.020
-GO:0045022,early endosome to late endosome transpor...,1,1,0.03,0.020
-GO:0051220,cytoplasmic sequestering of protein,1,1,0.03,0.020
-GO:0042789,mRNA transcription by RNA polymerase II,1,1,0.03,0.020
-GO:0021997,neural plate axis specification,1,1,0.03,0.020
-GO:1901687,glutathione derivative biosynthetic proc...,1,1,0.03,0.020
-GO:0007411,axon guidance,12,2,0.4,0.022
+GO:0010881,regulation of cardiac muscle contraction...,6,3,0.42,0.00089
+GO:0007603,"phototransduction, visible light",6,3,0.42,0.00131
+GO:0048205,COPI coating of Golgi vesicle,2,2,0.14,0.00134
+GO:0006890,"retrograde vesicle-mediated transport, G...",3,2,0.21,0.00393
+GO:0006891,intra-Golgi vesicle-mediated transport,3,2,0.21,0.00393
+GO:0002027,regulation of heart rate,14,4,0.97,0.00617
+GO:0086064,cell communication by electrical couplin...,6,3,0.42,0.00746
+GO:0070933,histone H4 deacetylation,4,2,0.28,0.00766
+GO:0051384,response to glucocorticoid,15,4,1.04,0.01013
+GO:0001523,retinoid metabolic process,5,2,0.35,0.01247

@@ -1,11 +1,11 @@
 GO_ID,Term,Annotated,Significant,Expected,fisher
-GO:0006120,"mitochondrial electron transport, NADH t...",7,3,0.51,0.002
-GO:0043523,regulation of neuron apoptotic process,6,2,0.44,0.023
-GO:0019048,modulation by virus of host morphology o...,8,2,0.59,0.040
-GO:0051924,regulation of calcium ion transport,5,2,0.37,0.040
-GO:0043043,peptide biosynthetic process,10,2,0.73,0.041
-GO:0043031,negative regulation of macrophage activa...,1,1,0.07,0.042
-GO:0007229,integrin-mediated signaling pathway,1,1,0.07,0.042
-GO:0060487,lung epithelial cell differentiation,1,1,0.07,0.042
-GO:0033137,negative regulation of peptidyl-serine p...,1,1,0.07,0.042
-GO:0051865,protein autoubiquitination,1,1,0.07,0.042
+GO:0070098,chemokine-mediated signaling pathway,3,2,0.08,0.0010
+GO:0006367,transcription initiation from RNA polyme...,17,3,0.47,0.0036
+GO:0001570,vasculogenesis,6,2,0.17,0.0050
+GO:0045669,positive regulation of osteoblast differ...,6,2,0.17,0.0050
+GO:0035690,cellular response to drug,22,4,0.61,0.0061
+GO:0060021,roof of mouth development,8,2,0.22,0.0091
+GO:0001958,endochondral ossification,8,2,0.22,0.0091
+GO:0010761,fibroblast migration,4,2,0.11,0.0185
+GO:0003143,embryonic heart tube morphogenesis,7,2,0.19,0.0185
+GO:0060548,negative regulation of cell death,81,3,2.24,0.0187
