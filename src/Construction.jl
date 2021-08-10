@@ -311,10 +311,17 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                                 het_graphlets = union(first.(split.(real_fil[:graphlet],"_4")),first.(split.(rand_fil[:graphlet],"_4")))
                         elseif (occursin("3",hog))
                                 het_graphlets = union(first.(split.(real_fil[:graphlet],"_3")),first.(split.(real_fil[:graphlet],"_3")))
-                        end 
+                        end
+                        #store summaries (for TikZ plot)
+                        summaries = DataFrame()
                         for heg in het_graphlets
                                 rand_fil_fil = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)
                                 transform!(rand_fil_fil,:value =>ByRow(x-> log(x))=>:log_value)
+                                
+                                ##get summary (for tikZ plot)
+                                summary = describe(rand_fil_fil[:,3:3],:min,:q25,:median,:q75,:max)
+                                summary.variable = heg
+                                append!(summaries,summary)
                                 ##histogram for each heterogeneous graphlet
                                 histogram(rand_fil_fil,:value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
                                 ##log version
@@ -348,8 +355,13 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         log_real_fil.value =log.(log_real_fil.value)
                         log_rand_fil = copy(rand_fil)
                         log_rand_fil.value =log.(log_rand_fil.value)
+                        #SVG plot (for web)
                         p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
                         draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/plots/$(hog)_boxplot.svg",4inch,6inch),p)
+                        #TeX plot (via PGFPlots) 
+                        
+
+
                         hog_array[i] = hog_df
                         hog_array_under[i] = hog_df_under
                 end
