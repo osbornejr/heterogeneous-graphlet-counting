@@ -118,7 +118,7 @@ function threejs_plot(adj_matrix::AbstractArray,vertex_names::Array{String,1},co
 end
 
 
-function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,out_format::String,ylabel::String="value")
+function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,out_format::String;ylabel::String="value")
     if (out_format == "standalone")
         #include standalone preamble
         tex = "\\documentclass[crop=false]{standalone}\n\\usepackage{pgfplotstable}\n\\usepgfplotslibrary{colorbrewer}\n%\\pgfplotsset{compat=1.16}\n\\usepgfplotslibrary{statistics}\n\n\\begin{document}\n"

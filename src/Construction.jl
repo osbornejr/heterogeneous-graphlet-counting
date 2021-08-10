@@ -362,7 +362,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         #add real log values to summaries, order from lowest to highest)
                         summaries.values = log_real_fil.value
                         sort!(summaries,:values)
-                        tex_boxplot(summaries[!,Not(:values)],summaries.values,"$hog.tex","standalone")
+                        tex_boxplot(summaries[!,Not(:values)],summaries.values,"$hog.tex","standalone",ylabel="log value")
 
                         hog_array[i] = hog_df
                         hog_array_under[i] = hog_df_under
