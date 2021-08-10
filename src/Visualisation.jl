@@ -118,7 +118,7 @@ function threejs_plot(adj_matrix::AbstractArray,vertex_names::Array{String,1},co
 end
 
 
-function tex_boxplot(data::DataFrame,ylabel::String="value",out_file::String,out_format::String)
+function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,out_format::String,ylabel::String="value")
     if (out_format == "standalone")
         #include standalone preamble
         tex = "\\documentclass[crop=false]{standalone}\n\\usepackage{pgfplotstable}\n\\usepgfplotslibrary{colorbrewer}\n%\\pgfplotsset{compat=1.16}\n\\usepgfplotslibrary{statistics}\n\n\\begin{document}\n"
@@ -145,7 +145,11 @@ function tex_boxplot(data::DataFrame,ylabel::String="value",out_file::String,out
                tex*= ","
            end
         end
-        tex *= "},\nx tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center},\nylabel={$ylabel},cycle list/Set3 ]\n\\pgfplotstablegetrowsof{\\datatable}\n\\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}\n\\pgfplotsinvokeforeach{0,...,\\rownumber}{ \n\\pgfplotstablegetelem{#1}{min}\\of\\datatable \n\\edef\\mymin{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q25}\\of\\datatable \n\\edef\\myql{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{median}\\of\\datatable \n\\edef\\mymedian{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q75}\\of\\datatable \n\\edef\\myqu{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{max}\\of\\datatable \n\\edef\\mymax{\\pgfplotsretval} \n \n\\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax} \n\\pgfmathsetmacro{\\mylowerq}{\\myql} \n\\pgfmathsetmacro{\\myupperq}{\\myqu} \n\\edef\\temp{\\noexpand\\addplot+[, \nboxplot prepared={ \n     lower whisker=\\mymin, \n     upper whisker=\\mymax, \n     lower quartile=\\mylowerq, \n     upper quartile=\\myupperq, \n     median=\\mymedian, \n     every box/.style={solid,fill,opacity=0.5}, \n     every whisker/.style={solid }, \n     every median/.style={solid}, \n     }, \n]coordinates {};} \n\\temp \n}\n\\end{axis}\n\\end{tikzpicture}\n"
+        tex *= "},\nx tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center},\nylabel={$ylabel},cycle list/Set3 ]\n\\pgfplotstablegetrowsof{\\datatable}\n\\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}\n\\pgfplotsinvokeforeach{0,...,\\rownumber}{ \n\\pgfplotstablegetelem{#1}{min}\\of\\datatable \n\\edef\\mymin{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q25}\\of\\datatable \n\\edef\\myql{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{median}\\of\\datatable \n\\edef\\mymedian{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q75}\\of\\datatable \n\\edef\\myqu{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{max}\\of\\datatable \n\\edef\\mymax{\\pgfplotsretval} \n \n\\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax} \n\\pgfmathsetmacro{\\mylowerq}{\\myql} \n\\pgfmathsetmacro{\\myupperq}{\\myqu} \n\\edef\\temp{\\noexpand\\addplot+[, \nboxplot prepared={ \n     lower whisker=\\mymin, \n     upper whisker=\\mymax, \n     lower quartile=\\mylowerq, \n     upper quartile=\\myupperq, \n     median=\\mymedian, \n     every box/.style={solid,fill,opacity=0.5}, \n     every whisker/.style={solid }, \n     every median/.style={solid}, \n     }, \n]coordinates {};} \n\\temp \n}\n\\addplot [only marks, mark=o,mark size = 1pt] coordinates{"
+        for (i,p) in enumerate(points)
+            tex*= " ($i,$p) "
+        end
+    tex*= "};\n\\end{axis}\n\\end{tikzpicture}\n"
 
     end
 
