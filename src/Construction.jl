@@ -359,8 +359,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
                         draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/plots/$(hog)_boxplot.svg",4inch,6inch),p)
                         #TeX plot (via PGFPlots) 
-                        
-
+                        #add real log values to summaries, order from lowest to highest)
+                        summaries.values = log_real_fil.value
+                        sort!(summaries,:values)
+                        tex_boxplot(summaries[!,Not(:values)],summaries.values,"$hog.tex","standalone")
 
                         hog_array[i] = hog_df
                         hog_array_under[i] = hog_df_under
@@ -411,7 +413,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 #       #       end
 #
                 #Now moved into a function
-                Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
+                #Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
 #
 #
 #               graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)

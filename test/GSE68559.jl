@@ -64,4 +64,4 @@ if(biomart_modification = true)
 	end
 end
 ##run code to generate plots and figures for website 
-#webpage_construction(raw_counts,params)
+webpage_construction(raw_counts,params)
