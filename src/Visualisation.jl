@@ -1,4 +1,4 @@
-using Printf
+using Printf, LaTeXStrings
 function cytoscape_elements(vertices::Array{String,2},edges::Array{Pair},output_path::String)
     io = open(output_path, "w")
     println(io, "var Elements = {")
@@ -116,3 +116,95 @@ function threejs_plot(adj_matrix::AbstractArray,vertex_names::Array{String,1},co
 
     @info "threejs plot saved as HTML page at $(plot_prefix)."
 end
+
+
+function tex_boxplot(data::DataFrame,out_file::String,out_format::String)
+    if (out_format == "standalone")
+        #include standalone preamble
+        tex = "\\documentclass[crop=false]{standalone}
+        \\usepackage{pgfplotstable}
+        \\usepgfplotslibrary{colorbrewer}
+        %\\pgfplotsset{compat=1.16}
+        \\usepgfplotslibrary{statistics}
+
+        \\begin{document}
+        "
+    end
+
+    if (out_format == "standalone" || "input")
+        tex *= "\\begin{tikzpicture}
+                    \\pgfplotstableread{%
+                              x min q25 median q75 max
+                    "
+         for row in eachrow(data)
+             arr = vec(convert(Array,row))
+             for a in arr
+                 tex *= string(a)*" "
+             end
+             tex *= "\n"
+         end
+        tex *= "            }\\datatable
+                    \\begin{axis}[boxplot/draw direction=y,
+                    xticklabels={"
+        #get row names (from column one)
+        for a in data[1]
+            tex *= a*","
+        end
+        tex *= "},
+                    xtick={"
+        for a in 1:length(data[1])
+            tex *= string(a)*","
+        end
+        tex *= "},
+                    x tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center},
+                    ylabel={fitness},cycle list/YlGnBu-5 ]
+                    \\pgfplotstablegetrowsof{\\datatable}
+                    \\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}
+                    \\pgfplotsinvokeforeach{0,...,\\rownumber}{
+                        \\pgfplotstablegetelem{#1}{min}\\of\\datatable
+                        \\edef\\mymin{\\pgfplotsretval}
+
+                        \\pgfplotstablegetelem{#1}{q25}\\of\\datatable
+                        \\edef\\myql{\\pgfplotsretval}
+
+                        \\pgfplotstablegetelem{#1}{median}\\of\\datatable
+                        \\edef\\mymedian{\\pgfplotsretval}
+
+                        \\pgfplotstablegetelem{#1}{q75}\\of\\datatable
+                        \\edef\\myqu{\\pgfplotsretval}
+
+                        \\pgfplotstablegetelem{#1}{max}\\of\\datatable
+                        \\edef\\mymax{\\pgfplotsretval}
+
+                        \\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax}
+                        \\pgfmathsetmacro{\\mylowerq}{\\myql}
+                        \\pgfmathsetmacro{\\myupperq}{\\myqu}
+                        \\edef\\temp{\\noexpand\\addplot+[,
+                            boxplot prepared={
+                                  lower whisker=\\mymin,
+                                  upper whisker=\\mymax,
+                                  lower quartile=\\mylowerq,
+                                  upper quartile=\\myupperq,
+                                  median=\\mymedian,
+                                  every box/.style={solid,fill,opacity=0.5},
+                                  every whisker/.style={solid },
+                                  every median/.style={solid},
+                                  },
+                            ]coordinates {};}
+                            \\temp
+                        }
+            \\end{axis}
+        \\end{tikzpicture}
+        "
+
+    end
+
+
+    if (out_format == "standalone")
+        tex *= "\\end{document}"
+    end
+
+
+    write(out_file,tex)
+end
+
