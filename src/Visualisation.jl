@@ -118,24 +118,14 @@ function threejs_plot(adj_matrix::AbstractArray,vertex_names::Array{String,1},co
 end
 
 
-function tex_boxplot(data::DataFrame,out_file::String,out_format::String)
+function tex_boxplot(data::DataFrame,ylabel::String="value",out_file::String,out_format::String)
     if (out_format == "standalone")
         #include standalone preamble
-        tex = "\\documentclass[crop=false]{standalone}
-        \\usepackage{pgfplotstable}
-        \\usepgfplotslibrary{colorbrewer}
-        %\\pgfplotsset{compat=1.16}
-        \\usepgfplotslibrary{statistics}
-
-        \\begin{document}
-        "
+        tex = "\\documentclass[crop=false]{standalone}\n\\usepackage{pgfplotstable}\n\\usepgfplotslibrary{colorbrewer}\n%\\pgfplotsset{compat=1.16}\n\\usepgfplotslibrary{statistics}\n\n\\begin{document}\n"
     end
 
     if (out_format == "standalone" || "input")
-        tex *= "\\begin{tikzpicture}
-                    \\pgfplotstableread{%
-                              x min q25 median q75 max
-                    "
+        tex *= "\\begin{tikzpicture}\n\\pgfplotstableread{%\nx min q25 median q75 max\n"
          for row in eachrow(data)
              arr = vec(convert(Array,row))
              for a in arr
@@ -143,59 +133,19 @@ function tex_boxplot(data::DataFrame,out_file::String,out_format::String)
              end
              tex *= "\n"
          end
-        tex *= "            }\\datatable
-                    \\begin{axis}[boxplot/draw direction=y,
-                    xticklabels={"
-        #get row names (from column one)
+        tex *= "}\\datatable\n\\begin{axis}[boxplot/draw direction=y,\nxticklabels={"
+        #get row names (from column one). IMPORTANTLY, latex cant handle underscores in name. Plots also present better with short labels, so we initialise each typed graphlet
         for a in data[1]
-            tex *= a*","
+            tex *= replace(replace(replace(a,"_"=>"-"),"oding"=>""),"on"=>"")*","
         end
-        tex *= "},
-                    xtick={"
+        tex *= "},\nxtick={"
         for a in 1:length(data[1])
-            tex *= string(a)*","
+            tex *= string(a)
+            if(a<length(data[1]))
+               tex*= ","
+           end
         end
-        tex *= "},
-                    x tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center},
-                    ylabel={fitness},cycle list/YlGnBu-5 ]
-                    \\pgfplotstablegetrowsof{\\datatable}
-                    \\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}
-                    \\pgfplotsinvokeforeach{0,...,\\rownumber}{
-                        \\pgfplotstablegetelem{#1}{min}\\of\\datatable
-                        \\edef\\mymin{\\pgfplotsretval}
-
-                        \\pgfplotstablegetelem{#1}{q25}\\of\\datatable
-                        \\edef\\myql{\\pgfplotsretval}
-
-                        \\pgfplotstablegetelem{#1}{median}\\of\\datatable
-                        \\edef\\mymedian{\\pgfplotsretval}
-
-                        \\pgfplotstablegetelem{#1}{q75}\\of\\datatable
-                        \\edef\\myqu{\\pgfplotsretval}
-
-                        \\pgfplotstablegetelem{#1}{max}\\of\\datatable
-                        \\edef\\mymax{\\pgfplotsretval}
-
-                        \\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax}
-                        \\pgfmathsetmacro{\\mylowerq}{\\myql}
-                        \\pgfmathsetmacro{\\myupperq}{\\myqu}
-                        \\edef\\temp{\\noexpand\\addplot+[,
-                            boxplot prepared={
-                                  lower whisker=\\mymin,
-                                  upper whisker=\\mymax,
-                                  lower quartile=\\mylowerq,
-                                  upper quartile=\\myupperq,
-                                  median=\\mymedian,
-                                  every box/.style={solid,fill,opacity=0.5},
-                                  every whisker/.style={solid },
-                                  every median/.style={solid},
-                                  },
-                            ]coordinates {};}
-                            \\temp
-                        }
-            \\end{axis}
-        \\end{tikzpicture}
-        "
+        tex *= "},\nx tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center},\nylabel={$ylabel},cycle list/Set3 ]\n\\pgfplotstablegetrowsof{\\datatable}\n\\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}\n\\pgfplotsinvokeforeach{0,...,\\rownumber}{ \n\\pgfplotstablegetelem{#1}{min}\\of\\datatable \n\\edef\\mymin{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q25}\\of\\datatable \n\\edef\\myql{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{median}\\of\\datatable \n\\edef\\mymedian{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q75}\\of\\datatable \n\\edef\\myqu{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{max}\\of\\datatable \n\\edef\\mymax{\\pgfplotsretval} \n \n\\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax} \n\\pgfmathsetmacro{\\mylowerq}{\\myql} \n\\pgfmathsetmacro{\\myupperq}{\\myqu} \n\\edef\\temp{\\noexpand\\addplot+[, \nboxplot prepared={ \n     lower whisker=\\mymin, \n     upper whisker=\\mymax, \n     lower quartile=\\mylowerq, \n     upper quartile=\\myupperq, \n     median=\\mymedian, \n     every box/.style={solid,fill,opacity=0.5}, \n     every whisker/.style={solid }, \n     every median/.style={solid}, \n     }, \n]coordinates {};} \n\\temp \n}\n\\end{axis}\n\\end{tikzpicture}\n"
 
     end
 
