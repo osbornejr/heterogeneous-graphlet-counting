@@ -322,7 +322,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                                 
                                 ##get summary (for tikZ plot)
                                 summary = describe(rand_fil_fil[:,3:3],:min,:q25,:median,:q75,:max)
-                                summary.variable = heg
+                                summary.variable = heg*"_"*hog
                                 append!(summaries,summary)
                                 ##histogram for each heterogeneous graphlet
                                 histogram(rand_fil_fil,:value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
@@ -370,6 +370,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         hog_array[i] = hog_df
                         hog_array_under[i] = hog_df_under
                 end
+
+                #merged boxplots
+                tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","input",ylabel = "log value")
+
                 ## find significant graphlets
                 sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
                 insig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array_under)...)
