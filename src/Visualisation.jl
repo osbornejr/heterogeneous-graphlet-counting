@@ -140,6 +140,7 @@ function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,o
         for a in data[1]
             tex *= replace(replace(replace(a,"_"=>"-"),"oding"=>""),"on"=>"")*","
         end
+        tex = chop(tex,tail=1)
         tex *= "},\nxtick={"
         for a in 1:length(data[1])
             tex *= string(a)
@@ -147,7 +148,7 @@ function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,o
                tex*= ","
            end
         end
-        tex *= "},\nx tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center},\nylabel={$ylabel},cycle list/Set3 ]\n\\pgfplotstablegetrowsof{\\datatable}\n\\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}\n\\pgfplotsinvokeforeach{0,...,\\rownumber}{ \n\\pgfplotstablegetelem{#1}{min}\\of\\datatable \n\\edef\\mymin{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q25}\\of\\datatable \n\\edef\\myql{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{median}\\of\\datatable \n\\edef\\mymedian{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q75}\\of\\datatable \n\\edef\\myqu{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{max}\\of\\datatable \n\\edef\\mymax{\\pgfplotsretval} \n \n\\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax} \n\\pgfmathsetmacro{\\mylowerq}{\\myql} \n\\pgfmathsetmacro{\\myupperq}{\\myqu} \n\\edef\\temp{\\noexpand\\addplot+[, \nboxplot prepared={ \n     lower whisker=\\mymin, \n     upper whisker=\\mymax, \n     lower quartile=\\mylowerq, \n     upper quartile=\\myupperq, \n     median=\\mymedian, \n     every box/.style={solid,fill,opacity=0.5}, \n     every whisker/.style={solid }, \n     every median/.style={solid}, \n     }, \n]coordinates {};} \n\\temp \n}\n\\addplot [only marks, mark=o,mark size = 1pt] coordinates{"
+        tex *= "},\nx tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center,anchor = east},\nylabel={$ylabel},cycle list/Set3 ]\n\\pgfplotstablegetrowsof{\\datatable}\n\\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}\n\\pgfplotsinvokeforeach{0,...,\\rownumber}{ \n\\pgfplotstablegetelem{#1}{min}\\of\\datatable \n\\edef\\mymin{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q25}\\of\\datatable \n\\edef\\myql{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{median}\\of\\datatable \n\\edef\\mymedian{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q75}\\of\\datatable \n\\edef\\myqu{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{max}\\of\\datatable \n\\edef\\mymax{\\pgfplotsretval} \n \n\\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax} \n\\pgfmathsetmacro{\\mylowerq}{\\myql} \n\\pgfmathsetmacro{\\myupperq}{\\myqu} \n\\edef\\temp{\\noexpand\\addplot+[, \nboxplot prepared={ \n     lower whisker=\\mymin, \n     upper whisker=\\mymax, \n     lower quartile=\\mylowerq, \n     upper quartile=\\myupperq, \n     median=\\mymedian, \n     every box/.style={solid,fill,opacity=0.5}, \n     every whisker/.style={solid }, \n     every median/.style={solid}, \n     }, \n]coordinates {};} \n\\temp \n}\n\\addplot [only marks, mark=o,mark size = 1pt] coordinates{"
         for (i,p) in enumerate(points)
             tex*= " ($i,$p) "
         end
@@ -164,3 +165,72 @@ function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,o
     write(out_file,tex)
 end
 
+function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_format::String;ylabel::String="value")
+    #initialise tex string
+    tex = ""
+    if (out_format == "standalone")
+        #include standalone preamble
+        tex *= "\\documentclass[crop=false]{standalone}\n\\usepackage{pgfplotstable}\n\\usepgfplotslibrary{colorbrewer}\n%\\pgfplotsset{compat=1.16}\n\\usepgfplotslibrary{statistics}\n\n\\begin{document}\n"
+    end
+    ## merge data
+    merged_data = vcat(data_array...)
+    #get global min and max of all datapoints
+    ymin = min(Array(merged_data[!,2:end])...)-0.5
+    ymax = max(Array(merged_data[!,2:end])...)+0.5
+
+    if (out_format in ["standalone","input"])
+        tex *= "\\begin{tikzpicture}\n"
+        tex *= "\\begin{axis}[ymin = $ymin, ymax = $ymax, boxplot/draw direction=y,\nxticklabels={"
+        #get row names (from column one). IMPORTANTLY, latex cant handle underscores in name. Plots also present better with short labels, so we initialise each typed graphlet
+        for a in merged_data[1]
+            tex *= replace(replace(replace(a,"_"=>"-"),"oding"=>""),"on"=>"")*","
+        end
+        tex = chop(tex,tail=1)
+        tex *= "},\nxtick={"
+        for a in 1:length(merged_data[1])
+            tex *= string(a)*","
+        end
+        tex = chop(tex,tail=1)
+        tex *= "},\nx tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center,anchor = east},\nylabel={$ylabel},cycle list/Set3 ]\n"
+        #cycle through graphlets
+        #keep global count
+        tal = 0
+        grey_flag = 0
+        for data in data_array
+            box_data = data[!,Not(:values)]
+            #define data for these boxplots
+            tex *= "\\pgfplotstableread{%\nx min q25 median q75 max\n"
+            for row in eachrow(box_data)
+                arr = vec(convert(Array,row))
+                for a in arr
+                    tex *= string(a)*" "
+                end
+                tex *= "\n"
+            end
+            tex *= "}\\datatable\n"
+            ##define grey box area every second graphlet
+            if (grey_flag == 1)
+                tex *= "\\addplot [draw=gray,fill=gray,opacity=0.1] coordinates {($(tal+0.5),$(ymin-1)) ($(tal+0.5),$(ymax+1)) ($(tal+length(data[1])+0.5),$(ymax+1)) ($(tal+length(data[1])+0.5),$(ymin-1))};\n"
+                grey_flag = 0
+            else
+                grey_flag = 1
+            end
+            ##box plots for this graphlet
+            tex*= "\\pgfplotstablegetrowsof{\\datatable}\n\\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}\n\\pgfplotsinvokeforeach{0,...,\\rownumber}{ \n\\pgfplotstablegetelem{#1}{min}\\of\\datatable \n\\edef\\mymin{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q25}\\of\\datatable \n\\edef\\myql{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{median}\\of\\datatable \n\\edef\\mymedian{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q75}\\of\\datatable \n\\edef\\myqu{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{max}\\of\\datatable \n\\edef\\mymax{\\pgfplotsretval} \n \n\\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax} \n\\pgfmathsetmacro{\\mylowerq}{\\myql} \n\\pgfmathsetmacro{\\myupperq}{\\myqu} \n\\edef\\temp{\\noexpand\\addplot+[, \nboxplot prepared={ \n     lower whisker=\\mymin, \n     upper whisker=\\mymax, \n     lower quartile=\\mylowerq, \n     upper quartile=\\myupperq, \n     median=\\mymedian, \n     every box/.style={solid,fill,opacity=0.5}, \n     every whisker/.style={solid }, \n     every median/.style={solid}, \n     }, \n]coordinates {};} \n\\temp \n}\n\\addplot [only marks, mark=o,mark size = 1pt] coordinates{"
+            points = data.values
+            for p in points
+                tal += 1
+                tex*= " ($tal,$p) "
+            end
+            tex*= "};\n"
+        end
+        tex *= "\\end{axis}\n\\end{tikzpicture}\n"
+    end
+
+    if (out_format == "standalone")
+        tex *= "\\end{document}"
+    end
+
+
+    write(out_file,tex)
+end
