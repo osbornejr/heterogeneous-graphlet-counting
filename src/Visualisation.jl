@@ -119,6 +119,7 @@ end
 
 
 function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,out_format::String;ylabel::String="value")
+    # generates a modified version of plot discussed at https://tex.stackexchange.com/a/495207
     #initialise tex string
     tex = ""
     if (out_format == "standalone")
