@@ -119,12 +119,14 @@ end
 
 
 function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,out_format::String;ylabel::String="value")
+    #initialise tex string
+    tex = ""
     if (out_format == "standalone")
         #include standalone preamble
-        tex = "\\documentclass[crop=false]{standalone}\n\\usepackage{pgfplotstable}\n\\usepgfplotslibrary{colorbrewer}\n%\\pgfplotsset{compat=1.16}\n\\usepgfplotslibrary{statistics}\n\n\\begin{document}\n"
+        tex *= "\\documentclass[crop=false]{standalone}\n\\usepackage{pgfplotstable}\n\\usepgfplotslibrary{colorbrewer}\n%\\pgfplotsset{compat=1.16}\n\\usepgfplotslibrary{statistics}\n\n\\begin{document}\n"
     end
 
-    if (out_format == "standalone" || "input")
+    if (out_format in ["standalone","input"])
         tex *= "\\begin{tikzpicture}\n\\pgfplotstableread{%\nx min q25 median q75 max\n"
          for row in eachrow(data)
              arr = vec(convert(Array,row))
