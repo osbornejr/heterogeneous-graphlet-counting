@@ -41,6 +41,7 @@ sudo-docker: ##make docker usable as non-sudo (linux only)
 ifeq ($(uname),Darwin)
 unison_file := "unison-v2.51.4+ocaml-4.05.0+x86_64.macos-10.15.tar.gz"
 unison: ##use this to sync repo with a remote host. (this command just installs unison)
+	rm -rf bin/unison
 	mkdir -p bin/unison
 	##download file
 	wget --no-check-certificate --content-disposition -P ./bin/unison/ "https://github.com/bcpierce00/unison/releases/download/v2.51.4/$(unison_file)"
@@ -48,10 +49,12 @@ unison: ##use this to sync repo with a remote host. (this command just installs 
 	mv bin/unison/bin/unison bin/unison_ex
 	rm -r bin/unison
 	mv bin/unison_ex bin/unison
+	mkdir -p output/share
 endif
 ifeq ($(uname),Linux)
 unison_file := "unison-v2.51.4+ocaml-4.05.0+x86_64.linux.tar.gz"
 unison: ##use this to sync repo with a remote host. (this command just installs unison)
+	rm -rf bin/unison
 	mkdir -p bin/unison
 	##download file
 	wget --no-check-certificate --content-disposition -P ./bin/unison/ "https://github.com/bcpierce00/unison/releases/download/v2.51.4/$(unison_file)"
@@ -59,6 +62,7 @@ unison: ##use this to sync repo with a remote host. (this command just installs 
 	mv bin/unison/bin/unison bin/unison_ex
 	rm -r bin/unison
 	mv bin/unison_ex bin/unison
+	mkdir -p output/share
 endif
 	
 
