@@ -297,8 +297,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 real_dict = DefaultDict(0,graphlet_counts)
                 hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
                 ##array to store all homogonous graphlet dfs
-                hog_array=Array{DataFrame,1}(undef,length(hom_graphlets))       
-                hog_array_under=Array{DataFrame,1}(undef,length(hom_graphlets)) 
+                hog_array = Array{DataFrame,1}(undef,length(hom_graphlets))       
+                hog_array_under = Array{DataFrame,1}(undef,length(hom_graphlets)) 
+                ##array to store all homgoenous summaries
+                merged_summaries= Array{DataFrame,1}(undef,length(hom_graphlets))       
                 for (i,hog) in enumerate(hom_graphlets)
                         hog_df= DataFrame()
                         hog_df_under= DataFrame()
@@ -363,7 +365,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         summaries.values = log_real_fil.value
                         sort!(summaries,:values)
                         tex_boxplot(summaries[!,Not(:values)],summaries.values,"output/share/$(hog)_boxplot.tex","input",ylabel="")
-
+                        ##leave real values attached here, improves tikz layout
+                        merged_summaries[i] = summaries
                         hog_array[i] = hog_df
                         hog_array_under[i] = hog_df_under
                 end
