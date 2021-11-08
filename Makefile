@@ -65,4 +65,4 @@ unison: ##use this to sync repo with a remote host. (this command just installs 
 	mkdir -p output/share
 endif
 	
-
+nectar-connect: ## ssh into nectar VM   
