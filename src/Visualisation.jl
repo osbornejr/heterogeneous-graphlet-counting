@@ -184,7 +184,7 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
         tex *= "\\begin{axis}[xmin = 0, xmax = $(length(merged_data[1])+1), enlarge x limits ={0},ymin = $ymin, ymax = $ymax, boxplot/draw direction=y,\nxticklabels={"
         #get row names (from column one). IMPORTANTLY, latex cant handle underscores in name. Plots also present better with short labels, so we initialise each typed graphlet
         for a in merged_data[1]
-            tex *= replace(replace(replace(chop(split(a,"-")[1]),"_"=>"-"),"oding"=>""),"on"=>"")*","
+            tex *= replace(replace(replace(chop(split(a,"-")[1],tail=2),"_"=>"-"),"oding"=>""),"on"=>"")*","
         end
         tex = chop(tex,tail=1)
         tex *= "},\nxtick={"
