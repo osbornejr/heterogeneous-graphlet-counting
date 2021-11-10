@@ -148,6 +148,17 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         vertexlist = copy(network_counts[:transcript_type])     
         edgelist = edgelist_from_adj(adj_matrix)
         
+        #Synthetic test (just override vertex and edge lists here-- is that ok?)
+        if(params.test_name == "Synthetic")
+            n = length(vertexlist) 
+            m = length(edgelist) 
+            # construct erdos renyi random network based on vertex and edge structure of real network
+            edgelist = Pair.(collect(edges(erdos_renyi(n,m/(n*(n-1)/2)))))
+            #percentage of coding vertices in synthetic network
+            percentage = 0.72
+            vertexlist = vcat(repeat(["coding"],Int(floor(percentage*n))),repeat(["noncoding"],Int(ceil((1-percentage)*n))))
+        end
+
         #Network visualisation
         g = SimpleGraph(adj_matrix)
         ##get largest component
@@ -420,7 +431,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 #       #       end
 #
                 #Now moved into a function
-                #Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
+                Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
+                #find only those coincidents that involve non-coding transcripts
+                Coincidents_noncoding = Coincidents[findall(x-> "noncoding" in x, Coincidents.Transcript_type),:]
+
 #
 #
 #               graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
