@@ -455,7 +455,7 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
         end
 
         ##add inclusion pattern (true if node is in pathway)
-        Coincidents_df.Inclusion = [ map(x-> in(x,candidates[Coincidents.Pathway[i]]),Coincidents.Vertices[i]) for i in 1:size(Coincidents)[1]]
+        Coincidents_df.Inclusion = [ map(x-> in(x,candidates[Coincidents_df.Pathway[i]]),Coincidents_df.Vertices[i]) for i in 1:size(Coincidents_df)[1]]
 
 
         #coincident_names = map(x->broadcast(y->vertex_names[y],x),first.(Coincidents["Morphine addiction"]["three"]))
