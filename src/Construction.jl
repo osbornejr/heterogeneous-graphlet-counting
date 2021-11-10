@@ -177,7 +177,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
                 draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
         end
+        
         #Network Analysis
+        ##update cache-- here we split cache into separate analysis folders, as each analysis is independent of the others
+        cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/analysis"
+        run(`mkdir -p $(cache_dir)`)
         @info "Analysing network..."
         #Type representations 
         ##set up csv string
@@ -212,15 +216,15 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         end     
         ## Community structure
         ##update cache
-        cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/"
-        run(`mkdir -p $(cache_dir)`)
+        anal_dir = "$cache_dir/communities"
+        run(`mkdir -p $(anal_dir)`)
         @info "Identifying communities..."
         ##use gene ids here, as they have more chance of getting a GO annotation
         if(params.func_annotate==true)
                 vertex_gene_names = network_counts[:gene_id]
                 community_vertices = get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
                 ## functional annotations of communities
-                func_file = "$cache_dir/func_annotations.jld" 
+                func_file = "$anal_dir/func_annotations.jld" 
                 if (isfile(func_file))
                         functional_annotations = JLD.load(func_file,"functional annotations")
                 else
@@ -236,21 +240,22 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         csv = "Nodes,Edges,Components,Nodes in largest component,Maximal degree,communities detected\n"
         csv = csv*string(length(vertexlist))*","*string(length(edgelist))*","*string(length(components))*","*string(length(largest...))*","*string(max(degrees...))*","*string(length(unique(community_vertices.group)))*"\n"
         write("$(params.website_dir)/_assets/$(params.page_name)/tableinput/network_stats.csv",csv)
+
         if(params.graphlet_counting==true)
 
                 ##update cache
-                cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/"
-                run(`mkdir -p $(cache_dir)`)
-                graphlet_file = "$cache_dir/graphlets.jld" 
+                anal_dir = "$cache_dir/graphlets"
+                run(`mkdir -p $(anal_dir)`)
+                graphlet_file = "$anal_dir/graphlets.jld" 
                 if (isfile(graphlet_file))
-                        @info "Loading graphlet counts from $cache_dir..."
+                        @info "Loading graphlet counts from $anal_dir..."
                         graphlet_counts = JLD.load(graphlet_file,"graphlets")
                         timer = JLD.load(graphlet_file,"time")
                 else
                         @info "Counting graphlets..."
                         timer=@elapsed graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old")
                         #graphlet_concentrations = concentrate(graphlet_counts) 
-                        @info "Saving graphlet counts at $cache_dir..."
+                        @info "Saving graphlet counts at $anal_dir..."
                         ##save the per-edge array as well in case we need it in the future (exp for debugging)
                         JLD.save(graphlet_file,"graphlets",graphlet_counts,"time",timer)
         
@@ -268,12 +273,12 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 @info "Looking at typed representations of graphlets..."
                 
                 ##update cache
-                cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/communities/graphlets/typed_representations/nullmodel/$(params.null_model_size)_simulations"
-                run(`mkdir -p $(cache_dir)`)
+                rep_dir = "$anal_dir/typed_representations/nullmodel/$(params.null_model_size)_simulations"
+                run(`mkdir -p $(rep_dir)`)
                 N=params.null_model_size
-                rand_graphlets_file = "$cache_dir/rand_graphlets.jld"
+                rand_graphlets_file = "$rep_dir/rand_graphlets.jld"
                 if (isfile(rand_graphlets_file))
-                        @info "Loading randomised vertices and graphlet counts from $cache_dir..."
+                        @info "Loading randomised vertices and graphlet counts from $rep_dir..."
                         rand_types_set = JLD.load(rand_graphlets_file,"rand vertices")
                         rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
                 else
@@ -281,7 +286,6 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         
                         #number of randomised graphs
                         rand_types_set = [copy(vertexlist) for i in 1:N]
-                        #randomise each graph by node
                         broadcast(shuffle!,rand_types_set) 
                         @info "Counting graphlets on null model" 
                         if (null_run=="distributed-short")
@@ -293,7 +297,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                                 rand_graphlet_counts = @showprogress map(x->count_graphlets(x,edgelist,4,run_method="distributed"),rand_types_set)
                         end
                         rand_graphlet_collection = vcat(collect.(rand_graphlet_counts)...)
-                        @info "Saving random graphlet count information at $cache_dir..."
+                        @info "Saving random graphlet count information at $rep_dir..."
                         JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection,"rand vertices",rand_types_set)
                 end
                 
@@ -390,8 +394,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 insig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array_under)...)
                 
                 #save in output cache
-                html_table_maker(sig_graphlets,"$cache_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet)                          
-                html_table_maker(insig_graphlets,"$cache_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet)                              
+                html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet)                          
+                html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet)                              
                 #save for website version
                 html_table_maker(sig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
                 html_table_maker(insig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
@@ -414,24 +418,21 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
 #               ### Validation steps
 #               # looking at identified significant graphlets and seeing if they check out biologically
-#               #To do this we require the node-level relationships output of the graphlet counting algorithm. We it is generally quicker to run this than save and load it via JLD, as it is quite large) 
-#               
-#       #       if (isfile(graphlet_file))
-#       #               @info "Loading graphlet counts from $cache_dir..."
-#       #               Rel = JLD.load(graphlet_file,"Rel")
-#       #       else
-#       #               @info "Counting graphlets..."
-#       #               ##Do full relationships run in case per-node relationships are required (TODO add toggle for this?)
-#       #               timer=@elapsed graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true)
-#       #               #graphlet_concentrations = concentrate(graphlet_counts) 
-#       #               @info "Saving graphlet counts at $cache_dir..."
-#       #               ##save the per-edge array as well in case we need it in the future (exp for debugging)
-#       #               JLD.save(graphlet_file,"graphlets",graphlet_counts,"Chi",Chi,"Rel",Rel,"time",timer)
-#       #
-#       #       end
-#
-                #Now moved into a function
-                Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
+#               # the most taxing step is to identify the graphlets that are coincident in some way to KEGG pathways. We cache these coincidents as a dataframe (using CSV instead of JLD)  
+                val_dir = "$anal_dir/validation"
+                run(`mkdir -p $(val_dir)`)
+                coincidents_file ="$val_dir/coincidents.csv"
+                if (isfile(coincidents_file))
+                        @info "Loading coincidents dataframe from $val_dir..."
+                        Coincidents = CSV.read(coincidents_file,"Coincidents")
+                else
+                        @info "Conducting per graphlet pathway coincidence analysis..."
+                        Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
+                        @info "Saving coincidents at $val_dir..."
+                        CSV.write(coincidents_file,Coincidents)
+        
+                end
+
                 #find only those coincidents that involve non-coding transcripts
                 Coincidents_noncoding = Coincidents[findall(x-> "noncoding" in x, Coincidents.Transcript_type),:]
 
