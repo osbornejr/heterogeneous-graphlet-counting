@@ -424,7 +424,17 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 coincidents_file ="$val_dir/coincidents.csv"
                 if (isfile(coincidents_file))
                         @info "Loading coincidents dataframe from $val_dir..."
-                        Coincidents = CSV.read(coincidents_file,"Coincidents")
+                        Coincidents = CSV.read(coincidents_file)
+                        #because CSV converts the array columns to strings, we have to convert back (cost of using the easy/dirty CSV option!)
+                        fix(g) = split(replace(replace(replace(replace(g,("["=>"")),("]"=>"")),("\""=>"")),(" "=>"")),",")
+                        fix_int(g) = map(x->parse(Int,x),split(replace(replace(g,("["=>"")),("]"=>"")),","))
+                        fix_bool(g) = BitArray(map(x->parse(Int,x),split(replace(replace(replace(g,("["=>"")),("]"=>"")),("Bool"=>"")),",")))
+                        Coincidents.Vertices = fix_int.(Coincidents.Vertices)
+                        Coincidents.Entrez = fix_int.(Coincidents.Entrez)
+                        Coincidents.Ensembl = fix.(Coincidents.Ensembl)
+                        Coincidents.Transcript_type = fix.(Coincidents.Transcript_type)
+                        Coincidents.Inclusion = fix_bool.(Coincidents.Inclusion)
+
                 else
                         @info "Conducting per graphlet pathway coincidence analysis..."
                         Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
