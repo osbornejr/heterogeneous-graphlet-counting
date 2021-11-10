@@ -429,15 +429,15 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
             three_coincidents = Array{Tuple,1}()
             four_coincidents = Array{Tuple,1}()
             for g in keys(graphlet_rels) 
-                #graphlets with at least two candidate transcripts involved
+                #graphlets with at least two candidate transcripts involved in process
                 #one_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])
                 #two_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g])
                 #three_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g])
                 #four_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g])
                 #push!(one_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])...))
-                push!(two_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g]))...)
-                push!(three_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g]))...)
-                push!(four_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g]))...)
+                push!(two_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==2,graphlet_rels[g]))...)
+                push!(three_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==3,graphlet_rels[g]))...)
+                push!(four_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==4,graphlet_rels[g]))...)
             end
             #save each in dictionary for candidate
             Coincidents[first(ent)] = Dict("two"=>two_coincidents,"three"=>three_coincidents,"four"=>four_coincidents) 
@@ -454,7 +454,8 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
             end
         end
 
-
+        ##add inclusion pattern (true if node is in pathway)
+        Coincidents_df.Inclusion = [ map(x-> in(x,candidates[Coincidents.Pathway[i]]),Coincidents.Vertices[i]) for i in 1:size(Coincidents)[1]]
 
 
         #coincident_names = map(x->broadcast(y->vertex_names[y],x),first.(Coincidents["Morphine addiction"]["three"]))
