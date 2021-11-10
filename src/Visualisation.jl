@@ -1,4 +1,4 @@
-using Printf, LaTeXStrings
+using Printf
 function cytoscape_elements(vertices::Array{String,2},edges::Array{Pair},output_path::String)
     io = open(output_path, "w")
     println(io, "var Elements = {")
