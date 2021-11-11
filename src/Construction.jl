@@ -443,10 +443,28 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         
                 end
 
+                #find which types are excluded in general, and then only as a cause of having no Entrez id
+                Coincidents.excluded = [Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]]
+                Coincidents.excluded_Entrez = [Coincidents.Transcript_type[i][Coincidents.Entrez[i].==0] for i in 1:size(Coincidents)[1]]
                 #find only those coincidents that involve non-coding transcripts
                 Coincidents_noncoding = Coincidents[findall(x-> "noncoding" in x, Coincidents.Transcript_type),:]
-
-#
+                
+                #Nonuniformity test: finds graphlets where the included nodes differ across different pathways (sampling for now for speed)
+                graphlet = "4-star"
+                nonuniforms = []
+                for y in filter(p->last(p)>1,countmap(filter(:Hom_graphlet=> x-> x == graphlet, Coincidents[1:199000,:]).Vertices))
+                    test = sum(filter(:Vertices => x-> x == first(y),filter(:Hom_graphlet => x-> x == "4-star",Coincidents))[8])/last(y)
+                    if (sum(((test.>0) - (test.<1)).==0)>0)
+                        push!(nonuniforms,first(y))
+                    end
+                end
+                #types of exlusions: which transcript types are most likely to be missing from the pathway in a graphlet
+                countmap([Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]])
+                countmap([Coincidents_noncoding.Transcript_type[i][Coincidents_noncoding.Inclusion[i].==0] for i in 1:size(Coincidents_noncoding)[1]])
+                
+                #agreement between entrez and inclusion info
+                sum(map(x->x.!==0,Coincidents.Entrez).==Coincidents.Inclusion)
+                sum(map(x->x.!==0,Coincidents_noncoding.Entrez).==Coincidents_noncoding.Inclusion)
 #
 #               graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
 #               ## combine relationships into one array
