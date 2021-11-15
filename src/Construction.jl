@@ -465,6 +465,21 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #agreement between entrez and inclusion info
                 sum(map(x->x.!==0,Coincidents.Entrez).==Coincidents.Inclusion)
                 sum(map(x->x.!==0,Coincidents_noncoding.Entrez).==Coincidents_noncoding.Inclusion)
+
+                #orbit statistics
+                orbit_templates = Dict("3-path" => Dict(("central" => [0,1,0]), ("peripheral" => [1,0,1])),
+                    "3-tri" => Dict(("central" => [1,1,1])),
+                    "4-path" => Dict(("peripheral" => [1,0,0,1]), ("central" => [0,1,1,0])),
+                    "4-star" => Dict(("peripheral" => [1,1,0,1]), ("central" => [0,0,1,0])),
+                    "4-tail" => Dict(("peripheral" => [0,0,0,1]), ("centre-peripheral" => [1,1,0,0]), ("central" => [0,0,1,0])),
+                    "4-cycle" => Dict(("central"=>[1,1,1,1])),
+                    "4-chord" => Dict(("central"=>[0,1,1,0]),("peripheral"=>[1,0,0,1])),
+                    "4-clique" => Dict(("central"=>[1,1,1,1]))) 
+                
+                for i in 1:length(vertexlist)
+                    graphlets = filter(:Vertices=> x -> in(i,x),Coincidents)
+                end
+
 #
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
         end
