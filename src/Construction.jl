@@ -480,11 +480,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     "4-clique" => Dict(("supercentral"=>[1,1,1,1]))) 
                
                 #collect dataframe for each node in this array
-                per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
+                #per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
                 #choose just one order of graphlets (3 or 4)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
-                for i in 1:length(vertexlist)
-                    #all coincident graphlets that i is involved in
+                test = @showprogress map(x->pernode_significance(x,sub_Coincidents),1:length(vertexlist))
+                function pernode_significance(i::Int,sub_Coincidents::DataFrame)#all coincident graphlets that i is involved in
                     graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
                     # setup a counter for i for each pathway that features a coincident graphlet of i
                     #i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
@@ -524,8 +524,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     end
                     #pair data with pathway labels into a (per-node) dataframe
                     df = DataFrame(Pathway = collect(keys(countmap(graphlets.Pathway))), Peripheral = significance[:,1], Central = significance[:,2], Supercentral = significance[:,3])  
-                    per_node_significance[i] = df
-                    @info "Finished $i..."
+                    return df
+                    #@info "Finished $i..."
                 end
 
 #
