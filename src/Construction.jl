@@ -488,13 +488,13 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         i_counter[p] =  Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
                     "3-tri" => Dict(("central" => 0)),
                     "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
-                    "4-star" => Dict(("peripheral" => 0), ("central" => 0)),
-                    "4-tail" => Dict(("peripheral" => 0), ("centre-peripheral" => 0), ("central" => 0)),
+                    "4-star" => Dict(("peripheral" => 0), ("supercentral" => 0)),
+                    "4-tail" => Dict(("peripheral" => 0), ("central" => 0), ("supercentral" => 0)),
                     "4-cycle" => Dict(("central"=>0)),
-                    "4-chord" => Dict(("central"=>0),("peripheral"=>0)),
-                    "4-clique" => Dict(("central"=>0))) 
+                    "4-chord" => Dict(("supercentral"=>0),("central"=>0)),
+                    "4-clique" => Dict(("supercentral"=>0))) 
                     end
-                    test = []
+                    column =[]
                     for g in eachrow(graphlets)
                         #find which position i is in this graphlet
                         position = g.Vertices.==i
@@ -502,7 +502,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         for orb in keys(orbit_templates[g.Hom_graphlet])
                             if(Bool(sum(orbit_templates[g.Hom_graphlet][orb].*position)))
                                 i_counter[g.Pathway][g.Hom_graphlet][orb] += 1 
-                                push!(test,orb) 
+                                push!(column,orb) 
                             end
                         end
                     end 
