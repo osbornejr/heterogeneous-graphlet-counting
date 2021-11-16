@@ -477,15 +477,31 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     "4-clique" => Dict(("central"=>[1,1,1,1]))) 
                 
                 for i in 1:length(vertexlist)
+                    #all coincident graphlets that i is involved in
                     graphlets = filter(:Vertices=> x -> in(i,x),Coincidents)
+                    # setup a counter for i for each pathway that features a coincident graphlet of i
+                    i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
+                    for p in keys(countmap(graphlets.Pathway))
+                        i_counter[p] =  Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
+                    "3-tri" => Dict(("central" => 0)),
+                    "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
+                    "4-star" => Dict(("peripheral" => 0), ("central" => 0)),
+                    "4-tail" => Dict(("peripheral" => 0), ("centre-peripheral" => 0), ("central" => 0)),
+                    "4-cycle" => Dict(("central"=>0)),
+                    "4-chord" => Dict(("central"=>0),("peripheral"=>0)),
+                    "4-clique" => Dict(("central"=>0))) 
+                    end
+                    test = []
                     for g in eachrow(graphlets)
                         #find which position i is in this graphlet
                         position = g.Vertices.==i
                         #find which orbit this position matches (for the given graphlet of g)
                         for orb in keys(orbit_templates[g.Hom_graphlet])
-                            if(sum(orbit_templates[g.Hom_graphlet][orb].*position))
-
+                            if(Bool(sum(orbit_templates[g.Hom_graphlet][orb].*position)))
+                                i_counter[g.Pathway][g.Hom_graphlet][orb] += 1 
+                                push!(test,orb) 
                             end
+                        end
                     end 
 
                 end
