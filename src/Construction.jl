@@ -467,14 +467,17 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 sum(map(x->x.!==0,Coincidents_noncoding.Entrez).==Coincidents_noncoding.Inclusion)
 
                 #orbit statistics
+                #peripheral: degree one orbit
+                #central: degree two orbit
+                #supercentral: degree three orbit
                 orbit_templates = Dict("3-path" => Dict(("central" => [0,1,0]), ("peripheral" => [1,0,1])),
                     "3-tri" => Dict(("central" => [1,1,1])),
                     "4-path" => Dict(("peripheral" => [1,0,0,1]), ("central" => [0,1,1,0])),
-                    "4-star" => Dict(("peripheral" => [1,1,0,1]), ("central" => [0,0,1,0])),
-                    "4-tail" => Dict(("peripheral" => [0,0,0,1]), ("centre-peripheral" => [1,1,0,0]), ("central" => [0,0,1,0])),
+                    "4-star" => Dict(("peripheral" => [1,1,0,1]), ("supercentral" => [0,0,1,0])),
+                    "4-tail" => Dict(("peripheral" => [0,0,0,1]), ("central" => [1,1,0,0]), ("supercentral" => [0,0,1,0])),
                     "4-cycle" => Dict(("central"=>[1,1,1,1])),
-                    "4-chord" => Dict(("central"=>[0,1,1,0]),("peripheral"=>[1,0,0,1])),
-                    "4-clique" => Dict(("central"=>[1,1,1,1]))) 
+                    "4-chord" => Dict(("supercentral"=>[0,1,1,0]),("central"=>[1,0,0,1])),
+                    "4-clique" => Dict(("supercentral"=>[1,1,1,1]))) 
                 
                 for i in 1:length(vertexlist)
                     #all coincident graphlets that i is involved in
