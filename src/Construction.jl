@@ -478,22 +478,26 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     "4-cycle" => Dict(("central"=>[1,1,1,1])),
                     "4-chord" => Dict(("supercentral"=>[0,1,1,0]),("central"=>[1,0,0,1])),
                     "4-clique" => Dict(("supercentral"=>[1,1,1,1]))) 
-                
+               
+                #collect dataframe for each node in this array
+                per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
+                #choose just one order of graphlets (3 or 4)
+                sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
                 for i in 1:length(vertexlist)
                     #all coincident graphlets that i is involved in
-                    graphlets = filter(:Vertices=> x -> in(i,x),Coincidents)
+                    graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
                     # setup a counter for i for each pathway that features a coincident graphlet of i
-                    i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
-                    for p in keys(countmap(graphlets.Pathway))
-                        i_counter[p] =  Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
-                    "3-tri" => Dict(("central" => 0)),
-                    "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
-                    "4-star" => Dict(("peripheral" => 0), ("supercentral" => 0)),
-                    "4-tail" => Dict(("peripheral" => 0), ("central" => 0), ("supercentral" => 0)),
-                    "4-cycle" => Dict(("central"=>0)),
-                    "4-chord" => Dict(("supercentral"=>0),("central"=>0)),
-                    "4-clique" => Dict(("supercentral"=>0))) 
-                    end
+                    #i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
+                   # for p in keys(countmap(graphlets.Pathway))
+                   #     i_counter[p] =  Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
+                   # "3-tri" => Dict(("central" => 0)),
+                   # "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
+                   # "4-star" => Dict(("peripheral" => 0), ("supercentral" => 0)),
+                   # "4-tail" => Dict(("peripheral" => 0), ("central" => 0), ("supercentral" => 0)),
+                   # "4-cycle" => Dict(("central"=>0)),
+                   # "4-chord" => Dict(("supercentral"=>0),("central"=>0)),
+                   # "4-clique" => Dict(("supercentral"=>0))) 
+                   # end
                     column =[]
                     for g in eachrow(graphlets)
                         #find which position i is in this graphlet
@@ -501,12 +505,27 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         #find which orbit this position matches (for the given graphlet of g)
                         for orb in keys(orbit_templates[g.Hom_graphlet])
                             if(Bool(sum(orbit_templates[g.Hom_graphlet][orb].*position)))
-                                i_counter[g.Pathway][g.Hom_graphlet][orb] += 1 
+                                #i_counter[g.Pathway][g.Hom_graphlet][orb] += 1 
                                 push!(column,orb) 
                             end
                         end
-                    end 
-
+                    end
+                    #append per graphlet label to i's graphlet subset
+                    graphlets.orbit = column
+                    # data matrix to tally significance for each pathway in table: (first column peripheral, second column central, third supercentral)
+                    significance = zeros(Int,length(keys(countmap(graphlets.Pathway))),3)
+                    #per pathway:
+                    for (i,p) in enumerate(keys(countmap(graphlets.Pathway)))
+                        #collect count of each significance term for this pathway (if the term does not exist, default to 0)
+                        c = DefaultDict(0,countmap(filter(:Pathway=>x->x==p,graphlets).orbit))
+                        significance[i,1] = c["peripheral"]
+                        significance[i,2] = c["central"]
+                        significance[i,3] = c["supercentral"]
+                    end
+                    #pair data with pathway labels into a (per-node) dataframe
+                    df = DataFrame(Pathway = collect(keys(countmap(graphlets.Pathway))), Peripheral = significance[:,1], Central = significance[:,2], Supercentral = significance[:,3])  
+                    per_node_significance[i] = df
+                    @info "Finished $i..."
                 end
 
 #
