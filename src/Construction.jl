@@ -478,6 +478,16 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 
                 for i in 1:length(vertexlist)
                     graphlets = filter(:Vertices=> x -> in(i,x),Coincidents)
+                    for g in eachrow(graphlets)
+                        #find which position i is in this graphlet
+                        position = g.Vertices.==i
+                        #find which orbit this position matches (for the given graphlet of g)
+                        for orb in keys(orbit_templates[g.Hom_graphlet])
+                            if(sum(orbit_templates[g.Hom_graphlet][orb].*position))
+
+                            end
+                    end 
+
                 end
 
 #
