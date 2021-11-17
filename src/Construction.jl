@@ -442,7 +442,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         CSV.write(coincidents_file,Coincidents)
         
                 end
+                
 
+                ##Coincident analysis
+                entrez_id_vector, candidates = get_KEGG_pathways(vertex_names,"transcripts")
                 #find which types are excluded in general, and then only as a cause of having no Entrez id
                 Coincidents.excluded = [Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]]
                 Coincidents.excluded_Entrez = [Coincidents.Transcript_type[i][Coincidents.Entrez[i].==0] for i in 1:size(Coincidents)[1]]
