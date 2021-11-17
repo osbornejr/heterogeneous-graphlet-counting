@@ -437,7 +437,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
                 else
                         @info "Conducting per graphlet pathway coincidence analysis..."
-                        Coincidents = get_KEGG_graphlet_coincidences(vertexlist,adj_matrix)
+                        Coincidents = graphlet_coincidences(vertexlist,vertex_names,"transcripts",adj_matrix)
                         @info "Saving coincidents at $val_dir..."
                         CSV.write(coincidents_file,Coincidents)
         
@@ -483,7 +483,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
                 #choose just one order of graphlets (3 or 4)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
-                test = @showprogress map(x->pernode_significance(x,sub_Coincidents),1:length(vertexlist))
+                orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents),1:length(vertexlist))
                 function pernode_significance(i::Int,sub_Coincidents::DataFrame)#all coincident graphlets that i is involved in
                     graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
                     # setup a counter for i for each pathway that features a coincident graphlet of i

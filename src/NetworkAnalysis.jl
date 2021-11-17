@@ -261,7 +261,7 @@ function get_functional_annotations(comm_vertices::DataFrame;ensembl_version::St
     return topGOtable
 end
 
-function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::AbstractArray)
+function graphlet_coincidences(vertexlist::Array{String,1},vertex_names::Array{String,1},nametypes::String,adj_matrix::AbstractArray)
         edgelist = edgelist_from_adj(adj_matrix)
         @info "Counting per-edge graphlet relationships..."
         graphlet_counts,Chi,Rel = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
@@ -342,78 +342,8 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
         #get names of transcripts in matching pattern 
 #       hegs_names = map(x->broadcast(y->vertex_gene_names[y],x),hegs)  
 #       hegs_transcript_names = map(x->broadcast(y->vertex_names[y],x),hegs)    
-        #restart R session  
-        R"""
-        sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
-        """
-        #use small sample for now
-        @info "Geting KEGG matches..."
-#       hegs_sample = sample(hegs_names,20)
-#       @rput hegs_sample
-        @rput vertex_names
-        @rput vertex_gene_names
-        R"""
-
-        library(biomaRt)
-        library(httr)
-        library(edgeR)
-        library(tidyverse)
-#       hegs_sample_trimmed = lapply(hegs_sample,function (x) sapply(x,tools::file_path_sans_ext))
-#       ## connect to biomart
-        set_config(config(ssl_verifypeer = 0L))
-        ensembl_version = "current" 
-        if (ensembl_version=="current")
-            {
-            ##mirrors to try: "useast" "uswest" "asia"
-            ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
-            } else
-            {
-            ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
-            }
-#       hegs_ids <- lapply(hegs_sample_trimmed,function(x) getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",x, mart = ensembl,useCache=FALSE)) 
-#       keggs = lapply(hegs_ids,function(x) topKEGG(kegga(x[[2]]),n=15,truncate =34))
-        
-
-        
-
-        ##Alternative approach: select KEGG terms of interest from whole set of transcripts first, and then look for those in graphlets
-        ## full list of entrez_ids mapped to transcripts/genes (neither will be one-to-one, use whichever offers better coverage. Transcripts also preferred as a better reflection of the data rather than expanding to the gene level).
-        ##transcripts
-        transcripts_trimmed = sapply(vertex_names,tools::file_path_sans_ext)    
-        transcripts = data.frame(trimmed_names = transcripts_trimmed)
-        entrez_from_transcripts = getBM(attributes=c("ensembl_transcript_id","ensembl_gene_id","entrezgene_id"),"ensembl_transcript_id",transcripts_trimmed, mart = ensembl,useCache=FALSE) 
-        transcript_coverage = length(entrez_from_transcripts[[3]])-sum(is.na(entrez_from_transcripts[[3]]))
-        transcripts$entrez_id = entrez_from_transcripts[match(transcripts_trimmed,entrez_from_transcripts[[1]]),3]
-        
-        ##genes
-        genes_trimmed = sapply(vertex_gene_names,tools::file_path_sans_ext) 
-        genes = data.frame(trimmed_names = genes_trimmed)
-        entrez_from_genes = getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",genes_trimmed, mart = ensembl,useCache=FALSE)   
-        gene_coverage = length(entrez_from_genes[[2]])-sum(is.na(entrez_from_genes[[2]]))
-        genes$entrez_id = entrez_from_genes[match(genes_trimmed,entrez_from_genes[[1]]),2]
-        
-
-        #get list of entrez ids mapped to KEGG pathways 
-        KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
-        ## get top hits to select from
-        top_terms = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34))
-        ##get the network candidates for each pathway
-        per_pathway = sapply(1:nrow(top_terms),function(x) KEGG$GeneID[ KEGG$PathwayID == row.names(top_terms)[x]])
-        in_network = lapply(per_pathway,function(x) transcripts$entrez_id %in% x)
-        names(in_network) = top_terms$Pathway
-        entrez_id_vector = transcripts$entrez_id
-
-        """
-        @rget entrez_id_vector 
-        ##get rid of missing ids (sset to 0 --for now?)
-        replace!(entrez_id_vector,missing=>0)
-        @rget in_network
-        @info "Finding candidates that match top KEGG pathways..."
-        candidates = Dict{String,Array{Int,1}}()
-        for e in in_network
-            candidates[string(first(e))] = findall(.==(true),last(e))
-        end
-        
+        #Get KEGG pathway information
+        entrez_id_vector, candidates = get_KEGG_pathways(vertex_names,nametypes) 
 
         @info "Checking for coincident candidates..."
         Coincidents = Dict{String,Dict{String,Array{Tuple,1}}}()
@@ -462,4 +392,97 @@ function get_KEGG_graphlet_coincidences(vertexlist::Array{String,1},adj_matrix::
         #coincident_types = map(x->broadcast(y->vertexlist[y],x),first.(Coincidents["Morphine addiction"]["three"]))
         #coincident_entrez_ids = map(x->broadcast(y->entrez_id_vector[y],x),first.(Coincidents["Morphine addiction"]["three"]))
     return Coincidents_df
+end 
+
+function restart_R()
+
+        #restart R session  
+        R"""
+        sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+        """
+end
+
+function biomaRt_connect()
+   
+    R"""
+        library(biomaRt)
+        library(httr)
+        library(tidyverse)
+#       ## connect to biomart
+        set_config(config(ssl_verifypeer = 0L))
+        ensembl_version = "current" 
+        if (ensembl_version=="current")
+            {
+            ##mirrors to try: "useast" "uswest" "asia"
+            ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
+            } else
+            {
+            ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
+            }
+        """
+end
+
+function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String) 
+    restart_R()
+    #use small sample for now
+    @info "Geting KEGG matches..."
+    @rput vertex_names
+    biomaRt_connect()
+    R"""
+        library(edgeR)
+        library(tidyverse)
+    """
+    
+    if(nametype == "transcripts")
+        R"""
+       
+            ##Alternative approach: select KEGG terms of interest from whole set of transcripts first, and then look for those in graphlets
+            ## full list of entrez_ids mapped to transcripts/genes (neither will be one-to-one, use whichever offers better coverage. Transcripts also preferred as a better reflection of the data rather than expanding to the gene level).
+            ##transcripts
+            transcripts_trimmed = sapply(vertex_names,tools::file_path_sans_ext)    
+            transcripts = data.frame(trimmed_names = transcripts_trimmed)
+            entrez_from_transcripts = getBM(attributes=c("ensembl_transcript_id","ensembl_gene_id","entrezgene_id"),"ensembl_transcript_id",transcripts_trimmed, mart = ensembl,useCache=FALSE) 
+            transcript_coverage = length(entrez_from_transcripts[[3]])-sum(is.na(entrez_from_transcripts[[3]]))
+            transcripts$entrez_id = entrez_from_transcripts[match(transcripts_trimmed,entrez_from_transcripts[[1]]),3]
+            
+            #get list of entrez ids mapped to KEGG pathways 
+            KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+            ## get top hits to select from
+            top_terms = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34))
+            ##get the network candidates for each pathway
+            per_pathway = sapply(1:nrow(top_terms),function(x) KEGG$GeneID[ KEGG$PathwayID == row.names(top_terms)[x]])
+            in_network = lapply(per_pathway,function(x) transcripts$entrez_id %in% x)
+            names(in_network) = top_terms$Pathway
+            entrez_id_vector = transcripts$entrez_id
+        """ 
+    elseif(nametype == "genes")
+        R"""
+            ##genes
+            genes_trimmed = sapply(vertex_names,tools::file_path_sans_ext) 
+            genes = data.frame(trimmed_names = genes_trimmed)
+            entrez_from_genes = getBM(attributes=c("ensembl_gene_id","entrezgene_id"),"ensembl_gene_id",genes_trimmed, mart = ensembl,useCache=FALSE)   
+            gene_coverage = length(entrez_from_genes[[2]])-sum(is.na(entrez_from_genes[[2]]))
+            genes$entrez_id = entrez_from_genes[match(genes_trimmed,entrez_from_genes[[1]]),2]
+            
+            #get list of entrez ids mapped to KEGG pathways 
+            KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+            ## get top hits to select from
+            top_terms = topKEGG(kegga(entrez_from_genes[[3]],n=Inf,truncate = 34))
+            ##get the network candidates for each pathway
+            per_pathway = sapply(1:nrow(top_terms),function(x) KEGG$GeneID[ KEGG$PathwayID == row.names(top_terms)[x]])
+            in_network = lapply(per_pathway,function(x) genes$entrez_id %in% x)
+            names(in_network) = top_terms$Pathway
+            entrez_id_vector = genes$entrez_id
+        """
+    end
+    @rget entrez_id_vector 
+    ##get rid of missing ids (sset to 0 --for now?)
+    replace!(entrez_id_vector,missing=>0)
+    @rget in_network
+    @info "Finding candidates that match top KEGG pathways..."
+    candidates = Dict{String,Array{Int,1}}()
+    for e in in_network
+        candidates[string(first(e))] = findall(.==(true),last(e))
+    end
+    return (entrez_id_vector, candidates)
 end
