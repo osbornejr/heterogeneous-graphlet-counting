@@ -478,6 +478,7 @@ function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String)
     @rget entrez_id_vector 
     ##get rid of missing ids (sset to 0 --for now?)
     replace!(entrez_id_vector,missing=>0)
+    entrez_id_vector = Int.(entrez_id_vector)
     @rget in_network
     @info "Finding candidates that match top KEGG pathways..."
     candidates = Dict{String,Array{Int,1}}()
