@@ -445,6 +445,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 
 
                 ##Coincident analysis
+                #get baseline entrez and kegg info about transcripts
                 entrez_id_vector, candidates = get_KEGG_pathways(vertex_names,"transcripts")
                 #find which types are excluded in general, and then only as a cause of having no Entrez id
                 Coincidents.excluded = [Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]]
@@ -486,8 +487,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
                 #choose just one order of graphlets (3 or 4)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
-                orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents),1:length(vertexlist))
-                function pernode_significance(i::Int,sub_Coincidents::DataFrame)#all coincident graphlets that i is involved in
+                orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,candidates),1:length(vertexlist))
+                function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidates)#all coincident graphlets that i is involved in
                     graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
                     # setup a counter for i for each pathway that features a coincident graphlet of i
                     #i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
@@ -516,9 +517,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     #append per graphlet label to i's graphlet subset
                     graphlets.orbit = column
                     # data matrix to tally significance for each pathway in table: (first column peripheral, second column central, third supercentral)
-                    significance = zeros(Int,length(keys(countmap(graphlets.Pathway))),3)
+                    significance = zeros(Int,length(keys(candidates)),3)
                     #per pathway:
-                    for (i,p) in enumerate(keys(countmap(graphlets.Pathway)))
+                    for (i,p) in enumerate(keys(candidates))
                         #collect count of each significance term for this pathway (if the term does not exist, default to 0)
                         c = DefaultDict(0,countmap(filter(:Pathway=>x->x==p,graphlets).orbit))
                         significance[i,1] = c["peripheral"]
@@ -526,9 +527,25 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         significance[i,3] = c["supercentral"]
                     end
                     #pair data with pathway labels into a (per-node) dataframe
-                    df = DataFrame(Pathway = collect(keys(countmap(graphlets.Pathway))), Peripheral = significance[:,1], Central = significance[:,2], Supercentral = significance[:,3])  
+                    df = DataFrame(Pathway = collect(keys(candidates)), Peripheral = significance[:,1], Central = significance[:,2], Supercentral = significance[:,3])  
                     return df
                     #@info "Finished $i..."
+                end
+                ## now compare the significance profile of those nodes that are not attached to a pathway to the average pathway profile of known pathway nodes
+                ##convert to array form for comparisons
+                orbit_sigs_array = map(x->Array(x[2:4]),orbit_sigs)
+                # this table stores the average for each pathway (of nodes that are known to be in the pathway)
+                significance_bars = zeros(length(keys(candidates)),3)
+                for (i,c) in enumerate(keys(candidates))
+                    significance_bars[i,:] = (sum(map(x->Array(x[2:4]),orbit_sigs[candidates[c]]))./length(vertexlist))[i,:]
+                end
+
+                ##now compare bars against profiles of non-pathway nodes
+                ## choose a subset of nodes to look at. Can be boolean BitArray (with length equal to all nodes) or a specific list of nodes 
+                subset = entrez_id_vector.==0
+                putative_pathways = Array{Array{String,1}}(undef,length(orbit_sigs_array[subset]))
+                for (i,t) in enumerate(orbit_sigs_array[subset])
+                    putative_pathways[i] = collect(keys(candidates))[vec((sum(t.>significance_bars,dims=2).>2))]
                 end
 
 #
