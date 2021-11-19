@@ -457,7 +457,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 graphlet = "4-star"
                 nonuniforms = []
                 for y in filter(p->last(p)>1,countmap(filter(:Hom_graphlet=> x-> x == graphlet, Coincidents[1:199000,:]).Vertices))
-                    test = sum(filter(:Vertices => x-> x == first(y),filter(:Hom_graphlet => x-> x == "4-star",Coincidents))[8])/last(y)
+                    test = sum(filter(:Vertices => x-> x == first(y),filter(:Hom_graphlet => x-> x == graphlet,Coincidents))[8])/last(y)
                     if (sum(((test.>0) - (test.<1)).==0)>0)
                         push!(nonuniforms,first(y))
                     end
