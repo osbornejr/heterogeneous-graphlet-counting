@@ -234,7 +234,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         else
                 community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
         end
-        
+        #find nodes who are not in any community (usually because they are not in connected component).
+        community_orphans = findall(x->x==0,in.(1:length(vertexlist),Ref(community_vertices.name)))
         ##Network stats table
         ##set up csv string
         csv = "Nodes,Edges,Components,Nodes in largest component,Maximal degree,communities detected\n"
