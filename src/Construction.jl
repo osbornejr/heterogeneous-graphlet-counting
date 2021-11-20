@@ -548,8 +548,16 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 for (i,t) in enumerate(orbit_sigs_array[subset])
                     putative_pathways[i] = collect(keys(candidates))[vec((sum(t.>significance_bars,dims=2).>2))]
                 end
+                
 
-#
+                ##visualise using R dotplot for now     
+                test = map(x-> x[1,1],orbit_sigs_array)
+                """R
+                svg("test.svg")
+                ggplot(data.frame(test), aes(x = "peripheral count")) + geom_dotplot(binwidth = 1.5) + theme_bw()
+                dev.off()
+                """
+
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
         end
 end
