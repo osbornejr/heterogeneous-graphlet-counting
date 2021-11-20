@@ -550,7 +550,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 end
                 
 
-                ##visualise using R dotplot for now     
+                ##visualise using R dotplot for now   (might be possible with Gadfly beeswarm)  
                 test = map(x-> x[1,1],orbit_sigs_array)
                 """R
                 svg("test.svg")
