@@ -1,12 +1,15 @@
 
 "wipe all buffers (this is a hard reset atm)
-bufdo bwipeout!
+"bufdo bwipeout!
 " open/reload buffers to source and test .jl files
 n src/*
 n test/*
-"this is homebase for now
-b src/Construction
 
+
+"wipe any existing terminals before refreshing them
+for i in term_list()
+    exec "bd! ".i
+endfor
 
 "set up local and remote terminals
 term
@@ -25,7 +28,18 @@ vert term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar
 file repl
 wincmd p
 
-"set up default window for vimslime to send to
+"clear old slime variable from each loaded buffer
+let buffers = map(filter(copy(getbufinfo()), 'v:val.listed'), 'v:val.bufnr')
+for i in buffers
+    exec "b ".i
+    if exists("b:slime_config")
+        unlet b:slime_config
+    endif
+endfor
+
+"this is homebase for now
+b src/Construction
+"set up default window for vimslime to send to (the last terminal created aka the repl
 let g:slime_default_config = {"bufnr": term_list()[0]}
 let g:slime_dont_ask_default = 1
 echo slime_default_config
