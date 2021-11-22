@@ -15,7 +15,7 @@ endfor
 term
 file local
 wincmd c
-term zsh -is eval "~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test"
+term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test"
 file remote
 wincmd c
 
