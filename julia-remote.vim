@@ -42,7 +42,5 @@ b src/Construction
 "set up default window for vimslime to send to (the last terminal created aka the repl
 let g:slime_default_config = {"bufnr": term_list()[0]}
 let g:slime_dont_ask_default = 1
-echo slime_default_config
-echo term_list()
 "for testing only
 "e julia-remote.vim
