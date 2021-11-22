@@ -488,7 +488,7 @@ function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String)
     return (entrez_id_vector, candidates)
 end
 
-function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidates)#all coincident graphlets that i is involved in
+function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
     ##for orbit level significance, this function takes a specific node and finds all its coincident graphlets, and then counts the orbit position the node is in in each. returns a dataframe detailing these stats
      graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
      # setup a counter for i for each pathway that features a coincident graphlet of i
@@ -518,9 +518,9 @@ function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidates)#all 
      #append per graphlet label to i's graphlet subset
      graphlets.orbit = column
      # data matrix to tally significance for each pathway in table: (first column peripheral, second column central, third supercentral)
-     significance = zeros(Int,length(keys(candidates)),3)
+     significance = zeros(Int,length(candidate_pathways),3)
      #per pathway:
-     for (i,p) in enumerate(keys(candidates))
+     for (i,p) in enumerate(candidate_pathways)
          #collect count of each significance term for this pathway (if the term does not exist, default to 0)
          c = DefaultDict(0,countmap(filter(:Pathway=>x->x==p,graphlets).orbit))
          significance[i,1] = c["peripheral"]
@@ -528,7 +528,7 @@ function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidates)#all 
          significance[i,3] = c["supercentral"]
      end
      #pair data with pathway labels into a (per-node) dataframe
-     df = DataFrame(Pathway = collect(keys(candidates)), Peripheral = significance[:,1], Central = significance[:,2], Supercentral = significance[:,3])  
+     df = DataFrame(Pathway = candidate_pathways, Peripheral = significance[:,1], Central = significance[:,2], Supercentral = significance[:,3])  
      return df
      #@info "Finished $i..."
 end

@@ -488,7 +488,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
                 #choose just one order of graphlets (3 or 4)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
-                orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,candidates),1:length(vertexlist))
+                
+                #table to showing whether each node (row) is included in each pathway (column)
+                in_key = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in keys(candidates) ]...)
+                orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,collect(keys(candidates)),in_key[x,:]),1:length(vertexlist))
                 ## now compare the significance profile of those nodes that are not attached to a pathway to the average pathway profile of known pathway nodes
                 ##convert to array form for comparisons
                 orbit_sigs_array = map(x->Array(x[2:4]),orbit_sigs)
@@ -515,15 +518,22 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 dev.off()
                 """
                 # Gadfly beeswarm method:
+                
+                run(`mkdir -p output/plots/orbit_significance`)
                 # get data into wide format
-                test_pathway = "Salmonella infection"
                 wide_orbit_sigs = vcat(map(x->stack(x,2:4),orbit_sigs)...)
-                test = filter(:Pathway=>x->x == test_pathway,wide_orbit_sigs)
-                insertcols!(test,:log_value =>log.(test.value))
-                in_pathway = vcat(collect(eachrow(repeat(in.(1:length(vertexlist),Ref(candidates[test_pathway])),1,3)))...)
-                insertcols!(test,:in_pathway =>in_pathway)
-                p = plot(test,x = :variable,y = :value, color = :in_pathway,Geom.beeswarm);
-                draw(SVG("test.svg"),p)
+                #for each pathway, we map the three orbit categories side by side
+                
+                for p in keys(candidates) 
+                    @info "Drawing beeswarm for $p..."    
+                    p_df = filter(:Pathway=>x->x == p,wide_orbit_sigs)
+                    insertcols!(p_df,:log_value =>log.(p_df.value))
+                    in_pathway = vcat(collect(eachrow(repeat(in.(1:length(vertexlist),Ref(candidates[p])),1,3)))...)
+                    insertcols!(p_df,:in_pathway =>in_pathway)
+                    pl = plot(p_df,x = :variable,y = :value, color = :in_pathway,Guide.title(p),Geom.beeswarm);
+                    draw(SVG("output/plots/orbit_significance/$(p)_beeswarm.svg"),pl)
+                    
+                end
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
         end
 end
