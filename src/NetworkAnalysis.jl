@@ -490,7 +490,12 @@ end
 
 function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
     ##for orbit level significance, this function takes a specific node and finds all its coincident graphlets, and then counts the orbit position the node is in in each. returns a dataframe detailing these stats
-     graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
+    ##find those graphlets that include i
+    pre_graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
+    #filter further to find cases where at least 2 OTHER nodes in graphlet are in pathway (i.e. self coincidence does not count)
+    path_graphlets = filter(:Coincident_type=>x->x!="two",filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
+    nonpath_graphlets = filter(:Pathway=>x-> !in(x,candidate_pathways[in_key]),pre_graphlets)
+    graphlets = vcat(path_graphlets,nonpath_graphlets) 
      # setup a counter for i for each pathway that features a coincident graphlet of i
      #i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
     # for p in keys(countmap(graphlets.Pathway))
