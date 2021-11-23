@@ -516,16 +516,51 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 wide_orbit_sigs = vcat(map(x->stack(x,2:4),orbit_sigs)...)
                 #for each pathway, we map the three orbit categories side by side
                 
+                palette = ["#db63c5","#bababa","#32a852"]
                 for p in keys(candidates) 
                     @info "Drawing beeswarm for $p..."    
                     p_df = filter(:Pathway=>x->x == p,wide_orbit_sigs)
-                    insertcols!(p_df,:log_value =>log.(p_df.value))
+                    #insertcols!(p_df,:log_value =>log.(p_df.value))
+                    #define colors by whether entrez id of node is in pathway
                     in_pathway = vcat(collect(eachrow(repeat(in.(1:length(vertexlist),Ref(candidates[p])),1,3)))...)
-                    insertcols!(p_df,:in_pathway =>in_pathway)
-                    pl = plot(p_df,x = :variable,y = :value, color = :in_pathway,Guide.title(p),Geom.beeswarm);
-                    draw(SVG("output/plots/orbit_significance/$(p)_beeswarm.svg"),pl)
+                    non_entrez = vcat(collect(eachrow(repeat(entrez_id_vector.==0,1,3)))...)
+                    coloring = CategoricalArray(in_pathway-non_entrez)
+                    coloring = recode(coloring,-1=>"unidentified",0=>"not in pathway",1=>"in pathway")
+                    insertcols!(p_df,:color =>coloring)
+                    #remove non pathway nodes
+                    #filter!(:color=>x->x!="not in pathway",p_df)
+                    #remove zero nodes
+                    filter!(:value=>x->x!=0,p_df)
+                    pl = plot(p_df,x = :variable,y = :value, color = :color,Guide.title(p),Geom.beeswarm(padding = 1mm),Theme(bar_spacing=1mm,point_size=0.5mm),Scale.color_discrete_manual(palette...));
+                    draw(SVG("output/plots/orbit_significance/$(p)_beeswarm.svg",30cm,20cm),pl)
                     
                 end
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
+                #ecdfs
+                #shape plots into a grid
+                ncols = 6
+                dims = fldmod(length(keys(candidates)),ncols)
+                plots = Array{Union{Plot,Context},2}(undef,dims[1]+(dims[2]>0),ncols)
+                #plots = Array{Union{Plot,Context},1}(undef,length(keys(candidates)))
+                for (i,p) in enumerate(keys(candidates))
+                    #find max over all measures for pathway
+                    m = max([map(x->x[i,1],orbit_sigs_array)...,map(x->x[i,2],orbit_sigs_array)..., map(x->x[i,3],orbit_sigs_array)...]...)
+                    plots[i] = plot(layer(x->ecdf(map(x->x[i,1],orbit_sigs_array))(x),0,m,color=["peripheral"]),
+                              layer(x->ecdf(map(x->x[i,2],orbit_sigs_array))(x),0,m,color=["central"]),
+                              layer(x->ecdf(map(x->x[i,3],orbit_sigs_array))(x),0,m,color=["supercentral"]),
+                              Scale.color_discrete_manual("orange", "green", "purple"),
+                              Theme(key_position=:none));
+                              #Guide.colorkey(title="orbit position"),
+                              #Guide.title(p));
+                end
+
+                #append blank gridspots if necessary
+                for i in 1:length(plots)
+                    if(!isassigned(plots,i))
+                        plots[i] = context()
+                    end
+                end
+                draw(SVG("test.svg",30cm,20cm),gridstack(plots))
+
         end
 end
