@@ -490,8 +490,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
                 
                 #table to showing whether each node (row) is included in each pathway (column)
-                in_key = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in keys(candidates) ]...)
-                orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,collect(keys(candidates)),in_key[x,:]),1:length(vertexlist))
+                inkey = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in keys(candidates) ]...)
+                orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
                 ## now compare the significance profile of those nodes that are not attached to a pathway to the average pathway profile of known pathway nodes
                 ##convert to array form for comparisons
                 orbit_sigs_array = map(x->Array(x[2:4]),orbit_sigs)
