@@ -537,3 +537,64 @@ function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidate_pathwa
      return df
      #@info "Finished $i..."
 end
+
+function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
+    ##for orbit level significance, this function takes a specific node and finds all its coincident graphlets, and then counts the orbit position the node is in in each. returns a dataframe detailing these stats
+    ##find those graphlets that include i
+    pre_graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
+    #filter further to find cases where at least 2 OTHER nodes in graphlet are in pathway (i.e. self coincidence does not count)
+    path_graphlets = filter(:Coincident_type=>x->x!="two",filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
+    nonpath_graphlets = filter(:Pathway=>x-> !in(x,candidate_pathways[in_key]),pre_graphlets)
+    graphlets = vcat(path_graphlets,nonpath_graphlets) 
+     # setup a counter for i for each pathway that features a coincident graphlet of i
+     i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
+     for p in candidate_pathways
+         i_counter[p] =  Dict( "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
+     "4-star" => Dict(("peripheral" => 0), ("supercentral" => 0)),
+     "4-tail" => Dict(("peripheral" => 0), ("central" => 0), ("supercentral" => 0)),
+     "4-cycle" => Dict(("central"=>0)),
+     "4-chord" => Dict(("supercentral"=>0),("central"=>0)),
+     "4-clique" => Dict(("supercentral"=>0))) 
+    ##three node version needed
+    #"3-path" => Dict(("central" => 0), ("peripheral" => 0)),
+    # "3-tri" => Dict(("central" => 0)),
+     end
+
+     #find aggregate scores
+     column =[]
+     for g in eachrow(graphlets)
+         #find which position i is in this graphlet
+         position = g.Vertices.==i
+         #find which orbit this position matches (for the given graphlet of g)
+         for orb in keys(orbit_templates[g.Hom_graphlet])
+             if(Bool(sum(orbit_templates[g.Hom_graphlet][orb].*position)))
+                 i_counter[g.Pathway][g.Hom_graphlet][orb] += 1 
+                 push!(column,orb) 
+             end
+         end
+     end
+     
+     #find score for each individual orbit
+     orbit_names = vcat(map(y->map(x->collect(keys(i_counter[candidate_pathways[1]]))[y]*"_"*x, map(x->collect(keys(last(x))),collect(i_counter[candidate_pathways[1]]))[y]),1:6)...)
+     orbit_scores = zeros(Int,length(candidate_pathways),length(orbit_names)) 
+     for (i,p) in enumerate(candidate_pathways)
+         orbit_scores[i,:] = vcat(map(x->collect(values(last(x))),collect(i_counter[p]))...)
+     end
+
+     #append per graphlet label to i's graphlet subset
+     graphlets.orbit = column
+     # data matrix to tally significance for each pathway in table: (first column peripheral, second column central, third supercentral)
+     significance = zeros(Int,length(candidate_pathways),3)
+     #per pathway:
+     for (i,p) in enumerate(candidate_pathways)
+         #collect count of each significance term for this pathway (if the term does not exist, default to 0)
+         c = DefaultDict(0,countmap(filter(:Pathway=>x->x==p,graphlets).orbit))
+         significance[i,1] = c["peripheral"]
+         significance[i,2] = c["central"]
+         significance[i,3] = c["supercentral"]
+     end
+     #pair data with pathway labels into a (per-node) dataframe
+     df = DataFrame(Pathway = candidate_pathways, Peripheral = significance[:,1], Central = significance[:,2], Supercentral = significance[:,3])  
+     return df
+     #@info "Finished $i..."
+end
