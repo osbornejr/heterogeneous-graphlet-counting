@@ -560,6 +560,19 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
     # "3-tri" => Dict(("central" => 0)),
      end
 
+     ##calculate orbit counts across coincident graphlets
+     #column =[]
+     for g in eachrow(graphlets)
+         #find which position i is in this graphlet
+         position = g.Vertices.==i
+         #find which orbit this position matches (for the given graphlet of g)
+         for orb in keys(orbit_templates[g.Hom_graphlet])
+             if(Bool(sum(orbit_templates[g.Hom_graphlet][orb].*position)))
+                 i_counter[g.Pathway][g.Hom_graphlet][orb] += 1 
+                 #push!(column,orb) 
+             end
+         end
+     end
      
      #find score for each individual orbit
      orbit_names = vcat(map(y->map(x->collect(keys(i_counter[candidate_pathways[1]]))[y]*"_"*x, map(x->collect(keys(last(x))),collect(i_counter[candidate_pathways[1]]))[y]),1:6)...)
