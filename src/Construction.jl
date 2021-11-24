@@ -491,14 +491,15 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 
                 #table to showing whether each node (row) is included in each pathway (column)
                 inkey = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in keys(candidates) ]...)
-                orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
+                #orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
+                orbit_sigs = @showprogress map(x->pernode_significance_detail(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
                 ## now compare the significance profile of those nodes that are not attached to a pathway to the average pathway profile of known pathway nodes
                 ##convert to array form for comparisons
-                orbit_sigs_array = map(x->Array(x[2:4]),orbit_sigs)
+                orbit_sigs_array = map(x->Array(x[2:end]),orbit_sigs)
                 # this table stores the average for each pathway (of nodes that are known to be in the pathway)
-                significance_bars = zeros(length(keys(candidates)),3)
+                significance_bars = zeros(length(keys(candidates)),size(orbit_sigs_array[1])[2])
                 for (i,c) in enumerate(keys(candidates))
-                    significance_bars[i,:] = (sum(map(x->Array(x[2:4]),orbit_sigs[candidates[c]]))./length(vertexlist))[i,:]
+                    significance_bars[i,:] = (sum(map(x->Array(x[2:end]),orbit_sigs[candidates[c]]))./length(vertexlist))[i,:]
                 end
 
                 ##now compare bars against profiles of non-pathway nodes
