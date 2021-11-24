@@ -544,8 +544,15 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     ecdf_table[i,2] = ecdf(map(x->x[i,2],orbit_sigs_array))
                     ecdf_table[i,3] = ecdf(map(x->x[i,3],orbit_sigs_array))
                 end
-                
-                
+               
+                #first check candidate probabilities across all categories
+                known_pathway_probs = Array{Array{Float64,2},1}(undef,length(keys(candidates)))
+                for (i,c) in enumerate(candidates)
+                    known_pathway_probs[i] = hcat(map(ecdf_table[i,1],map(x->x[i,1],orbit_sigs_array[last(c)])),
+                     map(ecdf_table[i,2],map(x->x[i,2],orbit_sigs_array[last(c)])),
+                     map(ecdf_table[i,3],map(x->x[i,3],orbit_sigs_array[last(c)])))
+                end
+                    
 
                 #shape plots into a grid
                 ncols = 6
