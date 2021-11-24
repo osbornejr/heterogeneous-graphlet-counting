@@ -537,6 +537,16 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 end
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
                 #ecdfs
+                #store ecdf functions in table
+                ecdf_table = Array{ECDF,2}(undef,length(keys(candidates)),3)
+                for (i,p) in enumerate((keys(candidates)))
+                    ecdf_table[i,1] = ecdf(map(x->x[i,1],orbit_sigs_array))
+                    ecdf_table[i,2] = ecdf(map(x->x[i,2],orbit_sigs_array))
+                    ecdf_table[i,3] = ecdf(map(x->x[i,3],orbit_sigs_array))
+                end
+                
+                
+
                 #shape plots into a grid
                 ncols = 6
                 dims = fldmod(length(keys(candidates)),ncols)
