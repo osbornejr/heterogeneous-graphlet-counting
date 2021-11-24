@@ -567,8 +567,8 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
      for (i,p) in enumerate(candidate_pathways)
          orbit_scores[i,:] = vcat(map(x->collect(values(last(x))),collect(i_counter[p]))...)
      end
-     insertcols!(df,1,:Pathway=>candidate_pathways)
      df = DataFrame(orbit_scores,orbit_names)
+     insertcols!(df,1,:Pathway=>candidate_pathways)
      return df
      #@info "Finished $i..."
 end
