@@ -560,19 +560,6 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
     # "3-tri" => Dict(("central" => 0)),
      end
 
-     #find aggregate scores
-     column =[]
-     for g in eachrow(graphlets)
-         #find which position i is in this graphlet
-         position = g.Vertices.==i
-         #find which orbit this position matches (for the given graphlet of g)
-         for orb in keys(orbit_templates[g.Hom_graphlet])
-             if(Bool(sum(orbit_templates[g.Hom_graphlet][orb].*position)))
-                 i_counter[g.Pathway][g.Hom_graphlet][orb] += 1 
-                 push!(column,orb) 
-             end
-         end
-     end
      
      #find score for each individual orbit
      orbit_names = vcat(map(y->map(x->collect(keys(i_counter[candidate_pathways[1]]))[y]*"_"*x, map(x->collect(keys(last(x))),collect(i_counter[candidate_pathways[1]]))[y]),1:6)...)
@@ -581,20 +568,7 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
          orbit_scores[i,:] = vcat(map(x->collect(values(last(x))),collect(i_counter[p]))...)
      end
 
-     #append per graphlet label to i's graphlet subset
-     graphlets.orbit = column
-     # data matrix to tally significance for each pathway in table: (first column peripheral, second column central, third supercentral)
-     significance = zeros(Int,length(candidate_pathways),3)
-     #per pathway:
-     for (i,p) in enumerate(candidate_pathways)
-         #collect count of each significance term for this pathway (if the term does not exist, default to 0)
-         c = DefaultDict(0,countmap(filter(:Pathway=>x->x==p,graphlets).orbit))
-         significance[i,1] = c["peripheral"]
-         significance[i,2] = c["central"]
-         significance[i,3] = c["supercentral"]
-     end
-     #pair data with pathway labels into a (per-node) dataframe
-     df = DataFrame(Pathway = candidate_pathways, Peripheral = significance[:,1], Central = significance[:,2], Supercentral = significance[:,3])  
+     df = DataFrame(orbit_scores,orbit_names)
      return df
      #@info "Finished $i..."
 end
