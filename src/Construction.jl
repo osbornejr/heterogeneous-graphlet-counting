@@ -448,6 +448,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 ##Coincident analysis
                 #get baseline entrez and kegg info about transcripts
                 entrez_id_vector, candidates = get_KEGG_pathways(vertex_names,"transcripts")
+                candidate_pathways = collect(keys(candidates))
                 #find which types are excluded in general, and then only as a cause of having no Entrez id
                 Coincidents.excluded = [Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]]
                 Coincidents.excluded_Entrez = [Coincidents.Transcript_type[i][Coincidents.Entrez[i].==0] for i in 1:size(Coincidents)[1]]
@@ -544,6 +545,28 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     draw(SVG("$(output_dir)/$(p)_beeswarm.svg",30cm,20cm),pl)
                 end
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
+
+                #High zero exploration
+                ## over all transcripts 
+                total_zero_proportion = sum(map(x->x.==0,orbit_sigs_array))./length(orbit_sigs_array)
+                ##over a subset
+                subset = candidates[candidate_pathways[1]] 
+                subset_zero_proportion = sum(map(x->x.==0,orbit_sigs_array[subset]))./length(orbit_sigs_array[subset])
+                #compare
+                zero_comparison = subset_zero_proportion.<total_zero_proportion
+                #compare for all pathways,speficically for that pathway
+                zero_scores = zeros(Int,length(candidate_pathways),last_col) 
+                for (i,p) in enumerate(candidate_pathways)
+                    subset = candidates[p] 
+                    subset_zero_proportion = sum(map(x->x.==0,orbit_sigs_array[subset]))./length(orbit_sigs_array[subset])
+                    #compare
+                    zero_scores[i,:] = (subset_zero_proportion.<total_zero_proportion)[i,:]
+                end
+                #find those pathways with majority of zero proportions below total proportions 
+                zero_passes = vec(sum(zero_scores,dims=2).>(last_col/2))
+                zero_candidate_pathways = candidate_pathways[zero_passes]
+                zero_orbit_sigs = map(x->filter(:Pathway=>y->y in zero_candidate_pathways,x),orbit_sigs)
+                zero_orbit_sigs_array = map(x->Array(x[2:end]),zero_orbit_sigs)
 
                 #ecdfs
                 #store ecdf functions in table
