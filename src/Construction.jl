@@ -472,6 +472,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 sum(map(x->x.!==0,Coincidents_noncoding.Entrez).==Coincidents_noncoding.Inclusion)
 
                 #orbit statistics
+                @info "Getting orbit significance statistics..."
                 #peripheral: degree one orbit
                 #central: degree two orbit
                 #supercentral: degree three orbit
@@ -490,7 +491,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
                
                 ## select whether we are looking at "detailed" or "collated" significance
-                orbit_sigs_method ="detailed"
+                orbit_sigs_method ="collated"
                 #table to showing whether each node (row) is included in each pathway (column)
                 inkey = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in keys(candidates) ]...)
                 if(orbit_sigs_method == "collated")
@@ -585,6 +586,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         plots[i] = context()
                     end
                 end
+                #TODO this needs to be more generalised for any dimension of gridstack/number of pathways 
                 plots[2,6] = legend;
                 draw(SVG("$(output_dir)/ecdfs.svg",30cm,20cm),gridstack(plots))
 
