@@ -488,11 +488,18 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
                 #choose just one order of graphlets (3 or 4)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
-                
+               
+                ## select whether we are looking at "detailed" or "collated" significance
+                orbit_sigs_method ="detailed"
                 #table to showing whether each node (row) is included in each pathway (column)
                 inkey = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in keys(candidates) ]...)
-                #orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
-                orbit_sigs = @showprogress map(x->pernode_significance_detail(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
+                if(orbit_sigs_method == "collated")
+                    orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
+                end
+                if(orbit_sigs_method == "detailed")
+                    orbit_sigs = @showprogress map(x->pernode_significance_detail(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
+                end
+
                 ## now compare the significance profile of those nodes that are not attached to a pathway to the average pathway profile of known pathway nodes
                 ##convert to array form for comparisons
                 orbit_sigs_array = map(x->Array(x[2:end]),orbit_sigs)
@@ -501,7 +508,6 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 for (i,c) in enumerate(keys(candidates))
                     significance_bars[i,:] = (sum(map(x->Array(x[2:end]),orbit_sigs[candidates[c]]))./length(vertexlist))[i,:]
                 end
-
                 ##now compare bars against profiles of non-pathway nodes
                 ## choose a subset of nodes to look at. Can be boolean BitArray (with length equal to all nodes) or a specific list of nodes 
                 subset = entrez_id_vector.==0
@@ -510,48 +516,46 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     putative_pathways[i] = collect(keys(candidates))[vec((sum(t.>significance_bars,dims=2).>2))]
                 end
                 
-                # Gadfly beeswarm method:
-                
-                run(`mkdir -p output/plots/orbit_significance`)
+                # Gadfly beeswarm visualisation:
+                output_dir = "output/plots/orbit_significance_$(orbit_sigs_method)/"
+                run(`mkdir -p $output_dir`)
                 # get data into wide format
-                wide_orbit_sigs = vcat(map(x->stack(x,2:4),orbit_sigs)...)
+                # size of each df
+                last_col = size(orbit_sigs[1])[2]-1
+                wide_orbit_sigs = vcat(map(x->stack(x,2:last_col+1),orbit_sigs)...)
                 #for each pathway, we map the three orbit categories side by side
-                
                 palette = ["#db63c5","#bababa","#32a852"]
-                for p in keys(candidates) 
+                for p in keys(candidates)
                     @info "Drawing beeswarm for $p..."    
                     p_df = filter(:Pathway=>x->x == p,wide_orbit_sigs)
                     #insertcols!(p_df,:log_value =>log.(p_df.value))
                     #define colors by whether entrez id of node is in pathway
-                    in_pathway = vcat(collect(eachrow(repeat(in.(1:length(vertexlist),Ref(candidates[p])),1,3)))...)
-                    non_entrez = vcat(collect(eachrow(repeat(entrez_id_vector.==0,1,3)))...)
+                    in_pathway = vcat(collect(eachrow(repeat(in.(1:length(vertexlist),Ref(candidates[p])),1,last_col)))...)
+                    non_entrez = vcat(collect(eachrow(repeat(entrez_id_vector.==0,1,last_col)))...)
                     coloring = CategoricalArray(in_pathway-non_entrez)
-                    coloring = recode(coloring,-1=>"unidentified",0=>"not in pathway",1=>"in pathway")
+                  coloring = recode(coloring,-1=>"unidentified",0=>"not in pathway",1=>"in pathway")
                     insertcols!(p_df,:color =>coloring)
                     #remove non pathway nodes
                     #filter!(:color=>x->x!="not in pathway",p_df)
                     #remove zero nodes
                     filter!(:value=>x->x!=0,p_df)
                     pl = plot(p_df,x = :variable,y = :value, color = :color,Guide.title(p),Geom.beeswarm(padding = 1mm),Theme(bar_spacing=1mm,point_size=0.5mm),Scale.color_discrete_manual(palette...));
-                    draw(SVG("output/plots/orbit_significance/$(p)_beeswarm.svg",30cm,20cm),pl)
-                    
+                    draw(SVG("$(output_dir)/$(p)_beeswarm.svg",30cm,20cm),pl)
                 end
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
+
                 #ecdfs
                 #store ecdf functions in table
-                ecdf_table = Array{ECDF,2}(undef,length(keys(candidates)),3)
+                ecdf_table = Array{ECDF,2}(undef,length(keys(candidates)),last_col)
                 for (i,p) in enumerate((keys(candidates)))
-                    ecdf_table[i,1] = ecdf(map(x->x[i,1],orbit_sigs_array))
-                    ecdf_table[i,2] = ecdf(map(x->x[i,2],orbit_sigs_array))
-                    ecdf_table[i,3] = ecdf(map(x->x[i,3],orbit_sigs_array))
+                    for j in 1:last_col
+                        ecdf_table[i,j] = ecdf(map(x->x[i,j],orbit_sigs_array))
+                    end
                 end
-               
                 #first check candidate probabilities across all categories
                 known_pathway_probs = Array{Array{Float64,2},1}(undef,length(keys(candidates)))
-                for (i,c) in enumerate(candidates)
-                    known_pathway_probs[i] = hcat(map(ecdf_table[i,1],map(x->x[i,1],orbit_sigs_array[last(c)])),
-                     map(ecdf_table[i,2],map(x->x[i,2],orbit_sigs_array[last(c)])),
-                     map(ecdf_table[i,3],map(x->x[i,3],orbit_sigs_array[last(c)])))
+                for (i,c) in enumerate(keys(candidates))
+                    known_pathway_probs[i] = hcat([map(ecdf_table[i,j],map(x->x[i,j],orbit_sigs_array[candidates[c]])) for j in 1:last_col]...)
                 end
                     
 
@@ -563,22 +567,26 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 for (i,p) in enumerate(keys(candidates))
                     #find max over all measures for pathway
                     m = max([map(x->x[i,1],orbit_sigs_array)...,map(x->x[i,2],orbit_sigs_array)..., map(x->x[i,3],orbit_sigs_array)...]...)
-                    plots[i] = plot(layer(x->ecdf(map(x->x[i,1],orbit_sigs_array))(x),0,m,color=["peripheral"]),
-                              layer(x->ecdf(map(x->x[i,2],orbit_sigs_array))(x),0,m,color=["central"]),
-                              layer(x->ecdf(map(x->x[i,3],orbit_sigs_array))(x),0,m,color=["supercentral"]),
+                    plots[i] = plot([layer(x->ecdf(map(x->x[i,j],orbit_sigs_array))(x),0,m,color=[j]) for j in 1:last_col]...,
                               Scale.color_discrete_manual("orange", "green", "purple"),
-                              Theme(key_position=:none));
+                              Guide.title(p),
+                              Guide.xlabel("count"),
+                              Theme(major_label_font_size=4pt,key_position=:none));
                               #Guide.colorkey(title="orbit position"),
                               #Guide.title(p));
                 end
-
+               #Add legend pane
+               legend = plot(wide_orbit_sigs,color=:variable,
+                             Geom.blank,
+                             Scale.color_discrete_manual("orange", "green", "purple"));
                 #append blank gridspots if necessary
                 for i in 1:length(plots)
                     if(!isassigned(plots,i))
                         plots[i] = context()
                     end
                 end
-                draw(SVG("test.svg",30cm,20cm),gridstack(plots))
+                plots[2,6] = legend;
+                draw(SVG("$(output_dir)/ecdfs.svg",30cm,20cm),gridstack(plots))
 
         end
 end
