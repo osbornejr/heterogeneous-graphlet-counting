@@ -568,6 +568,13 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 zero_orbit_sigs = map(x->filter(:Pathway=>y->y in zero_candidate_pathways,x),orbit_sigs)
                 zero_orbit_sigs_array = map(x->Array(x[2:end]),zero_orbit_sigs)
 
+
+                #uniqueness of pathway contributors (concerns of too much overlap) 
+                sig_pathway_occurences = countmap(vcat([candidates[x] for x in zero_candidate_pathways]...))
+                m = max(collect(values(sig_pathway_occurences))...) 
+                sharers = first.(filter(x->last(x)==m,collect(sig_pathway_occurences)))
+
+
                 #ecdfs
                 #store ecdf functions in table
                 ecdf_table = Array{ECDF,2}(undef,length(keys(candidates)),last_col)
