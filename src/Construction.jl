@@ -589,6 +589,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 in_group = collect(keys(countmap(vcat(supersharer_pathways...))))
                 not_in_group = zero_candidate_pathways[.!(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(supersharer_pathways...)))))))]
                 countmap(supersharer_pathways)
+                #do we need to rule out pathways dominated by supersharers? TODO
+
+
+
 
                 #collect known pathway vectors for corresponding known pathway nodes
                 known_pathway_dfs = Array{DataFrame,1}(undef,length(zero_candidate_pathways))
@@ -604,29 +608,35 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 end
                 known_pathway_arrays = map(x->Array(x[3:end]),known_pathway_dfs)
 
-
-
                 #ecdfs
                 #store ecdf functions in table
-                ecdf_table = Array{ECDF,2}(undef,length(keys(candidates)),last_col)
-                for (i,p) in enumerate((keys(candidates)))
+                ecdf_table = Array{ECDF,2}(undef,length(zero_candidate_pathways),last_col)
+                for (i,p) in enumerate(zero_candidate_pathways)
                     for j in 1:last_col
-                        ecdf_table[i,j] = ecdf(map(x->x[i,j],orbit_sigs_array))
+                        ecdf_table[i,j] = ecdf(map(x->x[i,j],zero_orbit_sigs_array))
                     end
                 end
                 #first check candidate probabilities across all categories
-                known_pathway_probs = Array{Array{Float64,2},1}(undef,length(keys(candidates)))
-                for (i,c) in enumerate(keys(candidates))
-                    known_pathway_probs[i] = hcat([map(ecdf_table[i,j],map(x->x[i,j],orbit_sigs_array[candidates[c]])) for j in 1:last_col]...)
+                known_pathway_probs = Array{Array{Float64,2},1}(undef,length(zero_candidate_pathways))
+                for (i,c) in enumerate(zero_candidate_pathways)
+                    known_pathway_probs[i] = hcat([map(ecdf_table[i,j],map(x->x[i,j],orbit_sigs_array[zero_candidates[c]])) for j in 1:last_col]...)
                 end
                     
+                #known ecdfs
+                #calculate ecdfs just for known pathway node values (each row corresponds to a pathway, each column to an orbit) 
+                known_ecdf_table = Array{ECDF,2}(undef,length(zero_candidate_pathways),last_col)
+                for (i,p) in enumerate(zero_candidate_pathways)
+                    known_ecdf_table[i,:] = ecdf.(eachcol(known_pathway_arrays[i]))
+                end
+
+                #compare each unknown node to known ecdfs
 
                 #shape plots into a grid
                 ncols = 6
-                dims = fldmod(length(keys(candidates)),ncols)
+                dims = fldmod(length(zero_candidate_pathways),ncols)
                 plots = Array{Union{Plot,Context},2}(undef,dims[1]+(dims[2]>0),ncols)
                 #plots = Array{Union{Plot,Context},1}(undef,length(keys(candidates)))
-                for (i,p) in enumerate(keys(candidates))
+                for (i,p) in enumerate(zero_candidate_pathways)
                     #find max over all measures for pathway
                     m = max([map(x->x[i,1],orbit_sigs_array)...,map(x->x[i,2],orbit_sigs_array)..., map(x->x[i,3],orbit_sigs_array)...]...)
                     plots[i] = plot([layer(x->ecdf(map(x->x[i,j],orbit_sigs_array))(x),0,m,color=[j]) for j in 1:last_col]...,
