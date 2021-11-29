@@ -572,8 +572,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #uniqueness of pathway contributors (concerns of too much overlap) 
                 sig_pathway_occurences = countmap(vcat([candidates[x] for x in zero_candidate_pathways]...))
                 m = max(collect(values(sig_pathway_occurences))...) 
-                
-                m = 8
+                #m = 8
                 supersharers = first.(filter(x->last(x)==m,collect(sig_pathway_occurences)))
                 #for these supersharers, find the set of pathways they are involved in
                 supersharer_pathways = Array{Array{String,1},1}(undef,length(supersharers))
@@ -629,8 +628,18 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     known_ecdf_table[i,:] = ecdf.(eachcol(known_pathway_arrays[i]))
                 end
 
-                #compare each unknown node to known ecdfs
-
+                ##compare each unknown node to known ecdfs
+                #set threshold for which to check on i.e. is node orbit count higher than the top ~thresh~% of known nodes
+                thresh = 0.05
+                ub = 1 -thresh
+                #first check if there are any orbits for any pathways that have such low representation that 0 count exceed threshold. we will filter these out of analysis
+                low_filter = .!(map(x->x(0),known_ecdf_table).>ub)
+                #for each node, map each known ecdf to the corresponding orbit count and check against threshold, factoring in the low filter
+                unknown_ecdf_comparison = map(y->(reshape(map(x->known_ecdf_table[x](y[x]),1:length(known_ecdf_table)),size(known_ecdf_table)[1],size(known_ecdf_table)[2]).>ub).*low_filter,zero_orbit_sigs_array)
+                #determine a node as significantly linked to a pathway if at least half its orbit counts are significant
+                sig_check = map(x->(sum(x,dims=2).>(last_col/2)),unknown_ecdf_comparison)
+                sig_nodes= findall(x->sum(x)>0,sig_check)
+                sig_nodes_dict = Dict(Pair.(sig_nodes,map(x->zero_candidate_pathways[vec(x)],sig_check[sig_nodes])))
                 #shape plots into a grid
                 ncols = 6
                 dims = fldmod(length(zero_candidate_pathways),ncols)
