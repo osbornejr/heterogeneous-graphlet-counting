@@ -567,12 +567,30 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 zero_candidate_pathways = candidate_pathways[zero_passes]
                 zero_orbit_sigs = map(x->filter(:Pathway=>y->y in zero_candidate_pathways,x),orbit_sigs)
                 zero_orbit_sigs_array = map(x->Array(x[2:end]),zero_orbit_sigs)
-
+                zero_candidates = Dict(Pair.(zero_candidate_pathways,[candidates[x] for x in zero_candidate_pathways]))
 
                 #uniqueness of pathway contributors (concerns of too much overlap) 
                 sig_pathway_occurences = countmap(vcat([candidates[x] for x in zero_candidate_pathways]...))
                 m = max(collect(values(sig_pathway_occurences))...) 
-                sharers = first.(filter(x->last(x)==m,collect(sig_pathway_occurences)))
+                
+                m = 8
+                supersharers = first.(filter(x->last(x)==m,collect(sig_pathway_occurences)))
+                #for these supersharers, find the set of pathways they are involved in
+                supersharer_pathways = Array{Array{String,1},1}(undef,length(supersharers))
+                for (i,s) in enumerate(supersharers)
+                    list = []
+                    for c in zero_candidates
+                        if (s in last(c))
+                            push!(list,first(c))
+                        end
+                    end
+                    supersharer_pathways[i] = list
+                end
+                in_group = collect(keys(countmap(vcat(supersharer_pathways...))))
+                not_in_group = zero_candidate_pathways[(!).(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(supersharer_pathways...)))))))]
+                countmap(supersharer_pathways)
+
+
 
 
                 #ecdfs
