@@ -587,7 +587,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     supersharer_pathways[i] = list
                 end
                 in_group = collect(keys(countmap(vcat(supersharer_pathways...))))
-                not_in_group = zero_candidate_pathways[(!).(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(supersharer_pathways...)))))))]
+                not_in_group = zero_candidate_pathways[.!(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(supersharer_pathways...)))))))]
                 countmap(supersharer_pathways)
 
                 #collect known pathway vectors for corresponding known pathway nodes
