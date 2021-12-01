@@ -1,0 +1,25 @@
+    
+---
+title : Orbit-based biological significance
+author : Joel Robertson
+date: 30th November 2021
+---
+
+
+```julia; echo = false; results = "hidden
+projectdir = ENV["JULIA_PROJECT"]
+cd(projectdir)
+@info projectdir
+outputdir = "$projectdir/docs/"  
+include(projectdir*"/src/WeaveInitialisation.jl")
+```
+
+```julia; echo = true
+#load test counts 
+include(projectdir*"/test/GSE68559.jl")
+
+```
+
+## Introduction
+
+
