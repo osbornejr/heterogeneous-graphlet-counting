@@ -6,7 +6,8 @@ date: 30th November 2021
 ---
 
 
-```julia; echo = false; results = "hidden
+```julia; echo = false; results = "hidden"
+##initialise project
 projectdir = ENV["JULIA_PROJECT"]
 cd(projectdir)
 @info projectdir
@@ -14,12 +15,29 @@ outputdir = "$projectdir/docs/"
 include(projectdir*"/src/WeaveInitialisation.jl")
 ```
 
-```julia; echo = true
+```julia; echo = false; results = "hidden"
 #load test counts 
 include(projectdir*"/test/GSE68559.jl")
 
 ```
 
 ## Introduction
+Now that we have our heterogeneous graphlet counts and have looked at how different types are represented over the network, we want to identify the higher order interactions of particular biological relevance that might indicate the roles of non-coding transcripts with no previous functional annotation.
+To do this, we will use KEGG pathway information to deterimine which biological processes are represented by the interactions in our network and infer function based on connections with known pathway transcripts.
+The identified pathways will thus provide both a validation on network level that relevant biological processes have been captured by the data, and show that graphlet counting of heterogeneous networks provides an alternative method tof functional annotation that focuses much more on the local interactions between transcripts rather than the global context of gene module (community) detection which partitions the network into functional associations.        
+
+
+## Candidate pathway indentification 
+
+- Using KEGG pathway analsyis on all transcripts on that have made it into the network, identify pathways of interest that appear more in the network collection than if a random selection of transcripts was taken.
+This gives a "first pass" of which pathways might be relevant (i.e. are preserved) in the data.
+
+- describe coincindent graphlet identification in relation to KEGG pathways.
+This involves the more intensive graphlet counting at the relationship level, preserving the nature of each individual graphlet rather than a whole network count.
+
+- discuss how it is largely non-coding transcripts that are excluded from graphlets (this is not surprising). The difference between exclusion due to no entrez id and exlusion due to no pathway match is important here.
+
+- finding a statistical measure to indicate whether a transcript should be included in a pathway or not.
+Looking at orbits in each graphlet, determine whether a transcript should be considered associated with a pathway (via its association with other known pathway transcripts).
 
 
