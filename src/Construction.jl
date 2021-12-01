@@ -575,19 +575,25 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #m = 8
                 supersharers = first.(filter(x->last(x)==m,collect(sig_pathway_occurences)))
                 #for these supersharers, find the set of pathways they are involved in
-                supersharer_pathways = Array{Array{String,1},1}(undef,length(supersharers))
-                for (i,s) in enumerate(supersharers)
-                    list = []
-                    for c in zero_candidates
-                        if (s in last(c))
-                            push!(list,first(c))
+                supersharer_pathways = pathways_per_node_dict(supersharers,zero_candidates)
+
+                function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
+                    output_dict = Dict{Int,Array{String,1}}() 
+                    for n in node_set
+                        list = []
+                        for c in candidates
+                            if (n in last(c))
+                                push!(list,first(c))
+                            end
                         end
+                        output_dict[n] = list
                     end
-                    supersharer_pathways[i] = list
+                    return output_dict
                 end
-                in_group = collect(keys(countmap(vcat(supersharer_pathways...))))
-                not_in_group = zero_candidate_pathways[.!(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(supersharer_pathways...)))))))]
-                countmap(supersharer_pathways)
+
+                in_group = collect(keys(countmap(vcat(collect(values(supersharer_pathways))...))))
+                not_in_group = zero_candidate_pathways[.!(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(collect(values(supersharer_pathways))...)))))))]
+                countmap(collect(values(supersharer_pathways)))
                 #do we need to rule out pathways dominated by supersharers? TODO
 
 
@@ -640,6 +646,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 sig_check = map(x->(sum(x,dims=2).>(last_col/2)),unknown_ecdf_comparison)
                 sig_nodes= findall(x->sum(x)>0,sig_check)
                 sig_nodes_dict = Dict(Pair.(sig_nodes,map(x->zero_candidate_pathways[vec(x)],sig_check[sig_nodes])))
+
                 #shape plots into a grid
                 ncols = 6
                 dims = fldmod(length(zero_candidate_pathways),ncols)
