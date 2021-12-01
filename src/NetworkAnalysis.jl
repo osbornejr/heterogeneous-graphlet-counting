@@ -496,6 +496,18 @@ function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidate_pathwa
     path_graphlets = filter(:Coincident_type=>x->x!="two",filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
     nonpath_graphlets = filter(:Pathway=>x-> !in(x,candidate_pathways[in_key]),pre_graphlets)
     graphlets = vcat(path_graphlets,nonpath_graphlets) 
+    ##set up orbit templates to be checked against
+                #peripheral: degree one orbit
+                #central: degree two orbit
+                #supercentral: degree three orbit
+    orbit_templates = Dict("3-path" => Dict(("central" => [0,1,0]), ("peripheral" => [1,0,1])),
+                           "3-tri" => Dict(("central" => [1,1,1])),
+    "4-path" => Dict(("peripheral" => [1,0,0,1]), ("central" => [0,1,1,0])),
+    "4-star" => Dict(("peripheral" => [1,1,0,1]), ("supercentral" => [0,0,1,0])),
+    "4-tail" => Dict(("peripheral" => [0,0,0,1]), ("central" => [1,1,0,0]), ("supercentral" => [0,0,1,0])),
+    "4-cycle" => Dict(("central"=>[1,1,1,1])),
+    "4-chord" => Dict(("supercentral"=>[0,1,1,0]),("central"=>[1,0,0,1])),
+    "4-clique" => Dict(("supercentral"=>[1,1,1,1]))) 
      # setup a counter for i for each pathway that features a coincident graphlet of i
      #i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
     # for p in keys(countmap(graphlets.Pathway))
@@ -546,6 +558,18 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
     path_graphlets = filter(:Coincident_type=>x->x!="two",filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
     nonpath_graphlets = filter(:Pathway=>x-> !in(x,candidate_pathways[in_key]),pre_graphlets)
     graphlets = vcat(path_graphlets,nonpath_graphlets) 
+    ##set up orbit templates to be checked against
+                #peripheral: degree one orbit
+                #central: degree two orbit
+                #supercentral: degree three orbit
+    orbit_templates = Dict("3-path" => Dict(("central" => [0,1,0]), ("peripheral" => [1,0,1])),
+                           "3-tri" => Dict(("central" => [1,1,1])),
+    "4-path" => Dict(("peripheral" => [1,0,0,1]), ("central" => [0,1,1,0])),
+    "4-star" => Dict(("peripheral" => [1,1,0,1]), ("supercentral" => [0,0,1,0])),
+    "4-tail" => Dict(("peripheral" => [0,0,0,1]), ("central" => [1,1,0,0]), ("supercentral" => [0,0,1,0])),
+    "4-cycle" => Dict(("central"=>[1,1,1,1])),
+    "4-chord" => Dict(("supercentral"=>[0,1,1,0]),("central"=>[1,0,0,1])),
+    "4-clique" => Dict(("supercentral"=>[1,1,1,1]))) 
      # setup a counter for i for each pathway that features a coincident graphlet of i
      i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
      for p in candidate_pathways
