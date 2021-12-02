@@ -420,6 +420,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 #               ### Validation steps
 #               # looking at identified significant graphlets and seeing if they check out biologically
 #               # the most taxing step is to identify the graphlets that are coincident in some way to KEGG pathways. We cache these coincidents as a dataframe (using CSV instead of JLD)  
+                ##Coincident analysis
+                #get baseline entrez and kegg info about transcripts
+                entrez_id_vector, candidates = get_KEGG_pathways(vertex_names,"transcripts")
+                candidate_pathways = collect(keys(candidates))
+                
                 val_dir = "$anal_dir/validation"
                 run(`mkdir -p $(val_dir)`)
                 coincidents_file ="$val_dir/coincidents.csv"
@@ -445,10 +450,6 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 end
                 
 
-                ##Coincident analysis
-                #get baseline entrez and kegg info about transcripts
-                entrez_id_vector, candidates = get_KEGG_pathways(vertex_names,"transcripts")
-                candidate_pathways = collect(keys(candidates))
                 #find which types are excluded in general, and then only as a cause of having no Entrez id
                 Coincidents.excluded = [Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]]
                 Coincidents.excluded_Entrez = [Coincidents.Transcript_type[i][Coincidents.Entrez[i].==0] for i in 1:size(Coincidents)[1]]
@@ -473,6 +474,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 sum(map(x->x.!==0,Coincidents_noncoding.Entrez).==Coincidents_noncoding.Inclusion)
 
                 #orbit statistics
+                #orbitsigs_file ="$val_dir/orbitsigs.jld"
+                #if (isfile(orbitsigs_file))
+                #        @info "Loading orbitsigs from $val_dir..."
                 @info "Getting orbit significance statistics..."
                
                 #collect dataframe for each node in this array
@@ -481,7 +485,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
                
                 ## select whether we are looking at "detailed" or "collated" significance
-                orbit_sigs_method ="collated"
+                orbit_sigs_method ="detailed"
                 #table to showing whether each node (row) is included in each pathway (column)
                 inkey = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in keys(candidates) ]...)
                 if(orbit_sigs_method == "collated")
@@ -566,19 +570,6 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #for these supersharers, find the set of pathways they are involved in
                 supersharer_pathways = pathways_per_node_dict(supersharers,zero_candidates)
 
-                function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
-                    output_dict = Dict{Int,Array{String,1}}() 
-                    for n in node_set
-                        list = []
-                        for c in candidates
-                            if (n in last(c))
-                                push!(list,first(c))
-                            end
-                        end
-                        output_dict[n] = list
-                    end
-                    return output_dict
-                end
 
                 in_group = collect(keys(countmap(vcat(collect(values(supersharer_pathways))...))))
                 not_in_group = zero_candidate_pathways[.!(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(collect(values(supersharer_pathways))...)))))))]

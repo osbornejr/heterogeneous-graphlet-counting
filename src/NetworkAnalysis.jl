@@ -394,6 +394,8 @@ function graphlet_coincidences(vertexlist::Array{String,1},vertex_names::Array{S
     return Coincidents_df
 end 
 
+
+##bio significance functions
 function restart_R()
 
         #restart R session  
@@ -475,7 +477,8 @@ function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String)
             entrez_id_vector = genes$entrez_id
         """
     end
-    @rget entrez_id_vector 
+    @rget entrez_id_vector
+    @rget top_terms
     ##get rid of missing ids (sset to 0 --for now?)
     replace!(entrez_id_vector,missing=>0)
     entrez_id_vector = Int.(entrez_id_vector)
@@ -485,8 +488,23 @@ function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String)
     for e in in_network
         candidates[string(first(e))] = findall(.==(true),last(e))
     end
-    return (entrez_id_vector, candidates)
+    return (entrez_id_vector, candidates,top_terms)
 end
+
+                function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
+                    output_dict = Dict{Int,Array{String,1}}() 
+                    for n in node_set
+                        list = []
+                        for c in candidates
+                            if (n in last(c))
+                                push!(list,first(c))
+                            end
+                        end
+                        output_dict[n] = list
+                    end
+                    return output_dict
+                end
+
 
 function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
     ##for orbit level significance, this function takes a specific node and finds all its coincident graphlets, and then counts the orbit position the node is in in each. returns a dataframe detailing these stats
