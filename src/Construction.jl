@@ -579,19 +579,6 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
 
 
-                #collect known pathway vectors for corresponding known pathway nodes
-                known_pathway_dfs = Array{DataFrame,1}(undef,length(zero_candidate_pathways))
-                for (i,p) in enumerate(zero_candidate_pathways)
-                    subset = zero_candidates[p]
-                    df_build = DataFrame(hcat(map(x->x[i,:],zero_orbit_sigs_array[subset])...)',orbit_names)
-                    insertcols!(df_build,1,:shared=>[sig_pathway_occurences[x] for x in subset].-1)
-                    insertcols!(df_build,1,:transcript_id=>subset)
-                    known_pathway_dfs[i] = df_build 
-                    #print("Known nodes in pathway $p are in this many other pathways:\n")
-                    #print([sig_pathway_occurences[x] for x in subset].-1)
-                    #print("\n")
-                end
-                known_pathway_arrays = map(x->Array(x[3:end]),known_pathway_dfs)
 
                 #ecdfs
                 #store ecdf functions in table
@@ -607,6 +594,19 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     known_pathway_probs[i] = hcat([map(ecdf_table[i,j],map(x->x[i,j],orbit_sigs_array[zero_candidates[c]])) for j in 1:last_col]...)
                 end
                     
+                #collect known pathway vectors for corresponding known pathway nodes
+                known_pathway_dfs = Array{DataFrame,1}(undef,length(zero_candidate_pathways))
+                for (i,p) in enumerate(zero_candidate_pathways)
+                    subset = zero_candidates[p]
+                    df_build = DataFrame(hcat(map(x->x[i,:],zero_orbit_sigs_array[subset])...)',orbit_names)
+                    insertcols!(df_build,1,:shared=>[sig_pathway_occurences[x] for x in subset].-1)
+                    insertcols!(df_build,1,:transcript_id=>subset)
+                    known_pathway_dfs[i] = df_build 
+                    #print("Known nodes in pathway $p are in this many other pathways:\n")
+                    #print([sig_pathway_occurences[x] for x in subset].-1)
+                    #print("\n")
+                end
+                known_pathway_arrays = map(x->Array(x[3:end]),known_pathway_dfs)
                 #known ecdfs
                 #calculate ecdfs just for known pathway node values (each row corresponds to a pathway, each column to an orbit) 
                 known_ecdf_table = Array{ECDF,2}(undef,length(zero_candidate_pathways),last_col)
