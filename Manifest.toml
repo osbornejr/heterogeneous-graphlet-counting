@@ -153,6 +153,12 @@ git-tree-sha1 = "c0647249d785f1d5139c0cc96db8f6b32f7ec416"
 uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 version = "1.5.0"
 
+[[Configurations]]
+deps = ["ExproniconLite", "OrderedCollections", "TOML"]
+git-tree-sha1 = "b0dcafb34cfff977df79fc9927b70a9157a702ad"
+uuid = "5218b696-f38b-4ac9-8b61-a12ec717816d"
+version = "0.17.0"
+
 [[Contour]]
 deps = ["StaticArrays"]
 git-tree-sha1 = "9f02045d934dc030edad45944ea80dbd1f0ebea7"
@@ -275,6 +281,11 @@ git-tree-sha1 = "10407a39b87f29d47ebaca8edbc75d7c302ff93e"
 uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
 version = "0.1.3"
 
+[[ExproniconLite]]
+git-tree-sha1 = "8b08cc88844e4d01db5a2405a08e9178e19e479e"
+uuid = "55351af7-c7e9-48d6-89ff-24e801d99491"
+version = "0.6.13"
+
 [[EzXML]]
 deps = ["Printf", "XML2_jll"]
 git-tree-sha1 = "0fa3b52a04a4e210aeb1626def9c90df3ae65268"
@@ -289,9 +300,9 @@ version = "1.3.1"
 
 [[FFTW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "5a0d4b6a22a34d17d53543bd124f4b08ed78e8b0"
+git-tree-sha1 = "3676abafff7e4ff07bbd2c42b3d8201f31653dcc"
 uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
-version = "3.3.9+7"
+version = "3.3.9+8"
 
 [[FastGroupBy]]
 deps = ["CategoricalArrays", "Compat", "DataFrames", "IndexedTables", "PooledArrays", "SortingAlgorithms", "SortingLab", "StatsBase"]
@@ -370,6 +381,12 @@ version = "1.0.5+6"
 [[Future]]
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+
+[[FuzzyCompletions]]
+deps = ["REPL"]
+git-tree-sha1 = "9cde086faa37f32794be3d2df393ff064d43cd66"
+uuid = "fb4132e2-a121-4a70-b8a1-d5b831dcdcc2"
+version = "0.4.1"
 
 [[Gadfly]]
 deps = ["Base64", "CategoricalArrays", "Colors", "Compose", "Contour", "CoupledFields", "DataStructures", "Dates", "Distributions", "DocStringExtensions", "Hexagons", "IndirectArrays", "IterTools", "JSON", "Juno", "KernelDensity", "LinearAlgebra", "Loess", "Measures", "Printf", "REPL", "Random", "Requires", "Showoff", "Statistics"]
@@ -629,9 +646,9 @@ version = "1.36.0+3"
 
 [[Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "8e924324b2e9275a51407a4e06deb3455b1e359f"
+git-tree-sha1 = "cba7b560fcc00f8cd770fa85a498cbc1d63ff618"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.0+7"
+version = "1.16.0+8"
 
 [[Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -747,9 +764,9 @@ version = "0.5.0"
 
 [[MicrosoftMPI_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e5c90234b3967684c9c6f87b4a54549b4ce21836"
+git-tree-sha1 = "a16aa086d335ed7e0170c5265247db29172af2f9"
 uuid = "9237b28f-5490-5468-be7b-bb81f5f5e6cf"
-version = "10.1.3+0"
+version = "10.1.3+2"
 
 [[Missings]]
 deps = ["DataAPI"]
@@ -765,6 +782,12 @@ deps = ["ExprTools"]
 git-tree-sha1 = "916b850daad0d46b8c71f65f719c49957e9513ed"
 uuid = "78c3b35d-d492-501b-9361-3d52fe80e533"
 version = "0.7.1"
+
+[[MsgPack]]
+deps = ["Serialization"]
+git-tree-sha1 = "a8cbf066b54d793b9a48c5daa5d586cf2b5bd43d"
+uuid = "99f44e22-a591-53d1-9472-aa23ef4bd671"
+version = "1.1.0"
 
 [[Mustache]]
 deps = ["Printf", "Tables"]
@@ -886,6 +909,12 @@ deps = ["Dates", "InteractiveUtils", "LibGit2", "Mustache", "Parameters", "Pkg",
 git-tree-sha1 = "ce6b280fc73dd6f4b308c6681b23f8ebe0f8cf98"
 uuid = "14b8a8f1-9102-5b29-a752-f990bacb7fe1"
 version = "0.7.10"
+
+[[Pluto]]
+deps = ["Base64", "Configurations", "Dates", "Distributed", "FileWatching", "FuzzyCompletions", "HTTP", "InteractiveUtils", "Logging", "Markdown", "MsgPack", "Pkg", "REPL", "Sockets", "TableIOInterface", "Tables", "UUIDs"]
+git-tree-sha1 = "a5b3fee95de0c0a324bab53a03911395936d15d9"
+uuid = "c3e4b0f8-55cb-11ea-2926-15256bba5781"
+version = "0.17.2"
 
 [[PooledArrays]]
 deps = ["DataAPI"]
@@ -1098,6 +1127,17 @@ version = "1.2.3"
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
+
+[[TOML]]
+deps = ["Dates"]
+git-tree-sha1 = "44aaac2d2aec4a850302f9aa69127c74f0c3787e"
+uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.3"
+
+[[TableIOInterface]]
+git-tree-sha1 = "9a0d3ab8afd14f33a35af7391491ff3104401a35"
+uuid = "d1efa939-5518-4425-949f-ab857e148477"
+version = "0.1.6"
 
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
