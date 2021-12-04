@@ -2,8 +2,8 @@
 "wipe all buffers (this is a hard reset atm)
 "bufdo bwipeout!
 " open/reload buffers to source and test .jl files
-n src/*
-n test/*
+"n src/*
+"n test/*
 
 
 "wipe any existing terminals before refreshing them
@@ -38,7 +38,7 @@ for i in buffers
 endfor
 
 "this is homebase for now
-b src/Construction
+"b src/Construction
 "set up default window for vimslime to send to (the last terminal created aka the repl
 let g:slime_default_config = {"bufnr": term_list()[0]}
 let g:slime_dont_ask_default = 1
