@@ -1,0 +1,12 @@
+name = "GraphletCounting"
+uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
+authors = ["osbornejr "]
+version = "0.1.0"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
