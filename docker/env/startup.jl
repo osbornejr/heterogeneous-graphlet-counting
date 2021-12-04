@@ -4,9 +4,9 @@ Base.atreplinit() do repl
 	         	!isdefined(repl, :interface) && (repl.interface = REPL.setup_interface(repl))
 	             	repl.interface.modes[2].sticky=true
 	          end
-using Weave
-using Debugger
-using Revise
+#using Weave
+#using Debugger
+#using Revise
 #using Pkg
 #Pkg.precompile()
 ENV["JULIA_PROJECT"] = "/home/osbornejr/app"

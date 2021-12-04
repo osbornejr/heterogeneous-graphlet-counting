@@ -1,3 +1,4 @@
+#need to activate Revise here for now (because Pluto?)
 ### Include all source files TODO make this occur more fluently and automatically by creating a package, and using Revise
 cwd = ENV["JULIA_PROJECT"]
 #define structure for run_parameters (nb... at this stage has to be rerun if values change). Also needs to be defined before including any package that depends on it
