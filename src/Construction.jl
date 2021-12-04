@@ -569,15 +569,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 supersharers = first.(filter(x->last(x)==m,collect(sig_pathway_occurences)))
                 #for these supersharers, find the set of pathways they are involved in
                 supersharer_pathways = pathways_per_node_dict(supersharers,zero_candidates)
-
-
                 in_group = collect(keys(countmap(vcat(collect(values(supersharer_pathways))...))))
                 not_in_group = zero_candidate_pathways[.!(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(collect(values(supersharer_pathways))...)))))))]
                 countmap(collect(values(supersharer_pathways)))
                 #do we need to rule out pathways dominated by supersharers? TODO
-
-
-
 
 
                 #ecdfs
@@ -655,7 +650,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 end
                 #TODO this needs to be more generalised for any dimension of gridstack/number of pathways 
                 plots[2,6] = legend;
-                draw(SVG("$(output_dir)/ecdfs.svg",30cm,20cm),gridstack(plots))
+                draw(SVG("$(output_dir)/known_ecdfs.svg",30cm,20cm),gridstack(plots))
 
         end
 end
