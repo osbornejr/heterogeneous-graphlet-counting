@@ -19,7 +19,7 @@ end
 function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
 
-        @info "Building directory structure..."
+        @info "Building website directory structure..."
         ##establish output directories  
         run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)
         run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/plots"`)
@@ -64,13 +64,13 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)"
         run(`mkdir -p $(cache_dir)`)
         ##plot before cut
-        histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+        DataPreprocessing.histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
         
         clean_counts=raw_counts[vec(sum(raw_data,dims = 2 ).>=params.expression_cutoff),:]
         clean_data = Array(select(clean_counts,filter(x->occursin("data",x),names(clean_counts))))
         
         ##plot after cut
-        histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+        DataPreprocessing.histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
         
         #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
         
@@ -78,7 +78,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         ##update cache
         cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)"
         run(`mkdir -p $(cache_dir)`)
-        norm_data=library_size_normalisation(clean_data,params.norm_method)
+        norm_data = DataPreprocessing.library_size_normalisation(clean_data,params.norm_method)
         norm_counts = copy(clean_counts)
         norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
         
@@ -89,8 +89,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         #add variance column to normalised data
         variance = vec(var(norm_data, dims=2))
         norm_counts.variance = variance
-        sample_counts_noncoding=sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-params.variance_percent))):end,:]
-        sample_counts_coding=sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-params.variance_percent))):end,:]
+        sample_counts_noncoding = sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-params.variance_percent))):end,:]
+        sample_counts_coding = sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-params.variance_percent))):end,:]
         sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
         sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(sample_counts))))
         ##Network construction
@@ -107,7 +107,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 similarity_matrix = JLD.load(sim_file,"similarity_matrix")
         else
                 @info "Generating similarity matrix..."
-                similarity_matrix = coexpression_measure(sample_data,params.coexpression)
+                similarity_matrix = NetworkConstruction.coexpression_measure(sample_data,params.coexpression)
                 @info "Saving similarity matrix at $cache_dir..."
                 JLD.save(sim_file,"similarity_matrix",similarity_matrix)
         end
@@ -124,14 +124,14 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         else
                 @info "Generating adjacency matrix..."
                 if (params.threshold_method=="empirical_dist")
-                        pre_adj_matrix = empirical_dist_adjacency(similarity_matrix,params.threshold)
+                        pre_adj_matrix = NetworkConstruction.empirical_dist_adjacency(similarity_matrix,params.threshold)
                 elseif (params.threshold_method=="empirical_dist_zero")
-                        pre_adj_matrix = empirical_dist_zero_adjacency(similarity_matrix,params.threshold)
+                        pre_adj_matrix = NetworkConstruction.empirical_dist_zero_adjacency(similarity_matrix,params.threshold)
                 elseif (params.threshold_method=="hard")
-                        pre_adj_matrix = adjacency(similarity_matrix,params.threshold)
+                        pre_adj_matrix = NetworkConstruction.adjacency(similarity_matrix,params.threshold)
                 elseif (params.threshold_method=="top")
                         ##TODO setting top x value here for now; should be a parameter, but as an Int rather than Float as threshold param is for other methods
-                        pre_adj_matrix = top_adjacency(similarity_matrix,10)
+                        pre_adj_matrix = NetworkConstruction.top_adjacency(similarity_matrix,10)
                 end
                 ##form final adjacency matrix
                 adj_matrix = copy(pre_adj_matrix)
@@ -146,7 +146,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         #maintain list of vertices in graph
         vertex_names = network_counts[:transcript_id]
         vertexlist = copy(network_counts[:transcript_type])     
-        edgelist = edgelist_from_adj(adj_matrix)
+        edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
         
         #Synthetic test (just override vertex and edge lists here-- is that ok?)
         if(params.test_name == "Synthetic")
@@ -222,17 +222,17 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         ##use gene ids here, as they have more chance of getting a GO annotation
         if(params.func_annotate==true)
                 vertex_gene_names = network_counts[:gene_id]
-                community_vertices = get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
+                community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
                 ## functional annotations of communities
                 func_file = "$anal_dir/func_annotations.jld" 
                 if (isfile(func_file))
                         functional_annotations = JLD.load(func_file,"functional annotations")
                 else
-                        functional_annotations = get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")       
+                        functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")       
                         JLD.save(func_file,"functional annotations",functional_annotations)
-                end
+                end 
         else
-                community_vertices = get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
+                community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
         end
         #find nodes who are not in any community (usually because they are not in connected component).
         community_orphans = findall(x->x==0,in.(1:length(vertexlist),Ref(community_vertices.name)))
