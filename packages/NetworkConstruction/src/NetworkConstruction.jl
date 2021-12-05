@@ -1,5 +1,6 @@
 module NetworkConstruction
 
-greet() = print("Hello World!")
-
+include("CoexpressionMeasures.jl")
+include("Networks.jl")
+include("NetworkStatistics.jl")
 end # module

@@ -2,3 +2,16 @@ name = "NetworkConstruction"
 uuid = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 authors = ["osbornejr "]
 version = "0.1.0"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+InformationMeasures = "96684042-fbdc-5399-9b8e-d34e539a126c"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
+RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
+SharedArrays = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
