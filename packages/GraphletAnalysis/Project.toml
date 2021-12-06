@@ -2,3 +2,8 @@ name = "GraphletAnalysis"
 uuid = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 authors = ["osbornejr "]
 version = "0.1.0"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
