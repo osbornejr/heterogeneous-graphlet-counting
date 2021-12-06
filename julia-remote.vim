@@ -1,3 +1,6 @@
+"save current buffer number
+let cur_buf = bufnr('%')
+
 
 "wipe all buffers (this is a hard reset atm)
 "bufdo bwipeout!
@@ -38,7 +41,7 @@ for i in buffers
 endfor
 
 "this is homebase for now
-"b src/Construction
+exec ":b ".cur_buf
 "set up default window for vimslime to send to (the last terminal created aka the repl
 let g:slime_default_config = {"bufnr": term_list()[0]}
 let g:slime_dont_ask_default = 1
