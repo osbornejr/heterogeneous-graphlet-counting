@@ -39,8 +39,8 @@ function sample_norm_counts(norm_counts::DataFrame,variance_percent::Float64)
     norm_data = data_from_dataframe(norm_counts,"data")
     variance = vec(var(norm_data, dims=2))
     norm_counts.variance = variance
-    sample_counts_noncoding = sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
-    sample_counts_coding = sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+    sample_counts_noncoding = sort(norm_counts[norm_counts[!,:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+    sample_counts_coding = sort(norm_counts[norm_counts[!,:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
     sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
     return sample_counts
 end
