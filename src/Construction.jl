@@ -18,7 +18,6 @@ function distributed_setup(inclusions::Array{String,1})
 end
 function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
-
         @info "Building directory structure..."
         ##establish output directories  
         run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)

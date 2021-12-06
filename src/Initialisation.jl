@@ -35,7 +35,7 @@ if(length(workers())!=Threads.nthreads())
     addprocs(Threads.nthreads())
     #addprocs(8)
     @everywhere include("src/CoexpressionMeasures.jl")
-    @everywhere include("src/GraphletCounting.jl")
+    @everywhere include("src/CountingFunctions.jl")
     @everywhere include("src/NullModel.jl")
 
 end
