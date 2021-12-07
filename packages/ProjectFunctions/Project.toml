@@ -1,0 +1,7 @@
+name = "ProjectFunctions"
+uuid = "a8586eae-54f0-4952-9436-ba92c8ab3181"
+authors = ["osbornejr "]
+version = "0.1.0"
+
+[deps]
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
