@@ -73,8 +73,8 @@ if(length(workers())!=Threads.nthreads())
     #add workers equal to the number of available cpus  
     addprocs(Threads.nthreads())
     #addprocs(8)
-    @everywhere include("src/CoexpressionMeasures.jl")
-    @everywhere include("src/CountingFunctions.jl")
-    @everywhere include("src/NullModel.jl")
+    #@everywhere include("src/CoexpressionMeasures.jl")
+    #@everywhere include("src/CountingFunctions.jl")
+    #@everywhere include("src/NullModel.jl")
 
 end
