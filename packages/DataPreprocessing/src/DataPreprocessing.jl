@@ -1,4 +1,5 @@
 module DataPreprocessing
+export data_from_dataframe
 
 include("Normalisation.jl")
 include("ReadExpressionData.jl")
