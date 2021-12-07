@@ -57,17 +57,16 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         #end
         #Processing data:
         @info "Processing raw data..."
-        raw_data = Array(select(raw_counts,filter(x->occursin("data",x),names(raw_counts))))
         
         ## Clean - remove transcripts with total counts across all samples less than Cut
         ##update cache
         cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)"
         run(`mkdir -p $(cache_dir)`)
+        
         ##plot before cut
         DataPreprocessing.histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
         
-        clean_counts=raw_counts[vec(sum(raw_data,dims = 2 ).>=params.expression_cutoff),:]
-        clean_data = Array(select(clean_counts,filter(x->occursin("data",x),names(clean_counts))))
+        clean_counts = DataPreprocessing.clean_raw_counts(raw_counts,params.expression_cutoff)
         
         ##plot after cut
         DataPreprocessing.histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
@@ -78,21 +77,16 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         ##update cache
         cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)"
         run(`mkdir -p $(cache_dir)`)
-        norm_data = DataPreprocessing.library_size_normalisation(clean_data,params.norm_method)
-        norm_counts = copy(clean_counts)
-        norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
-        
+
+        norm_counts = DataPreprocessing.normalise_clean_counts(clean_counts,params.norm_method)
+
         ##Sampling for most variable transcripts
         ##update cache
         cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)"
         run(`mkdir -p $(cache_dir)`)
-        #add variance column to normalised data
-        variance = vec(var(norm_data, dims=2))
-        norm_counts.variance = variance
-        sample_counts_noncoding = sort(norm_counts[norm_counts[:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-params.variance_percent))):end,:]
-        sample_counts_coding = sort(norm_counts[norm_counts[:transcript_type].=="coding",:],:variance)[Int(round(end*(1-params.variance_percent))):end,:]
-        sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
-        sample_data = Array(select(sample_counts,filter(x->occursin("data",x),names(sample_counts))))
+
+        sample_counts = DataPreprocessing.sample_norm_counts(norm_counts,params.variance_percent)
+
         ##Network construction
         @info "Constructing the network..."
         ##Measure of coexpression
