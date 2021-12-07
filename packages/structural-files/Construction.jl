@@ -1,4 +1,4 @@
-using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions
+using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions,DataPreprocessing, ProjectFunctions
 
 function distributed_setup(inclusions::Array{String,1})
 
@@ -93,28 +93,30 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         ##update cache
         cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)"
         run(`mkdir -p $(cache_dir)`)
+        
         #similarity_matrix=mutual_information(data)
         ## file to cache similarity matrix for use later:
-        sim_file = "$cache_dir/similarity_matrix.jld"
+        sim_file = "$cache_dir/similarity_matrix.jld2"
         if (isfile(sim_file))
                 @info "Loading similarity matrix from $cache_dir..."
-                similarity_matrix = JLD.load(sim_file,"similarity_matrix")
+                similarity_matrix = cache_load(sim_file,"similarity_matrix")
         else
                 @info "Generating similarity matrix..."
                 similarity_matrix = NetworkConstruction.coexpression_measure(sample_data,params.coexpression)
                 @info "Saving similarity matrix at $cache_dir..."
-                JLD.save(sim_file,"similarity_matrix",similarity_matrix)
+                cache_save(sim_file,"similarity_matrix"=>similarity_matrix)
         end
         
+
         ## Adjacency matrix 
         ##update cache
         cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)"
         run(`mkdir -p $(cache_dir)`)
-        adj_file = "$cache_dir/adjacency_matrix.jld"
+        adj_file = "$cache_dir/adjacency_matrix.jld2"
         if (isfile(adj_file))
                 @info "Loading adjacency matrix from $cache_dir..."
-                pre_adj_matrix = JLD.load(adj_file,"pre-adj_matrix")
-                adj_matrix = JLD.load(adj_file,"adjacency_matrix")
+                pre_adj_matrix = cache_load(adj_file,"pre-adj_matrix")
+                adj_matrix = cache_load(adj_file,"adjacency_matrix")
         else
                 @info "Generating adjacency matrix..."
                 if (params.threshold_method=="empirical_dist")
@@ -132,7 +134,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 adj_matrix = adj_matrix[:,vec(sum(pre_adj_matrix,dims=1).!=0)]
                 adj_matrix = adj_matrix[vec(sum(pre_adj_matrix,dims=2).!=0),:]
                 @info "Saving adjacency matrix at $cache_dir..."
-                JLD.save(adj_file,"adjacency_matrix",adj_matrix,"pre-adj_matrix",pre_adj_matrix)
+                cache_save(adj_file,["adjacency_matrix"=>adj_matrix,"pre-adj_matrix"=>pre_adj_matrix])
         end
         #Trim nodes with degree zero
         network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
@@ -218,12 +220,12 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 vertex_gene_names = network_counts[:gene_id]
                 community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
                 ## functional annotations of communities
-                func_file = "$anal_dir/func_annotations.jld" 
+                func_file = "$anal_dir/func_annotations.jld2" 
                 if (isfile(func_file))
-                        functional_annotations = JLD.load(func_file,"functional annotations")
+                        functional_annotations = cache_load(func_file,"functional annotations")
                 else
                         functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")       
-                        JLD.save(func_file,"functional annotations",functional_annotations)
+                        cache_save(func_file,"functional annotations"=>functional_annotations)
                 end 
         else
                 community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
@@ -241,18 +243,18 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 ##update cache
                 anal_dir = "$cache_dir/graphlets"
                 run(`mkdir -p $(anal_dir)`)
-                graphlet_file = "$anal_dir/graphlets.jld" 
+                graphlet_file = "$anal_dir/graphlets.jld2" 
                 if (isfile(graphlet_file))
                         @info "Loading graphlet counts from $anal_dir..."
-                        graphlet_counts = JLD.load(graphlet_file,"graphlets")
-                        timer = JLD.load(graphlet_file,"time")
+                        graphlet_counts = cache_load(graphlet_file,"graphlets")
+                        timer = cache_load(graphlet_file,"time")
                 else
                         @info "Counting graphlets..."
                         timer=@elapsed graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old")
                         #graphlet_concentrations = concentrate(graphlet_counts) 
                         @info "Saving graphlet counts at $anal_dir..."
                         ##save the per-edge array as well in case we need it in the future (exp for debugging)
-                        JLD.save(graphlet_file,"graphlets",graphlet_counts,"time",timer)
+                        cache_save(graphlet_file,["graphlets"=>graphlet_counts,"time"=>timer])
         
                 end
         
@@ -271,11 +273,11 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 rep_dir = "$anal_dir/typed_representations/nullmodel/$(params.null_model_size)_simulations"
                 run(`mkdir -p $(rep_dir)`)
                 N=params.null_model_size
-                rand_graphlets_file = "$rep_dir/rand_graphlets.jld"
+                rand_graphlets_file = "$rep_dir/rand_graphlets.jld2"
                 if (isfile(rand_graphlets_file))
                         @info "Loading randomised vertices and graphlet counts from $rep_dir..."
-                        rand_types_set = JLD.load(rand_graphlets_file,"rand vertices")
-                        rand_graphlet_collection = JLD.load(rand_graphlets_file,"rand graphlets")
+                        rand_types_set = cache_load(rand_graphlets_file,"rand vertices")
+                        rand_graphlet_collection = cache_load(rand_graphlets_file,"rand graphlets")
                 else
                         ## randomise node types
                         
@@ -293,7 +295,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         end
                         rand_graphlet_collection = vcat(collect.(rand_graphlet_counts)...)
                         @info "Saving random graphlet count information at $rep_dir..."
-                        JLD.save(rand_graphlets_file,"rand graphlets",rand_graphlet_collection,"rand vertices",rand_types_set)
+                        cache_save(rand_graphlets_file,["rand graphlets"=>rand_graphlet_collection,"rand vertices"=>rand_types_set])
                 end
                 
                 
@@ -416,7 +418,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 #               # the most taxing step is to identify the graphlets that are coincident in some way to KEGG pathways. We cache these coincidents as a dataframe (using CSV instead of JLD)  
                 ##Coincident analysis
                 #get baseline entrez and kegg info about transcripts
-                entrez_id_vector, candidates = get_KEGG_pathways(vertex_names,"transcripts")
+                entrez_id_vector, candidates = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcripts")
                 candidate_pathways = collect(keys(candidates))
                 
                 val_dir = "$anal_dir/validation"
