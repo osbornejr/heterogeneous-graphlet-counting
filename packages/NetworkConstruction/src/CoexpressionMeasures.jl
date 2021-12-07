@@ -1,27 +1,33 @@
-using Statistics, StatsBase, DataFrames, InformationMeasures, LinearAlgebra, RCall,Distributed,ProgressMeter,SharedArrays
+using Statistics, StatsBase, DataFrames, InformationMeasures, LinearAlgebra, RCall,Distributed,ProgressMeter,SharedArrays,DataPreprocessing
 
 function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
-	if (method =="pearson")
-		return cor(data')
-	end
+    ## wrapper for all possible different coexpression measure methods
+    ## convert to array if necessary
+    if(typeof(data)<:AbstractDataFrame)
+        data = DataPreprocessing.data_from_dataframe(data,"data")
+    end
 
-	if (method=="spearman")
-		return corspearman(data')
-	end
+    if (method =="pearson")
+        return cor(data')
+    end
 
-	if (method== "kendall")
-		return corkendall(data')
-	end
+    if (method=="spearman")
+        return corspearman(data')
+    end
 
-	if (method=="mutual_information")
-		return mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
-	end
-	if (method=="pidc")
-		return partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed = true)
-	end
-	if (method=="pcit")
-		return pcit(data)
-	end
+    if (method== "kendall")
+        return corkendall(data')
+    end
+
+    if (method=="mutual_information")
+        return mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
+    end
+    if (method=="pidc")
+        return partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed = true)
+    end
+    if (method=="pcit")
+        return pcit(data)
+    end
 end
 
 
