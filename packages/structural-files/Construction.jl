@@ -138,7 +138,6 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         end
         #Trim nodes with degree zero
         network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
-        network_data = sample_data[vec(sum(pre_adj_matrix,dims=2).!=0),:]
         #maintain list of vertices in graph
         vertex_names = network_counts[:transcript_id]
         vertexlist = copy(network_counts[:transcript_type])     
@@ -473,22 +472,29 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #orbitsigs_file ="$val_dir/orbitsigs.jld"
                 #if (isfile(orbitsigs_file))
                 #        @info "Loading orbitsigs from $val_dir..."
-                @info "Getting orbit significance statistics..."
                
                 #collect dataframe for each node in this array
                 #per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
                 #choose just one order of graphlets (3 or 4)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
-               
-                ## select whether we are looking at "detailed" or "collated" significance
-                orbit_sigs_method ="detailed"
-                #table to showing whether each node (row) is included in each pathway (column)
-                inkey = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in keys(candidates) ]...)
-                if(orbit_sigs_method == "collated")
-                    orbit_sigs = @showprogress map(x->pernode_significance(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
-                end
-                if(orbit_sigs_method == "detailed")
-                    orbit_sigs = @showprogress map(x->pernode_significance_detail(x,sub_Coincidents,collect(keys(candidates)),inkey[x,:]),1:length(vertexlist))
+                orbit_sigs_file = "$val_dir/orbit_sigs.jld2" 
+                if (isfile(coincidents_file))
+                    @info "Loading orbit significance dataframe from $val_dir..."
+                    orbit_sigs = cache_load(orbit_sigs_file,"orbit_sigs")
+                else
+
+                    @info "Getting orbit significance statistics..."
+                    ## select whether we are looking at "detailed" or "collated" significance
+                    orbit_sigs_method ="detailed"
+                    #table to showing whether each node (row) is included in each pathway (column)
+                    inkey = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in candidate_pathways ]...)
+                    if(orbit_sigs_method == "collated")
+                        orbit_sigs = @showprogress map(x->GraphletAnalysis.pernode_significance(x,sub_Coincidents,candidate_pathways,inkey[x,:]),1:length(vertexlist))
+                    end
+                    if(orbit_sigs_method == "detailed")
+                        orbit_sigs = @showprogress map(x->GraphletAnalysis.pernode_significance_detail(x,sub_Coincidents,candidate_pathways,inkey[x,:]),1:length(vertexlist))
+                    end
+                    cache_save(orbit_sigs_file,"orbit_sigs"=>orbit_sigs)
                 end
 
                 ## now compare the significance profile of those nodes that are not attached to a pathway to the average pathway profile of known pathway nodes
