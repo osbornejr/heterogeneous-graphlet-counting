@@ -1,4 +1,5 @@
-using Distributed, JLD, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions,DataPreprocessing, ProjectFunctions
+using Distributed, JLD, CSV, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions,ProgressMeter
+using DataPreprocessing, NetworkConstruction,GraphletCounting,GraphletAnalysis, ProjectFunctions
 
 function distributed_setup(inclusions::Array{String,1})
 
@@ -64,12 +65,12 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         run(`mkdir -p $(cache_dir)`)
         
         ##plot before cut
-        DataPreprocessing.histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+        #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
         
         clean_counts = DataPreprocessing.clean_raw_counts(raw_counts,params.expression_cutoff)
         
         ##plot after cut
-        DataPreprocessing.histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+        #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
         
         #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
         
@@ -249,7 +250,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                         timer = cache_load(graphlet_file,"time")
                 else
                         @info "Counting graphlets..."
-                        timer=@elapsed graphlet_counts = count_graphlets(vertexlist,edgelist,4,run_method="distributed-old")
+                        timer=@elapsed graphlet_counts = GraphletCounting.count_graphlets(vertexlist,edgelist,4,run_method="distributed-old")
                         #graphlet_concentrations = concentrate(graphlet_counts) 
                         @info "Saving graphlet counts at $anal_dir..."
                         ##save the per-edge array as well in case we need it in the future (exp for debugging)
@@ -413,18 +414,33 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 
 #               ### Validation steps
+                val_dir = "$anal_dir/validation"
+                run(`mkdir -p $(val_dir)`)
 #               # looking at identified significant graphlets and seeing if they check out biologically
 #               # the most taxing step is to identify the graphlets that are coincident in some way to KEGG pathways. We cache these coincidents as a dataframe (using CSV instead of JLD)  
                 ##Coincident analysis
+                coinc_dir = "$val_dir/coincidents"
+                run(`mkdir -p $(coinc_dir)`)
                 #get baseline entrez and kegg info about transcripts
-                entrez_id_vector, candidates = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcripts")
+                kegg_file = "$(coinc_dir)/kegg_info.jld2"
+                if (isfile(kegg_file))
+                    @info "Loading KEGG info from $val_dir..."
+                    entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
+                    candidates = cache_load(kegg_file,"candidates")
+                    top_terms = cache_load(kegg_file,"top_terms")
+                else
+
+                    @info "getting KEGG info..."
+
+                    entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcripts")
+                    cache_save(kegg_file,["entrez_id_vector"=>entrez_id_vector, "candidates"=>candidates,"top_terms"=>top_terms ])
+                end
+
                 candidate_pathways = collect(keys(candidates))
                 
-                val_dir = "$anal_dir/validation"
-                run(`mkdir -p $(val_dir)`)
-                coincidents_file ="$val_dir/coincidents.csv"
+                coincidents_file ="$coinc_dir/coincidents.csv"
                 if (isfile(coincidents_file))
-                        @info "Loading coincidents dataframe from $val_dir..."
+                        @info "Loading coincidents dataframe from $coinc_dir..."
                         Coincidents = CSV.read(coincidents_file)
                         #because CSV converts the array columns to strings, we have to convert back (cost of using the easy/dirty CSV option!)
                         fix(g) = split(replace(replace(replace(replace(g,("["=>"")),("]"=>"")),("\""=>"")),(" "=>"")),",")
@@ -438,8 +454,8 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
 
                 else
                         @info "Conducting per graphlet pathway coincidence analysis..."
-                        Coincidents = graphlet_coincidences(vertexlist,vertex_names,"transcripts",adj_matrix)
-                        @info "Saving coincidents at $val_dir..."
+                        Coincidents = GraphletAnalysis.graphlet_coincidences(vertexlist,vertex_names,"transcripts",adj_matrix,entrez_id_vector,candidates)
+                        @info "Saving coincidents at $coinc_dir..."
                         CSV.write(coincidents_file,Coincidents)
         
                 end
@@ -477,9 +493,9 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
                 #choose just one order of graphlets (3 or 4)
                 sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
-                orbit_sigs_file = "$val_dir/orbit_sigs.jld2" 
-                if (isfile(coincidents_file))
-                    @info "Loading orbit significance dataframe from $val_dir..."
+                orbit_sigs_file = "$coinc_dir/orbit_sigs.jld2" 
+                if (isfile(orbit_sigs_file))
+                    @info "Loading orbit significance dataframe from $coinc_dir..."
                     orbit_sigs = cache_load(orbit_sigs_file,"orbit_sigs")
                 else
 
