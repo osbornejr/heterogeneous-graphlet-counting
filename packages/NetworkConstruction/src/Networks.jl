@@ -1,4 +1,4 @@
-using LinearAlgebra,RCall
+using LinearAlgebra,RCall,StatsBase
 function adjacency(data::AbstractArray,threshold::Float64)
     sim_matrix = copy(data)
     sim_matrix[diagind(sim_matrix)].= 0
