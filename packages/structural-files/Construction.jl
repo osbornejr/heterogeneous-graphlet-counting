@@ -1,4 +1,4 @@
-using Distributed, JLD, CSV, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions,ProgressMeter
+using Distributed, JLD, CSV, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions,ProgressMeter,StatsBase,Gadfly,Compose
 using DataPreprocessing, NetworkConstruction,GraphletCounting,GraphletAnalysis, ProjectFunctions
 
 function distributed_setup(inclusions::Array{String,1})
@@ -586,7 +586,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #m = 8
                 supersharers = first.(filter(x->last(x)==m,collect(sig_pathway_occurences)))
                 #for these supersharers, find the set of pathways they are involved in
-                supersharer_pathways = pathways_per_node_dict(supersharers,zero_candidates)
+                supersharer_pathways = GraphletAnalysis.pathways_per_node_dict(supersharers,zero_candidates)
                 in_group = collect(keys(countmap(vcat(collect(values(supersharer_pathways))...))))
                 not_in_group = zero_candidate_pathways[.!(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(collect(values(supersharer_pathways))...)))))))]
                 countmap(collect(values(supersharer_pathways)))
@@ -606,7 +606,10 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 for (i,c) in enumerate(zero_candidate_pathways)
                     known_pathway_probs[i] = hcat([map(ecdf_table[i,j],map(x->x[i,j],orbit_sigs_array[zero_candidates[c]])) for j in 1:last_col]...)
                 end
-                    
+
+                #define orbit names here for now
+                orbit_names = names(orbit_sigs[1])[2:last_col+1]
+
                 #collect known pathway vectors for corresponding known pathway nodes
                 known_pathway_dfs = Array{DataFrame,1}(undef,length(zero_candidate_pathways))
                 for (i,p) in enumerate(zero_candidate_pathways)
@@ -619,7 +622,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                     #print([sig_pathway_occurences[x] for x in subset].-1)
                     #print("\n")
                 end
-                known_pathway_arrays = map(x->Array(x[3:end]),known_pathway_dfs)
+                known_pathway_arrays = map(x->Array(x[!,3:end]),known_pathway_dfs)
                 #known ecdfs
                 #calculate ecdfs just for known pathway node values (each row corresponds to a pathway, each column to an orbit) 
                 known_ecdf_table = Array{ECDF,2}(undef,length(zero_candidate_pathways),last_col)
@@ -646,9 +649,20 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 plots = Array{Union{Plot,Context},2}(undef,dims[1]+(dims[2]>0),ncols)
                 #plots = Array{Union{Plot,Context},1}(undef,length(keys(candidates)))
                 for (i,p) in enumerate(zero_candidate_pathways)
+                    #For total ecdfs:
                     #find max over all measures for pathway
-                    m = max([map(x->x[i,1],orbit_sigs_array)...,map(x->x[i,2],orbit_sigs_array)..., map(x->x[i,3],orbit_sigs_array)...]...)
-                    plots[i] = plot([layer(x->ecdf(map(x->x[i,j],orbit_sigs_array))(x),0,m,color=[j]) for j in 1:last_col]...,
+#                    m = max([map(x->x[i,1],orbit_sigs_array)...,map(x->x[i,2],orbit_sigs_array)..., map(x->x[i,3],orbit_sigs_array)...]...)
+#                    plots[i] = plot([layer(x->ecdf(map(x->x[i,j],orbit_sigs_array))(x),0,m,color=[j]) for j in 1:last_col]...,
+#                              Scale.color_discrete_manual("orange", "green", "purple"),
+#                              Guide.title(p),
+#                              Guide.xlabel("count"),
+#                              Theme(major_label_font_size=4pt,key_position=:none));
+#                              #Guide.colorkey(title="orbit position"),
+#                              #Guide.title(p));
+#                              #
+                    #for known ecdfs only:
+                    m = max(known_pathway_arrays[i]...)
+                    plots[i] = plot([layer(x->known_ecdf_table[i,j](x),0,m,color=[orbit_names[j]]) for j in 1:last_col]...,
                               Scale.color_discrete_manual("orange", "green", "purple"),
                               Guide.title(p),
                               Guide.xlabel("count"),
