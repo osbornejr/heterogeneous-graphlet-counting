@@ -82,7 +82,6 @@ outputs:\n
     - PC: each column is a principle component\n
     - V: M x 1 matrix of variances\n
 """
-commit reset
 function pca(data::AbstractArray{T,2}) where T<:Real
    
 #Here we compute PCA following the SVD method outlined here: https://medium.com/@jonathan_hui/machine-learning-singular-value-decomposition-svd-principal-component-analysis-pca-1d45e885e491
