@@ -75,12 +75,12 @@ end
 #pca
 """
     pca(data)
-perform PCA using SVD
-inputs:
-    - data: M x N matrix of input data. (M dimensions, N trials)
-outputs:
-    - PC: each column is a principle component
-    - V: M x 1 matrix of variances
+perform PCA using SVD\n
+inputs:\n
+    - data: M x N matrix of input data. (M dimensions, N trials)\n
+outputs:\n
+    - PC: each column is a principle component\n
+    - V: M x 1 matrix of variances\n
 """
 function pca(data::AbstractArray{T,2}) where T<:Real
    
