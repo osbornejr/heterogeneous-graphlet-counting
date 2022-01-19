@@ -244,7 +244,7 @@ function draw_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
     slice = string.(split(graphlet_name,split_char)) 
     return draw_graphlet(slice[1:end-1],slice[end];kwargs...)
 end
-
+commit reset
 function draw_graphlet(node_schematic::Array{String,1},edge_name::String;kwargs...)
     if (edge_name == "2-path")
         return draw_graphlet(node_schematic,[true];kwargs...)
