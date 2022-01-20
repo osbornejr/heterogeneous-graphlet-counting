@@ -7,15 +7,17 @@ using InteractiveUtils
 # ╔═╡ 74c92bd0-ef4f-41a0-bc4b-5063ffcd12df
 ### set up notebook environment
 begin
+cwd = ENV["JULIA_PROJECT"];	
 	import Pkg
 	dev = Pkg.develop
-	dev(path="packages/DataPreprocessing")
-	dev(path="packages/NetworkConstruction")
-	dev(path="packages/GraphletCounting")
-	dev(path="packages/GraphletAnalysis")
-	dev(path="packages/ProjectFunctions")
+	dev(path=cwd*"/packages/DataPreprocessing")
+	dev(path=cwd*"/packages/NetworkConstruction")
+	dev(path=cwd*"/packages/GraphletCounting")
+	dev(path=cwd*"/packages/GraphletAnalysis")
+	dev(path=cwd*"/packages/ProjectFunctions")
 	using Revise	
-	using JLD
+	using CommonMark
+	using PlutoUI
 	using JLD2
 	using StatsBase
 	using Gadfly,CategoricalArrays,Colors, Compose
@@ -26,8 +28,12 @@ begin
 	using GraphletAnalysis
 	using ProjectFunctions
 	
-	cwd = ENV["JULIA_PROJECT"];
+	
+	TableOfContents()
 end;
+
+# ╔═╡ 6ea01822-2aa0-4073-84b0-304e5a86f9ea
+TableOfContents()
 
 # ╔═╡ 940181d4-a9b0-47e4-a13d-db2eb175e22e
 ### Setup input data (from human smoker GSE68559 dataset) loaded from existing cache
@@ -36,8 +42,8 @@ begin
 		
 
 	biomart_raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts_biomart.jld2";
-	
 	raw_counts = ProjectFunctions.cache_load(biomart_raw_counts_file,"raw counts");
+	
 
 
 		
@@ -64,14 +70,44 @@ md"""
 # Orbit-based biological significance
 """
 
+# ╔═╡ a1d13b83-5713-4910-82d8-1f514dc04a3c
+NetworkConstruction.draw_graphlet(["coding","coding","coding","coding"],"4-clique")
+
+# ╔═╡ 0f82d5eb-c1d1-4406-b356-ada7d229074e
+NetworkConstruction.draw_graphlet("coding_coding_coding_coding_4-path")
+
+# ╔═╡ 4771b9a4-fe7b-4678-8175-542b012094d4
+
+
 # ╔═╡ 28836056-6604-4918-9f74-39bf81ad0559
 md"""
 ## Introduction
 Now that we have our heterogeneous graphlet counts and have looked at how different types are represented over the network, we want to identify the higher order interactions of particular biological relevance that might indicate the roles of non-coding transcripts with no previous functional annotation.
 To do this, we will use KEGG pathway information to deterimine which biological processes are represented by the interactions in our network and infer function based on connections with known pathway transcripts.
 The identified pathways will thus provide both a validation on network level that relevant biological processes have been captured by the data, and show that graphlet counting of heterogeneous networks provides an alternative method tof functional annotation that focuses much more on the local interactions between transcripts rather than the global context of gene module (community) detection which partitions the network into functional associations.        
+"""
+
+# ╔═╡ 67f24598-4b27-4dd8-b533-45c1cc4e44a6
+md"""
+## Network details
+
+The network we are working with is derived from a *homo sapiens* dataset[^1] that compared 10 different regions of brain tissue across smokers and nonsmokers.
+Transcripts are classified as either `coding` or `noncoding` based on a multistep process that factors in coding potential and checks for preexisting records on the Ensembl database.
+After normalisation, transcripts are selected as potential nodes if they show enough variable expression across samples.
+Edges between nodes are then defined using a partial information measure method that focuses on identify only the **direct** interactions between transcripts.[^2]
+The resulting network has the following structure:
+"""
 
 
+
+# ╔═╡ df21e8f4-7af6-4401-a8d7-e4f21e9c7139
+begin
+	parser = enable!(Parser(),[FootnoteRule()])
+	
+end;
+
+# ╔═╡ 4ef32b7a-d7f3-4642-a75c-2870a5130ade
+md"""
 ## Candidate pathway identification 
 As a first pass attempt to capture the pathway information in the network, the Entrez ids corresponding to each transcript were matched to associated KEGG pathways and the statistically significant (p<0.05) pathways over the whole network node set were selected.
 This was conducted in  `R` using the `topKEGG()` function provided by the package `limma`, and the list of candiddate pathways can be seen below.
@@ -196,8 +232,13 @@ begin
 	
 end;
 
-# ╔═╡ d2f8505a-6d00-4a75-85d9-aba9bb251302
+# ╔═╡ 4861b8cf-cf59-4cfd-b412-089ccfc00e90
+md"""
+|nodes | noncoding nodes | coding nodes | number of edges |
+|:----:|:---------------:|:------------:|:---------------:|
+|$(length(vertexlist))   | $(length(findall(x->x=="noncoding",vertexlist)))  |$(length(findall(x->x=="coding",vertexlist)))   |$(length(edgelist))   |      
 
+"""
 
 # ╔═╡ f34235b1-0e47-4f28-94db-ce3cfa598a91
 begin
@@ -247,6 +288,13 @@ If we can observe how these transcripts interact with the known pathway transcri
 	
 end
 
+# ╔═╡ c2ddfc1b-5ef7-4c0f-82fb-d86c015aba74
+cm"""
+## References
+[^1]: @WebbRNAsequencingtranscriptomes2015
+[^2]: @ChanGeneRegulatoryNetwork2017
+"""
+
 # ╔═╡ f24286b1-a29f-49dc-8005-058dfcf4440f
 begin
 
@@ -295,7 +343,7 @@ begin
 	                    #remove zero nodes
 	                    #filter!(:value=>x->x!=0,p_df)
 			
-	                    pl = plot(p_df,x = :variable,y = :value, color = :color,Guide.title(p),Geom.beeswarm(padding = 1mm),Theme(bar_spacing=1mm,point_size=0.5mm),Scale.color_discrete_manual(palette...));
+	                    pl = plot(p_df,x = :variable,y = :value, color = :color,Guide.title(p),Guide.xlabel("Orbit"),Guide.ylabel("Orbit frequency (per node)",orientation=:vertical),Geom.beeswarm(padding = 1mm),Theme(bar_spacing=1mm,point_size=0.5mm),Scale.color_discrete_manual(palette...));
 	                    plot_grid[i] = pl
 						#draw(SVG("$(output_dir)/$(p)_beeswarm.svg",30cm,20cm),pl)
 	                end
@@ -334,9 +382,6 @@ end;
 
 # ╔═╡ f7b11d20-9e7e-4197-b9b4-136d3e86644f
 DataFrame(pathways = zero_candidate_pathways)
-
-# ╔═╡ df210827-7a7e-4181-bdae-c65974ff81db
-zero_candidate_pathways[8]
 
 # ╔═╡ 534b73a8-ced9-4e8c-a9df-ef73af97198d
 begin
@@ -464,16 +509,17 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
+CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
 Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataPreprocessing = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
 Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 GraphletAnalysis = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
-JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 ProjectFunctions = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
@@ -482,15 +528,16 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 CSV = "~0.9.11"
 CategoricalArrays = "~0.10.2"
 Colors = "~0.12.8"
+CommonMark = "~0.8.4"
 Compose = "~0.9.2"
 DataFrames = "~1.3.0"
 DataPreprocessing = "~0.1.0"
 Gadfly = "~1.3.4"
 GraphletAnalysis = "~0.1.0"
 GraphletCounting = "~0.1.0"
-JLD = "~0.12.3"
 JLD2 = "~0.4.15"
 NetworkConstruction = "~0.1.0"
+PlutoUI = "~0.7.22"
 ProjectFunctions = "~0.1.0"
 Revise = "~3.1.20"
 StatsBase = "~0.33.13"
@@ -505,6 +552,12 @@ deps = ["LinearAlgebra"]
 git-tree-sha1 = "485ee0867925449198280d4af84bdb46a2a404d0"
 uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "1.0.1"
+
+[[AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "abb72771fd8895a7ebd83d5632dc4b989b022b5b"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.1.2"
 
 [[Adapt]]
 deps = ["LinearAlgebra"]
@@ -537,18 +590,6 @@ version = "1.0.1"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[Blosc]]
-deps = ["Blosc_jll"]
-git-tree-sha1 = "217da19d6f3a94753e580a8bc241c7cbefd9281f"
-uuid = "a74b3585-a348-5f62-a45c-50e91977d574"
-version = "0.7.1"
-
-[[Blosc_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Lz4_jll", "Pkg", "Zlib_jll", "Zstd_jll"]
-git-tree-sha1 = "e747dac84f39c62aff6956651ec359686490134e"
-uuid = "0b7ba130-8d10-5ba8-a3d6-c5182647fed9"
-version = "1.21.0+0"
 
 [[Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -616,6 +657,12 @@ git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
 
+[[CommonMark]]
+deps = ["Crayons", "JSON", "URIs"]
+git-tree-sha1 = "7a0d74b8b007c8170dd48166fdc4be049bf68f70"
+uuid = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
+version = "0.8.4"
+
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
 git-tree-sha1 = "dce3e3fea680869eaa0b774b2e8343e9ff442313"
@@ -670,7 +717,7 @@ version = "1.3.0"
 
 [[DataPreprocessing]]
 deps = ["CSV", "Cairo", "Compose", "DataFrames", "Gadfly", "LinearAlgebra", "RCall", "Statistics"]
-path = "../../home/osbornejr/app/packages/DataPreprocessing"
+path = "/home/osbornejr/app/packages/DataPreprocessing"
 uuid = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
 version = "0.1.0"
 
@@ -838,13 +885,13 @@ version = "1.3.13+4"
 
 [[GraphletAnalysis]]
 deps = ["DataFrames", "DataPreprocessing", "GraphletCounting", "LightGraphs", "NetworkConstruction", "RCall"]
-path = "../../home/osbornejr/app/packages/GraphletAnalysis"
+path = "/home/osbornejr/app/packages/GraphletAnalysis"
 uuid = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 version = "0.1.0"
 
 [[GraphletCounting]]
 deps = ["DataFrames", "DataStructures", "Distributed", "LightGraphs", "ProgressMeter", "RCall"]
-path = "../../home/osbornejr/app/packages/GraphletCounting"
+path = "/home/osbornejr/app/packages/GraphletCounting"
 uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 version = "0.1.0"
 
@@ -852,18 +899,6 @@ version = "0.1.0"
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
-
-[[HDF5]]
-deps = ["Blosc", "Compat", "HDF5_jll", "Libdl", "Mmap", "Random", "Requires"]
-git-tree-sha1 = "698c099c6613d7b7f151832868728f426abe698b"
-uuid = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
-version = "0.15.7"
-
-[[HDF5_jll]]
-deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "OpenSSL_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "fd83fa0bde42e01952757f01149dd968c06c4dba"
-uuid = "0234f1f7-429e-5d53-9886-15a909be8d59"
-version = "1.12.0+1"
 
 [[HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Gettext_jll", "Glib_jll", "Graphite2_jll", "ICU_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
@@ -877,11 +912,28 @@ git-tree-sha1 = "de4a6f9e7c4710ced6838ca906f81905f7385fd6"
 uuid = "a1b4810d-1bce-5fbd-ac56-80944d57a21f"
 version = "0.2.0"
 
+[[Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.4"
+
+[[HypertextLiteral]]
+git-tree-sha1 = "2b078b5a615c6c0396c77810d92ee8c6f470d238"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.3"
+
 [[ICU_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "6ce9cf3c5490b045710d60ac3fd2fe48188846b3"
 uuid = "a51ab1cf-af8e-5615-a023-bc2c838bba6b"
 version = "67.1.0+3"
+
+[[IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.2"
 
 [[IndirectArrays]]
 git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
@@ -946,12 +998,6 @@ version = "1.4.0"
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
 version = "1.0.0"
-
-[[JLD]]
-deps = ["FileIO", "HDF5", "Printf"]
-git-tree-sha1 = "1d291ba1730de859903b480e6f85a0dc40c19dcb"
-uuid = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
-version = "0.12.3"
 
 [[JLD2]]
 deps = ["DataStructures", "FileIO", "MacroTools", "Mmap", "Pkg", "Printf", "Reexport", "TranscodingStreams", "UUIDs"]
@@ -1093,12 +1139,6 @@ git-tree-sha1 = "491a883c4fef1103077a7f648961adbf9c8dd933"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
 version = "2.1.2"
 
-[[Lz4_jll]]
-deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "51b1db0732bbdcfabb60e36095cc3ed9c0016932"
-uuid = "5ced341a-0733-55b8-9ab6-a4889d929147"
-version = "1.9.2+2"
-
 [[MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg"]
 git-tree-sha1 = "5455aef09b40e5020e1520f551fa3135040d4ed0"
@@ -1154,7 +1194,7 @@ version = "0.3.5"
 
 [[NetworkConstruction]]
 deps = ["DataFrames", "DataPreprocessing", "Distributed", "InformationMeasures", "LightGraphs", "LinearAlgebra", "Printf", "ProgressMeter", "RCall", "SharedArrays", "Statistics", "StatsBase"]
-path = "../../home/osbornejr/app/packages/NetworkConstruction"
+path = "/home/osbornejr/app/packages/NetworkConstruction"
 uuid = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 version = "0.1.0"
 
@@ -1174,12 +1214,6 @@ deps = ["Libdl", "Pkg"]
 git-tree-sha1 = "d22054f66695fe580009c09e765175cbf7f13031"
 uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
 version = "0.7.1+0"
-
-[[OpenSSL_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "71bbbc616a1d710879f5a1021bcba65ffba6ce58"
-uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "1.1.1+6"
 
 [[OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1226,6 +1260,12 @@ version = "0.40.0+0"
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
+[[PlutoUI]]
+deps = ["AbstractPlutoDingetjes", "Base64", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
+git-tree-sha1 = "565564f615ba8c4e4f40f5d29784aa50a8f7bbaf"
+uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+version = "0.7.22"
+
 [[PooledArrays]]
 deps = ["DataAPI", "Future"]
 git-tree-sha1 = "db3a23166af8aebf4db5ef87ac5b00d36eb771e2"
@@ -1260,7 +1300,7 @@ version = "1.7.1"
 
 [[ProjectFunctions]]
 deps = ["JLD2"]
-path = "../../home/osbornejr/app/packages/ProjectFunctions"
+path = "/home/osbornejr/app/packages/ProjectFunctions"
 uuid = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 version = "0.1.0"
 
@@ -1436,6 +1476,11 @@ git-tree-sha1 = "216b95ea110b5972db65aa90f88d8d89dcb8851c"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.6"
 
+[[URIs]]
+git-tree-sha1 = "97bbe755a53fe859669cd907f2d96aee8d2c1355"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.3.0"
+
 [[UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
@@ -1532,12 +1577,6 @@ git-tree-sha1 = "320228915c8debb12cb434c59057290f0834dbf6"
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
 version = "1.2.11+18"
 
-[[Zstd_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "2c1332c54931e83f8f94d310fa447fd743e8d600"
-uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
-version = "1.4.8+0"
-
 [[libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
 git-tree-sha1 = "6abbc424248097d69c0c87ba50fcb0753f93e0ee"
@@ -1553,14 +1592,22 @@ version = "1.40.0+2"
 
 # ╔═╡ Cell order:
 # ╟─74c92bd0-ef4f-41a0-bc4b-5063ffcd12df
+# ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
 # ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
+# ╠═a1d13b83-5713-4910-82d8-1f514dc04a3c
+# ╠═0f82d5eb-c1d1-4406-b356-ada7d229074e
+# ╠═4771b9a4-fe7b-4678-8175-542b012094d4
 # ╟─28836056-6604-4918-9f74-39bf81ad0559
+# ╟─67f24598-4b27-4dd8-b533-45c1cc4e44a6
+# ╟─4861b8cf-cf59-4cfd-b412-089ccfc00e90
+# ╟─df21e8f4-7af6-4401-a8d7-e4f21e9c7139
+# ╟─4ef32b7a-d7f3-4642-a75c-2870a5130ade
 # ╟─8267a9ad-9551-4842-9194-5e250e79305e
 # ╟─2733aa29-9e63-4b60-a7ee-0e9abcd62974
 # ╟─e01833de-63e0-493a-8d6c-0240c1fe1633
 # ╟─3c79ec7e-7e64-4f24-aa65-35c79167301b
-# ╠═08edac1b-f869-4464-828d-bcb60c64a98e
+# ╟─08edac1b-f869-4464-828d-bcb60c64a98e
 # ╟─752f5e2a-6a63-442f-9e28-90db65b6eeb1
 # ╟─f759d399-f76a-4cb5-b0d6-bf64aab1380a
 # ╟─a380f1ed-32bb-46f1-bd2c-8c633afa70d0
@@ -1574,17 +1621,16 @@ version = "1.40.0+2"
 # ╟─18dbd2ba-ad4c-40fc-92bc-3b8579d8d952
 # ╟─2c0de2b0-3d95-4abd-a7fe-7bbcf3fcfd52
 # ╟─51ee4885-582a-4349-8d91-98f583b8a510
-# ╟─df210827-7a7e-4181-bdae-c65974ff81db
 # ╟─07904aca-d5da-444a-8fa5-55f6af49eb23
 # ╟─7a0255c6-82c6-48c6-83e1-cd83606b05dc
 # ╟─7f35a6f0-71e3-4448-8dd1-fe359ac73f94
-# ╠═84aa8941-8766-4482-ba97-cfb5c477a072
+# ╟─84aa8941-8766-4482-ba97-cfb5c477a072
 # ╟─877da2cf-fe40-4bfd-b44c-478427f3c81f
 # ╟─99f1209a-3dea-4c60-8b5b-fe7da9219a1d
-# ╟─d2f8505a-6d00-4a75-85d9-aba9bb251302
 # ╟─3f3e6d45-d576-4385-bea8-e55a37d34512
 # ╟─f34235b1-0e47-4f28-94db-ce3cfa598a91
 # ╟─9bb259ec-8528-4049-80bf-5fa0d543e47c
+# ╟─c2ddfc1b-5ef7-4c0f-82fb-d86c015aba74
 # ╟─f24286b1-a29f-49dc-8005-058dfcf4440f
 # ╟─c5f26162-6c29-46c2-b08b-8832ea301207
 # ╟─33367e44-3233-4200-a091-a4bd4ea9adeb
