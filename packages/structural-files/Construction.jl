@@ -691,6 +691,7 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 ## method to find all orbit permutations of a type set
                 set = ["coding","noncoding"]
                 
+commit reset
                 # specify orbit classes
                 orbit = [1,1,1,1]
                 order = length(orbit)
