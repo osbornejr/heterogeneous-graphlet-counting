@@ -665,7 +665,7 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
                 graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]])
                 ## cycles (differentiate between instances where a) a triplet of same type, which will occupy first three slots; b) at least on pair of adjacent nodes are of same type, in which case make first two be the pair (and if there are two pairs, choose first pair via sorting),; or c) all adjacent node pairs are of different type, in which case let any matching non adjacent pairs take slots 1 and 3, and if there two non adjacent pairs, choose first pair via sorting).    
             elseif (graphlet_names[el][5] == "4-cycle")
-             dddddd   
+                
             #for cliques, just order everything
             else 
                 graphlet_names[el][1:4] = sort(graphlet_names[el][1:4])
