@@ -683,6 +683,31 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
                 #TODO this needs to be more generalised for any dimension of gridstack/number of pathways 
                 plots[2,6] = legend;
                 draw(SVG("$(output_dir)/known_ecdfs.svg",30cm,20cm),gridstack(plots))
+                
+
+                ## make a table to analyse different candidate levels for coincident graphlets
+
+
+                ## method to find all orbit permutations of a type set
+                set = ["coding","noncoding"]
+                
+                # specify orbit classes
+                orbit = [1,1,1,1]
+                order = length(orbit)
+                ##get all possible combinations from set (before sorting)
+                base = collect.(vcat(collect(Iterators.product(repeat([set],order)...))...))
+                #sort via each orbit equivalence class 
+                for o in unique(orbit)
+                    template = orbit.==o
+                    for i in base
+                        i[template] = sort(i[template])
+                    end
+                end
+                #find unique permutations
+                gs = unique(base)  
+                    
+
+
 
         end
 end
