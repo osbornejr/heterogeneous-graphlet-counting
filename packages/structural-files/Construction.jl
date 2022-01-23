@@ -17,9 +17,9 @@ function distributed_setup(inclusions::Array{String,1})
                 end
         end
 end
+
+
 function webpage_construction(raw_counts::DataFrame,params::RunParameters)
-
-
         @info "Building website directory structure..."
         ##establish output directories  
         run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)
@@ -31,31 +31,29 @@ function webpage_construction(raw_counts::DataFrame,params::RunParameters)
         run(`mkdir -p "$(params.website_dir)/$(params.page_name)"`)
         run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/tableinput"`)
         run(`mkdir -p "$(params.website_dir)/_assets/$(params.page_name)/plots"`)
+end
+
+function network_construction(raw_counts::DataFrame,params::RunParameters;clear_cache::Bool=false,archive::Bool=false)
                 
         ##Cache setup
         #New method: cache directory updates folder by folder as we go. Avoids need for moving files around,symbolic links etc. 
         cache_dir = "$cwd/output/cache/$(params.test_name)"
+        
         run(`mkdir -p $(cache_dir)`)
-        ## Check if there are cached files for runs with similar parameters (i.e. the same before irelevant parameters are invoked for a specific output)
-        #TODO improve this process to automatically detect via a dependency tree (will also tidy up cache dir)
-        #similarity matrix
-        #sim_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)*/similarity*",cwd)
-        #check if any already exist
-        #if(length(sim_check)>0)
-                #check if actual cache already exists
-        #       if (!(cache_dir in first.(splitdir.(sim_check))))
-        #               run(`cp $(sim_check[1]) $(cache_dir)/`)
-        #       end
-        #end
-        #functional annotation
-        #func_check = glob("output/cache/$(params.test_name)_$(params.expression_cutoff)_$(params.norm_method)_$(params.variance_percent)_$(params.coexpression)_$(params.threshold)_$(params.threshold_method)*/simil_$(params.threshold)_$(params.threshold_method)*/func*",cwd)
-        #check if any already exist
-        #if(length(func_check)>0)
-                #check if actual cache already exists
-        #       if (!(cache_dir in first.(splitdir.(func_check))))
-        #               run(`cp $(func_check[1]) $(cache_dir)/`)
-        #       end
-        #end
+        if (clear_cache)
+            if(archive)
+                #if both clear cache and archive are true, then cache will be moved to archive. otherwise, cache will be deleted permanently.
+                @info "archiving previous cache files at archives/$(params.test_name)..."
+                run(`mkdir -p archive`)
+                run(`mv $(cache_dir) archive/$(params.test_name)`)
+                run(`mkdir -p $(cache_dir)`)
+            else
+                @info "clearing previous cache..."
+                run(`rm -r $(cache_dir)`)
+                run(`mkdir -p $(cache_dir)`)
+            end
+        end
+        
         #Processing data:
         @info "Processing raw data..."
         
