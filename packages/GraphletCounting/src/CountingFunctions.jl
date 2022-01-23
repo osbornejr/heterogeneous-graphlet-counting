@@ -665,18 +665,44 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
                 graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]])
                 ## cycles (differentiate between instances where a) there is a triplet of same type, which will occupy first three slots; b) at least on pair of adjacent nodes are of same type, in which case make first two be the pair (and if there are two pairs, choose first pair via sorting),; or c) all adjacent node pairs are of different type, in which case let any matching non adjacent pairs take slots 1 and 3, and if there two non adjacent pairs, choose first pair via sorting).    
             elseif (graphlet_names[el][5] == "4-cycle")
+                #get occurences of each type in graphlet
                 occs = countmap(graphlet_names[el][1:4])
                 moccs = max(values(occs)...)
                 if (moccs == 4)
-                    # no switching needed 
+                    # no switching needed (homogeneous graphlet) 
                 elseif (moccs == 3)
                     #triplet case
                     #find type and position that is not in triplet
-                    solo = collect(keys(filter(x->last(x) !== moccs,occs)))[1],
+                    solo = collect(keys(filter(x->last(x) !== moccs,occs)))[1]
                     switch = findall(x->x == solo,graphlet_names[el])
                     #switch solo type to last position (potentially trivially but thats ok) 
                     graphlet_names[el][switch] = graphlet_names[el][4]
                     graphlet_names[el][4] = solo
+                elseif (moccs == 2)
+                    ## find which first type that matches max occs 
+                    primary_pair_type = sort(collect(keys(filter(x->last(x) == moccs,occs))))[1]
+                    sig = graphlet_names[el].==primary_pair_type
+                    ##check for case c)
+                    if (sig == [true false true false false])
+                        ## sort non primary non-adjecent pair nodes 
+                        graphlet_names[el][[2,4]] = sort(graphlet_names[el][[2,4]])
+                    elseif (sig == [false true false true false])
+                        ##switch primary nonadjacent pair to positions 1 and 3, and sort the other nodes
+                        graphlet_names[el][[2,4]] = sort(graphlet_names[el][[1,3]])
+                        graphlet_names[el][[1,3]] = [primary_pair_type, primary_pair_type]
+                    else
+                        ## it must be case b)
+                        graphlet_names[el][[3,4]] = sort(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]))
+                        graphlet_names[el][[1,2]] = [primary_pair_type, primary_pair_type]
+
+                    end
+                else
+                    ## all types must be unique (and thus there must be at least 4 types present) so we sort on all nodes
+                    graphlet_names[el][1:4] = sort(graphlet_names[el][1:4])
+
+                    #now need to find out if 
+                    #if (length(occs) == 2)
+
                 end
             #for cliques, just order everything
             else 
