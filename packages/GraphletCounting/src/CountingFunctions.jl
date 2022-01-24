@@ -1,4 +1,4 @@
-using DataStructures,Distributed,ProgressMeter
+using DataStructures,Distributed,ProgressMeter,StatsBase
 
 #module GraphletCounting
 #export Neighbours, mergecum, add3graphlets
@@ -663,9 +663,14 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
             elseif (graphlet_names[el][5] == "4-chord")
                 graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
                 graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]])
-                ## cycles (differentiate between instances where a) a triplet of same type, which will occupy first three slots; b) at least on pair of adjacent nodes are of same type, in which case make first two be the pair (and if there are two pairs, choose first pair via sorting),; or c) all adjacent node pairs are of different type, in which case let any matching non adjacent pairs take slots 1 and 3, and if there two non adjacent pairs, choose first pair via sorting).    
+                ## cycles (differentiate between instances where a) there is a triplet of same type, which will occupy first three slots; b) at least on pair of adjacent nodes are of same type, in which case make first two be the pair (and if there are two pairs, choose first pair via sorting),; or c) all adjacent node pairs are of different type, in which case let any matching non adjacent pairs take slots 1 and 3, and if there two non adjacent pairs, choose first pair via sorting).    
             elseif (graphlet_names[el][5] == "4-cycle")
-                
+                occs = countmap(graphlet_names[el][1:4])
+                moccs = max(values(occs)...)
+                if (moccs == 4)
+
+                elseif (moccs == 3)
+                end
             #for cliques, just order everything
             else 
                 graphlet_names[el][1:4] = sort(graphlet_names[el][1:4])
