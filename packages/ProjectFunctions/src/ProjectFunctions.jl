@@ -1,6 +1,7 @@
 module ProjectFunctions
 export cache_save, cache_load,  @name, RunParameters
-using JLD2, ProgressMeter
+using Distributed, JLD2, CSV, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions,ProgressMeter,StatsBase,Gadfly,Compose,DataFrames,YAML,Dates
+using DataPreprocessing, NetworkConstruction,GraphletCounting,GraphletAnalysis
 ### Include all source files TODO make this occur more fluently and automatically by creating a package, and using Revise
 cwd = ENV["JULIA_PROJECT"]
 #define structure for run_parameters (nb... at this stage has to be rerun if values change). Also needs to be defined before including any package that depends on it
@@ -60,19 +61,22 @@ function cache_load(file_name::String,load_object::String)
     end
 end
 
-function network_construction(raw_counts::DataFrame,params::RunParameters;clear_cache::Bool=false,archive::Bool=false)
-                
+
+function network_construction(raw_counts::DataFrame,config_file::String;clear_cache::Bool=false,archive::Bool=false)
+        #Parameter setup
+        params = YAML.load_file(config_file)
+
         ##Cache setup
         #New method: cache directory updates folder by folder as we go. Avoids need for moving files around,symbolic links etc. 
-        cache_dir = "$cwd/output/cache/$(params.test_name)"
+            cache_dir = "$cwd/output/cache/$(params["test_name"])"
         
         run(`mkdir -p $(cache_dir)`)
         if (clear_cache)
             if(archive)
                 #if both clear cache and archive are true, then cache will be moved to archive. otherwise, cache will be deleted permanently.
-                @info "archiving previous cache files at archives/$(params.test_name)..."
-                run(`mkdir -p archive`)
-                run(`mv $(cache_dir) archive/$(params.test_name)`)
+                    @info "Archiving previous cache files at archives/$(params["test_name"])..."
+                    run(`mkdir -p $(cwd)/output/cache/archive`)
+                    run(`mv $(cache_dir) archive/$(params["test_name"]*"_"*string(now()))`)
                 run(`mkdir -p $(cache_dir)`)
             else
                 @info "clearing previous cache..."
@@ -86,38 +90,38 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
         
         ## Clean - remove transcripts with total counts across all samples less than Cut
         ##update cache
-        cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)"
+        cache_dir = "$cwd/output/cache/$(params["test_name"])/cutoff/$(params["data-preprocessing"]["expression_cutoff"])"
         run(`mkdir -p $(cache_dir)`)
         
         ##plot before cut
-        #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+        #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
         
-        clean_counts = DataPreprocessing.clean_raw_counts(raw_counts,params.expression_cutoff)
+        clean_counts = DataPreprocessing.clean_raw_counts(raw_counts,params["data-preprocessing"]["expression_cutoff"])
         
         ##plot after cut
-        #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params.website_dir)/_assets/$(params.page_name)/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+        #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
         
         #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
         
         ### Normalisation
         ##update cache
-        cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)"
+        cache_dir = "$cwd/output/cache/$(params["test_name"])/cutoff/$(params["data-preprocessing"]["expression_cutoff"])/normalisation/$(params["data-preprocessing"]["norm_method"])"
         run(`mkdir -p $(cache_dir)`)
 
-        norm_counts = DataPreprocessing.normalise_clean_counts(clean_counts,params.norm_method)
+        norm_counts = DataPreprocessing.normalise_clean_counts(clean_counts,params["data-preprocessing"]["norm_method"])
 
         ##Sampling for most variable transcripts
         ##update cache
-        cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)"
+        cache_dir = "$cwd/output/cache/$(params["test_name"])/cutoff/$(params["data-preprocessing"]["expression_cutoff"])/normalisation/$(params["data-preprocessing"]["norm_method"])/sampling/$(params["data-preprocessing"]["variance_percent"])"
         run(`mkdir -p $(cache_dir)`)
 
-        sample_counts = DataPreprocessing.sample_norm_counts(norm_counts,params.variance_percent)
+        sample_counts = DataPreprocessing.sample_norm_counts(norm_counts,params["data-preprocessing"]["variance_percent"])
 
         ##Network construction
         @info "Constructing the network..."
         ##Measure of coexpression
         ##update cache
-        cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)"
+        cache_dir = "$cwd/output/cache/$(params["test_name"])/cutoff/$(params["data-preprocessing"]["expression_cutoff"])/normalisation/$(params["data-preprocessing"]["norm_method"])/sampling/$(params["data-preprocessing"]["variance_percent"])/similarity/$(params["network-construction"]["coexpression"])"
         run(`mkdir -p $(cache_dir)`)
         
         #similarity_matrix=mutual_information(data)
@@ -128,7 +132,7 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
                 similarity_matrix = cache_load(sim_file,"similarity_matrix")
         else
                 @info "Generating similarity matrix..."
-                similarity_matrix = NetworkConstruction.coexpression_measure(sample_data,params.coexpression)
+                similarity_matrix = NetworkConstruction.coexpression_measure(sample_data,params["network-construction"]["coexpression"])
                 @info "Saving similarity matrix at $cache_dir..."
                 cache_save(sim_file,"similarity_matrix"=>similarity_matrix)
         end
@@ -136,7 +140,7 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
 
         ## Adjacency matrix 
         ##update cache
-        cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)"
+        cache_dir = "$cwd/output/cache/$(params["test_name"])/cutoff/$(params["data-preprocessing"]["expression_cutoff"])/normalisation/$(params["data-preprocessing"]["norm_method"])/sampling/$(params["data-preprocessing"]["variance_percent"])/similarity/$(params["network-construction"]["coexpression"])/threshold/$(params["network-construction"]["threshold"])/threshold_method/$(params["network-construction"]["threshold_method"])"
         run(`mkdir -p $(cache_dir)`)
         adj_file = "$cache_dir/adjacency_matrix.jld2"
         if (isfile(adj_file))
@@ -145,13 +149,13 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
                 adj_matrix = cache_load(adj_file,"adjacency_matrix")
         else
                 @info "Generating adjacency matrix..."
-                if (params.threshold_method=="empirical_dist")
-                        pre_adj_matrix = NetworkConstruction.empirical_dist_adjacency(similarity_matrix,params.threshold)
-                elseif (params.threshold_method=="empirical_dist_zero")
-                        pre_adj_matrix = NetworkConstruction.empirical_dist_zero_adjacency(similarity_matrix,params.threshold)
-                elseif (params.threshold_method=="hard")
-                        pre_adj_matrix = NetworkConstruction.adjacency(similarity_matrix,params.threshold)
-                elseif (params.threshold_method=="top")
+                if (params["network-construction"]["threshold_method"]=="empirical_dist")
+                    pre_adj_matrix = NetworkConstruction.empirical_dist_adjacency(similarity_matrix,params["network-construction"]["threshold"])
+                elseif (params["network-construction"]["threshold_method"]=="empirical_dist_zero")
+                    pre_adj_matrix = NetworkConstruction.empirical_dist_zero_adjacency(similarity_matrix,params["network-construction"]["threshold"])
+                elseif (params["network-construction"]["threshold_method"]=="hard")
+                    pre_adj_matrix = NetworkConstruction.adjacency(similarity_matrix,params["network-construction"]["threshold"])
+                elseif (params["network-construction"]["threshold_method"]=="top")
                         ##TODO setting top x value here for now; should be a parameter, but as an Int rather than Float as threshold param is for other methods
                         pre_adj_matrix = NetworkConstruction.top_adjacency(similarity_matrix,10)
                 end
@@ -170,7 +174,7 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
         edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
         
         #Synthetic test (just override vertex and edge lists here-- is that ok?)
-        if(params.test_name == "Synthetic")
+        if(params["test_name"] == "Synthetic")
             n = length(vertexlist) 
             m = length(edgelist) 
             # construct erdos renyi random network based on vertex and edge structure of real network
@@ -193,7 +197,7 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
         
         #Network Analysis
         ##update cache-- here we split cache into separate analysis folders, as each analysis is independent of the others
-        cache_dir = "$cwd/output/cache/$(params.test_name)/cutoff/$(params.expression_cutoff)/normalisation/$(params.norm_method)/sampling/$(params.variance_percent)/similarity/$(params.coexpression)/threshold/$(params.threshold)/threshold_method/$(params.threshold_method)/analysis"
+        cache_dir = "$cwd/output/cache/$(params["test_name"])/cutoff/$(params["data-preprocessing"]["expression_cutoff"])/normalisation/$(params["data-preprocessing"]["norm_method"])/sampling/$(params["data-preprocessing"]["variance_percent"])/similarity/$(params["network-construction"]["coexpression"])/threshold/$(params["network-construction"]["threshold"])/threshold_method/$(params["network-construction"]["threshold_method"])/analysis"
         run(`mkdir -p $(cache_dir)`)
         @info "Analysing network..."
         #Type representations 
@@ -203,27 +207,27 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
         run(`mkdir -p $(anal_dir)`)
         @info "Identifying communities..."
         ##use gene ids here, as they have more chance of getting a GO annotation
-        if(params.func_annotate==true)
+        if(params["analysis"]["func_annotate"]==true)
                 vertex_gene_names = network_counts[:gene_id]
-                #community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
+                #community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
                 community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain") 
                 ## functional annotations of communities
                 func_file = "$anal_dir/func_annotations.jld2" 
                 if (isfile(func_file))
                         functional_annotations = cache_load(func_file,"functional annotations")
                 else
-                        #functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params.website_dir)/_assets/$(params.page_name)/tableinput/")       
+                    #functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/tableinput/")       
                         functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75")       
                         cache_save(func_file,"functional annotations"=>functional_annotations)
                 end 
         else
-                #community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params.website_dir)/$(params.page_name)") 
+            #community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
                 community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain") 
         end
         #find nodes who are not in any community (usually because they are not in connected component).
         community_orphans = findall(x->x==0,in.(1:length(vertexlist),Ref(community_vertices.name)))
 
-        if(params.graphlet_counting==true)
+        if(params["analysis"]["graphlet_counting"]==true)
 
                 ##update cache
                 anal_dir = "$cache_dir/graphlets"
@@ -255,9 +259,9 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
                 @info "Looking at typed representations of graphlets..."
                 
                 ##update cache
-                rep_dir = "$anal_dir/typed_representations/nullmodel/$(params.null_model_size)_simulations"
+                rep_dir = "$anal_dir/typed_representations/nullmodel/$(params["analysis"]["null_model_size"])_simulations"
                 run(`mkdir -p $(rep_dir)`)
-                N=params.null_model_size
+                N=params["analysis"]["null_model_size"]
                 rand_graphlets_file = "$rep_dir/rand_graphlets.jld2"
                 if (isfile(rand_graphlets_file))
                         @info "Loading randomised vertices and graphlet counts from $rep_dir..."
@@ -322,9 +326,9 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
                                 summary.variable = heg*"_"*hog
                                 append!(summaries,summary)
                                 ##histogram for each heterogeneous graphlet
-                                #histogram(rand_fil_fil,:value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_histogram.svg")
+                                    #histogram(rand_fil_fil,:value,:graphlet,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(heg)_$(hog)_histogram.svg")
                                 ##log version
-                                #histogram(rand_fil_fil,:log_value,:graphlet,"$(params.website_dir)/_assets/$(params.page_name)/plots/$(heg)_$(hog)_log_histogram.svg")
+                                #histogram(rand_fil_fil,:log_value,:graphlet,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(heg)_$(hog)_log_histogram.svg")
                                 rand_vals = rand_fil_fil[!,:value]
                                 log_rand_vals =rand_fil_fil[!,:log_value]
                                 rand_exp = sum(rand_vals)/N
@@ -356,7 +360,7 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
                         log_rand_fil.value =log.(log_rand_fil.value)
                         #SVG plot (for web)
                         #p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
-                        #draw(SVG("$(params.website_dir)/_assets/$(params.page_name)/plots/$(hog)_boxplot.svg",4inch,6inch),p)
+                        #draw(SVG("$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(hog)_boxplot.svg",4inch,6inch),p)
                         #TeX plot (via PGFPlots) 
                         #add real log values to summaries, order from lowest to highest)
                         summaries.values = log_real_fil.value
@@ -379,8 +383,8 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
                 html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet)                          
                 html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet)                              
                 #save for website version
-                #html_table_maker(sig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
-                #html_table_maker(insig_graphlets,"$(params.website_dir)/_assets/$(params.page_name)/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
+                    #html_table_maker(sig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
+                    #html_table_maker(insig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
                 ##look at edge types in randomised networks
                 real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
                 rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
@@ -696,5 +700,5 @@ function network_construction(raw_counts::DataFrame,params::RunParameters;clear_
 
         end
 end
-
+    
 end # module
