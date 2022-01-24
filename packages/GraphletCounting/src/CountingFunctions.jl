@@ -668,8 +668,15 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
                 occs = countmap(graphlet_names[el][1:4])
                 moccs = max(values(occs)...)
                 if (moccs == 4)
-
+                    # no switching needed 
                 elseif (moccs == 3)
+                    #triplet case
+                    #find type and position that is not in triplet
+                    solo = collect(keys(filter(x->last(x) !== moccs,occs)))[1],
+                    switch = findall(x->x == solo,graphlet_names[el])
+                    #switch solo type to last position (potentially trivially but thats ok) 
+                    graphlet_names[el][switch] = graphlet_names[el][4]
+                    graphlet_names[el][4] = solo
                 end
             #for cliques, just order everything
             else 
