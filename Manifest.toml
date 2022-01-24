@@ -488,12 +488,12 @@ version = "0.1.0"
     RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
 
 [[GraphletCounting]]
-deps = ["DataFrames", "DataStructures", "Distributed", "LightGraphs", "ProgressMeter", "RCall"]
+deps = ["DataFrames", "DataStructures", "Distributed", "LightGraphs", "ProgressMeter", "RCall", "StatsBase"]
 path = "packages/GraphletCounting"
 uuid = "e594a779-c85d-4b11-961b-6a72d4605208"
 version = "0.1.0"
 [[GraphletCounting]]
-deps = ["DataFrames", "DataStructures", "Distributed", "LightGraphs", "ProgressMeter", "RCall"]
+deps = ["DataFrames", "DataStructures", "Distributed", "LightGraphs", "ProgressMeter", "RCall", "StatsBase"]
 path = "packages/GraphletCounting"
 uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 version = "0.1.0"
