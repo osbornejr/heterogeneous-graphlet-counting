@@ -132,7 +132,7 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
                 similarity_matrix = cache_load(sim_file,"similarity_matrix")
         else
                 @info "Generating similarity matrix..."
-                similarity_matrix = NetworkConstruction.coexpression_measure(sample_data,params["network-construction"]["coexpression"])
+                similarity_matrix = NetworkConstruction.coexpression_measure(data_from_dataframe(sample_counts,"data"),params["network-construction"]["coexpression"])
                 @info "Saving similarity matrix at $cache_dir..."
                 cache_save(sim_file,"similarity_matrix"=>similarity_matrix)
         end
