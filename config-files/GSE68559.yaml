@@ -1,0 +1,22 @@
+test_name: GSE68559   
+
+website:
+  page_name: menu1
+  website_dir: "website"
+
+data-preprocessing: 
+  expression_cutoff: 1
+  norm_method: "upper_quartile"
+  variance_percent: 0.025
+    
+network-construction:
+  coexpression: "pidc"
+  threshold: 0.95
+  threshold_method: "empirical-dist-zero"
+
+analysis:    
+  graphlet-counting: true
+  null_model_size: 1000
+  wgcna: false
+  func_annotate: true
+  visualise: false
