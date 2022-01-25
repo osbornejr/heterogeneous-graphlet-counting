@@ -1129,7 +1129,7 @@ uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.4.1"
 
 [[ProjectFunctions]]
-deps = ["JLD2"]
+deps = ["JLD2", "ProgressMeter"]
 path = "packages/ProjectFunctions"
 uuid = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 version = "0.1.0"
