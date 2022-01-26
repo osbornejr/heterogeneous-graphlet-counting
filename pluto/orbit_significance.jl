@@ -81,14 +81,38 @@ md"""
 # Orbit-based biological significance
 """
 
-# ╔═╡ a1d13b83-5713-4910-82d8-1f514dc04a3c
-NetworkConstruction.draw_graphlet(["coding","coding","coding","coding"],"4-clique")
-
 # ╔═╡ 0f82d5eb-c1d1-4406-b356-ada7d229074e
-NetworkConstruction.draw_graphlet("coding_coding_coding_coding_4-path")
+NetworkConstruction.draw_graphlet("coding_coding_coding_coding_4-cycle")
+
+# ╔═╡ 901287ea-9b03-4067-aea1-d039304ebf0a
+NetworkConstruction.draw_graphlet("coding_noncoding_coding_noncoding_4-path")
+
+# ╔═╡ 937fd5dc-1423-468d-8ec6-518f58ae8807
+NetworkConstruction.draw_graphlet("noncoding_coding_uncoding_noncoding_4-path")
+
+# ╔═╡ d999c806-aafe-442d-8ab7-56360b6c60b2
+NetworkConstruction.draw_graphlet("noncoding_coding_coding_noncoding_4-path")
 
 # ╔═╡ 4771b9a4-fe7b-4678-8175-542b012094d4
+NetworkConstruction.draw_graphlet("coding_noncoding_coding_noncoding_4-cycle")
 
+# ╔═╡ cde04746-9a5a-4e8d-8a3b-b6bac523a72e
+NetworkConstruction.draw_graphlet("coding_coding_noncoding_noncoding_4-cycle")
+
+# ╔═╡ 75dec48b-6fa2-426d-978a-f4278552c700
+NetworkConstruction.draw_graphlet("coding_coding_uncoding_noncoding_4-chord")
+
+# ╔═╡ c1622ca4-937e-4ea1-aac5-52fdb9facaa1
+GraphletCounting
+
+# ╔═╡ 229c0a1e-bee6-4fbc-82c7-e317a3a32200
+GraphletAnalysis
+
+# ╔═╡ b7a477ab-09d0-4030-a14d-538a59c6c1bf
+DataPreprocessing
+
+# ╔═╡ 840a1519-5cde-4cfd-8443-6cae5b02a508
+NetworkConstruction
 
 # ╔═╡ 28836056-6604-4918-9f74-39bf81ad0559
 md"""
@@ -243,6 +267,9 @@ begin
 	
 end;
 
+# ╔═╡ 1a4fe9d7-96cb-44b9-8eef-d64d671f50ce
+length(vertexlist)
+
 # ╔═╡ 4861b8cf-cf59-4cfd-b412-089ccfc00e90
 md"""
 |nodes | noncoding nodes | coding nodes | number of edges |
@@ -272,6 +299,9 @@ begin
                 candidate_pathways = collect(keys(candidates))
 
 end;
+
+# ╔═╡ 2a43ebc7-e029-415e-b665-b84eed21094a
+candidates
 
 # ╔═╡ 8267a9ad-9551-4842-9194-5e250e79305e
 top_terms
@@ -513,6 +543,15 @@ end
 
 # ╔═╡ 84aa8941-8766-4482-ba97-cfb5c477a072
 DataFrame(node = collect(keys(sig_nodes_dict)), pathways = collect(values(sig_nodes_dict)),type=vertexlist[sig_nodes])
+
+# ╔═╡ da4aed91-1942-44f5-9bf2-d80937db8c5b
+collect(1:100:1020)
+
+# ╔═╡ 94ac0630-ef54-42fa-92da-07ffecb58b95
+i=1
+
+# ╔═╡ 852b5a3e-d307-4b5a-b09f-c4825b1a7ae5
+collect(i:i+100-1)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1709,9 +1748,19 @@ version = "3.5.0+0"
 # ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
 # ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
-# ╠═a1d13b83-5713-4910-82d8-1f514dc04a3c
 # ╠═0f82d5eb-c1d1-4406-b356-ada7d229074e
+# ╠═901287ea-9b03-4067-aea1-d039304ebf0a
+# ╠═937fd5dc-1423-468d-8ec6-518f58ae8807
+# ╠═d999c806-aafe-442d-8ab7-56360b6c60b2
 # ╠═4771b9a4-fe7b-4678-8175-542b012094d4
+# ╠═cde04746-9a5a-4e8d-8a3b-b6bac523a72e
+# ╠═75dec48b-6fa2-426d-978a-f4278552c700
+# ╠═c1622ca4-937e-4ea1-aac5-52fdb9facaa1
+# ╠═229c0a1e-bee6-4fbc-82c7-e317a3a32200
+# ╠═1a4fe9d7-96cb-44b9-8eef-d64d671f50ce
+# ╠═b7a477ab-09d0-4030-a14d-538a59c6c1bf
+# ╠═840a1519-5cde-4cfd-8443-6cae5b02a508
+# ╠═2a43ebc7-e029-415e-b665-b84eed21094a
 # ╟─28836056-6604-4918-9f74-39bf81ad0559
 # ╟─67f24598-4b27-4dd8-b533-45c1cc4e44a6
 # ╟─4861b8cf-cf59-4cfd-b412-089ccfc00e90
@@ -1753,5 +1802,8 @@ version = "3.5.0+0"
 # ╟─c2d2fe61-9e00-4db8-aa80-97deb551486a
 # ╟─87c1ea4a-26b2-42af-a21d-b6ff80366562
 # ╟─3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
+# ╠═da4aed91-1942-44f5-9bf2-d80937db8c5b
+# ╠═94ac0630-ef54-42fa-92da-07ffecb58b95
+# ╠═852b5a3e-d307-4b5a-b09f-c4825b1a7ae5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
