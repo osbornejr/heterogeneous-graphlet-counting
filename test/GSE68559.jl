@@ -1,8 +1,8 @@
 using RCall,DataFrames,JLD2 
-params = ProjectFunctions.RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.025,"pidc",0.95,"empirical_dist_zero",1000,true,false,true,true)
+#params = ProjectFunctions.RunParameters("GSE68559","menu1","$cwd/website",25,"upper_quartile",0.025,"pidc",0.95,"empirical_dist_zero",1000,true,false,true,true)
 
 #Read in raw counts (cached)
-raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts.jld2"
+raw_counts_file = "$cwd/output/cache/$(params["test_name"])_raw_counts.jld2"
 if (isfile(raw_counts_file))
     raw_counts = cache_load(raw_counts_file,"raw counts")
 else
@@ -22,9 +22,9 @@ biomart_modification = true
 
 
 if(biomart_modification = true)
-	biomart_raw_counts_file = "$cwd/output/cache/$(params.test_name)_raw_counts_biomart.jld2"
+    biomart_raw_counts_file = "$cwd/output/cache/$(params["test_name"])_raw_counts_biomart.jld2"
 	if (isfile(biomart_raw_counts_file))
-		raw_counts = cache_load(biomart_raw_counts_file,"raw counts")
+        raw_counts = cache_load(biomart_raw_counts_file,"raw counts")
 	else
 		#restart R session	
 		R"""
