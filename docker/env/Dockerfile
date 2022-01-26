@@ -2,7 +2,7 @@ FROM julia:latest
 
 USER root
 #add config files
-RUN apt-get install -y unzip ssh
+RUN apt-get update;apt-get install -y unzip ssh
 COPY environment.yml Project.toml Manifest.toml docker/env/startup.jl /tmp/
 RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml /tmp/startup.jl
 #COPY postBuild /usr/local/bin/postBuild.sh
@@ -35,7 +35,7 @@ ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
 #set up MPI variables
 ENV JULIA_MPI_BINARY system
 ENV JULIA_MPI_PATH $CONDA_DIR/envs/$ENV_PREFIX
-RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
+#RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
 #RUN julia --projec#t=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
 #set up MPI.jl to use openMPI 
 #RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.build(\"MPI\");using MPI;MPI.install_mpiexecjl()"
