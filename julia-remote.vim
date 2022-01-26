@@ -26,9 +26,9 @@ wincmd c
 term unison heterogeneous-graphlet-counting 
 wincmd c
 
-"setup terminal for pluto 
+"setup terminal with port connection 
 term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -t julia-server'"
-file pluto
+file julia-port
 wincmd c
 
 "open REPL terminal vertically on right
