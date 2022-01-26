@@ -64,3 +64,10 @@ th.rowNumber, td.rowNumber {
         </html>""")
     close(io)
 end
+
+
+##set up csv string
+#csv = "Nodes,Edges,Components,Nodes in largest component,Maximal degree,communities detected\n"
+#csv = csv*string(length(vertexlist))*","*string(length(edgelist))*","*string(length(components))*","*string(length(largest...))*","*string(max(degrees...))*","*string(length(unique(community_vertices.group)))*"\n"
+#write("$(params.website_dir)/_assets/$(params.page_name)/tableinput/network_stats.csv",csv)
+
