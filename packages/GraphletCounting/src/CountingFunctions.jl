@@ -537,11 +537,10 @@ end
 function t2(d1,d2)
     append!(d1,d2)
     d1
-        
 end
 
 function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",relationships::Bool=false,progress::Bool=false)
-
+    GC.gc(true)
     ##INPUTS TO PER EDGE FUNCTION
     #get neighbourhood for each vertex in advance (rather than calling per-edge)
     neighbourdict=Neighbours(edgelist)
@@ -563,10 +562,12 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
     end 
     #per edge process
     if(run_method == "threads")
+        throw(ArgumentError("threads method is currently not working."))
+        ##NOT WORKING AT PRESENT
         Threads.@threads for h in 1 :size(edgelist,1)
             edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships)
             Chi[h] = edge[1]
-            if (relationships=true)
+            if (relationships==true)
                 Rel[h] = edge[2]
             end
         end
@@ -587,8 +588,8 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
         if(progress==true)
             @info "Distributing edges to workers..."
 
-            res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
-                [(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships))]        
+            res = @showprogress @distributed (GraphletCounting.t2) for h in 1:size(edgelist,1)
+                [(h,GraphletCounting.per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships))]        
             end
         else
             res = @sync @distributed (t2) for h in 1:size(edgelist,1)
@@ -676,17 +677,17 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
                     solo = collect(keys(filter(x->last(x) !== moccs,occs)))[1]
                     switch = findall(x->x == solo,graphlet_names[el])
                     #switch solo type to last position (potentially trivially but thats ok) 
-                    graphlet_names[el][switch] = graphlet_names[el][4]
+                    graphlet_names[el][switch...] = graphlet_names[el][4]
                     graphlet_names[el][4] = solo
                 elseif (moccs == 2)
                     ## find which first type that matches max occs 
                     primary_pair_type = sort(collect(keys(filter(x->last(x) == moccs,occs))))[1]
                     sig = graphlet_names[el].==primary_pair_type
                     ##check for case c)
-                    if (sig == [true false true false false])
+                    if (sig == BitArray(vec([true false true false false])))
                         ## sort non primary non-adjecent pair nodes 
                         graphlet_names[el][[2,4]] = sort(graphlet_names[el][[2,4]])
-                    elseif (sig == [false true false true false])
+                    elseif (sig == BitArray(vec([false true false true false])))
                         ##switch primary nonadjacent pair to positions 1 and 3, and sort the other nodes
                         graphlet_names[el][[2,4]] = sort(graphlet_names[el][[1,3]])
                         graphlet_names[el][[1,3]] = [primary_pair_type, primary_pair_type]
