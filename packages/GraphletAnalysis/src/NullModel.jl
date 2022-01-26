@@ -96,8 +96,6 @@ function null_model_dataframe(null_model_dicts::Array{Dict{String,T},1} where T<
     return df
 end
 
-##allows a function to be broadcast and splat each argument
-splat(f) = args->f(args...)
 
 
 function triangle_edge_switch(vertexlist::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},relationships::Array{Array{Pair{Int64,Int64},1},1},switches::Int)
