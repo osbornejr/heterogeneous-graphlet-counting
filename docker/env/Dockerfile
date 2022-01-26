@@ -47,8 +47,10 @@ ENV  PATH $PATH:$HOME/.julia/bin
  #   /usr/local/bin/postBuild.sh && \
   #  conda deactivate
 
+##set up env variable to dynamically change startupfile to be loaded by julia with -i flag
+ENV startup docker/env/startup.jl
 #setup entrypoint
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
 # default command will launch julia
-CMD julia --project=$PROJECT_DIR/Project.toml
+CMD ["sh", "-c", "julia --project=$PROJECT_DIR/Project.toml -i ${startup}"]

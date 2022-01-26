@@ -8,7 +8,7 @@ help: ## This help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 julia: ## run julia
-	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -it --rm -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
+	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -e startup=config/startup-files/env-startup.jl -it --rm -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
 
 julia-port: ## run julia with access to port 8000
 	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -it --rm -p 8000:8000 -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
