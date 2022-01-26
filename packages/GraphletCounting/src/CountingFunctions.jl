@@ -588,8 +588,8 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
         if(progress==true)
             @info "Distributing edges to workers..."
 
-            res = @showprogress @distributed (GraphletCounting.t2) for h in 1:size(edgelist,1)
-                [(h,GraphletCounting.per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships))]        
+            res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
+                [(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships))]        
             end
         else
             res = @sync @distributed (t2) for h in 1:size(edgelist,1)
