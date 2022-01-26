@@ -1,9 +1,12 @@
-using Distributed, JLD2, CSV, LightGraphs, GraphPlot, Colors, Random, Glob, Distributions,ProgressMeter,StatsBase,Gadfly,Compose,DataFrames,YAML,Dates
-
-function network_construction(raw_counts::DataFrame,config_file::String;clear_cache::Bool=false,archive::Bool=false)
+#using Distributed, JLD2, CSV
+#using StatsBase,Gadfly,Compose,DataFrames,YAML,Dates, LightGraphs, Colors, Random, Distributions, ProgressMeter
+using ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,LightGraphs,Dates,Colors,Gadfly,Compose,DataStructures
+function network_construction(config_file::String;clear_cache::Bool=false,archive::Bool=false)
         #Parameter setup
+        @info "Loading parameters..."
         params = YAML.load_file(config_file)
-
+        @info "Loading raw counts data from $(params["raw_counts_file"])"
+        raw_counts = cache_load(cwd*"/"*params["raw_counts_file"],"raw counts")
         ##Cache setup
         #New method: cache directory updates folder by folder as we go. Avoids need for moving files around,symbolic links etc. 
             cache_dir = "$cwd/output/cache/$(params["test_name"])"
@@ -110,8 +113,8 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
         #Trim nodes with degree zero
         network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
         #maintain list of vertices in graph
-        vertex_names = network_counts[:transcript_id]
-        vertexlist = copy(network_counts[:transcript_type])     
+        vertex_names = network_counts[!,:transcript_id]
+        vertexlist = copy(network_counts[!,:transcript_type])     
         edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
         
         #Synthetic test (just override vertex and edge lists here-- is that ok?)
@@ -149,7 +152,7 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
         @info "Identifying communities..."
         ##use gene ids here, as they have more chance of getting a GO annotation
         if(params["analysis"]["func_annotate"]==true)
-                vertex_gene_names = network_counts[:gene_id]
+                vertex_gene_names = network_counts[!,:gene_id]
                 #community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
                 community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain") 
                 ## functional annotations of communities
@@ -217,7 +220,7 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
                         @info "Counting graphlets on null model" 
                         if (null_run=="distributed-short")
                                 #rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed-old")
-                                rand_graphlet_counts = @showprogress pmap(x->count_graphlets(x,edgelist,4,run_method="serial"),rand_types_set,batch_size =10)
+                                rand_graphlet_counts = @showprogress pmap(x->GraphletCounting.count_graphlets(x,edgelist,4,run_method="serial"),rand_types_set,batch_size =10)
                         end
                         if (null_run=="distributed-long")
                                 #rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
@@ -237,7 +240,7 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
                 
                 ##convert graphlet_counts dict output to default dictionary, returning 0 for graphlets that don't exist in the real network
                 real_dict = DefaultDict(0,graphlet_counts)
-                hom_graphlets = unique(last.(split.(unique(real_df[:graphlet]),"_")))
+                hom_graphlets = unique(last.(split.(unique(real_df[!,:graphlet]),"_")))
                 ##array to store all homogonous graphlet dfs
                 hog_array = Array{DataFrame,1}(undef,length(hom_graphlets))       
                 hog_array_under = Array{DataFrame,1}(undef,length(hom_graphlets)) 
@@ -252,9 +255,9 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
                 
                         #get hetero subgraphlets within homogonous type (problem: might not be complete set present in real/rand outputs?)
                         if (occursin("4",hog))
-                                het_graphlets = union(first.(split.(real_fil[:graphlet],"_4")),first.(split.(rand_fil[:graphlet],"_4")))
+                                het_graphlets = union(first.(split.(real_fil[!,:graphlet],"_4")),first.(split.(rand_fil[!,:graphlet],"_4")))
                         elseif (occursin("3",hog))
-                                het_graphlets = union(first.(split.(real_fil[:graphlet],"_3")),first.(split.(real_fil[:graphlet],"_3")))
+                                het_graphlets = union(first.(split.(real_fil[!,:graphlet],"_3")),first.(split.(real_fil[!,:graphlet],"_3")))
                         end
                         #store summaries (for TikZ plot)
                         summaries = DataFrame()
@@ -264,7 +267,7 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
                                 
                                 ##get summary (for tikZ plot)
                                 summary = describe(rand_fil_fil[:,3:3],:min,:q25,:median,:q75,:max)
-                                summary.variable = heg*"_"*hog
+                                summary.variable = [heg*"_"*hog]
                                 append!(summaries,summary)
                                 ##histogram for each heterogeneous graphlet
                                     #histogram(rand_fil_fil,:value,:graphlet,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(heg)_$(hog)_histogram.svg")
@@ -306,7 +309,7 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
                         #add real log values to summaries, order from lowest to highest)
                         summaries.values = log_real_fil.value
                         sort!(summaries,:values)
-                        tex_boxplot(summaries[!,Not(:values)],summaries.values,"output/share/$(hog)_boxplot.tex","input",ylabel="")
+                        #tex_boxplot(summaries[!,Not(:values)],summaries.values,"output/share/$(hog)_boxplot.tex","input",ylabel="")
                         ##leave real values attached here, improves tikz layout
                         merged_summaries[i] = summaries
                         hog_array[i] = hog_df
@@ -314,25 +317,25 @@ function network_construction(raw_counts::DataFrame,config_file::String;clear_ca
                 end
 
                 #merged boxplots
-                tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","input",ylabel = "log value")
+                #tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","input",ylabel = "log value")
 
                 ## find significant graphlets
                 sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
                 insig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array_under)...)
                 
                 #save in output cache
-                html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet)                          
-                html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet)                              
+                NetworkConstruction.html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet)                          
+                NetworkConstruction.html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet)                              
                 #save for website version
-                    #html_table_maker(sig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
-                    #html_table_maker(insig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
+                    #NetworkConstruction.html_table_maker(sig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
+                    #NetworkConstruction.html_table_maker(insig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
                 ##look at edge types in randomised networks
                 real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
                 rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
                 rand_edge_collection = vcat(collect.(rand_types_edgecounts)...)
                 rand_edge_df = DataFrame(graphlet = broadcast(first,rand_edge_collection),value = broadcast(last,rand_edge_collection))
                 random_edges = DataFrame()
-                for t in unique(rand_edge_df[:graphlet])
+                for t in unique(rand_edge_df[!,:graphlet])
                         rand_vals = filter(:graphlet=>x->x==t,rand_edge_df)[!,:value]
                         rand_exp = sum(rand_vals)/N
                         real_obs = real_type_edgecounts[t]
