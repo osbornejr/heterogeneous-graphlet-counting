@@ -1,30 +1,97 @@
 #using Distributed, JLD2, CSV
 #using StatsBase,Gadfly,Compose,DataFrames,YAML,Dates, LightGraphs, Colors, Random, Distributions, ProgressMeter
 using ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,LightGraphs,Dates,Colors,Gadfly,Compose,DataStructures
-function network_construction(config_file::String;clear_cache::Bool=false,archive::Bool=false)
-        #Parameter setup
+
+
+
+function run_all(config_file::String)
+        load_config(config_file)
+        cache_setup()
+end
+
+function load_config(config_file::String)
+        #setup parameters to be read.writable for all functions in this module
         @info "Loading parameters..."
-        params = YAML.load_file(config_file)
+        global params = YAML.load_file(config_file)
+end
+
+function cache_setup()
+    ##create directory for run
+    cache_dir = join([cwd,params["cache"]["base_dir"],params["test_name"]],"/") 
+    run(`mkdir -p $(cache_dir)`)
+    params["cache"]["cur_dir"] = cache_dir
+    ##check if whole cache_dir should be removed
+    if(params["cache"]["clear"]["all"])
+        if(params["cache"]["clear"]["archive"])
+            #if both clear cache and archive are true, then cache will be moved to archive. otherwise, cache will be deleted permanently.
+            @info "Archiving previous cache files at archives/$(params["test_name"])..."
+            run(`mkdir -p $(join([cwd,params["cache"]["base_dir"]],"/"))/archive`)
+            run(`mv $(cache_dir) $(join([cwd,params["cache"]["base_dir"]],"/"))/archive/$(params["test_name"]*"_"*string(now()))`)
+            run(`mkdir -p $(cache_dir)`)
+        else
+            @info "Clearing previous cache..."
+            run(`rm -r $(cache_dir)`)
+            run(`mkdir -p $(cache_dir)`)
+        end
+    end
+
+end
+
+function cache_update(general::String,specific::String="",side_dir::String="")
+    ##method to update or add cache path 
+    
+    ##update current dir, possibly with specific subdir
+    if (side_dir=="")
+        cache_dir = params["cache"]["cur_dir"]*"/"*general  
+        params["cache"]["cur_dir"] = cache_dir
+        run(`mkdir -p $(cache_dir)`)
+        if(specific!="")
+            cache_dir = params["cache"]["cur_dir"]*"/"*specific
+            params["cache"]["cur_dir"] = cache_dir 
+            run(`mkdir -p $(cache_dir)`)
+        end
+    else
+        ##create side dir, possiblly with specific subdir
+        cache_dir = params["cache"]["cur_dir"]*"/"*general  
+        params["cache"][side_dir] = cache_dir 
+        run(`mkdir -p $(cache_dir)`)
+        if(specific!="")
+            cache_dir = params["cache"][sid_dir]*"/"*specific
+            params["cache"][side_dir] = cache_dir
+            run(`mkdir -p $(cache_dir)`)
+        end
+    end
+end
+
+
+function cache_check(file::String)
+
+
+end
+
+
+function get_input_data()
         @info "Loading raw counts data from $(params["raw_counts_file"])"
+        file = "raw_counts.jld2"
+        cache_check(file)
+
         raw_counts = cache_load(cwd*"/"*params["raw_counts_file"],"raw counts")
+        
+
+
+
         ##Cache setup
         #New method: cache directory updates folder by folder as we go. Avoids need for moving files around,symbolic links etc. 
-            cache_dir = "$cwd/output/cache/$(params["test_name"])"
+        cache_dir = "$cwd/output/cache/$(params["test_name"])"
         
-        run(`mkdir -p $(cache_dir)`)
-        if (clear_cache)
-            if(archive)
-                #if both clear cache and archive are true, then cache will be moved to archive. otherwise, cache will be deleted permanently.
-                    @info "Archiving previous cache files at archives/$(params["test_name"])..."
-                    run(`mkdir -p $(cwd)/output/cache/archive`)
-                    run(`mv $(cache_dir) archive/$(params["test_name"]*"_"*string(now()))`)
-                run(`mkdir -p $(cache_dir)`)
-            else
-                @info "clearing previous cache..."
-                run(`rm -r $(cache_dir)`)
-                run(`mkdir -p $(cache_dir)`)
-            end
-        end
+end
+
+function data_preprocessing()
+end
+
+function network_construction(config_file::String;clear_cache::Bool=false,archive::Bool=false)
+
+        
         
         #Processing data:
         @info "Processing raw data..."

@@ -1,5 +1,5 @@
 module ProjectFunctions
-export cwd,cache_save, cache_load,  @name
+export cache_save, cache_load,  @name
 using DataPreprocessing, NetworkConstruction,GraphletCounting ,GraphletAnalysis
 
 include("RunFunctions.jl")
