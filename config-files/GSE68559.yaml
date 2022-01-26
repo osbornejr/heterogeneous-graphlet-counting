@@ -1,4 +1,5 @@
 test_name: GSE68559   
+raw_counts_file: "output/cache/GSE68559_raw_counts_biomart.jld2"
 
 website:
   page_name: menu1
