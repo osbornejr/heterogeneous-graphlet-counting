@@ -571,6 +571,40 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
                 Rel[h] = edge[2]
             end
         end
+    elseif(run_method == "remote-channel")
+        
+        ##run tasks through input and ooutput remote-channels (r is output remote channel)
+        r = remote_channel_method(vertex_type_list,edgelist,graphlet_size,neighbourdict;relationships = relationships, progress = progress)
+        ## there should be length(edgelist) results on channel r. we harvest them into each array as required:
+        if(progress)
+            @info "Taking results from output channel..."
+            if (relationships)
+                @showprogress for n in 1:length(edgelist)
+                    i,chi,rel = take!(r)
+                    Chi[i] = chi
+                    Rel[i] = rel
+                end
+            else
+                @showprogress for n in 1:length(edgelist)
+                    i,chi = take!(r)
+                    Chi[i] = chi
+                end
+            end
+        else
+            if (relationships)
+                for n in 1:length(edgelist)
+                    i,chi,rel = take!(r)
+                    Chi[i] = chi
+                    Rel[i] = rel
+                end
+            else
+                for n in 1:length(edgelist)
+                    i,chi = take!(r)
+                    Chi[i] = chi
+                end
+            end
+        end
+
     elseif(run_method == "distributed")
         if(progress == true)
             
@@ -619,7 +653,10 @@ function count_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
                 Chi[h] = edge
             end
         end
+    else
+        throw(ArgumentError("run_method not recognised."))
     end
+    @info "Calculating total counts for each graphlet..."
     #total counts for each graphlet
     total_counts = reduce(mergecum,Chi)
     
@@ -826,3 +863,45 @@ function find_motifs(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},null_
     return [zscores,edgelists,null_model_calc,graphlet_counts,plots]
 end 
 
+#put function everywhere
+function no_work(jobs, results,args...;relationships=false) # define work function everywhere
+    while true
+        job_ids = take!(jobs)
+        if (relationships==true)
+            for i in job_ids
+                Chi,Rel = GraphletCounting.per_edge_counts(i,args...,relationships = relationships)
+                put!(results,(i,Chi,Rel))
+            end
+        else
+            for i in job_ids
+                Chi = GraphletCounting.per_edge_counts(i,args...,relationships = relationships)
+                put!(results,(i,Chi))
+            end
+        end
+     end
+end
+
+function remote_channel_method(args...;relationships=false,progress::Bool=false)
+    
+    batch_size = 1000
+    m = length(args[2])
+    #create input and output channels
+    jobs = RemoteChannel(()->Channel{Vector{Int}}(m));
+    results = RemoteChannel(()->Channel{Tuple}(m));
+    #add jobs to input channel
+    for i in 1:batch_size:m
+        put!(jobs,collect(i:(i+batch_size-1)))
+    end
+    if (progress)
+        @info "Distributing edges to workers..."
+        @showprogress for p in workers() # start tasks on the workers to process requests in parallel
+            remote_do(GraphletCounting.no_work, p, jobs, results,args...,relationships = relationships)
+        end
+    else
+        for p in workers() # start tasks on the workers to process requests in parallel
+            remote_do(GraphletCounting.no_work, p, jobs, results,args...,relationships = relationships)
+        end
+
+    end
+return results
+end
