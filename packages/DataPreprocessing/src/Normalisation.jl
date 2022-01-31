@@ -30,8 +30,8 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
     @rput method
     
     R"""
-    library(edgeR)
-    library(EBSeq)
+    library(edgeR,quietly=T)
+    library(EBSeq,quietly = T)
 
     if(method=="DESeq2")
     {  
