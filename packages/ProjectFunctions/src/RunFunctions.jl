@@ -5,14 +5,16 @@ using ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,LightG
 
 
 function run_all(config_file::String)
+        @info "Loading parameters"
         load_config(config_file)
-        cache_setup()
+        @info "Loading raw counts"
+        raw_counts = get_input_data()
 end
 
 function load_config(config_file::String)
         #setup parameters to be read.writable for all functions in this module
-        @info "Loading parameters..."
         global params = YAML.load_file(config_file)
+        cache_setup()
 end
 
 function cache_setup()
@@ -41,7 +43,7 @@ function cache_update(general::String,specific::String="",side_dir::String="")
     ##method to update or add cache path 
     
     ##update current dir, possibly with specific subdir
-    if (side_dir=="")
+    if (side_dir=="") 
         cache_dir = params["cache"]["cur_dir"]*"/"*general  
         params["cache"]["cur_dir"] = cache_dir
         run(`mkdir -p $(cache_dir)`)
@@ -63,30 +65,23 @@ function cache_update(general::String,specific::String="",side_dir::String="")
     end
 end
 
-
-function cache_check(file::String)
-
-
-end
-
-
 function get_input_data()
-        @info "Loading raw counts data from $(params["raw_counts_file"])"
-        file = "raw_counts.jld2"
-        cache_check(file)
-
-        raw_counts = cache_load(cwd*"/"*params["raw_counts_file"],"raw counts")
-        
-
-
-
-        ##Cache setup
-        #New method: cache directory updates folder by folder as we go. Avoids need for moving files around,symbolic links etc. 
-        cache_dir = "$cwd/output/cache/$(params["test_name"])"
-        
+    file = join([cwd,params["cur_dir"],"raw_counts.jld2"],"/")
+    #cache_check(file)
+    if isfile(file) 
+        raw_counts = cache_load(file,"raw counts")  
+    else 
+        ##run external julia script provided in paramaters to create raw_counts cache. This is a bit messy as the script must match the file location here (and JLD2 file name)
+        #but is best solution for now.
+        run(`julia --project=$cwd/Project.toml $(params["raw_counts_script"])`)
+        raw_counts = cache_load(file,"raw counts")  
+    end
+    return raw_counts  
 end
 
 function data_preprocessing()
+#cache_update("cutoff",
+
 end
 
 function network_construction(config_file::String;clear_cache::Bool=false,archive::Bool=false)
