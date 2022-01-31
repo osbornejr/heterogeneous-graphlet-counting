@@ -1,8 +1,7 @@
 test_name: GSE68559   
 
 
-raw_counts_file: "output/cache/GSE68559_raw_counts_biomart.jld2"
-
+raw_counts_script: "config/input_scripts/GSE68559.jl"
 cache:
   keep_cache: true
   base_dir: "output/cache"
