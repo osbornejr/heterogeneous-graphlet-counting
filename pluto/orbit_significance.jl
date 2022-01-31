@@ -82,25 +82,31 @@ md"""
 """
 
 # ╔═╡ 0f82d5eb-c1d1-4406-b356-ada7d229074e
-NetworkConstruction.draw_graphlet("coding_coding_coding_coding_4-cycle")
+NetworkConstruction.draw_graphlet("coding_coding_noncoding_noncoding_4-path")
+
+# ╔═╡ baba57a5-0c24-4620-b0c2-450db2a89f44
+NetworkConstruction.draw_graphlet("coding_noncoding_noncoding_3-path")
 
 # ╔═╡ 901287ea-9b03-4067-aea1-d039304ebf0a
-NetworkConstruction.draw_graphlet("coding_noncoding_coding_noncoding_4-path")
+NetworkConstruction.draw_graphlet("coding_coding_noncoding_coding_4-star")
 
 # ╔═╡ 937fd5dc-1423-468d-8ec6-518f58ae8807
-NetworkConstruction.draw_graphlet("noncoding_coding_uncoding_noncoding_4-path")
+NetworkConstruction.draw_graphlet("coding_coding_uncoding_noncoding_4-tail")
 
 # ╔═╡ d999c806-aafe-442d-8ab7-56360b6c60b2
-NetworkConstruction.draw_graphlet("noncoding_coding_coding_noncoding_4-path")
-
-# ╔═╡ 4771b9a4-fe7b-4678-8175-542b012094d4
 NetworkConstruction.draw_graphlet("coding_noncoding_coding_noncoding_4-cycle")
 
+# ╔═╡ 4771b9a4-fe7b-4678-8175-542b012094d4
+NetworkConstruction.draw_graphlet("coding_noncoding_noncoding_coding_4-chord")
+
 # ╔═╡ cde04746-9a5a-4e8d-8a3b-b6bac523a72e
-NetworkConstruction.draw_graphlet("coding_coding_noncoding_noncoding_4-cycle")
+NetworkConstruction.draw_graphlet("coding_coding_noncoding_noncoding_4-clique")
 
 # ╔═╡ 75dec48b-6fa2-426d-978a-f4278552c700
-NetworkConstruction.draw_graphlet("coding_coding_uncoding_noncoding_4-chord")
+NetworkConstruction.draw_graphlet("coding_boncoding_uncoding_noncoding_4-clique")
+
+# ╔═╡ 6e208a5a-a990-4c0c-ae90-ec3fc66bbb55
+
 
 # ╔═╡ c1622ca4-937e-4ea1-aac5-52fdb9facaa1
 GraphletCounting
@@ -1749,12 +1755,14 @@ version = "3.5.0+0"
 # ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
 # ╠═0f82d5eb-c1d1-4406-b356-ada7d229074e
+# ╠═baba57a5-0c24-4620-b0c2-450db2a89f44
 # ╠═901287ea-9b03-4067-aea1-d039304ebf0a
 # ╠═937fd5dc-1423-468d-8ec6-518f58ae8807
 # ╠═d999c806-aafe-442d-8ab7-56360b6c60b2
 # ╠═4771b9a4-fe7b-4678-8175-542b012094d4
 # ╠═cde04746-9a5a-4e8d-8a3b-b6bac523a72e
 # ╠═75dec48b-6fa2-426d-978a-f4278552c700
+# ╠═6e208a5a-a990-4c0c-ae90-ec3fc66bbb55
 # ╠═c1622ca4-937e-4ea1-aac5-52fdb9facaa1
 # ╠═229c0a1e-bee6-4fbc-82c7-e317a3a32200
 # ╠═1a4fe9d7-96cb-44b9-8eef-d64d671f50ce
