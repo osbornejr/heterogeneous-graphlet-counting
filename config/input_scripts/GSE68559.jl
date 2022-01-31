@@ -33,7 +33,7 @@ raw_counts = rename!(hcat(transcript_names,select.(samples,Symbol("FPKM"))...,ma
 raw_counts.transcript_type = replace(x-> occursin("lnc",x) ? "noncoding" : "coding",raw_counts.transcript_id)
 
 ## find transcript types via biomaRt (NOTE this should be inside the raw counts cache section above, but currently input data has vanished from NeCTAR! It is all cached here thankfully, so for now we use this workaround.
-@info "Checking transcript types on via biomaRt"
+@info "Checking transcript types via biomaRt"
 #restart R session	
 R"""
 sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
