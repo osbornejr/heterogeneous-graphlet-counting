@@ -19,7 +19,6 @@ function run_all(config_file::String)
     @info "Preprocessing raw counts"
     processed_counts = data_preprocessing(raw_counts)
     @info "Constructing network"
-    git fix
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
 
     cache_update("analysis")
