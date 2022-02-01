@@ -38,32 +38,36 @@ TableOfContents()
 # ╔═╡ 940181d4-a9b0-47e4-a13d-db2eb175e22e
 ### Setup input data (from human smoker GSE68559 dataset) loaded from existing cache
 begin
-	config_file = "$cwd/config-files/GSE68559.yaml"
-	params = YAML.load_file(config_file)
-
-	##move params values to specific variables for now (easier)
-	params_test_name = params["test_name"]
-	params_null_model_size = params["analysis"]["null_model_size"] 
-	params_expression_cutoff = params["data_preprocessing"]["expression_cutoff"] 
-	params_variance_percent = params["data_preprocessing"]["variance_percent"] 
-	params_norm_method = params["data_preprocessing"]["norm_method"] 
-	params_threshold = params["network_construction"]["threshold"] 
-	params_threshold_method = params["network_construction"]["threshold_method"] 
-	params_coexpression = params["network_construction"]["coexpression"]
-	
-	
-	biomart_raw_counts_file = "$cwd/output/cache/$(params_test_name)_raw_counts_biomart.jld2";
-	raw_counts = ProjectFunctions.cache_load(biomart_raw_counts_file,"raw counts");
-	
-
-
+	#using Logging
+	#redirect_stdout(devnull) do
+		#logger = ConsoleLogger(stdout)
+		#with_logger(logger) do
+			config_file = "$cwd/config/run-files/GSE68559.yaml"
+			ProjectFunctions.load_config(config_file)
+			##move params values to specific variables for now (easier)
+			params_test_name = ProjectFunctions.params["test_name"]
+			params_null_model_size = ProjectFunctions.params["analysis"]["null_model_size"] 
+			params_expression_cutoff = ProjectFunctions.params["data_preprocessing"]["expression_cutoff"] 
+			params_variance_percent = ProjectFunctions.params["data_preprocessing"]["variance_percent"] 
+			params_norm_method = ProjectFunctions.params["data_preprocessing"]["norm_method"] 
+			params_threshold = ProjectFunctions.params["network_construction"]["threshold"] 
+			params_threshold_method = ProjectFunctions.params["network_construction"]["threshold_method"] 
+			params_coexpression = ProjectFunctions.params["network_construction"]["coexpression"]
+			raw_counts = ProjectFunctions.get_input_data();
+			processed_counts = ProjectFunctions.data_preprocessing(raw_counts);
+			    adj_matrix,network_counts,vertexlist,edgelist = ProjectFunctions.network_construction(processed_counts)
 		
+			#biomart_raw_counts_file = "$cwd/output/cache/$(params_test_name)_raw_counts_biomart.jld2";
+			#raw_counts = ProjectFunctions.cache_load(biomart_raw_counts_file,"raw counts");
+		#end
+	#end
+	
 end;
 
 # ╔═╡ 3f3e6d45-d576-4385-bea8-e55a37d34512
 begin
 	using CSV
-	coincidents_file = "$cwd/output/cache/$(params_test_name)/cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/validation/coincidents/coincidents.csv";
+	coincidents_file = "$cwd/output/cache/$(params_test_name)/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/coincidents/coincidents.csv";
 	                        Coincidents = CSV.read(coincidents_file,DataFrame)
                         #because CSV converts the array columns to strings, we have to convert back (cost of using the easy/dirty CSV option!)
                         fix(g) = split(replace(replace(replace(replace(g,("["=>"")),("]"=>"")),("\""=>"")),(" "=>"")),",")
@@ -75,6 +79,23 @@ begin
                         Coincidents.Transcript_type = fix.(Coincidents.Transcript_type)
                         Coincidents.Inclusion = fix_bool.(Coincidents.Inclusion)
 end;
+
+# ╔═╡ 312f20e3-3c97-4108-847d-f2276abfab9a
+begin
+	degrees = vec(sum(adj_matrix,dims=2))
+	#degrees = sort(vec(degrees))
+	p = plot(x = 1:length(degrees),y=degrees, Geom.bar,Guide.xlabel("id"),Guide.ylabel("count"))
+
+	end
+
+# ╔═╡ 16594a10-f747-49f7-9dea-81724ec3ae4d
+begin
+ 	e_degrees = sum.(map(y->map(x->degrees[x],y),edgelist))
+	m = max(e_degrees...)
+ end
+
+# ╔═╡ 9007eba9-a579-4946-a502-1a86399c419f
+findall(x->x==m,e_degrees)
 
 # ╔═╡ 72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
 md"""
@@ -105,20 +126,8 @@ NetworkConstruction.draw_graphlet("coding_coding_noncoding_noncoding_4-clique")
 # ╔═╡ 75dec48b-6fa2-426d-978a-f4278552c700
 NetworkConstruction.draw_graphlet("coding_boncoding_uncoding_noncoding_4-clique")
 
-# ╔═╡ 6e208a5a-a990-4c0c-ae90-ec3fc66bbb55
-
-
-# ╔═╡ c1622ca4-937e-4ea1-aac5-52fdb9facaa1
-GraphletCounting
-
-# ╔═╡ 229c0a1e-bee6-4fbc-82c7-e317a3a32200
-GraphletAnalysis
-
-# ╔═╡ b7a477ab-09d0-4030-a14d-538a59c6c1bf
-DataPreprocessing
-
-# ╔═╡ 840a1519-5cde-4cfd-8443-6cae5b02a508
-NetworkConstruction
+# ╔═╡ 1a4fe9d7-96cb-44b9-8eef-d64d671f50ce
+length(vertexlist)
 
 # ╔═╡ 28836056-6604-4918-9f74-39bf81ad0559
 md"""
@@ -140,6 +149,14 @@ The resulting network has the following structure:
 """
 
 
+
+# ╔═╡ 4861b8cf-cf59-4cfd-b412-089ccfc00e90
+md"""
+|nodes | noncoding nodes | coding nodes | number of edges |
+|:----:|:---------------:|:------------:|:---------------:|
+|$(length(vertexlist))   | $(length(findall(x->x=="noncoding",vertexlist)))  |$(length(findall(x->x=="coding",vertexlist)))   |$(length(edgelist))   |      
+
+"""
 
 # ╔═╡ df21e8f4-7af6-4401-a8d7-e4f21e9c7139
 begin
@@ -172,15 +189,6 @@ In the above table, *Coincident_type* refers to the number of nodes in the graph
 The other columns indidate the ids of the nodes in the graphlet in each context, save for the last column, *Inclusion*, that identifies __which__ of the nodes in the graphlet are the known pathway transcripts.
 """
 
-# ╔═╡ f759d399-f76a-4cb5-b0d6-bf64aab1380a
-sample_counts = DataPreprocessing.preprocess_raw_counts(raw_counts,params_expression_cutoff,params_norm_method,params_variance_percent);
-
-# ╔═╡ a380f1ed-32bb-46f1-bd2c-8c633afa70d0
-begin
-	sim_file = "$cwd/output/cache/$(params_test_name)/cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/similarity_matrix.jld2";
-    similarity_matrix = cache_load(sim_file,"similarity_matrix");
-end;
-
 # ╔═╡ 6a2d3d61-cc8e-48ba-8839-705979033484
 md"""
 ## Orbit significance
@@ -198,7 +206,7 @@ Here we have two examples of pathways:
 md"""
 Each node  that is known to be in the pathway is represented as a point for each orbit.
 The height of the point indicates the number of times that node occurred in that orbit.
-In the first pathway, *Glyoxylate and dicarboxylate metabolism*, there is little  signal across any of the orbits. 
+In the first pathway, *Pyruvate metabolism*, there is little  signal across any of the orbits. 
 In contrast, the *Alzheimer disease* pathway clearly has a lot of coincidence at the graphlet level.
 We can deduce that pathways with a high graphlet connectivity in our network are those that are most active as the known pathway nodes are interacting with each other.
 This means we can then identify other nodes that are also have a interaction with these known pathway nodes and infer that these nodes also have some importance in the KEGG pathway. 
@@ -253,37 +261,6 @@ After applying the above process to all nodes in our network, we get the followi
 
 """
 
-# ╔═╡ 877da2cf-fe40-4bfd-b44c-478427f3c81f
-begin
-		adj_file = "$cwd/output/cache/$(params_test_name)/cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/adjacency_matrix.jld2"
-                pre_adj_matrix = cache_load(adj_file,"pre-adj_matrix")
-                adj_matrix = cache_load(adj_file,"adjacency_matrix")
-
-end;
-
-# ╔═╡ 99f1209a-3dea-4c60-8b5b-fe7da9219a1d
-begin
-        #Trim nodes with degree zero
-        network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
-        
-        #maintain list of vertices in graph
-        vertex_names = network_counts[!,:transcript_id]
-        vertexlist = copy(network_counts[!,:transcript_type])     
-        edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-	
-end;
-
-# ╔═╡ 1a4fe9d7-96cb-44b9-8eef-d64d671f50ce
-length(vertexlist)
-
-# ╔═╡ 4861b8cf-cf59-4cfd-b412-089ccfc00e90
-md"""
-|nodes | noncoding nodes | coding nodes | number of edges |
-|:----:|:---------------:|:------------:|:---------------:|
-|$(length(vertexlist))   | $(length(findall(x->x=="noncoding",vertexlist)))  |$(length(findall(x->x=="coding",vertexlist)))   |$(length(edgelist))   |      
-
-"""
-
 # ╔═╡ f34235b1-0e47-4f28-94db-ce3cfa598a91
 begin
 	
@@ -297,7 +274,7 @@ sub_Coincidents
 
 # ╔═╡ 9bb259ec-8528-4049-80bf-5fa0d543e47c
 begin
-	kegg_file = "/home/osbornejr/app/output/cache/GSE68559/cutoff/25/normalisation/upper_quartile/sampling/0.025/similarity/pidc/threshold/0.95/threshold_method/empirical_dist_zero/analysis/graphlets/validation/coincidents/kegg_info.jld2"
+	kegg_file = "/home/osbornejr/app/output/cache/GSE68559/expression_cutoff/1/normalisation/upper_quartile/sampling/0.025/similarity/pidc/threshold/0.95/threshold_method/empirical_dist_zero/analysis/graphlets/coincidents/kegg_info.jld2"
 
 	                    entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
                     candidates = cache_load(kegg_file,"candidates")
@@ -345,7 +322,7 @@ cm"""
 # ╔═╡ f24286b1-a29f-49dc-8005-058dfcf4440f
 begin
 
-	orbit_sigs_file = "$cwd/output/cache/$(params_test_name)/cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/validation/coincidents/orbit_sigs.jld2"
+	orbit_sigs_file = "$cwd/output/cache/$(params_test_name)/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/coincidents/orbit_sigs.jld2"
 	orbit_sigs =  cache_load(orbit_sigs_file,"orbit_sigs")
 	                        
 	                
@@ -398,7 +375,7 @@ begin
 end;
 
 # ╔═╡ 812abebd-a67d-498c-939b-98f9b4d8a300
-plot_grid[findall(x-> occursin("Glyoxylate", x),candidate_pathways)...]
+plot_grid[findall(x-> occursin("Pyruvate", x),candidate_pathways)...]
 
 # ╔═╡ b0ce6943-a214-4f5c-a75a-c3d59c71aa81
 plot_grid[findall(x-> occursin("Alzheimer", x),candidate_pathways)...]
@@ -550,15 +527,6 @@ end
 # ╔═╡ 84aa8941-8766-4482-ba97-cfb5c477a072
 DataFrame(node = collect(keys(sig_nodes_dict)), pathways = collect(values(sig_nodes_dict)),type=vertexlist[sig_nodes])
 
-# ╔═╡ da4aed91-1942-44f5-9bf2-d80937db8c5b
-collect(1:100:1020)
-
-# ╔═╡ 94ac0630-ef54-42fa-92da-07ffecb58b95
-i=1
-
-# ╔═╡ 852b5a3e-d307-4b5a-b09f-c4825b1a7ae5
-collect(i:i+100-1)
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -588,9 +556,14 @@ Colors = "~0.12.8"
 CommonMark = "~0.8.5"
 Compose = "~0.9.3"
 DataFrames = "~1.3.2"
+DataPreprocessing = "~0.1.0"
 Gadfly = "~1.3.4"
+GraphletAnalysis = "~0.1.0"
+GraphletCounting = "~0.1.0"
 JLD2 = "~0.4.17"
+NetworkConstruction = "~0.1.0"
 PlutoUI = "~0.7.32"
+ProjectFunctions = "~0.1.0"
 Revise = "~3.3.1"
 StatsBase = "~0.33.14"
 YAML = "~0.4.7"
@@ -1392,7 +1365,7 @@ uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.7.1"
 
 [[deps.ProjectFunctions]]
-deps = ["CSV", "Colors", "Compose", "DataFrames", "DataPreprocessing", "Dates", "Distributed", "Gadfly", "GraphletAnalysis", "GraphletCounting", "JLD2", "LightGraphs", "NetworkConstruction", "ProgressMeter", "Random", "StatsBase", "YAML"]
+deps = ["CSV", "CategoricalArrays", "Colors", "Compose", "DataFrames", "DataPreprocessing", "DataStructures", "Dates", "Distributed", "Gadfly", "GraphletAnalysis", "GraphletCounting", "JLD2", "LightGraphs", "NetworkConstruction", "Pkg", "ProgressMeter", "Random", "StatsBase", "YAML"]
 path = "/home/osbornejr/app/packages/ProjectFunctions"
 uuid = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 version = "0.1.0"
@@ -1753,6 +1726,9 @@ version = "3.5.0+0"
 # ╟─74c92bd0-ef4f-41a0-bc4b-5063ffcd12df
 # ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
 # ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
+# ╠═312f20e3-3c97-4108-847d-f2276abfab9a
+# ╠═16594a10-f747-49f7-9dea-81724ec3ae4d
+# ╠═9007eba9-a579-4946-a502-1a86399c419f
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
 # ╠═0f82d5eb-c1d1-4406-b356-ada7d229074e
 # ╠═baba57a5-0c24-4620-b0c2-450db2a89f44
@@ -1762,12 +1738,7 @@ version = "3.5.0+0"
 # ╠═4771b9a4-fe7b-4678-8175-542b012094d4
 # ╠═cde04746-9a5a-4e8d-8a3b-b6bac523a72e
 # ╠═75dec48b-6fa2-426d-978a-f4278552c700
-# ╠═6e208a5a-a990-4c0c-ae90-ec3fc66bbb55
-# ╠═c1622ca4-937e-4ea1-aac5-52fdb9facaa1
-# ╠═229c0a1e-bee6-4fbc-82c7-e317a3a32200
 # ╠═1a4fe9d7-96cb-44b9-8eef-d64d671f50ce
-# ╠═b7a477ab-09d0-4030-a14d-538a59c6c1bf
-# ╠═840a1519-5cde-4cfd-8443-6cae5b02a508
 # ╠═2a43ebc7-e029-415e-b665-b84eed21094a
 # ╟─28836056-6604-4918-9f74-39bf81ad0559
 # ╟─67f24598-4b27-4dd8-b533-45c1cc4e44a6
@@ -1780,12 +1751,10 @@ version = "3.5.0+0"
 # ╟─3c79ec7e-7e64-4f24-aa65-35c79167301b
 # ╟─08edac1b-f869-4464-828d-bcb60c64a98e
 # ╟─752f5e2a-6a63-442f-9e28-90db65b6eeb1
-# ╠═f759d399-f76a-4cb5-b0d6-bf64aab1380a
-# ╟─a380f1ed-32bb-46f1-bd2c-8c633afa70d0
 # ╟─6a2d3d61-cc8e-48ba-8839-705979033484
 # ╟─812abebd-a67d-498c-939b-98f9b4d8a300
 # ╟─b0ce6943-a214-4f5c-a75a-c3d59c71aa81
-# ╟─2abc718c-e711-4b7f-880c-38922e225dd2
+# ╠═2abc718c-e711-4b7f-880c-38922e225dd2
 # ╟─4ee8ef83-ee2a-458c-b7ce-bf16fd4c5baa
 # ╟─f7b11d20-9e7e-4197-b9b4-136d3e86644f
 # ╟─822164ee-0193-4c16-a245-b55ea8082530
@@ -1796,8 +1765,6 @@ version = "3.5.0+0"
 # ╟─7a0255c6-82c6-48c6-83e1-cd83606b05dc
 # ╟─7f35a6f0-71e3-4448-8dd1-fe359ac73f94
 # ╟─84aa8941-8766-4482-ba97-cfb5c477a072
-# ╟─877da2cf-fe40-4bfd-b44c-478427f3c81f
-# ╟─99f1209a-3dea-4c60-8b5b-fe7da9219a1d
 # ╟─3f3e6d45-d576-4385-bea8-e55a37d34512
 # ╟─f34235b1-0e47-4f28-94db-ce3cfa598a91
 # ╟─9bb259ec-8528-4049-80bf-5fa0d543e47c
@@ -1810,8 +1777,5 @@ version = "3.5.0+0"
 # ╟─c2d2fe61-9e00-4db8-aa80-97deb551486a
 # ╟─87c1ea4a-26b2-42af-a21d-b6ff80366562
 # ╟─3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
-# ╠═da4aed91-1942-44f5-9bf2-d80937db8c5b
-# ╠═94ac0630-ef54-42fa-92da-07ffecb58b95
-# ╠═852b5a3e-d307-4b5a-b09f-c4825b1a7ae5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
