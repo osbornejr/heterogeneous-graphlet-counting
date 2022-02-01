@@ -1,11 +1,14 @@
 #using Distributed, JLD2, CSV
 #using StatsBase,Gadfly,Compose,DataFrames,YAML,Dates, LightGraphs, Colors, Random, Distributions, ProgressMeter
-using ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,LightGraphs,Dates,Colors,Gadfly,Compose,DataStructures
+using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,LightGraphs,Dates,Colors,Gadfly,Compose,DataStructures,CategoricalArrays
 
 
 
 function run_all(config_file::String)
+   
     if (length(workers())!=Threads.nthreads()) 
+        Pkg.resolve()
+        Pkg.precompile()
         @info "Setting up worker processes"
         distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
     end
@@ -19,14 +22,14 @@ function run_all(config_file::String)
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
 
     cache_update("analysis")
-    @info "Finding communities"
-    com_anal = community_analysis(network_counts,adj_matrix)
-    @info "Counting graphlets"
-    graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
+   # @info "Finding communities"
+   # com_anal = community_analysis(network_counts,adj_matrix)
+   # @info "Counting graphlets"
+   # graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
 
     cache_update("graphlets")
-    @info "Comparing typed graphlet representations"
-    typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+   # @info "Comparing typed graphlet representations"
+    #typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     @info "Conducting coincident graphlet analysis"
     coinc_anal = coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
 end
@@ -461,7 +464,7 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
     #get baseline entrez and kegg info about transcripts
     kegg_file = "$(coinc_dir)/kegg_info.jld2"
     if (isfile(kegg_file))
-        @info "Loading KEGG info from $val_dir..."
+        @info "Loading KEGG info from $kegg_file..."
         entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
         candidates = cache_load(kegg_file,"candidates")
         top_terms = cache_load(kegg_file,"top_terms")
@@ -478,7 +481,7 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
     coincidents_file ="$coinc_dir/coincidents.csv"
     if (isfile(coincidents_file))
         @info "Loading coincidents dataframe from $coinc_dir..."
-        Coincidents = CSV.read(coincidents_file)
+        Coincidents = CSV.read(coincidents_file,DataFrame)
         #because CSV converts the array columns to strings, we have to convert back (cost of using the easy/dirty CSV option!)
         fix(g) = split(replace(replace(replace(replace(g,("["=>"")),("]"=>"")),("\""=>"")),(" "=>"")),",")
         fix_int(g) = map(x->parse(Int,x),split(replace(replace(g,("["=>"")),("]"=>"")),","))
@@ -508,7 +511,7 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
     graphlet = "4-star"
     nonuniforms = []
     for y in filter(p->last(p)>1,countmap(filter(:Hom_graphlet=> x-> x == graphlet, Coincidents[1:199000,:]).Vertices))
-        test = sum(filter(:Vertices => x-> x == first(y),filter(:Hom_graphlet => x-> x == graphlet,Coincidents))[8])/last(y)
+        test = sum(filter(:Vertices => x-> x == first(y),filter(:Hom_graphlet => x-> x == graphlet,Coincidents))[!,8])/last(y)
         if (sum(((test.>0) - (test.<1)).==0)>0)
             push!(nonuniforms,first(y))
         end
@@ -531,14 +534,15 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
     #choose just one order of graphlets (3 or 4)
     sub_Coincidents = filter(:Hom_graphlet=>x->occursin("4-",x),Coincidents)
     orbit_sigs_file = "$coinc_dir/orbit_sigs.jld2" 
+    ## select whether we are looking at "detailed" or "collated" significance
+    orbit_sigs_method ="detailed"
+    
     if (isfile(orbit_sigs_file))
         @info "Loading orbit significance dataframe from $coinc_dir..."
         orbit_sigs = cache_load(orbit_sigs_file,"orbit_sigs")
     else
 
         @info "Getting orbit significance statistics..."
-        ## select whether we are looking at "detailed" or "collated" significance
-        orbit_sigs_method ="detailed"
         #table to showing whether each node (row) is included in each pathway (column)
         inkey = hcat([ in.(1:length(vertexlist),Ref(candidates[p])) for p in candidate_pathways ]...)
         if(orbit_sigs_method == "collated")
@@ -552,11 +556,11 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
 
     ## now compare the significance profile of those nodes that are not attached to a pathway to the average pathway profile of known pathway nodes
     ##convert to array form for comparisons
-    orbit_sigs_array = map(x->Array(x[2:end]),orbit_sigs)
+    orbit_sigs_array = map(x->Array(x[!,2:end]),orbit_sigs)
     # this table stores the average for each pathway (of nodes that are known to be in the pathway)
     significance_bars = zeros(length(keys(candidates)),size(orbit_sigs_array[1])[2])
     for (i,c) in enumerate(keys(candidates))
-        significance_bars[i,:] = (sum(map(x->Array(x[2:end]),orbit_sigs[candidates[c]]))./length(vertexlist))[i,:]
+        significance_bars[i,:] = (sum(map(x->Array(x[!,2:end]),orbit_sigs[candidates[c]]))./length(vertexlist))[i,:]
     end
     ##now compare bars against profiles of non-pathway nodes
     ## choose a subset of nodes to look at. Can be boolean BitArray (with length equal to all nodes) or a specific list of nodes 
