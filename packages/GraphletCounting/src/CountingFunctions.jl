@@ -87,7 +87,7 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
         #get neighbourhoods of i and j
         gamma_i = neighbourdict[i]  
         gamma_j = neighbourdict[j]
-        
+       git fix 
         delim = "_"
         #three node graphlets
     ##more efficient loop based method
