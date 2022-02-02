@@ -267,7 +267,7 @@ end
 function graphlet_coincidences(vertexlist::Array{String,1},vertex_names::Array{String,1},nametypes::String,adj_matrix::AbstractArray,entrez_id_vector::Array{Int,1},candidates::Dict{String,Array{Int,1}})
         edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
         @info "Counting per-edge graphlet relationships..."
-        graphlet_counts,Chi,Rel = GraphletCounting.count_graphlets(vertexlist,edgelist,4,run_method="remote-channel",relationships = true,progress = true)
+        graphlet_counts,Chi,Rel = GraphletCounting.count_graphlets(vertexlist,edgelist,4,run_method="distributed",relationships = true,progress = true)
 
         ## combine relationships into one array
         rel = vcat(Rel...)
