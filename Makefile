@@ -69,3 +69,4 @@ unison: ##use this to sync repo with a remote host. (this command just installs 
 endif
 	
 nectar-connect: ## ssh into nectar VM   
+	git fix
