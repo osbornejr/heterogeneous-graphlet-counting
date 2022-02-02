@@ -143,7 +143,7 @@ macro make_public(module_name::Symbol)
 
     return nothing
 end
-export make_public
+export @make_public
 
 """
 export all non-temporary, non-imported values (values not having a '#' at the
@@ -198,6 +198,6 @@ macro make_public_rec(module_name::Symbol)
 
     return nothing
 end
-export make_public_rec
+export @make_public_rec
 
 end # module
