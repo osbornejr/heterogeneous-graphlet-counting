@@ -54,4 +54,3 @@ ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
 # default command will launch julia
 CMD ["sh", "-c", "julia --project=$PROJECT_DIR/Project.toml -i ${startup}"]
-git fix
