@@ -10,6 +10,9 @@ help: ## This help.
 julia: ## run julia
 	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -e startup=config/startup-files/env-startup.jl -it --rm -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
 
+julia-clean: ## run julia with no startup 
+	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -it --rm -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
+
 julia-port: ## run julia with access to port 8000
 	docker run --mount source=dot-julia,target=/home/osbornejr/.julia -it --rm -p 8000:8000 -v $(path_to_current_dir):/home/osbornejr/app $(julia_env)  	
 
