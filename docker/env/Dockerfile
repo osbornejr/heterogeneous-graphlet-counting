@@ -33,8 +33,8 @@ RUN conda update --name base --channel defaults conda && \
 #build the julia environment TODO find out why RCall does not install properly
 ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
 #set up MPI variables
-ENV JULIA_MPI_BINARY system
-ENV JULIA_MPI_PATH $CONDA_DIR/envs/$ENV_PREFIX
+#ENV JULIA_MPI_BINARY system
+#ENV JULIA_MPI_PATH $CONDA_DIR/envs/$ENV_PREFIX
 #RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
 #RUN julia --projec#t=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
 #set up MPI.jl to use openMPI 
