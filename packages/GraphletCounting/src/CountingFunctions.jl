@@ -68,6 +68,7 @@ end
 
 function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
     ### fix to clear "sticky" memory
+    GC.gc()
     ccall(:malloc_trim, Cvoid, (Cint,), 0)
     h=edge  
 #   # get nodes i and j for this edge
@@ -435,15 +436,31 @@ function count_graphlets(args...;run_method::String="serial",progress::Bool=fals
 end
 
 
-function graphlet_relationships()
+function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",progress::Bool=false)
+    #get neighbourhood for each vertex in advance (rather than calling per-edge)
+    neighbourdict=Neighbours(edgelist)
+    #preallocate array to store each edge relationship dict 
+    Rel=Array{Array{Tuple{Int,Int,Int,Int,String},1}}(undef,size(edgelist,1));
+    #Rel = Array{Int,3}(undef,length(vertex_type_list),length(vertex_type_list),length(vertex_type_list))
 
-        #preallocate array to store each edge relationship dict 
-        Rel=Array{Array{Tuple{Int,Int,Int,Int,String},1}}(undef,size(edgelist,1));
-        #Rel = Array{Int,3}(undef,length(vertex_type_list),length(vertex_type_list),length(vertex_type_list))
+    if(run_method == "distributed")
+        if(progress == true)
 
-
-
-
+            @info "Distributing edges to workers..."
+            ##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
+            Rel = @showprogress pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
+        else
+            Rel = pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
+        end
+    elseif (run_method == "serial")
+        for h in 1 :size(edgelist,1)
+            edge = per_edge_relationships(h,vertex_type_list,edgelist,graphlet_size,neighbourdict)
+            append!(Rel,edge)
+        end
+    else
+        throw(ArgumentError("run_method not recognised."))
+    end
+    return Rel
 end
 
 
@@ -740,6 +757,7 @@ function do_work(jobs, results,args...) # define work function everywhere
         put!(results,(job_id,Chi))
     end
 end
+
 function remote_channel_method(args...;progress::Bool=false)
     
     batch_size = 1
