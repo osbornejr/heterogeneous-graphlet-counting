@@ -10,7 +10,7 @@ cache:
     archive: false
 
 website:
-  page_name: menu1
+  page_name: "menu1"
   website_dir: "website"
 
 data_preprocessing: 
