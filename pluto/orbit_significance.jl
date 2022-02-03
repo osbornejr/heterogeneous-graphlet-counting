@@ -202,19 +202,6 @@ Here we have two examples of pathways:
 
 """
 
-# ╔═╡ 2abc718c-e711-4b7f-880c-38922e225dd2
-md"""
-Each node  that is known to be in the pathway is represented as a point for each orbit.
-The height of the point indicates the number of times that node occurred in that orbit.
-In the first pathway, *Pyruvate metabolism*, there is little  signal across any of the orbits. 
-In contrast, the *Alzheimer disease* pathway clearly has a lot of coincidence at the graphlet level.
-We can deduce that pathways with a high graphlet connectivity in our network are those that are most active as the known pathway nodes are interacting with each other.
-This means we can then identify other nodes that are also have a interaction with these known pathway nodes and infer that these nodes also have some importance in the KEGG pathway. 
-Thus we narrow our scope to only those pathways that have a high connectivity across orbit categories.
-The pathways we exclude may have a significant number of transcripts present in the network, but (at least at the four node level) they do not appear to be active across the sample space. 
-"""
-
-
 # ╔═╡ 4ee8ef83-ee2a-458c-b7ce-bf16fd4c5baa
 md"""
 ## Removing low signal pathways
@@ -274,7 +261,7 @@ sub_Coincidents
 
 # ╔═╡ 9bb259ec-8528-4049-80bf-5fa0d543e47c
 begin
-	kegg_file = "/home/osbornejr/app/output/cache/GSE68559/expression_cutoff/1/normalisation/upper_quartile/sampling/0.025/similarity/pidc/threshold/0.95/threshold_method/empirical_dist_zero/analysis/graphlets/coincidents/kegg_info.jld2"
+	kegg_file = "/home/osbornejr/app/output/cache/GSE68559/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/coincidents/kegg_info.jld2"
 
 	                    entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
                     candidates = cache_load(kegg_file,"candidates")
@@ -375,10 +362,29 @@ begin
 end;
 
 # ╔═╡ 812abebd-a67d-498c-939b-98f9b4d8a300
-plot_grid[findall(x-> occursin("Pyruvate", x),candidate_pathways)...]
+begin
+	plot_1 = "Glyoxylate and dicarboxylate metabolism" 
+	plot_grid[findall(x-> occursin(plot_1, x),candidate_pathways)...]
+end
 
 # ╔═╡ b0ce6943-a214-4f5c-a75a-c3d59c71aa81
-plot_grid[findall(x-> occursin("Alzheimer", x),candidate_pathways)...]
+begin
+	plot_2 = "Alzheimer disease" 
+	plot_grid[findall(x-> occursin(plot_2, x),candidate_pathways)...]
+end
+
+# ╔═╡ 2abc718c-e711-4b7f-880c-38922e225dd2
+md"""
+Each node  that is known to be in the pathway is represented as a point for each orbit.
+The height of the point indicates the number of times that node occurred in that orbit.
+In the first pathway, *$(plot_1)*, there is little  signal across any of the orbits. 
+In contrast, the *$(plot_2)* pathway clearly has a lot of coincidence at the graphlet level.
+We can deduce that pathways with a high graphlet connectivity in our network are those that are most active as the known pathway nodes are interacting with each other.
+This means we can then identify other nodes that are also have a interaction with these known pathway nodes and infer that these nodes also have some importance in the KEGG pathway. 
+Thus we narrow our scope to only those pathways that have a high connectivity across orbit categories.
+The pathways we exclude may have a significant number of transcripts present in the network, but (at least at the four node level) they do not appear to be active across the sample space. 
+"""
+
 
 # ╔═╡ 92c7926c-f21f-4665-84df-1ea98229cd4d
 begin 	
@@ -397,7 +403,7 @@ begin
 	                end
 	                # #find those pathways with majority of zero proportions below total proportions 
 	                zero_passes = vec(sum(zero_scores,dims=2).>(last_col/2))
-	                zero_candidate_pathways = candidate_pathways[zero_passes]
+	                zero_candidate_pathways = candidate_pathways
 	                zero_orbit_sigs = map(x->filter(:Pathway=>y->y in zero_candidate_pathways,x),orbit_sigs)
 	                zero_orbit_sigs_array = map(x->Array(x[!,2:end]),zero_orbit_sigs)
 	                zero_candidates = Dict(Pair.(zero_candidate_pathways,[candidates[x] for x in zero_candidate_pathways]))
@@ -454,6 +460,9 @@ end
 
   
 
+# ╔═╡ 42452b78-f24c-4517-ae46-8ddfe6368d03
+sig_pathway_occurences[1074]
+
 # ╔═╡ c2d2fe61-9e00-4db8-aa80-97deb551486a
 begin
 	                #shape plots into a grid
@@ -507,14 +516,14 @@ begin
                 ub = 1 -thresh
                 #first check if there are any orbits for any pathways that have such low representation that 0 count exceed threshold. we will filter these out of analysis
                 low_filter = .!(map(x->x(0),known_ecdf_table).>ub)
+				#low_filter = BitMatrix(ones(Bool,20,11))
                 #for each node, map each known ecdf to the corresponding orbit count and check against threshold, factoring in the low filter
                 unknown_ecdf_comparison = map(y->(reshape(map(x->known_ecdf_table[x](y[x]),1:length(known_ecdf_table)),size(known_ecdf_table)[1],size(known_ecdf_table)[2]).>ub).*low_filter,zero_orbit_sigs_array)
                 #determine a node as significantly linked to a pathway if at least half its orbit counts are significant
-                sig_check = map(x->(sum(x,dims=2).>(last_col/2)),unknown_ecdf_comparison)
+				sig_cut = 7
+                sig_check = map(x->(sum(x,dims=2).>(sig_cut)),unknown_ecdf_comparison)
                 sig_nodes= findall(x->sum(x)>0,sig_check)
                 sig_nodes_dict = Dict(Pair.(sig_nodes,map(x->zero_candidate_pathways[vec(x)],sig_check[sig_nodes])))
-
-
 end;
 
 # ╔═╡ 7a0255c6-82c6-48c6-83e1-cd83606b05dc
@@ -526,6 +535,12 @@ end
 
 # ╔═╡ 84aa8941-8766-4482-ba97-cfb5c477a072
 DataFrame(node = collect(keys(sig_nodes_dict)), pathways = collect(values(sig_nodes_dict)),type=vertexlist[sig_nodes])
+
+# ╔═╡ cce33b08-b63b-4987-92fe-cfe2b25e835b
+sig_pathway_occurences[597]
+
+# ╔═╡ 6ccd7400-1323-47c8-972f-d44ff5fd4322
+Coincidents
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1754,7 +1769,7 @@ version = "3.5.0+0"
 # ╟─6a2d3d61-cc8e-48ba-8839-705979033484
 # ╟─812abebd-a67d-498c-939b-98f9b4d8a300
 # ╟─b0ce6943-a214-4f5c-a75a-c3d59c71aa81
-# ╠═2abc718c-e711-4b7f-880c-38922e225dd2
+# ╟─2abc718c-e711-4b7f-880c-38922e225dd2
 # ╟─4ee8ef83-ee2a-458c-b7ce-bf16fd4c5baa
 # ╟─f7b11d20-9e7e-4197-b9b4-136d3e86644f
 # ╟─822164ee-0193-4c16-a245-b55ea8082530
@@ -1764,18 +1779,21 @@ version = "3.5.0+0"
 # ╟─07904aca-d5da-444a-8fa5-55f6af49eb23
 # ╟─7a0255c6-82c6-48c6-83e1-cd83606b05dc
 # ╟─7f35a6f0-71e3-4448-8dd1-fe359ac73f94
-# ╟─84aa8941-8766-4482-ba97-cfb5c477a072
+# ╠═84aa8941-8766-4482-ba97-cfb5c477a072
+# ╠═42452b78-f24c-4517-ae46-8ddfe6368d03
 # ╟─3f3e6d45-d576-4385-bea8-e55a37d34512
 # ╟─f34235b1-0e47-4f28-94db-ce3cfa598a91
 # ╟─9bb259ec-8528-4049-80bf-5fa0d543e47c
 # ╟─c2ddfc1b-5ef7-4c0f-82fb-d86c015aba74
 # ╟─f24286b1-a29f-49dc-8005-058dfcf4440f
-# ╟─c5f26162-6c29-46c2-b08b-8832ea301207
-# ╟─33367e44-3233-4200-a091-a4bd4ea9adeb
-# ╟─92c7926c-f21f-4665-84df-1ea98229cd4d
-# ╟─534b73a8-ced9-4e8c-a9df-ef73af97198d
-# ╟─c2d2fe61-9e00-4db8-aa80-97deb551486a
-# ╟─87c1ea4a-26b2-42af-a21d-b6ff80366562
-# ╟─3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
+# ╠═c5f26162-6c29-46c2-b08b-8832ea301207
+# ╠═33367e44-3233-4200-a091-a4bd4ea9adeb
+# ╠═92c7926c-f21f-4665-84df-1ea98229cd4d
+# ╠═534b73a8-ced9-4e8c-a9df-ef73af97198d
+# ╠═c2d2fe61-9e00-4db8-aa80-97deb551486a
+# ╠═87c1ea4a-26b2-42af-a21d-b6ff80366562
+# ╠═3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
+# ╠═cce33b08-b63b-4987-92fe-cfe2b25e835b
+# ╠═6ccd7400-1323-47c8-972f-d44ff5fd4322
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
