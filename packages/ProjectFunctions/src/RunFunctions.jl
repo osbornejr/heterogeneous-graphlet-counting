@@ -12,6 +12,7 @@ function run_all(config_file::String)
         @info "Setting up worker processes"
         distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
     end
+
     @info "Loading parameters"
     load_config(config_file)
     @info "Loading raw counts"
