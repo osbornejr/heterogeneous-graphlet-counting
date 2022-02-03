@@ -22,13 +22,13 @@ function run_all(config_file::String)
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
 
     cache_update("analysis")
-   # @info "Finding communities"
-   # com_anal = community_analysis(network_counts,adj_matrix)
-   # @info "Counting graphlets"
-   # graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
+    # @info "Finding communities"
+    # com_anal = community_analysis(network_counts,adj_matrix)
+    @info "Counting graphlets"
+    graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
 
     cache_update("graphlets")
-   # @info "Comparing typed graphlet representations"
+    # @info "Comparing typed graphlet representations"
     #typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     @info "Conducting coincident graphlet analysis"
     coinc_anal = coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
@@ -240,7 +240,6 @@ function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)
     vertexlist_comp = vertexlist[largest[1]]
 end
        
-
 function community_analysis(network_counts,adj_matrix)
     #Network Analysis
     #Type representations 
@@ -599,6 +598,7 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
     #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 
     #High zero exploration
+    #TODO remove this and just use low_filter method below to more organically acheive same thing
     ## over all transcripts 
     total_zero_proportion = sum(map(x->x.==0,orbit_sigs_array))./length(orbit_sigs_array)
     ##over a subset
@@ -618,7 +618,7 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
     zero_passes = vec(sum(zero_scores,dims=2).>(last_col/2))
     zero_candidate_pathways = candidate_pathways[zero_passes]
     zero_orbit_sigs = map(x->filter(:Pathway=>y->y in zero_candidate_pathways,x),orbit_sigs)
-    zero_orbit_sigs_array = map(x->Array(x[2:end]),zero_orbit_sigs)
+    zero_orbit_sigs_array = map(x->Array(x[!,2:end]),zero_orbit_sigs)
     zero_candidates = Dict(Pair.(zero_candidate_pathways,[candidates[x] for x in zero_candidate_pathways]))
 
     #uniqueness of pathway contributors (concerns of too much overlap) 
