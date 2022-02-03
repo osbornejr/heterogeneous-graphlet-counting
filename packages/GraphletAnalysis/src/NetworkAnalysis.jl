@@ -267,7 +267,7 @@ end
 function graphlet_coincidences(vertexlist::Array{String,1},vertex_names::Array{String,1},nametypes::String,adj_matrix::AbstractArray,entrez_id_vector::Array{Int,1},candidates::Dict{String,Array{Int,1}})
         edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
         @info "Counting per-edge graphlet relationships..."
-        graphlet_counts,Chi,Rel = GraphletCounting.count_graphlets(vertexlist,edgelist,4,run_method="distributed",relationships = true,progress = true)
+        graphlet_counts,Chi,Rel = GraphletCounting.count_graphlets(vertexlist,edgelist,4,run_method="distributed-old",relationships = true,progress = true)
 
         ## combine relationships into one array
         rel = vcat(Rel...)
@@ -294,7 +294,7 @@ function graphlet_coincidences(vertexlist::Array{String,1},vertex_names::Array{S
             #hogs = filter(x->x[end]==g,rel)
             #hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
             hogs_array = rel_array[findall(x->x==g,rel_types)]
-
+            #TODO check that this sorting holds up with the unique typed orbit situations for 4-path and 4-cycle 
             @info "sorting $g..."
             if(g == "3-path")
                 #get rid of leading zero
