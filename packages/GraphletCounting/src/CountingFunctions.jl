@@ -76,10 +76,9 @@ function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::U
 
 end
 
-function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
     ### fix to clear "sticky" memory
     ccall(:malloc_trim, Cvoid, (Cint,), 0)
-    count_dict = DefaultDict{String,Int}(0)
     h=edge  
 #   # get nodes i and j for this edge
         i = edgelist[h].first
@@ -106,12 +105,10 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
         if(k!=i)
             if (rel[k]==1)
                 ##triangle
-                count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[k],"3-tri",delim)]+=1
                 append!(Tri,k)
                 rel[k] = 3
             else
                 #j-path
-                count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[k],"3-path",delim)]+=1
                 append!(jPath,k)
                 rel[k] = 2
             end
@@ -121,14 +118,13 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
     for k in gamma_i
         if (rel[k]==1)
             #ipaths
-            count_dict[graphlet_string(vertex_type_list[j],vertex_type_list[i],vertex_type_list[k],"3-path",delim)]+=1
             append!(iPath,k)
         end
     end 
         if (graphlet_size==4)
-        #matrix to store 4 node relationships in; each row corresponds to the relevant entry in rel TODO might be better for memory to only have rows associated with
-        #nonzero entries in rel?
-        Rel = zeros(Int,length(vertex_type_list),length(vertex_type_list))
+        #Rel = zeros(Int,length(vertex_type_list),length(vertex_type_list))
+        #For efficiency, store relationship info in dict here rather than large matrix
+        Rel =  DefaultDict{Int,Vector{Pair}}(Vector{Pair{Int,Int}}())
         ##for reference, relationships are coded as follows:
         #1 = 3-path i centre
         #2 = 3-path j centre
@@ -147,29 +143,25 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
                 if (v==i)
 
                 elseif (!(v in gamma_i) & !(v in gamma_j))
-                        count_dict[graphlet_string(vertex_type_list[j],vertex_type_list[i],vertex_type_list[w],vertex_type_list[v],"4-path-edge-orbit",delim)]+=1
-                        Rel[w,v] = 4
+                        push!(Rel[w],v=>4)
                 elseif ((v in iPath) & (v < w))
-                        count_dict[graphlet_string(vertex_type_list[w],vertex_type_list[v],vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)]+=1
-                        Rel[w,v] = 6
+                        push!(Rel[w],v=>6)
                 end
 
             end
         end
                         
         for w in jPath 
+
             for v in neighbourdict[w]
                 if (v==j)
                 #do nothing
                 elseif (!(v in gamma_i) & !(v in gamma_j))
-                    count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[w],vertex_type_list[v],"4-path-edge-orbit",delim)]+=1
-                        Rel[w,v] = 4
+                        push!(Rel[w],v=>4)
                 elseif ((v in jPath) & (v < w))
-                        count_dict[graphlet_string(vertex_type_list[w],vertex_type_list[v],vertex_type_list[j],vertex_type_list[i],"4-tail-edge-orbit",delim)]+=1
-                        Rel[w,v] = 6
+                        push!(Rel[w],v=>6)
                 elseif (v in iPath)
-                        count_dict[graphlet_string(vertex_type_list[v],vertex_type_list[i],vertex_type_list[j],vertex_type_list[w],"4-cycle",delim)]+=1
-                        Rel[w,v] = 7
+                        push!(Rel[w],v=>7)
                 end
 
             end
@@ -180,18 +172,14 @@ function per_edge_counts_relationships(edge::Int,vertex_type_list::Array{String,
                 if (v==i|v==j)
                 #do nothing
                 elseif ((v in Tri) & (v < w)) 
-                    count_dict[graphlet_string(vertex_type_list[w],vertex_type_list[i],vertex_type_list[j],vertex_type_list[v],"4-clique",delim)]+=1
-                        Rel[w,v] = 10
+                        push!(Rel[w],v=>10)
                 ## separating the processes here so that we can maintain the right type ordering 
                 elseif (v in iPath) 
-                    count_dict[graphlet_string(vertex_type_list[v],vertex_type_list[i],vertex_type_list[w],vertex_type_list[j],"4-chord-edge-orbit",delim)]+=1
-                        Rel[w,v] = 8
+                        push!(Rel[w],v=>8)
                 elseif (v in jPath) 
-                    count_dict[graphlet_string(vertex_type_list[v],vertex_type_list[j],vertex_type_list[w],vertex_type_list[i],"4-chord-edge-orbit",delim)]+=1
-                        Rel[w,v] = 9
+                        push!(Rel[w],v=>9)
                 elseif (!(v in gamma_i) & !(v in gamma_j))
-                        count_dict[graphlet_string(vertex_type_list[i],vertex_type_list[j],vertex_type_list[w],vertex_type_list[v],"4-tail-tri-centre-orbit",delim)]+=1
-                        Rel[w,v] = 6
+                        push!(Rel[w],v=>6)
                 end             
             end
         end
