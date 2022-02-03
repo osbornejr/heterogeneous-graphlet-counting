@@ -66,16 +66,6 @@ function graphlet_string(a::String,b::String,c::String,d::String,graphlet::Strin
 end
 
 
-function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}};relationships::Bool=false)
-    if (relationships==true)
-        return per_edge_counts_relationships(edge,vertex_type_list,edgelist,graphlet_size,neighbourdict)
-    else
-        return per_edge_counts_no_relationships(edge,vertex_type_list,edgelist,graphlet_size,neighbourdict)
-    end
-
-
-end
-
 function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
     ### fix to clear "sticky" memory
     ccall(:malloc_trim, Cvoid, (Cint,), 0)
@@ -241,7 +231,7 @@ end
 
 end
 
-function per_edge_counts_no_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
     count_dict = DefaultDict{String,Int}(0)
     h=edge  
 #   # get nodes i and j for this edge
@@ -437,20 +427,27 @@ function t2(d1,d2)
     d1
 end
 
-function count_graphlets(args...;run_method::String="serial",relationships::Bool=false,progress::Bool=false)
+function count_graphlets(args...;run_method::String="serial",progress::Bool=false)
     GC.gc(true)
-    if (relationships)
-        Chi,Rel = local_graphlets(args...;run_method=run_method,relationships=relationships,progress=progress)
-        graphlets = total_graphlets(Chi)
-        return [graphlets,Chi,Rel]
-    else
-        Chi = local_graphlets(args...;run_method=run_method,relationships=relationships,progress=progress)
-        graphlets = total_graphlets(Chi)
-        return graphlets
-    end
+    Chi = local_graphlets(args...;run_method=run_method,relationships=relationships,progress=progress)
+    graphlets = total_graphlets(Chi)
+    return graphlets
 end
 
-function local_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",relationships::Bool=false,progress::Bool=false)
+
+function graphlet_relationships()
+
+        #preallocate array to store each edge relationship dict 
+        Rel=Array{Array{Tuple{Int,Int,Int,Int,String},1}}(undef,size(edgelist,1));
+        #Rel = Array{Int,3}(undef,length(vertex_type_list),length(vertex_type_list),length(vertex_type_list))
+
+
+
+
+end
+
+
+function local_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",progress::Bool=false)
     ##INPUTS TO PER EDGE FUNCTION
     #get neighbourhood for each vertex in advance (rather than calling per-edge)
     neighbourdict=Neighbours(edgelist)
@@ -460,147 +457,66 @@ function local_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array
     
     #preallocate array to store each edge's graphlet dictionary 
     Chi=Array{Dict{String,Int}}(undef,size(edgelist,1));
-    if (relationships==true)
-        ##when per node graphlet information is required. note that this does demand large memory storage TODO make more efficient?
-        #preallocate array to store each edge relationship dict 
-        Rel=Array{Array{Tuple{Int,Int,Int,Int,String},1}}(undef,size(edgelist,1));
-        #Rel = Array{Int,3}(undef,length(vertex_type_list),length(vertex_type_list),length(vertex_type_list))
-
-
-        #dummy_chi = Dict{String,Int}()
-        #dummy_rel = Dict{Int,Int}()
-    end 
     #per edge process
     if(run_method == "threads")
         throw(ArgumentError("threads method is currently not working."))
         ##NOT WORKING AT PRESENT
         Threads.@threads for h in 1 :size(edgelist,1)
-            edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships)
+            edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict)
             Chi[h] = edge[1]
-            if (relationships==true)
-                Rel[h] = edge[2]
-            end
         end
     elseif(run_method == "remote-channel")
         
         ##run tasks through input and ooutput remote-channels (r is output remote channel)
-        r = remote_channel_method(vertex_type_list,edgelist,graphlet_size,neighbourdict;relationships = relationships, progress = progress)
+        r = remote_channel_method(vertex_type_list,edgelist,graphlet_size,neighbourdict;progress = progress)
         ## there should be length(edgelist) results on channel r. we harvest them into each array as required:
         if(progress)
             @info "Taking results from output channel..."
-            if (relationships)
-                @showprogress for n in 1:length(edgelist)
-                    i,chi,rel = take!(r)
-                    Chi[i] = chi
-                    Rel[i] = rel
-                end
-            else
-                @showprogress for n in 1:length(edgelist)
-                    i,chi = take!(r)
-                    Chi[i] = chi
-                end
+            @showprogress for n in 1:length(edgelist)
+                i,chi = take!(r)
+                Chi[i] = chi
             end
         else
-            if (relationships)
-                for n in 1:length(edgelist)
-                    i,chi,rel = take!(r)
-                    Chi[i] = chi
-                    Rel[i] = rel
-                end
-            else
-                for n in 1:length(edgelist)
-                    i,chi = take!(r)
-                    Chi[i] = chi
-                end
+            for n in 1:length(edgelist)
+                i,chi = take!(r)
+                Chi[i] = chi
             end
         end
 
     elseif(run_method == "distributed")
-        if (relationships == true)
-            ## break up edgelist into chunks so that workers can handle it
-           # partition = 20000
-           # if (length(edgelist) > partition)
-           #     out = []
-           #         if(progress == true)
-           #             @info "Distributing edges to workers in batches of size $partition"
-           #             #for (i,p) in enumerate(1:partition:length(edgelist))
-           #             p =1
-           #             e = p + partition -1
-           #                 if (e>length(edgelist))
-           #                     e = length(edgelist)
-           #                 end
-           #                 @info "Batch $i: edges $p to $e"
-           #                 bout = @showprogress pmap(x->per_edge_counts_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),p:e,batch_size =1000)
-           #                 
-           #                 #append!(out,bout)
-           #             #end
-           #         else 
-           #     end
-           # else
-                if(progress == true)
-                    @info "Distributing edges to workers..."
-                    out = @showprogress pmap(x->per_edge_counts_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
-                    #@info "Per-node relationships not provided as they are unsupported using the distributed run_method. Try serial or distributed-old if relationships are required."
-                else
-                    out = pmap(x->per_edge_counts_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
-                end
-           # end
-            Chi = first.(out)
-            Rel = last.(out)
-            #relationships = false
-        else
-            if(progress == true)
+        if(progress == true)
 
-                @info "Distributing edges to workers..."
-                ##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
-                Chi = @showprogress pmap(x->per_edge_counts_no_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
-            else
-                Chi = pmap(x->per_edge_counts_no_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
-            end
+            @info "Distributing edges to workers..."
+            ##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
+            Chi = @showprogress pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
+        else
+            Chi = pmap(x->per_edge_counts(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
         end
     elseif(run_method == "distributed-old")
         if(progress==true)
             @info "Distributing edges to workers..."
 
             res = @showprogress @distributed (t2) for h in 1:size(edgelist,1)
-                [(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships))]        
+                [(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict))]        
             end
         else
             res = @sync @distributed (t2) for h in 1:size(edgelist,1)
-                [(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships))]        
+                [(h,per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict))]        
             end
         end
-        #manipulate distributed output tuples into Chi array (for now in line iwth other methods)
-        if (relationships == true)
-
-            for r in res
-                Chi[first(r)] = last(r)[1]
-                Rel[first(r)] = last(r)[2]
-            end
-        else
-            for r in res
-                Chi[first(r)] = last(r)
-            end
+        for r in res
+            Chi[first(r)] = last(r)
         end
 
     elseif (run_method == "serial")
         for h in 1 :size(edgelist,1)
-            edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,relationships=relationships)
-            if (relationships==true)
-                Chi[h] = edge[1]
-                Rel[h] = edge[2]
-            else
-                Chi[h] = edge
-            end
+            edge = per_edge_counts(h,vertex_type_list,edgelist,graphlet_size,neighbourdict)
+            Chi[h] = edge
         end
     else
         throw(ArgumentError("run_method not recognised."))
     end
-    if (relationships)
-        return [Chi,Rel]
-    else
-        return Chi
-    end
+    return Chi
 end
 
 function total_graphlets(Chi::Array{Dict{String,Int}})    
@@ -807,36 +723,24 @@ function find_motifs(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},null_
 end 
 
 #put function everywhere
-function no_work(jobs, results,args...;relationships=false) # define work function everywhere
+function no_work(jobs, results,args...) # define work function everywhere
     while true
         job_ids = take!(jobs)
-        if (relationships==true)
-            for i in job_ids
-                Chi,Rel = GraphletCounting.per_edge_counts(i,args...,relationships = relationships)
-                put!(results,(i,Chi,Rel))
-            end
-        else
-            for i in job_ids
-                Chi = GraphletCounting.per_edge_counts(i,args...,relationships = relationships)
-                put!(results,(i,Chi))
-            end
+        for i in job_ids
+            Chi = GraphletCounting.per_edge_counts(i,args...)
+            put!(results,(i,Chi))
         end
      end
 end
 
-function do_work(jobs, results,args...;relationships=false) # define work function everywhere
+function do_work(jobs, results,args...) # define work function everywhere
     while true
         job_id = take!(jobs)
-        if (relationships==true)
-            Chi,Rel = GraphletCounting.per_edge_counts(job_id,args...,relationships = relationships)
-            put!(results,(job_id,Chi,Rel))
-        else
-            Chi = GraphletCounting.per_edge_counts(job_id,args...,relationships = relationships)
-            put!(results,(job_id,Chi))
-        end
-     end
+        Chi = GraphletCounting.per_edge_counts(job_id,args...)
+        put!(results,(job_id,Chi))
+    end
 end
-function remote_channel_method(args...;relationships=false,progress::Bool=false)
+function remote_channel_method(args...;progress::Bool=false)
     
     batch_size = 1
     m = length(args[2])
@@ -852,11 +756,11 @@ function remote_channel_method(args...;relationships=false,progress::Bool=false)
     if (progress)
         @info "Distributing edges to workers..."
         @showprogress for p in workers() # start tasks on the workers to process requests in parallel
-            remote_do(GraphletCounting.no_work, p, jobs, results,args...,relationships = relationships)
+            remote_do(GraphletCounting.no_work, p, jobs, results,args...)
         end
     else
         for p in workers() # start tasks on the workers to process requests in parallel
-            remote_do(GraphletCounting.do_work, p, jobs, results,args...,relationships = relationships)
+            remote_do(GraphletCounting.do_work, p, jobs, results,args...)
         end
 
     end
