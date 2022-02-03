@@ -143,9 +143,9 @@ function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edge
                 if (v==i)
 
                 elseif (!(v in gamma_i) & !(v in gamma_j))
-                        push!(Rel[w],v=>4)
+                        push!(Rel[4],w=>v)
                 elseif ((v in iPath) & (v < w))
-                        push!(Rel[w],v=>6)
+                        push!(Rel[6],w=>v)
                 end
 
             end
@@ -157,11 +157,11 @@ function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edge
                 if (v==j)
                 #do nothing
                 elseif (!(v in gamma_i) & !(v in gamma_j))
-                        push!(Rel[w],v=>4)
+                        push!(Rel[4],w=>v)
                 elseif ((v in jPath) & (v < w))
-                        push!(Rel[w],v=>6)
+                        push!(Rel[6],w=>v)
                 elseif (v in iPath)
-                        push!(Rel[w],v=>7)
+                        push!(Rel[7],w=>v)
                 end
 
             end
@@ -172,110 +172,17 @@ function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edge
                 if (v==i|v==j)
                 #do nothing
                 elseif ((v in Tri) & (v < w)) 
-                        push!(Rel[w],v=>10)
+                        push!(Rel[10],w=>v)
                 ## separating the processes here so that we can maintain the right type ordering 
                 elseif (v in iPath) 
-                        push!(Rel[w],v=>8)
+                        push!(Rel[8],w=>v)
                 elseif (v in jPath) 
-                        push!(Rel[w],v=>9)
+                        push!(Rel[9],w=>v)
                 elseif (!(v in gamma_i) & !(v in gamma_j))
-                        push!(Rel[w],v=>6)
+                        push!(Rel[6],w=>v)
                 end             
             end
         end
-        
-        #Combinatorial methods
-        # Remaining graphlets are found as per Rossi et al. (2019) using combinatorial relationships. These must be done per type 
-        
-        #first we store the types, as well as their occurences in each adjacent set (to save on recomputing)
-        types = unique(vertex_type_list)
-        iPathTypes = Array{Int}(undef,length(types))
-        for(ind,t) in enumerate(types)
-            iPathTypes[ind] = sum(vertex_type_list[iPath].==t)
-        end
-        jPathTypes = Array{Int}(undef,length(types))
-        for(ind,t) in enumerate(types)
-            jPathTypes[ind] = sum(vertex_type_list[jPath].==t)
-        end
-        TriTypes = Array{Int}(undef,length(types))
-        for(ind,t) in enumerate(types)
-            TriTypes[ind] = sum(vertex_type_list[Tri].==t)
-        end
-
-                ##Now we loop per type combination
-        for (inda,a) in enumerate(types)     
-            for (indb,b) in enumerate(types[inda:end])
-                if (a == b) 
-                    ##4-path centre orbit
-                    #order doesn't matter here
-                    count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-path-centre-orbit",delim)] += iPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-cycle",delim)]
-                    ## 4-chord-centre-orbit
-                    count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-chord-centre-orbit",delim)] += Int(0.5*TriTypes[inda]*(TriTypes[inda]-1)) - count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-clique",delim)]
-
-                    ##For the other two graphlets, we operate differently if i and j are of different types
-                    if (vertex_type_list[i]!=vertex_type_list[j])
-                        ##4-star
-                        #To maintain type order here, we also have to separate. Note we enforce that the centre of the star is THIRD listed (in line with the 4-tail edge orbit layout)
-                        #i-centre
-                        count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-star",delim)] += Int(0.5*iPathTypes[inda]*(iPathTypes[inda]-1)) -     count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)]
-                        #j-centre
-                        count_dict[graphlet_string(a,b,vertex_type_list[j],vertex_type_list[i],"4-star",delim)] += Int(0.5*jPathTypes[inda]*(jPathTypes[inda]-1)) -     count_dict[graphlet_string(a,b,vertex_type_list[j],vertex_type_list[i],"4-tail-edge-orbit",delim)]
-                        ##4-tail tri-edge orbit
-                        #i-centre
-                        count_dict[graphlet_string(a,vertex_type_list[j],vertex_type_list[i],b,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda]*iPathTypes[inda] -     count_dict[graphlet_string(a,vertex_type_list[i],b,vertex_type_list[j],"4-chord-edge-orbit",delim)]
-                        #j-centre
-                        count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda]*jPathTypes[inda] -     count_dict[graphlet_string(a,vertex_type_list[j],b,vertex_type_list[i],"4-chord-edge-orbit",delim)]
-
-                    else # when i and j are also of same type
-                        ##4-star
-                        #To maintain type order here, we also have to separate. Note we enforce that the centre of the star is THIRD listed (in line with the 4-tail edge orbit layout)
-                        count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-star",delim)] += Int(0.5*iPathTypes[inda]*(iPathTypes[inda]-1))+Int(0.5*jPathTypes[inda]*(jPathTypes[inda]-1)) -  count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)]
-                        ##4-tail tri-edge orbit
-                        count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda]*iPathTypes[inda] + TriTypes[inda]*jPathTypes[inda] - count_dict[graphlet_string(a,vertex_type_list[i],b,vertex_type_list[j],"4-chord-edge-orbit",delim)]
-                    end
-                else # when a and b are of different types
-                    ##4-path centre orbit
-                    #to maintain order here, we diverge from ROssi et al and calculate each orientation separately
-                    count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-path-centre-orbit",delim)] += iPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-cycle",delim)]
-                    count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-path-centre-orbit",delim)] += iPathTypes[inda+indb-1]*jPathTypes[inda] - count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-cycle",delim)]
-                    ## 4-chord-centre-orbit
-                    count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-chord-centre-orbit",delim)] += TriTypes[inda]*TriTypes[inda+indb-1] - count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-clique",delim)] - count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-clique",delim)]
-
-                    ##For the other two graphlets, we operate differently if i and j are of different types
-                     if (vertex_type_list[i]!=vertex_type_list[j])
-                        ##4-star
-                        #i-centre
-                        count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-star",delim)] += iPathTypes[inda]*iPathTypes[inda+indb-1] - count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)] - count_dict[graphlet_string(b,a,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)]#unsure if both need to be subtracted here? TEST                   
-                        #j-centre
-                        count_dict[graphlet_string(a,b,vertex_type_list[j],vertex_type_list[i],"4-star",delim)] += jPathTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(a,b,vertex_type_list[j],vertex_type_list[i],"4-tail-edge-orbit",delim)] - count_dict[graphlet_string(b,a,vertex_type_list[j],vertex_type_list[i],"4-tail-edge-orbit",delim)]#unsure if both need to be subtracted here? TEST
-                        ##4-tail tri-edge orbit
-                        #Note that here we split again! to make sure we get the right tail type (i.e. a or b)
-                        #i-centre, a tail
-                        count_dict[graphlet_string(b,vertex_type_list[j],vertex_type_list[i],a,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda+indb-1]*iPathTypes[inda] - count_dict[graphlet_string(a,vertex_type_list[i],b,vertex_type_list[j],"4-chord-edge-orbit",delim)]
-                        #i-centre, b tail
-                        count_dict[graphlet_string(a,vertex_type_list[j],vertex_type_list[i],b,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda]*iPathTypes[inda+indb-1] - count_dict[graphlet_string(b,vertex_type_list[i],a,vertex_type_list[j],"4-chord-edge-orbit",delim)]
-                        #j-centre, a tail
-                        count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda+indb-1]*jPathTypes[inda] - count_dict[graphlet_string(a,vertex_type_list[j],b,vertex_type_list[i],"4-chord-edge-orbit",delim)]
-                        #j-centre, b tail
-                        count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(b,vertex_type_list[j],a,vertex_type_list[i],"4-chord-edge-orbit",delim)]
-                    else ##i and j are same type
-                        ##4-star
-                        count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-star",delim)] += iPathTypes[inda]*iPathTypes[inda+indb-1] +  jPathTypes[inda]*jPathTypes[inda+indb-1]  - count_dict[graphlet_string(a,b,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)] - count_dict[graphlet_string(b,a,vertex_type_list[i],vertex_type_list[j],"4-tail-edge-orbit",delim)]#unsure if both need to be subtracted here? TEST                  
-                        ##4-tail tri-edge orbit
-                        # We still split by and b tails
-                        #a tail
-                        count_dict[graphlet_string(b,vertex_type_list[i],vertex_type_list[j],a,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda+indb-1]*iPathTypes[inda] + TriTypes[inda+indb-1]*jPathTypes[inda] - count_dict[graphlet_string(a,vertex_type_list[j],b,vertex_type_list[i],"4-chord-edge-orbit",delim)]
-                        #j-centre, b tail
-                        count_dict[graphlet_string(a,vertex_type_list[i],vertex_type_list[j],b,"4-tail-tri-edge-orbit",delim)] += TriTypes[inda]*iPathTypes[inda+indb-1] + TriTypes[inda]*jPathTypes[inda+indb-1] - count_dict[graphlet_string(b,vertex_type_list[j],a,vertex_type_list[i],"4-chord-edge-orbit",delim)]
-                    end
-                end
-            end
-        end
-    end 
-    #combinatorial process currently adds 0 entries if no candidates exist. Not an issue per se, but makes readability on smaller graphs annoying. for now we tidy up at the end, but might be more efficient to do during combinatorial loop?
-    for g in collect(keys(count_dict))[collect(values(count_dict)).==0]
-        delete!(count_dict,g)
-    end
     
     ###extract relationships vector from matrix... I think it is better to do here as storing matrix for each edge will surely eat up all memory.
     ships = Array{Tuple{Int,Int,Int,Int,String},1}()
@@ -287,49 +194,50 @@ function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edge
     append!(ships,[(0,i,j,x,"3-tri") for x in findall(==(3),rel)])
 
     #4-paths iedge
-    append!(ships,[(j,i,x,y,"4-path") for x in findall(==(1),rel) for y in findall(==(4),Rel[x,:])])
+    append!(ships,[(j,i,x,y,"4-path") for x in findall(==(1),rel) for y in last.(filter(z->first(z)==x,Rel[4]))])
     #4-paths jedge
-    append!(ships,[(i,j,x,y,"4-path") for x in findall(==(2),rel) for y in findall(==(4),Rel[x,:])])
+    append!(ships,[(i,j,x,y,"4-path") for x in findall(==(2),rel) for y in last.(filter(z->first(z)==x,Rel[4]))])
+
 
 
     #4-tails icentre
-    append!(ships,[(y,x,i,j,"4-tail") for x in findall(==(1),rel) for y in findall(==(6),Rel[x,:])])
+    append!(ships,[(y,x,i,j,"4-tail") for x in findall(==(1),rel) for y in last.(filter(z->first(z)==x,Rel[6]))])
     #4-tails jcentre
-    append!(ships,[(y,x,j,i,"4-tail") for x in findall(==(2),rel) for y in findall(==(6),Rel[x,:])])
+    append!(ships,[(y,x,j,i,"4-tail") for x in findall(==(2),rel) for y in last.(filter(z->first(z)==x,Rel[6]))])
     #4-tails tricentre
-    append!(ships,[(i,j,x,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(6),Rel[x,:])])
+    append!(ships,[(i,j,x,y,"4-tail") for x in findall(==(3),rel) for y in last.(filter(z->first(z)==x,Rel[6]))])
 
     #4-cycles
-    append!(ships,[(i,j,x,y,"4-cycle") for x in findall(==(2),rel) for y in findall(==(7),Rel[x,:])])
+    append!(ships,[(i,j,x,y,"4-cycle") for x in findall(==(2),rel) for y in last.(filter(z->first(z)==x,Rel[7]))])
     
     #4-chord iedge orbit
-    append!(ships,[(j,i,x,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(8),Rel[x,:])])
+    append!(ships,[(j,i,x,y,"4-chord") for x in findall(==(3),rel) for y in last.(filter(z->first(z)==x,Rel[8]))])
     #4-chord jedge orbit
-    append!(ships,[(i,j,x,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(9),Rel[x,:])])
+    append!(ships,[(i,j,x,y,"4-chord") for x in findall(==(3),rel) for y in last.(filter(z->first(z)==x,Rel[9]))])
 
     #4-clique
-    append!(ships,[(x,i,j,y,"4-clique") for x in findall(==(3),rel) for y in findall(==(10),Rel[x,:])])
+    append!(ships,[(x,i,j,y,"4-clique") for x in findall(==(3),rel) for y in last.(filter(z->first(z)==x,Rel[10]))])
 
     ##combinatorials might be more difficult...
     #4-paths centre orbit
-    append!(ships,[(x,i,j,y,"4-path") for x in findall(==(1),rel) for y in findall(==(2),rel) if Rel[y,x]!=7])
+    append!(ships,[(x,i,j,y,"4-path") for x in findall(==(1),rel) for y in findall(==(2),rel) if !((y,x) in Rel[7])])
     
     #4-chords centre orbit
-    append!(ships,[(x,i,j,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(3),rel) if (y<x && Rel[x,y]!=10)])
+    append!(ships,[(x,i,j,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(3),rel) if !(y<x && (x=>y) in Rel[10])])
     
     #4-stars i centre
-    append!(ships,[(x,j,i,y,"4-star") for x in findall(==(1),rel) for y in findall(==(1),rel) if (y<x && Rel[x,y]!=6)])
+    append!(ships,[(x,j,i,y,"4-star") for x in findall(==(1),rel) for y in findall(==(1),rel) if !(y<x && (x=>y) in Rel[6])])
     
     #4-stars j centre
-    append!(ships,[(x,i,j,y,"4-star") for x in findall(==(2),rel) for y in findall(==(2),rel) if (y<x && Rel[x,y]!=6)])
+    append!(ships,[(x,i,j,y,"4-star") for x in findall(==(2),rel) for y in findall(==(2),rel) if !(y<x && (x=>y) in Rel[6])])
 
     #4-tails tri i edge
-    append!(ships,[(x,j,i,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(1),rel) if (Rel[x,y]!=8)])
+    append!(ships,[(x,j,i,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(1),rel) if !((x=>y) in Rel[8])])
     
     #4-tails tri j edge
-    append!(ships,[(x,i,j,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(2),rel) if (Rel[x,y]!=9)])
-    
-    return [count_dict,ships]
+    append!(ships,[(x,i,j,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(2),rel) if !((x=>y) in Rel[9])])
+end
+    return ships
 
 end
 
