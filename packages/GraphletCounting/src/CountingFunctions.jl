@@ -66,6 +66,170 @@ function graphlet_string(a::String,b::String,c::String,d::String,graphlet::Strin
 end
 
 
+function per_edge_relationships_old(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+    ### fix to clear "sticky" memory
+    ccall(:malloc_trim, Cvoid, (Cint,), 0)
+    h=edge  
+#   # get nodes i and j for this edge
+        i = edgelist[h].first
+        j = edgelist[h].second
+        #get neighbourhoods of i and j
+        gamma_i = neighbourdict[i]  
+        gamma_j = neighbourdict[j]
+        
+        delim = "_"
+        #three node graphlets
+    ##more efficient loop based method
+    #rel = DefaultDict{Int,Int}(0)
+    rel = zeros(Int,length(vertex_type_list))
+    Tri = Array{Int,1}()
+    iPath = Array{Int,1}()
+    jPath = Array{Int,1}()
+    #prelim cycle through i neighbours
+    for k in gamma_i
+        if (k!=j)
+            rel[k] = 1
+        end
+    end
+    for k in gamma_j
+        if(k!=i)
+            if (rel[k]==1)
+                ##triangle
+                append!(Tri,k)
+                rel[k] = 3
+            else
+                #j-path
+                append!(jPath,k)
+                rel[k] = 2
+            end
+        end
+    end
+        
+    for k in gamma_i
+        if (rel[k]==1)
+            #ipaths
+            append!(iPath,k)
+        end
+    end 
+        if (graphlet_size==4)
+        #matrix to store 4 node relationships in; each row corresponds to the relevant entry in rel TODO might be better for memory to only have rows associated with
+        #nonzero entries in rel?
+        Rel = zeros(Int,length(vertex_type_list),length(vertex_type_list))
+        ##for reference, relationships are coded as follows:
+        #1 = 3-path i centre
+        #2 = 3-path j centre
+        #3 = 3-tri
+        #4 = 4-path
+        #5 = 4-star
+        #6 = 4-tail
+        #7 = 4-cycle
+        #8 = 4-chord iedge
+        #9 = 4-chord jedge
+        #10 = 4-clique
+        #The specific orbits of each four node graphlet should be recoverable from the first column in Rel (1,2 or 3) but otherwise we might need more relationship types 
+        #in the fournode case
+        for w in  iPath
+            for v in neighbourdict[w]
+                if (v==i)
+
+                elseif (!(v in gamma_i) & !(v in gamma_j))
+                        Rel[w,v] = 4
+                elseif ((v in iPath) & (v < w))
+                        Rel[w,v] = 6
+                end
+
+            end
+        end
+                        
+        for w in jPath 
+            for v in neighbourdict[w]
+                if (v==j)
+                #do nothing
+                elseif (!(v in gamma_i) & !(v in gamma_j))
+                        Rel[w,v] = 4
+                elseif ((v in jPath) & (v < w))
+                        Rel[w,v] = 6
+                elseif (v in iPath)
+                        Rel[w,v] = 7
+                end
+
+            end
+        end
+    
+        for w in Tri 
+            for v  in neighbourdict[w]
+                if (v==i|v==j)
+                #do nothing
+                elseif ((v in Tri) & (v < w)) 
+                        Rel[w,v] = 10
+                ## separating the processes here so that we can maintain the right type ordering 
+                elseif (v in iPath) 
+                        Rel[w,v] = 8
+                elseif (v in jPath) 
+                        Rel[w,v] = 9
+                elseif (!(v in gamma_i) & !(v in gamma_j))
+                        Rel[w,v] = 6
+                end             
+            end
+        end
+        
+    end 
+    
+    ###extract relationships vector from matrix... I think it is better to do here as storing matrix for each edge will surely eat up all memory.
+    ships = Array{Tuple{Int,Int,Int,Int,String},1}()
+    #ipaths
+    append!(ships,[(0,j,i,x,"3-path") for x in findall(==(1),rel)])
+    #jpaths
+    append!(ships,[(0,i,j,x,"3-path") for x in findall(==(2),rel)])
+    #triangles
+    append!(ships,[(0,i,j,x,"3-tri") for x in findall(==(3),rel)])
+
+    #4-paths iedge
+    append!(ships,[(j,i,x,y,"4-path") for x in findall(==(1),rel) for y in findall(==(4),Rel[x,:])])
+    #4-paths jedge
+    append!(ships,[(i,j,x,y,"4-path") for x in findall(==(2),rel) for y in findall(==(4),Rel[x,:])])
+
+
+    #4-tails icentre
+    append!(ships,[(y,x,i,j,"4-tail") for x in findall(==(1),rel) for y in findall(==(6),Rel[x,:])])
+    #4-tails jcentre
+    append!(ships,[(y,x,j,i,"4-tail") for x in findall(==(2),rel) for y in findall(==(6),Rel[x,:])])
+    #4-tails tricentre
+    append!(ships,[(i,j,x,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(6),Rel[x,:])])
+
+    #4-cycles
+    append!(ships,[(i,j,x,y,"4-cycle") for x in findall(==(2),rel) for y in findall(==(7),Rel[x,:])])
+    
+    #4-chord iedge orbit
+    append!(ships,[(j,i,x,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(8),Rel[x,:])])
+    #4-chord jedge orbit
+    append!(ships,[(i,j,x,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(9),Rel[x,:])])
+
+    #4-clique
+    append!(ships,[(x,i,j,y,"4-clique") for x in findall(==(3),rel) for y in findall(==(10),Rel[x,:])])
+
+    ##combinatorials might be more difficult...
+    #4-paths centre orbit
+    append!(ships,[(x,i,j,y,"4-path") for x in findall(==(1),rel) for y in findall(==(2),rel) if Rel[y,x]!=7])
+    
+    #4-chords centre orbit
+    append!(ships,[(x,i,j,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(3),rel) if (y<x && Rel[x,y]!=10)])
+    
+    #4-stars i centre
+    append!(ships,[(x,j,i,y,"4-star") for x in findall(==(1),rel) for y in findall(==(1),rel) if (y<x && Rel[x,y]!=6)])
+    
+    #4-stars j centre
+    append!(ships,[(x,i,j,y,"4-star") for x in findall(==(2),rel) for y in findall(==(2),rel) if (y<x && Rel[x,y]!=6)])
+
+    #4-tails tri i edge
+    append!(ships,[(x,j,i,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(1),rel) if (Rel[x,y]!=8)])
+    
+    #4-tails tri j edge
+    append!(ships,[(x,i,j,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(2),rel) if (Rel[x,y]!=9)])
+    
+    return ships
+end
+
 function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
     ### fix to clear "sticky" memory
     GC.gc()
