@@ -66,7 +66,7 @@ function graphlet_string(a::String,b::String,c::String,d::String,graphlet::Strin
 end
 
 
-function per_edge_relationships_old(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},ticket_channel::RemoteChannel=RemoteChannel(()->Channel(Bool)(1)),outfile::String="relationships.csv";write_out=false)
     ### fix to clear "sticky" memory
     ccall(:malloc_trim, Cvoid, (Cint,), 0)
     h=edge  
@@ -176,61 +176,81 @@ function per_edge_relationships_old(edge::Int,vertex_type_list::Array{String,1},
     end 
     
     ###extract relationships vector from matrix... I think it is better to do here as storing matrix for each edge will surely eat up all memory.
-    ships = Array{Tuple{Int,Int,Int,Int,String},1}()
-    #ipaths
-    append!(ships,[(0,j,i,x,"3-path") for x in findall(==(1),rel)])
-    #jpaths
-    append!(ships,[(0,i,j,x,"3-path") for x in findall(==(2),rel)])
-    #triangles
-    append!(ships,[(0,i,j,x,"3-tri") for x in findall(==(3),rel)])
+    begin
+        ships = Array{Tuple{Int,Int,Int,Int,String},1}()
+        #ipaths
+        append!(ships,[(0,j,i,x,"3-path") for x in findall(==(1),rel)])
+        #jpaths
+        append!(ships,[(0,i,j,x,"3-path") for x in findall(==(2),rel)])
+        #triangles
+        append!(ships,[(0,i,j,x,"3-tri") for x in findall(==(3),rel)])
 
-    #4-paths iedge
-    append!(ships,[(j,i,x,y,"4-path") for x in findall(==(1),rel) for y in findall(==(4),Rel[x,:])])
-    #4-paths jedge
-    append!(ships,[(i,j,x,y,"4-path") for x in findall(==(2),rel) for y in findall(==(4),Rel[x,:])])
+        #4-paths iedge
+        append!(ships,[(j,i,x,y,"4-path") for x in findall(==(1),rel) for y in findall(==(4),Rel[x,:])])
+        #4-paths jedge
+        append!(ships,[(i,j,x,y,"4-path") for x in findall(==(2),rel) for y in findall(==(4),Rel[x,:])])
 
 
-    #4-tails icentre
-    append!(ships,[(y,x,i,j,"4-tail") for x in findall(==(1),rel) for y in findall(==(6),Rel[x,:])])
-    #4-tails jcentre
-    append!(ships,[(y,x,j,i,"4-tail") for x in findall(==(2),rel) for y in findall(==(6),Rel[x,:])])
-    #4-tails tricentre
-    append!(ships,[(i,j,x,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(6),Rel[x,:])])
+        #4-tails icentre
+        append!(ships,[(y,x,i,j,"4-tail") for x in findall(==(1),rel) for y in findall(==(6),Rel[x,:])])
+        #4-tails jcentre
+        append!(ships,[(y,x,j,i,"4-tail") for x in findall(==(2),rel) for y in findall(==(6),Rel[x,:])])
+        #4-tails tricentre
+        append!(ships,[(i,j,x,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(6),Rel[x,:])])
 
-    #4-cycles
-    append!(ships,[(i,j,x,y,"4-cycle") for x in findall(==(2),rel) for y in findall(==(7),Rel[x,:])])
+        #4-cycles
+        append!(ships,[(i,j,x,y,"4-cycle") for x in findall(==(2),rel) for y in findall(==(7),Rel[x,:])])
+
+        #4-chord iedge orbit
+        append!(ships,[(j,i,x,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(8),Rel[x,:])])
+        #4-chord jedge orbit
+        append!(ships,[(i,j,x,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(9),Rel[x,:])])
+
+        #4-clique
+        append!(ships,[(x,i,j,y,"4-clique") for x in findall(==(3),rel) for y in findall(==(10),Rel[x,:])])
+
+        ##combinatorials might be more difficult...
+        #4-paths centre orbit
+        append!(ships,[(x,i,j,y,"4-path") for x in findall(==(1),rel) for y in findall(==(2),rel) if Rel[y,x]!=7])
+
+        #4-chords centre orbit
+        append!(ships,[(x,i,j,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(3),rel) if (y<x && Rel[x,y]!=10)])
+
+        #4-stars i centre
+        append!(ships,[(x,j,i,y,"4-star") for x in findall(==(1),rel) for y in findall(==(1),rel) if (y<x && Rel[x,y]!=6)])
+
+        #4-stars j centre
+        append!(ships,[(x,i,j,y,"4-star") for x in findall(==(2),rel) for y in findall(==(2),rel) if (y<x && Rel[x,y]!=6)])
+
+        #4-tails tri i edge
+        append!(ships,[(x,j,i,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(1),rel) if (Rel[x,y]!=8)])
+
+        #4-tails tri j edge
+        append!(ships,[(x,i,j,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(2),rel) if (Rel[x,y]!=9)])
+    end
     
-    #4-chord iedge orbit
-    append!(ships,[(j,i,x,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(8),Rel[x,:])])
-    #4-chord jedge orbit
-    append!(ships,[(i,j,x,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(9),Rel[x,:])])
-
-    #4-clique
-    append!(ships,[(x,i,j,y,"4-clique") for x in findall(==(3),rel) for y in findall(==(10),Rel[x,:])])
-
-    ##combinatorials might be more difficult...
-    #4-paths centre orbit
-    append!(ships,[(x,i,j,y,"4-path") for x in findall(==(1),rel) for y in findall(==(2),rel) if Rel[y,x]!=7])
-    
-    #4-chords centre orbit
-    append!(ships,[(x,i,j,y,"4-chord") for x in findall(==(3),rel) for y in findall(==(3),rel) if (y<x && Rel[x,y]!=10)])
-    
-    #4-stars i centre
-    append!(ships,[(x,j,i,y,"4-star") for x in findall(==(1),rel) for y in findall(==(1),rel) if (y<x && Rel[x,y]!=6)])
-    
-    #4-stars j centre
-    append!(ships,[(x,i,j,y,"4-star") for x in findall(==(2),rel) for y in findall(==(2),rel) if (y<x && Rel[x,y]!=6)])
-
-    #4-tails tri i edge
-    append!(ships,[(x,j,i,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(1),rel) if (Rel[x,y]!=8)])
-    
-    #4-tails tri j edge
-    append!(ships,[(x,i,j,y,"4-tail") for x in findall(==(3),rel) for y in findall(==(2),rel) if (Rel[x,y]!=9)])
-    
-    return ships
+    if (write_out)
+        ##write to file
+        ticket = false
+        ticket = take!(ticket_channel)
+        if ticket
+            open(outfile,"a",lock=true) do io
+                for line in ships
+                    write(io,"$(join([line...],","))\n")
+                end
+            end
+            #ticket =false
+        end
+        ##return ticket to channel
+        put!(ticket_channel,true)
+        return nothing
+    else
+        return ships
+    end
 end
 
-function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+function per_edge_relationships_alt(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+    ###Turns out, this method is slower than old method, with seemingly no memory gains! strange, but it might prove better on LARGER networks (if they are ever possible memory wise).
     ### fix to clear "sticky" memory
     GC.gc()
     ccall(:malloc_trim, Cvoid, (Cint,), 0)
@@ -609,10 +629,13 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
 
     if(run_method == "distributed")
         if(progress == true)
-
             @info "Distributing edges to workers..."
-            ##alternative option using pmap (dynamically manages worker loads, so that all CPUS are used for entire job. Needs some mechanism for reduction at end though
-            Rel = @showprogress pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
+
+            ##for larger/more connected networks, counting relationships will only be possible if outputs are written directly to a CSV file. To manage this on the distributed system, we pass a remote channel with each edge count, forcing each worker to wait for a "ticket to write". 
+            outfile = "test.csv"
+            tickets = RemoteChannel(()->Channel{Bool}(1));
+            put!(tickets,true)
+            Rel = @showprogress pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict,tickets,outfile,write_out=true),1:size(edgelist,1),batch_size =1000)
         else
             Rel = pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
         end
