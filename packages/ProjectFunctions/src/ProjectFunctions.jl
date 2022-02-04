@@ -1,5 +1,4 @@
 module ProjectFunctions
-export cache_save, cache_load,  @name
 using DataPreprocessing, NetworkConstruction,GraphletCounting ,GraphletAnalysis
 
 include("RunFunctions.jl")
@@ -41,6 +40,7 @@ function distributed_setup(inclusions::Symbol...)
         eval(macroexpand(Distributed,quote @everywhere using $(inc) end))
     end
 end
+export distributed_setup
 
 function distributed_code_load(inclusions::Symbol...)
     for package in inclusions

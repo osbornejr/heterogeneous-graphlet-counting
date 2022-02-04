@@ -40,6 +40,7 @@ function load_config(config_file::String)
         global params = YAML.load_file(config_file)
         cache_setup()
 end
+export load_config
 
 function cache_setup()
     ##create directory for run
@@ -106,6 +107,7 @@ function get_input_data()
      end
     return raw_counts  
 end 
+export get_input_data
 
 function data_preprocessing(raw_counts::DataFrame)
     
@@ -157,6 +159,7 @@ function data_preprocessing(raw_counts::DataFrame)
 
     return sample_counts
 end 
+export data_preprocessing
 
 function  network_construction(sample_counts::DataFrame)
 
@@ -216,7 +219,7 @@ function  network_construction(sample_counts::DataFrame)
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
     return [adj_matrix, network_counts,vertexlist,edgelist]       
 end
-
+export network_construction
 
 function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)       
     #Synthetic test (just override vertex and edge lists here-- is that ok?)
