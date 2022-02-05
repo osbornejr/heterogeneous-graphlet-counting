@@ -200,4 +200,14 @@ macro make_public_rec(module_name::Symbol)
 end
 export @make_public_rec
 
+## function for threaded version of pmap (taken from https://github.com/JuliaLang/julia/issues/17887#issuecomment-564844185)
+function tmap(f, xs::AbstractArray)
+    g = Base.Generator(f,xs)
+    et = Base.@default_eltype(g)
+    a = Array{et}(undef, length(xs))
+    Threads.@threads for i in 1:length(xs)
+        a[i] = f(xs[i])
+    end
+    a
+end
 end # module
