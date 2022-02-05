@@ -66,7 +66,7 @@ function graphlet_string(a::String,b::String,c::String,d::String,graphlet::Strin
 end
 
 
-function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},ticket_channel::RemoteChannel=RemoteChannel(()->Channel(Bool)(1)),outfile::String="relationships.csv";write_out=false)
+function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},outfile::String="relationships.csv";write_out=false)
     ### fix to clear "sticky" memory
     ccall(:malloc_trim, Cvoid, (Cint,), 0)
     h=edge  
@@ -231,18 +231,14 @@ function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edge
     
     if (write_out)
         ##write to file
-        ticket = false
-        ticket = take!(ticket_channel)
-        if ticket
-            open(outfile,"a",lock=true) do io
-                for line in ships
-                    write(io,"$(join([line...],","))\n")
-                end
+        file = "$outfile/relationships_$(myid()).csv"
+        open(file,"a",lock=true) do io
+            for line in ships
+                write(io,"$(join([line...],","))\n")
             end
             #ticket =false
         end
         ##return ticket to channel
-        put!(ticket_channel,true)
         return nothing
     else
         return ships
@@ -632,10 +628,9 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
             @info "Distributing edges to workers..."
 
             ##for larger/more connected networks, counting relationships will only be possible if outputs are written directly to a CSV file. To manage this on the distributed system, we pass a remote channel with each edge count, forcing each worker to wait for a "ticket to write". 
-            outfile = "test.csv"
-            tickets = RemoteChannel(()->Channel{Bool}(1));
-            put!(tickets,true)
-            Rel = @showprogress pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict,tickets,outfile,write_out=true),1:size(edgelist,1),batch_size =1000)
+            outfile = "rel_dir"
+            run(`mkdir -p $outfile`)
+            Rel = @showprogress pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict,outfile,write_out=true),1:size(edgelist,1),batch_size =1000)
         else
             Rel = pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
         end
