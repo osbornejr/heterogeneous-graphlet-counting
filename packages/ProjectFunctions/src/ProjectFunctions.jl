@@ -85,6 +85,7 @@ function cache_save(file_name::String,save_object::T) where T<:Pair{String,}
             file[first(save_object)] = last(save_object)
     end;
 end
+export cache_save
 
 function cache_load(file_name::String,load_object::String)
     #load specific object from jld2 file
@@ -96,6 +97,7 @@ function cache_load(file_name::String,load_object::String)
         file[load_object]
     end
 end
+export cache_load
 
 # macros to load all functions of module into REPL (for development): taken from https://discourse.julialang.org/t/exportall/4970/18
 #
