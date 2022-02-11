@@ -42,7 +42,7 @@ begin
 	#redirect_stdout(devnull) do
 		#logger = ConsoleLogger(stdout)
 		#with_logger(logger) do
-			config_file = "$cwd/config/run-files/GSE68559.yaml"
+			config_file = "$cwd/config/run-files/pluto.yaml"
 			ProjectFunctions.load_config(config_file)
 			##move params values to specific variables for now (easier)
 			params_test_name = ProjectFunctions.params["test_name"]
@@ -125,9 +125,6 @@ NetworkConstruction.draw_graphlet("coding_coding_noncoding_noncoding_4-clique")
 
 # ╔═╡ 75dec48b-6fa2-426d-978a-f4278552c700
 NetworkConstruction.draw_graphlet("coding_boncoding_uncoding_noncoding_4-clique")
-
-# ╔═╡ 1a4fe9d7-96cb-44b9-8eef-d64d671f50ce
-length(vertexlist)
 
 # ╔═╡ 28836056-6604-4918-9f74-39bf81ad0559
 md"""
@@ -270,9 +267,6 @@ begin
 
 end;
 
-# ╔═╡ 2a43ebc7-e029-415e-b665-b84eed21094a
-candidates
-
 # ╔═╡ 8267a9ad-9551-4842-9194-5e250e79305e
 top_terms
 
@@ -403,7 +397,8 @@ begin
 	                end
 	                # #find those pathways with majority of zero proportions below total proportions 
 	                zero_passes = vec(sum(zero_scores,dims=2).>(last_col/2))
-	                zero_candidate_pathways = candidate_pathways
+	                ##quick fix to remove above zero score process
+					zero_candidate_pathways = candidate_pathways
 	                zero_orbit_sigs = map(x->filter(:Pathway=>y->y in zero_candidate_pathways,x),orbit_sigs)
 	                zero_orbit_sigs_array = map(x->Array(x[!,2:end]),zero_orbit_sigs)
 	                zero_candidates = Dict(Pair.(zero_candidate_pathways,[candidates[x] for x in zero_candidate_pathways]))
@@ -506,7 +501,10 @@ ecdf_plots[1,2]
 ecdf_plots[1,4]
 
 # ╔═╡ 51ee4885-582a-4349-8d91-98f583b8a510
-ecdf_plots[2,4]
+ecdf_plots[3,3]
+
+# ╔═╡ 8cdaf845-43c6-4455-822f-d30fbd2ff19b
+ecdf_plots[1,3]
 
 # ╔═╡ 3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
 begin
@@ -536,11 +534,11 @@ end
 # ╔═╡ 84aa8941-8766-4482-ba97-cfb5c477a072
 DataFrame(node = collect(keys(sig_nodes_dict)), pathways = collect(values(sig_nodes_dict)),type=vertexlist[sig_nodes])
 
-# ╔═╡ cce33b08-b63b-4987-92fe-cfe2b25e835b
-sig_pathway_occurences[597]
+# ╔═╡ ebaa8810-9096-4cc2-9c28-31143143bf14
+unique(vcat(values(sig_nodes_dict)...))
 
-# ╔═╡ 6ccd7400-1323-47c8-972f-d44ff5fd4322
-Coincidents
+# ╔═╡ 61a6f729-141c-4892-b983-dd48d78b6b7d
+unique(vcat(values(sig_nodes_dict)...))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1741,20 +1739,18 @@ version = "3.5.0+0"
 # ╟─74c92bd0-ef4f-41a0-bc4b-5063ffcd12df
 # ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
 # ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
-# ╠═312f20e3-3c97-4108-847d-f2276abfab9a
-# ╠═16594a10-f747-49f7-9dea-81724ec3ae4d
-# ╠═9007eba9-a579-4946-a502-1a86399c419f
+# ╟─312f20e3-3c97-4108-847d-f2276abfab9a
+# ╟─16594a10-f747-49f7-9dea-81724ec3ae4d
+# ╟─9007eba9-a579-4946-a502-1a86399c419f
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
-# ╠═0f82d5eb-c1d1-4406-b356-ada7d229074e
-# ╠═baba57a5-0c24-4620-b0c2-450db2a89f44
-# ╠═901287ea-9b03-4067-aea1-d039304ebf0a
-# ╠═937fd5dc-1423-468d-8ec6-518f58ae8807
-# ╠═d999c806-aafe-442d-8ab7-56360b6c60b2
-# ╠═4771b9a4-fe7b-4678-8175-542b012094d4
-# ╠═cde04746-9a5a-4e8d-8a3b-b6bac523a72e
-# ╠═75dec48b-6fa2-426d-978a-f4278552c700
-# ╠═1a4fe9d7-96cb-44b9-8eef-d64d671f50ce
-# ╠═2a43ebc7-e029-415e-b665-b84eed21094a
+# ╟─0f82d5eb-c1d1-4406-b356-ada7d229074e
+# ╟─baba57a5-0c24-4620-b0c2-450db2a89f44
+# ╟─901287ea-9b03-4067-aea1-d039304ebf0a
+# ╟─937fd5dc-1423-468d-8ec6-518f58ae8807
+# ╟─d999c806-aafe-442d-8ab7-56360b6c60b2
+# ╟─4771b9a4-fe7b-4678-8175-542b012094d4
+# ╟─cde04746-9a5a-4e8d-8a3b-b6bac523a72e
+# ╟─75dec48b-6fa2-426d-978a-f4278552c700
 # ╟─28836056-6604-4918-9f74-39bf81ad0559
 # ╟─67f24598-4b27-4dd8-b533-45c1cc4e44a6
 # ╟─4861b8cf-cf59-4cfd-b412-089ccfc00e90
@@ -1776,24 +1772,25 @@ version = "3.5.0+0"
 # ╟─18dbd2ba-ad4c-40fc-92bc-3b8579d8d952
 # ╟─2c0de2b0-3d95-4abd-a7fe-7bbcf3fcfd52
 # ╟─51ee4885-582a-4349-8d91-98f583b8a510
+# ╠═8cdaf845-43c6-4455-822f-d30fbd2ff19b
 # ╟─07904aca-d5da-444a-8fa5-55f6af49eb23
 # ╟─7a0255c6-82c6-48c6-83e1-cd83606b05dc
 # ╟─7f35a6f0-71e3-4448-8dd1-fe359ac73f94
-# ╠═84aa8941-8766-4482-ba97-cfb5c477a072
-# ╠═42452b78-f24c-4517-ae46-8ddfe6368d03
+# ╟─84aa8941-8766-4482-ba97-cfb5c477a072
+# ╟─42452b78-f24c-4517-ae46-8ddfe6368d03
+# ╠═ebaa8810-9096-4cc2-9c28-31143143bf14
 # ╟─3f3e6d45-d576-4385-bea8-e55a37d34512
 # ╟─f34235b1-0e47-4f28-94db-ce3cfa598a91
 # ╟─9bb259ec-8528-4049-80bf-5fa0d543e47c
 # ╟─c2ddfc1b-5ef7-4c0f-82fb-d86c015aba74
 # ╟─f24286b1-a29f-49dc-8005-058dfcf4440f
-# ╠═c5f26162-6c29-46c2-b08b-8832ea301207
-# ╠═33367e44-3233-4200-a091-a4bd4ea9adeb
-# ╠═92c7926c-f21f-4665-84df-1ea98229cd4d
-# ╠═534b73a8-ced9-4e8c-a9df-ef73af97198d
-# ╠═c2d2fe61-9e00-4db8-aa80-97deb551486a
-# ╠═87c1ea4a-26b2-42af-a21d-b6ff80366562
-# ╠═3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
-# ╠═cce33b08-b63b-4987-92fe-cfe2b25e835b
-# ╠═6ccd7400-1323-47c8-972f-d44ff5fd4322
+# ╟─c5f26162-6c29-46c2-b08b-8832ea301207
+# ╟─33367e44-3233-4200-a091-a4bd4ea9adeb
+# ╟─92c7926c-f21f-4665-84df-1ea98229cd4d
+# ╟─534b73a8-ced9-4e8c-a9df-ef73af97198d
+# ╟─c2d2fe61-9e00-4db8-aa80-97deb551486a
+# ╟─87c1ea4a-26b2-42af-a21d-b6ff80366562
+# ╟─3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
+# ╟─61a6f729-141c-4892-b983-dd48d78b6b7d
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
