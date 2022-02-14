@@ -66,9 +66,7 @@ function graphlet_string(a::String,b::String,c::String,d::String,graphlet::Strin
 end
 
 
-function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},outfile::String="relationships.csv";write_out=false)
-    ### fix to clear "sticky" memory
-    ccall(:malloc_trim, Cvoid, (Cint,), 0)
+function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},outfile::String;write_out=false)
     h=edge  
 #   # get nodes i and j for this edge
         i = edgelist[h].first
@@ -616,32 +614,45 @@ function count_graphlets(args...;run_method::String="serial",progress::Bool=fals
 end
 
 
-function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",progress::Bool=false)
+function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",temp_dir::String="rel_dir",progress::Bool=false)
     #get neighbourhood for each vertex in advance (rather than calling per-edge)
     neighbourdict=Neighbours(edgelist)
     #preallocate array to store each edge relationship dict 
     Rel=Array{Array{Tuple{Int,Int,Int,Int,String},1}}(undef,size(edgelist,1));
     #Rel = Array{Int,3}(undef,length(vertex_type_list),length(vertex_type_list),length(vertex_type_list))
 
+    ##for larger/more connected networks, counting relationships will only be possible if outputs are written directly to a CSV file. This is now enforced for all relationship counting
+    #remove any existing temp dir and remake
+    
+    run(`rm -rf $temp_dir`)
+    run(`mkdir $temp_dir`)
+    #now run per edge relationship counts, generating relationship csv files in temp_dir (one for each worker process)
     if(run_method == "distributed")
         if(progress == true)
-            @info "Distributing edges to workers..."
+            @info "Distributing edges to workers"
 
-            ##for larger/more connected networks, counting relationships will only be possible if outputs are written directly to a CSV file. To manage this on the distributed system, we pass a remote channel with each edge count, forcing each worker to wait for a "ticket to write". 
-            outfile = "rel_dir"
-            run(`mkdir -p $outfile`)
-            Rel = @showprogress pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict,outfile,write_out=true),1:size(edgelist,1),batch_size =1000)
+            @showprogress pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict,temp_dir,write_out=true),1:size(edgelist,1),batch_size =1000)
         else
-            Rel = pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict),1:size(edgelist,1),batch_size =1000)
+            pmap(x->per_edge_relationships(x,vertex_type_list,edgelist,graphlet_size,neighbourdict,temp_dir,write_out=true),1:size(edgelist,1),batch_size =1000)        
         end
     elseif (run_method == "serial")
         for h in 1 :size(edgelist,1)
-            edge = per_edge_relationships(h,vertex_type_list,edgelist,graphlet_size,neighbourdict)
-            append!(Rel,edge)
+            per_edge_relationships(h,vertex_type_list,edgelist,graphlet_size,neighbourdict,temp_dir,write_out=true)
         end
     else
         throw(ArgumentError("run_method not recognised."))
     end
+    
+    ## we now need to collate and sort these relationship files, removing duplicates. This still needs to be done on disk memory
+    progress ? @info "Sorting graphlet relationships" :  
+    ##first sort into graphlet type so that all duplicates are guaranteed to be in same file
+    for file in filter(x->occursin(".csv",x),readdir("$temp_dir",join=true))
+        #sort file into each graphlet (appending to existing if it exists)
+        run(`awk -v var="$(temp_dir)/" -F, '{print >> (var $NF".csv")}' $file`)
+        #remove original file (for space constraints)
+        run(`rm $file`)
+    end
+
     return Rel
 end
 
