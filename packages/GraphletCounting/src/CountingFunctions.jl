@@ -244,6 +244,8 @@ function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edge
 end
 
 function per_edge_relationships_alt(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+    ###OUTDATED
+    throw(MethodError("method is depreceated"))
     ###Turns out, this method is slower than old method, with seemingly no memory gains! strange, but it might prove better on LARGER networks (if they are ever possible memory wise).
     ### fix to clear "sticky" memory
     GC.gc()
@@ -623,7 +625,7 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
 
     ##for larger/more connected networks, counting relationships will only be possible if outputs are written directly to a CSV file. This is now enforced for all relationship counting
     #remove any existing temp dir and remake
-    
+    temp_dir = "rel_dir" 
     run(`rm -rf $temp_dir`)
     run(`mkdir $temp_dir`)
     #now run per edge relationship counts, generating relationship csv files in temp_dir (one for each worker process)
@@ -644,15 +646,115 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
     end
     
     ## we now need to collate and sort these relationship files, removing duplicates. This still needs to be done on disk memory
-    progress ? @info "Sorting graphlet relationships" :  
+    progress ? (@info "Sorting graphlet relationships") : 
+
     ##first sort into graphlet type so that all duplicates are guaranteed to be in same file
-    for file in filter(x->occursin(".csv",x),readdir("$temp_dir",join=true))
+    for file  in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
         #sort file into each graphlet (appending to existing if it exists)
         run(`awk -v var="$(temp_dir)/" -F, '{print >> (var $NF".csv")}' $file`)
         #remove original file (for space constraints)
         run(`rm $file`)
     end
 
+    ##now sort each graphlet file, based on the orbit structure of that graphlet
+   #TODO update to use perl? and perhaps improve parallelisation  
+    @sync @distributed for file in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
+        if(splitext(basename(file))[1] == "3-path")
+            ## remove 0 field and sort first and third nodes
+            run(`awk -F, '$2<$4{print $2,$3,$4,$5 > $5"_sorted.csv"} $4<$2{print $4,$3,$2,$5 > $5"_sorted.csv"}' $file`) 
+
+        elseif(splitext(basename(file))[1] == "3-tri")
+            ## remove 0 field and sort all three nodes
+            run(`awk -v var="$(temp_dir)/" -F, '
+                $2<$3 && $2<$4 && $3<$4{print $2,$3,$4,$5 > var $5"_sorted.csv"}
+                $2<$3 && $2<$4 && $4<$3{print $2,$4,$3,$5 > var $5"_sorted.csv"}
+                $3<$2 && $2<$4 && $3<$4{print $3,$2,$4,$5 > var $5"_sorted.csv"}
+                $3<$2 && $4<$2 && $3<$4{print $3,$4,$2,$5 > var $5"_sorted.csv"}
+                $2<$3 && $4<$2 && $4<$3{print $4,$2,$3,$5 > var $5"_sorted.csv"}
+                $3<$2 && $4<$2 && $4<$3{print $4,$3,$2,$5 > var $5"_sorted.csv"}
+                ' $file`) 
+        elseif(splitext(basename(file))[1] == "4-path")
+            ## sort inner, and then sort outer accordingly
+            run(`awk -v var="$(temp_dir)/" -F, '
+                $2<$3{print $1,$2,$3,$4,$5 > var $5"_sorted.csv"}
+                $3<$2{print $4,$3,$2,$1,$5 > var $5"_sorted.csv"}
+                ' $file`) 
+        elseif(splitext(basename(file))[1] == "4-star")
+            ## sort on 1,2 and 4
+            run(`awk -v var="$(temp_dir)/" -F, '
+                $1<$2 && $1<$4 && $2<$4{print$1,$2,$3,$4,$5 > var $5"_sorted.csv"}
+                $1<$2 && $1<$4 && $4<$2{print$1,$4,$3,$2,$5 > var $5"_sorted.csv"}
+                $2<$1 && $1<$4 && $2<$4{print$2,$1,$3,$4,$5 > var $5"_sorted.csv"}
+                $2<$1 && $4<$2 && $2<$4{print$2,$4,$3,$1,$5 > var $5"_sorted.csv"}
+                $1<$2 && $4<$1 && $4<$2{print$4,$1,$3,$2,$5 > var $5"_sorted.csv"}
+                $1<$2 && $1<$4 && $2<$4{print$4,$2,$3,$1,$5 > var $5"_sorted.csv"}
+                ' $file`) 
+        elseif(splitext(basename(file))[1] == "4-tail")
+            ## sort on 1 and 2 only
+                run(`awk -v var="$(temp_dir)/" -F, '
+                $1<$2{print $1,$2,$3,$4,$5 > var $5"_sorted.csv"}
+                $2<$1{print $2,$1,$3,$4,$5 > var $5"_sorted.csv"}
+                ' $file`) 
+        elseif(splitext(basename(file))[1] == "4-cycle")
+            ## sort on all to orientate on lowest (in pos 1), then sort adjacents for position 2 and 4, and then position node non-adjacent to position 3
+                run(`awk -v var="$(temp_dir)/" -F, '
+                $1<$2 && $1<$3 && $1<$4 && $2<$4  {print$1,$2,$3,$4,$5 > var $5"_sorted.csv"}
+                $1<$2 && $1<$3 && $1<$4 && $4<$2  {print$1,$4,$3,$2,$5 > var $5"_sorted.csv"}
+                $2<$1 && $2<$3 && $2<$4 && $1<$3  {print$2,$1,$4,$3,$5 > var $5"_sorted.csv"}
+                $2<$1 && $2<$3 && $2<$4 && $3<$1  {print$2,$3,$4,$1,$5 > var $5"_sorted.csv"}
+                $3<$1 && $3<$2 && $3<$4 && $2<$4  {print$3,$2,$1,$4,$5 > var $5"_sorted.csv"}
+                $3<$1 && $3<$2 && $3<$4 && $4<$2  {print$3,$4,$1,$2,$5 > var $5"_sorted.csv"}
+                $4<$1 && $4<$2 && $4<$3 && $1<$3  {print$4,$1,$2,$3,$5 > var $5"_sorted.csv"}
+                $4<$1 && $4<$2 && $4<$3 && $3<$1  {print$4,$3,$2,$1,$5 > var $5"_sorted.csv"}
+                ' $file`) 
+        elseif(splitext(basename(file))[1] == "4-chord")
+            ## sort inner and outer independently
+            run(`awk -v var="$(temp_dir)/" -F, '
+                $2<$3 && $1<$4{print $1,$2,$3,$4,$5 > var $5"_sorted.csv"}
+                $2<$3 && $4<$1{print $4,$2,$3,$1,$5 > var $5"_sorted.csv"}
+                $3<$2 && $1<$4{print $1,$3,$2,$4,$5 > var $5"_sorted.csv"}
+                $3<$2 && $4<$1{print $4,$3,$2,$1,$5 > var $5"_sorted.csv"}
+                ' $file`) 
+        elseif(splitext(basename(file))[1] == "4-clique")
+            ## sort all nodes
+            run(`awk -v var="$(temp_dir)/" -F, '
+                $1<$2 && $1<$3 && $1<$4 && $2<$3 && $2<$4 && $3<$4  {print $1,$2,$3,$4,$5 > var $5"_sorted.csv"}
+                $1<$2 && $1<$3 && $1<$4 && $2<$3 && $2<$4 && $4<$3  {print $1,$2,$4,$3,$5 > var $5"_sorted.csv"}
+                $1<$2 && $1<$3 && $1<$4 && $3<$2 && $3<$4 && $2<$4  {print $1,$3,$2,$4,$5 > var $5"_sorted.csv"}
+                $1<$2 && $1<$3 && $1<$4 && $3<$2 && $3<$4 && $4<$2  {print $1,$3,$4,$2,$5 > var $5"_sorted.csv"}
+                $1<$2 && $1<$3 && $1<$4 && $4<$2 && $4<$3 && $2<$3  {print $1,$4,$2,$3,$5 > var $5"_sorted.csv"}
+                $1<$2 && $1<$3 && $1<$4 && $4<$2 && $4<$3 && $3<$2  {print $1,$4,$3,$2,$5 > var $5"_sorted.csv"}
+                $2<$1 && $2<$3 && $2<$4 && $1<$3 && $1<$4 && $3<$4  {print $2,$1,$3,$4,$5 > var $5"_sorted.csv"}
+                $2<$1 && $2<$3 && $2<$4 && $1<$3 && $1<$4 && $4<$3  {print $2,$1,$4,$3,$5 > var $5"_sorted.csv"}
+                $2<$1 && $2<$3 && $2<$4 && $3<$1 && $3<$4 && $1<$4  {print $2,$3,$1,$4,$5 > var $5"_sorted.csv"}
+                $2<$1 && $2<$3 && $2<$4 && $3<$1 && $3<$4 && $4<$1  {print $2,$3,$4,$1,$5 > var $5"_sorted.csv"}
+                $2<$1 && $2<$3 && $2<$4 && $4<$1 && $4<$3 && $1<$3  {print $2,$4,$1,$3,$5 > var $5"_sorted.csv"}
+                $2<$1 && $2<$3 && $2<$4 && $4<$1 && $4<$3 && $3<$1  {print $2,$4,$3,$1,$5 > var $5"_sorted.csv"}
+                $3<$1 && $3<$2 && $3<$4 && $1<$2 && $1<$4 && $2<$4  {print $3,$1,$2,$4,$5 > var $5"_sorted.csv"}
+                $3<$1 && $3<$2 && $3<$4 && $1<$2 && $1<$4 && $4<$2  {print $3,$1,$4,$2,$5 > var $5"_sorted.csv"}
+                $3<$1 && $3<$2 && $3<$4 && $2<$1 && $2<$4 && $1<$4  {print $3,$2,$1,$4,$5 > var $5"_sorted.csv"}
+                $3<$1 && $3<$2 && $3<$4 && $2<$1 && $2<$4 && $4<$1  {print $3,$2,$4,$1,$5 > var $5"_sorted.csv"}
+                $3<$1 && $3<$2 && $3<$4 && $4<$1 && $4<$2 && $1<$2  {print $3,$4,$1,$2,$5 > var $5"_sorted.csv"}
+                $3<$1 && $3<$2 && $3<$4 && $4<$1 && $4<$2 && $2<$1  {print $3,$4,$2,$1,$5 > var $5"_sorted.csv"}
+                $4<$1 && $4<$2 && $4<$3 && $1<$2 && $1<$3 && $2<$3  {print $4,$1,$2,$3,$5 > var $5"_sorted.csv"}
+                $4<$1 && $4<$2 && $4<$3 && $1<$2 && $1<$3 && $3<$2  {print $4,$1,$3,$2,$5 > var $5"_sorted.csv"}
+                $4<$1 && $4<$2 && $4<$3 && $2<$1 && $2<$3 && $1<$3  {print $4,$2,$1,$3,$5 > var $5"_sorted.csv"}
+                $4<$1 && $4<$2 && $4<$3 && $2<$1 && $2<$3 && $3<$1  {print $4,$2,$3,$1,$5 > var $5"_sorted.csv"}
+                $4<$1 && $4<$2 && $4<$3 && $3<$1 && $3<$2 && $1<$2  {print $4,$3,$1,$2,$5 > var $5"_sorted.csv"}
+                $4<$1 && $4<$2 && $4<$3 && $3<$1 && $3<$2 && $2<$1  {print $4,$3,$2,$1,$5 > var $5"_sorted.csv"}
+                ' $file`) 
+        else
+            throw(ArgumentError("Symmetries have not yet been defined for this graphlet"))
+        end    
+        #remove original file (for space constraints)
+        run(`rm $file`)
+    end
+
+    ##now remove duplicates from each graphlet file, writing to one relationships file
+    for file in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
+        #run(`/bin/bash -c "sort -u $(file) >> $(temp_dir)/relationships.csv"`)
+        run(`awk '!seen[$0] {print >> "relationships.csv"} {seen[$0] += 1}' $file`)
+    end
     return Rel
 end
 
