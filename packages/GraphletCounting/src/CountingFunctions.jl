@@ -661,7 +661,7 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
     @sync @distributed for file in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
         if(splitext(basename(file))[1] == "3-path")
             ## remove 0 field and sort first and third nodes
-            run(`awk -F, '$2<$4{print $2,$3,$4,$5 > $5"_sorted.csv"} $4<$2{print $4,$3,$2,$5 > $5"_sorted.csv"}' $file`) 
+            run(`awk -v var="$(temp_dir)/" -F, '$2<$4{print $2,$3,$4,$5 > var $5"_sorted.csv"} $4<$2{print $4,$3,$2,$5 > var $5"_sorted.csv"}' $file`) 
 
         elseif(splitext(basename(file))[1] == "3-tri")
             ## remove 0 field and sort all three nodes
