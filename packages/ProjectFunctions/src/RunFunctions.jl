@@ -7,8 +7,8 @@ using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,Li
 function run_all(config_file::String)
    
     if (length(workers())!=Threads.nthreads()) 
-        Pkg.resolve()
-        Pkg.precompile()
+        #Pkg.resolve()
+       #Pkg.precompile()
         @info "Setting up worker processes"
         distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
     end
