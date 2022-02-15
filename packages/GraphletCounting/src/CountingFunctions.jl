@@ -1,4 +1,4 @@
-using DataStructures,Distributed,ProgressMeter,StatsBase
+using DataStructures,Distributed,ProgressMeter,StatsBase,CSV,DataFrames
 
 #module GraphletCounting
 #export Neighbours, mergecum, add3graphlets
@@ -620,7 +620,7 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
     #get neighbourhood for each vertex in advance (rather than calling per-edge)
     neighbourdict=Neighbours(edgelist)
     #preallocate array to store each edge relationship dict 
-    Rel=Array{Array{Tuple{Int,Int,Int,Int,String},1}}(undef,size(edgelist,1));
+    #Rel=Array{Array{Tuple{Int,Int,Int,Int,String},1}}(undef,size(edgelist,1));
     #Rel = Array{Int,3}(undef,length(vertex_type_list),length(vertex_type_list),length(vertex_type_list))
 
     ##for larger/more connected networks, counting relationships will only be possible if outputs are written directly to a CSV file. This is now enforced for all relationship counting
@@ -646,9 +646,9 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
     end
     
     ## we now need to collate and sort these relationship files, removing duplicates. This still needs to be done on disk memory
-    progress ? (@info "Sorting graphlet relationships") : 
 
     ##first sort into graphlet type so that all duplicates are guaranteed to be in same file
+    progress ? (@info "Sorting into graphlet types for deduplication") : nothing 
     for file  in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
         #sort file into each graphlet (appending to existing if it exists)
         run(`awk -v var="$(temp_dir)/" -F, '{print >> (var $NF".csv")}' $file`)
@@ -658,20 +658,21 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
 
     ##now sort each graphlet file, based on the orbit structure of that graphlet
    #TODO update to use perl? and perhaps improve parallelisation  
-    @sync @distributed for file in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
+    progress ? (@info "Sorting each graphlet type according to orbit symmetries") : nothing 
+     @sync @distributed for file in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
         if(splitext(basename(file))[1] == "3-path")
             ## remove 0 field and sort first and third nodes
-            run(`awk -v var="$(temp_dir)/" -F, '$2<$4{print $2,$3,$4,$5 > var $5"_sorted.csv"} $4<$2{print $4,$3,$2,$5 > var $5"_sorted.csv"}' $file`) 
+            run(`awk -v var="$(temp_dir)/" -F, '$2<$4{print $1,$2,$3,$4,$5 > var $5"_sorted.csv"} $4<$2{print $1,$4,$3,$2,$5 > var $5"_sorted.csv"}' $file`) 
 
         elseif(splitext(basename(file))[1] == "3-tri")
             ## remove 0 field and sort all three nodes
             run(`awk -v var="$(temp_dir)/" -F, '
-                $2<$3 && $2<$4 && $3<$4{print $2,$3,$4,$5 > var $5"_sorted.csv"}
-                $2<$3 && $2<$4 && $4<$3{print $2,$4,$3,$5 > var $5"_sorted.csv"}
-                $3<$2 && $2<$4 && $3<$4{print $3,$2,$4,$5 > var $5"_sorted.csv"}
-                $3<$2 && $4<$2 && $3<$4{print $3,$4,$2,$5 > var $5"_sorted.csv"}
-                $2<$3 && $4<$2 && $4<$3{print $4,$2,$3,$5 > var $5"_sorted.csv"}
-                $3<$2 && $4<$2 && $4<$3{print $4,$3,$2,$5 > var $5"_sorted.csv"}
+                $2<$3 && $2<$4 && $3<$4{print $1,$2,$3,$4,$5 > var $5"_sorted.csv"}
+                $2<$3 && $2<$4 && $4<$3{print $1,$2,$4,$3,$5 > var $5"_sorted.csv"}
+                $3<$2 && $2<$4 && $3<$4{print $1,$3,$2,$4,$5 > var $5"_sorted.csv"}
+                $3<$2 && $4<$2 && $3<$4{print $1,$3,$4,$2,$5 > var $5"_sorted.csv"}
+                $2<$3 && $4<$2 && $4<$3{print $1,$4,$2,$3,$5 > var $5"_sorted.csv"}
+                $3<$2 && $4<$2 && $4<$3{print $1,$4,$3,$2,$5 > var $5"_sorted.csv"}
                 ' $file`) 
         elseif(splitext(basename(file))[1] == "4-path")
             ## sort inner, and then sort outer accordingly
@@ -751,10 +752,17 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
     end
 
     ##now remove duplicates from each graphlet file, writing to one relationships file
+    progress ? (@info "Removing duplicates") : nothing 
     for file in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
         #run(`/bin/bash -c "sort -u $(file) >> $(temp_dir)/relationships.csv"`)
-        run(`awk '!seen[$0] {print >> "relationships.csv"} {seen[$0] += 1}' $file`)
+        run(`awk -v var="$(temp_dir)/" '!seen[$0] {print >> var"relationships.csv"} {seen[$0] += 1}' $file`)
+        run(`rm $file`)
     end
+    ## load final file onto heap memory
+    
+    progress ? (@info "Loading relationships into memory") : nothing 
+    Rel = CSV.read("$temp_dir/relationships.csv",DataFrame,header=false)
+    
     return Rel
 end
 
