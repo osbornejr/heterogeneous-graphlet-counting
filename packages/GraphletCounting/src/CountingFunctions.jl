@@ -609,8 +609,7 @@ function t2(d1,d2)
 end
 
 function count_graphlets(args...;run_method::String="serial",progress::Bool=false)
-    GC.gc(true)
-    Chi = local_graphlets(args...;run_method=run_method,relationships=relationships,progress=progress)
+    Chi = local_graphlets(args...;run_method=run_method,progress=progress)
     graphlets = total_graphlets(Chi)
     return graphlets
 end
