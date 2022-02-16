@@ -264,90 +264,17 @@ end
 
 
 ##bio significance functions
-function graphlet_coincidences(vertexlist::Array{String,1},vertex_names::Array{String,1},nametypes::String,adj_matrix::AbstractArray,entrez_id_vector::Array{Int,1},candidates::Dict{String,Array{Int,1}})
-        edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-        @info "Counting per-edge graphlet relationships..."
-        Rel = GraphletCounting.graphlet_relationships(vertexlist,edgelist,4,run_method="distributed",progress = true)
-
-        ## combine relationships into one array
-        rel = vcat(Rel...)
-        
+function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertexlist::Array{String,1},vertex_names::Array{String,1},entrez_id_vector::Array{Int,1},candidates::Dict{String,Array{Int,1}})
         #convert into "nicer" format
-        rel_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],rel))
-        rel_types = last.(rel)
-        #clear big rel and Rel TODO do we even need Chi?
-        rel = Nothing
-        GC.gc()
+        #rel_array = eachrow(rel)
+        
+        #rel = Nothing
         ##remove 0 from 3-node entries
         #rel_array = map(y->filter(x->x!=0,y),rel_array)
         #rel_names = map(x->broadcast(y->vertex_gene_names[y],x),rel_array) 
         #rel_transcript_names = map(x->broadcast(y->vertex_names[y],x),rel_array)   
         
 
-        ##split into each homogeneous graphlet and sort there
-        ##sort and find unique copies of graphlet 
-        @info "Finding unique copies of each graphlet relationship..."
-        graphlet_types = string.(unique(last.(split.(collect(keys(graphlet_counts)),"_"))))
-        graphlet_rels = Dict{String,Array{Array{Int64,1},1}}()
-        @time for g in graphlet_types
-            
-            #hogs = filter(x->x[end]==g,rel)
-            #hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
-            hogs_array = rel_array[findall(x->x==g,rel_types)]
-            #TODO check that this sorting holds up with the unique typed orbit situations for 4-path and 4-cycle 
-            @info "sorting $g..."
-            if(g == "3-path")
-                #get rid of leading zero
-                hogs_array = map(y->filter(x->x!=0,y),hogs_array)
-                graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,3]])[1],x[2],sort(x[[1,3]])[2]],hogs_array))
-            end
-            if(g == "3-tri")
-                #get rid of leading zero
-                hogs_array = map(y->filter(x->x!=0,y),hogs_array)
-                graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3]])...],hogs_array))
-            end
-            if(g == "4-path")
-                graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,4]])[1],sort(x[[2,3]])...,sort(x[[1,4]])[2]],hogs_array))
-            end
-            if(g == "4-star")
-                graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
-            end
-            if(g == "4-tail")
-                graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2]])...,x[3],x[4]],hogs_array))
-            end
-            if(g == "4-cycle")
-                graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3,4]])...],hogs_array))
-            end
-            if(g == "4-chord")
-                graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,4]])[1],sort(x[[2,3]])...,sort(x[[1,4]])[2]],hogs_array))
-            end
-            if(g == "4-clique")
-                graphlet_rels[g] = unique(broadcast(x->[sort(x[[1,2,3,4]])...],hogs_array))
-            end
-        end
-        ## add edges to graphlet_rels as separate entry
-        graphlet_rels["2-path"] = [[x...] for x in eachrow(hcat(first.(edgelist),last.(edgelist)))]
-
-#       #graphlet of interest... set manually for now 
-#       goi = sig_graphlets.Graphlet[2]     
-#       hegoi,hogoi = string.(split(goi,"_")[1:end-1]),string(split(goi,"_")[end])
-#       #filter down to homogenous graphlet first
-#       hogs = filter(x->x[end]==hogoi,rel)
-#       hogs_array = broadcast(a->[i for i in a],broadcast(x->x[1:end-1],hogs))
-#       ##sort and find unique copies of graphlet (TODO unique for each graphlet!)
-#       if(hogoi == "4-star")
-#           hogs_sorted = unique(broadcast(x->[sort(x[[1,2,4]])[1:2]...,x[3],sort(x[[1,2,4]])[3]],hogs_array))
-#       end
-#   
-#       #get those that match heterogeneous pattern as well
-#       hogs_types = map(x->broadcast(y->vertexlist[y],x),hogs_sorted)  
-#       hegs = hogs_sorted[findall(x->x== hegoi,hogs_types)]
-        #get names of transcripts in matching pattern 
-#       hegs_names = map(x->broadcast(y->vertex_gene_names[y],x),hegs)  
-#       hegs_transcript_names = map(x->broadcast(y->vertex_names[y],x),hegs)    
-        #Get KEGG pathway information
-        ##now this should be provided as input (to maintain consistency of candidate pathways across functions
-        #entrez_id_vector, candidates = get_KEGG_pathways(vertex_names,nametypes) 
 
         @info "Checking for coincident candidates..."
         Coincidents = Dict{String,Dict{String,Array{Tuple,1}}}()
@@ -362,17 +289,32 @@ function graphlet_coincidences(vertexlist::Array{String,1},vertex_names::Array{S
             two_coincidents = Array{Tuple,1}()
             three_coincidents = Array{Tuple,1}()
             four_coincidents = Array{Tuple,1}()
-            for g in keys(graphlet_rels) 
-                #graphlets with at least two candidate transcripts involved in process
-                #one_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])
-                #two_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g])
-                #three_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g])
-                #four_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g])
-                #push!(one_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])...))
-                push!(two_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==2,graphlet_rels[g]))...)
-                push!(three_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==3,graphlet_rels[g]))...)
-                push!(four_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==4,graphlet_rels[g]))...)
+
+            for (i,r) in enumerate(eachrow(rel))
+
+                if(sum(map(x->x in cands,r))==2)         
+                    push!(two_coincidents,tuple(r,rel_types[i]))                
+                
+                elseif(sum(map(x->x in cands,r))==3)         
+                    push!(three_coincidents,tuple(r,rel_types[i]))                
+
+                elseif(sum(map(x->x in cands,r))==4)         
+                    push!(four_coincidents,tuple(r,rel_types[i]))                
+                end
+
             end
+
+            #for g in keys(graphlet_rels) 
+            #    #graphlets with at least two candidate transcripts involved in process
+            #    #one_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])
+            #    #two_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>1,graphlet_rels[g])
+            #    #three_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>2,graphlet_rels[g])
+            #    #four_coincidents[i] = findall(x->sum(map(y->in(y,x),cands))>3,graphlet_rels[g])
+            #    #push!(one_coincidents,map(x->tuple(graphlet_rels[g][x]...,g),findall(x->sum(map(y->in(y,x),cands))>0,graphlet_rels[g])...))
+            #    push!(two_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==2,graphlet_rels[g]))...)
+            #    push!(three_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==3,graphlet_rels[g]))...)
+            #    push!(four_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==4,graphlet_rels[g]))...)
+            #end
             #save each in dictionary for candidate
             Coincidents[first(ent)] = Dict("two"=>two_coincidents,"three"=>three_coincidents,"four"=>four_coincidents) 
         end
@@ -397,6 +339,7 @@ function graphlet_coincidences(vertexlist::Array{String,1},vertex_names::Array{S
         #coincident_entrez_ids = map(x->broadcast(y->entrez_id_vector[y],x),first.(Coincidents["Morphine addiction"]["three"]))
     return Coincidents_df
 end 
+
 function restart_R()
 
         #restart R session  
