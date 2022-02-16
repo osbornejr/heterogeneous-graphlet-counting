@@ -481,6 +481,33 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
 
     candidate_pathways = collect(keys(candidates))
 
+
+    ##relationships TODO cache
+    graphlet_size = 4 #TODO selectable?
+    rel_dir = "$coinc_dir/relationships"
+    relationships_file = "$rel_dir/relationships.csv"
+    if (isfile(relationships_file))
+        cleaner()
+        @info "Loading per-edge graphlet relationships from $relationships_file"
+        Rel = CSV.read("rel_dir/relationships.csv",DataFrame,header=false)
+        ## convert relationships to array, clear 
+        @info "Converting into array form"
+        rel = Array(Rel[:,1:graphlet_size])
+        rel_types = Rel[:,end]
+        Rel = nothing
+        cleaner()
+    else
+        cleaner()
+        @info "Counting per-edge graphlet relationships..."
+        ## graphlet_relationships already caches final file in csv form at temp_dir location
+        Rel = GraphletCounting.graphlet_relationships(vertexlist,edgelist,graphlet_size,run_method="distributed",progress = true,temp_dir = rel_dir)
+        ## convert relationships to array, clear 
+        rel = Array(Rel[:,1:graphlet_size])
+        rel_types = Rel[:,end]
+        Rel = nothing
+        cleaner()
+    end
+
     coincidents_file ="$coinc_dir/coincidents.csv"
     if (isfile(coincidents_file))
         @info "Loading coincidents dataframe from $coinc_dir..."
@@ -497,7 +524,7 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
 
     else
         @info "Conducting per graphlet pathway coincidence analysis..."
-        Coincidents = GraphletAnalysis.graphlet_coincidences(vertexlist,vertex_names,"transcripts",adj_matrix,entrez_id_vector,candidates)
+        Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,entrez_id_vector,candidates)
         @info "Saving coincidents at $coinc_dir..."
         CSV.write(coincidents_file,Coincidents)
 
