@@ -69,3 +69,13 @@ unison: ##use this to sync repo with a remote host. (this command just installs 
 endif
 	
 nectar-connect: ## ssh into nectar VM   
+
+
+swapfile: ##manually create large (5g) swapfile for kernel to use
+	###DO NOT RUN IF SWAPFILE ALREADY EXISTS!! TODO add check for this
+	## create swapfile
+	sudo dd if=/dev/zero of=/mnt/swapfile bs=1M count=5120
+	#format
+	sudo mkswap /mnt/swapfile
+	#add to swap
+	sudo swapon /mnt/swapfile
