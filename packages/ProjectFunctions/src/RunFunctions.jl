@@ -67,6 +67,7 @@ end
 function cache_update(general::String,specific::Any)
     return cache_update(general,string(specific))
 end
+export cache_update
 
 function cache_update(general::String,specific::String="",side_dir::String="")
     ##method to update or add cache path 
@@ -472,26 +473,26 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
         candidates = cache_load(kegg_file,"candidates")
         top_terms = cache_load(kegg_file,"top_terms")
     else
-
         @info "getting KEGG info..."
-
         entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcripts")
         cache_save(kegg_file,["entrez_id_vector"=>entrez_id_vector, "candidates"=>candidates,"top_terms"=>top_terms ])
     end
-
     candidate_pathways = collect(keys(candidates))
 
 
-    ##relationships TODO cache
+    ##relationships 
     graphlet_size = 4 #TODO selectable?
     rel_dir = "$coinc_dir/relationships"
     relationships_file = "$rel_dir/relationships.csv"
     if (isfile(relationships_file))
         cleaner()
         @info "Loading per-edge graphlet relationships from $relationships_file"
-        Rel = CSV.read("rel_dir/relationships.csv",DataFrame,header=false)
+        Rel = CSV.read("$rel_dir/relationships.csv",DataFrame,header=false)
+        ## remove workers now (no further distributed at this stage)
+        rmprocs(workers())
+        cleaner()
         ## convert relationships to array, clear 
-        @info "Converting into array form"
+        @info "Converting relationships into array form"
         rel = Array(Rel[:,1:graphlet_size])
         rel_types = Rel[:,end]
         Rel = nothing
@@ -501,13 +502,20 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
         @info "Counting per-edge graphlet relationships..."
         ## graphlet_relationships already caches final file in csv form at temp_dir location
         Rel = GraphletCounting.graphlet_relationships(vertexlist,edgelist,graphlet_size,run_method="distributed",progress = true,temp_dir = rel_dir)
+        cleaner()
         ## convert relationships to array, clear 
+        @info "Converting relationships into array form"
         rel = Array(Rel[:,1:graphlet_size])
         rel_types = Rel[:,end]
         Rel = nothing
         cleaner()
     end
+    
+    ##trim to just 4 node graphlets here (for now) TODO integrate this better. Graphlet orders should be distinct and non-implicit throughout codebase
+   rel = rel[map(x->occursin(string(graphlet_size),x),rel_types),:]
+    rel_types = rel_types[map(x->occursin(string(graphlet_size),x),rel_types)]
 
+    #coincidents
     coincidents_file ="$coinc_dir/coincidents.csv"
     if (isfile(coincidents_file))
         @info "Loading coincidents dataframe from $coinc_dir..."
@@ -521,13 +529,11 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
         Coincidents.Ensembl = fix.(Coincidents.Ensembl)
         Coincidents.Transcript_type = fix.(Coincidents.Transcript_type)
         Coincidents.Inclusion = fix_bool.(Coincidents.Inclusion)
-
     else
         @info "Conducting per graphlet pathway coincidence analysis..."
         Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,entrez_id_vector,candidates)
         @info "Saving coincidents at $coinc_dir..."
         CSV.write(coincidents_file,Coincidents)
-
     end
 
 
@@ -538,14 +544,14 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
     Coincidents_noncoding = Coincidents[findall(x-> "noncoding" in x, Coincidents.Transcript_type),:]
 
     #Nonuniformity test: finds graphlets where the included nodes differ across different pathways (sampling for now for speed)
-    graphlet = "4-star"
-    nonuniforms = []
-    for y in filter(p->last(p)>1,countmap(filter(:Hom_graphlet=> x-> x == graphlet, Coincidents[1:199000,:]).Vertices))
-        test = sum(filter(:Vertices => x-> x == first(y),filter(:Hom_graphlet => x-> x == graphlet,Coincidents))[!,8])/last(y)
-        if (sum(((test.>0) - (test.<1)).==0)>0)
-            push!(nonuniforms,first(y))
-        end
-    end
+    #graphlet = "4-star"
+    #nonuniforms = []
+    #for y in filter(p->last(p)>1,countmap(filter(:Hom_graphlet=> x-> x == graphlet, Coincidents[1:199000,:]).Vertices))
+    #    test = sum(filter(:Vertices => x-> x == first(y),filter(:Hom_graphlet => x-> x == graphlet,Coincidents))[!,8])/last(y)
+    #    if (sum(((test.>0) - (test.<1)).==0)>0)
+    #        push!(nonuniforms,first(y))
+    #    end
+    #end
     #types of exlusions: which transcript types are most likely to be missing from the pathway in a graphlet
     countmap([Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]])
     countmap([Coincidents_noncoding.Transcript_type[i][Coincidents_noncoding.Inclusion[i].==0] for i in 1:size(Coincidents_noncoding)[1]])
@@ -609,23 +615,23 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
     wide_orbit_sigs = vcat(map(x->stack(x,2:last_col+1),orbit_sigs)...)
     #for each pathway, we map the three orbit categories side by side
     palette = ["#db63c5","#bababa","#32a852"]
-    for p in keys(candidates)
-        @info "Drawing beeswarm for $p..."    
-        p_df = filter(:Pathway=>x->x == p,wide_orbit_sigs)
-        #insertcols!(p_df,:log_value =>log.(p_df.value))
-        #define colors by whether entrez id of node is in pathway
-        in_pathway = vcat(collect(eachrow(repeat(in.(1:length(vertexlist),Ref(candidates[p])),1,last_col)))...)
-        non_entrez = vcat(collect(eachrow(repeat(entrez_id_vector.==0,1,last_col)))...)
-        coloring = CategoricalArray(in_pathway-non_entrez)
-        coloring = recode(coloring,-1=>"unidentified",0=>"not in pathway",1=>"in pathway")
-        insertcols!(p_df,:color =>coloring)
-        #remove non pathway nodes
-        #filter!(:color=>x->x!="not in pathway",p_df)
-        #remove zero nodes
-        filter!(:value=>x->x!=0,p_df)
-        pl = plot(p_df,x = :variable,y = :value, color = :color,Guide.title(p),Geom.beeswarm(padding = 1mm),Theme(bar_spacing=1mm,point_size=0.5mm),Scale.color_discrete_manual(palette...));
-        draw(SVG("$(output_dir)/$(p)_beeswarm.svg",30cm,20cm),pl)
-    end
+#    for p in keys(candidates)
+#        @info "Drawing beeswarm for $p..."    
+#        p_df = filter(:Pathway=>x->x == p,wide_orbit_sigs)
+#        #insertcols!(p_df,:log_value =>log.(p_df.value))
+#        #define colors by whether entrez id of node is in pathway
+#        in_pathway = vcat(collect(eachrow(repeat(in.(1:length(vertexlist),Ref(candidates[p])),1,last_col)))...)
+#        non_entrez = vcat(collect(eachrow(repeat(entrez_id_vector.==0,1,last_col)))...)
+#        coloring = CategoricalArray(in_pathway-non_entrez)
+#        coloring = recode(coloring,-1=>"unidentified",0=>"not in pathway",1=>"in pathway")
+#        insertcols!(p_df,:color =>coloring)
+#        #remove non pathway nodes
+#        #filter!(:color=>x->x!="not in pathway",p_df)
+#        #remove zero nodes
+#        filter!(:value=>x->x!=0,p_df)
+#        pl = plot(p_df,x = :variable,y = :value, color = :color,Guide.title(p),Geom.beeswarm(padding = 1mm),Theme(bar_spacing=1mm,point_size=0.5mm),Scale.color_discrete_manual(palette...));
+#        draw(SVG("$(output_dir)/$(p)_beeswarm.svg",30cm,20cm),pl)
+#    end
     #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 
     #High zero exploration
