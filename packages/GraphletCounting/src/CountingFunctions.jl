@@ -624,7 +624,6 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
 
     ##for larger/more connected networks, counting relationships will only be possible if outputs are written directly to a CSV file. This is now enforced for all relationship counting
     #remove any existing temp dir and remake
-    temp_dir = "rel_dir" 
     run(`rm -rf $temp_dir`)
     run(`mkdir $temp_dir`)
     #now run per edge relationship counts, generating relationship csv files in temp_dir (one for each worker process)
