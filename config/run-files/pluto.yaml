@@ -14,7 +14,7 @@ website:
   website_dir: "website"
 
 data_preprocessing: 
-  expression_cutoff: 25
+  expression_cutoff: 1
   norm_method: "upper_quartile"
   variance_percent: 0.025
     

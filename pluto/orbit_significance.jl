@@ -199,6 +199,9 @@ Here we have two examples of pathways:
 
 """
 
+# ╔═╡ 0c721876-736e-495e-85b6-490ea7ded8f2
+
+
 # ╔═╡ 4ee8ef83-ee2a-458c-b7ce-bf16fd4c5baa
 md"""
 ## Removing low signal pathways
@@ -357,7 +360,7 @@ end;
 
 # ╔═╡ 812abebd-a67d-498c-939b-98f9b4d8a300
 begin
-	plot_1 = "Glyoxylate and dicarboxylate metabolism" 
+	plot_1 = "Mineral absorption" 
 	plot_grid[findall(x-> occursin(plot_1, x),candidate_pathways)...]
 end
 
@@ -455,9 +458,6 @@ end
 
   
 
-# ╔═╡ 42452b78-f24c-4517-ae46-8ddfe6368d03
-sig_pathway_occurences[1074]
-
 # ╔═╡ c2d2fe61-9e00-4db8-aa80-97deb551486a
 begin
 	                #shape plots into a grid
@@ -539,6 +539,9 @@ unique(vcat(values(sig_nodes_dict)...))
 
 # ╔═╡ 61a6f729-141c-4892-b983-dd48d78b6b7d
 unique(vcat(values(sig_nodes_dict)...))
+
+# ╔═╡ ea2da746-ac59-4a54-99c1-5ab39a2f3221
+length(sig_nodes_dict)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -935,7 +938,7 @@ uuid = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 version = "0.1.0"
 
 [[deps.GraphletCounting]]
-deps = ["DataFrames", "DataStructures", "Distributed", "LightGraphs", "ProgressMeter", "RCall", "StatsBase"]
+deps = ["CSV", "DataFrames", "DataStructures", "Distributed", "LightGraphs", "ProgressMeter", "RCall", "StatsBase"]
 path = "/home/osbornejr/app/packages/GraphletCounting"
 uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 version = "0.1.0"
@@ -1765,6 +1768,7 @@ version = "3.5.0+0"
 # ╟─6a2d3d61-cc8e-48ba-8839-705979033484
 # ╟─812abebd-a67d-498c-939b-98f9b4d8a300
 # ╟─b0ce6943-a214-4f5c-a75a-c3d59c71aa81
+# ╠═0c721876-736e-495e-85b6-490ea7ded8f2
 # ╟─2abc718c-e711-4b7f-880c-38922e225dd2
 # ╟─4ee8ef83-ee2a-458c-b7ce-bf16fd4c5baa
 # ╟─f7b11d20-9e7e-4197-b9b4-136d3e86644f
@@ -1772,13 +1776,12 @@ version = "3.5.0+0"
 # ╟─18dbd2ba-ad4c-40fc-92bc-3b8579d8d952
 # ╟─2c0de2b0-3d95-4abd-a7fe-7bbcf3fcfd52
 # ╟─51ee4885-582a-4349-8d91-98f583b8a510
-# ╠═8cdaf845-43c6-4455-822f-d30fbd2ff19b
+# ╟─8cdaf845-43c6-4455-822f-d30fbd2ff19b
 # ╟─07904aca-d5da-444a-8fa5-55f6af49eb23
 # ╟─7a0255c6-82c6-48c6-83e1-cd83606b05dc
 # ╟─7f35a6f0-71e3-4448-8dd1-fe359ac73f94
 # ╟─84aa8941-8766-4482-ba97-cfb5c477a072
-# ╟─42452b78-f24c-4517-ae46-8ddfe6368d03
-# ╠═ebaa8810-9096-4cc2-9c28-31143143bf14
+# ╟─ebaa8810-9096-4cc2-9c28-31143143bf14
 # ╟─3f3e6d45-d576-4385-bea8-e55a37d34512
 # ╟─f34235b1-0e47-4f28-94db-ce3cfa598a91
 # ╟─9bb259ec-8528-4049-80bf-5fa0d543e47c
@@ -1792,5 +1795,6 @@ version = "3.5.0+0"
 # ╟─87c1ea4a-26b2-42af-a21d-b6ff80366562
 # ╟─3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
 # ╟─61a6f729-141c-4892-b983-dd48d78b6b7d
+# ╟─ea2da746-ac59-4a54-99c1-5ab39a2f3221
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
