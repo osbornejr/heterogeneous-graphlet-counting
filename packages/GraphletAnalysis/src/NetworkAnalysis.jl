@@ -264,6 +264,9 @@ end
 
 
 ##bio significance functions
+function per_graphlet_coincidence(graphlet::AbstractArray,type::AbstractString,candidates)
+
+end
 function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertexlist::Array{String,1},vertex_names::Array{String,1},entrez_id_vector::Array{Int,1},candidates::Dict{String,Array{Int,1}})
         #convert into "nicer" format
         #rel_array = eachrow(rel)
@@ -290,6 +293,8 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
             three_coincidents = Array{Tuple,1}()
             four_coincidents = Array{Tuple,1}()
 
+            #per graphlet
+            
             for (i,r) in enumerate(eachrow(rel))
 
                 if(sum(map(x->x in cands,r))==2)         
@@ -435,19 +440,19 @@ function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String)
     return (entrez_id_vector, candidates,top_terms)
 end
 
-                function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
-                    output_dict = Dict{Int,Array{String,1}}() 
-                    for n in node_set
-                        list = []
-                        for c in candidates
-                            if (n in last(c))
-                                push!(list,first(c))
-                            end
-                        end
-                        output_dict[n] = list
-                    end
-                    return output_dict
-                end
+function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
+    output_dict = Dict{Int,Array{String,1}}() 
+    for n in node_set
+        list = []
+        for c in candidates
+            if (n in last(c))
+                push!(list,first(c))
+            end
+        end
+        output_dict[n] = list
+    end
+    return output_dict
+end
 
 
 function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
