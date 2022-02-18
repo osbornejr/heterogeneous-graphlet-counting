@@ -29,8 +29,8 @@ function run_all(config_file::String)
     graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
 
     cache_update("graphlets")
-    # @info "Comparing typed graphlet representations"
-    #typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+    @info "Comparing typed graphlet representations"
+    typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     @info "Conducting coincident graphlet analysis"
     coinc_anal = coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
 end
