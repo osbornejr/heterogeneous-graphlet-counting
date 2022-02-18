@@ -760,7 +760,7 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
     
     progress ? (@info "Loading relationships into memory") : nothing 
     Rel = CSV.read("$temp_dir/relationships.csv",DataFrame,header=false)
-    
+    #TODO switch this to use stdlib module DelimtedFiles (removing dependencies)  
     return Rel
 end
 
