@@ -86,45 +86,12 @@ begin
 	#degrees = sort(vec(degrees))
 	p = plot(x = 1:length(degrees),y=degrees, Geom.bar,Guide.xlabel("id"),Guide.ylabel("count"))
 
-	end
-
-# ╔═╡ 16594a10-f747-49f7-9dea-81724ec3ae4d
-begin
- 	e_degrees = sum.(map(y->map(x->degrees[x],y),edgelist))
-	m = max(e_degrees...)
- end
-
-# ╔═╡ 9007eba9-a579-4946-a502-1a86399c419f
-findall(x->x==m,e_degrees)
+end;
 
 # ╔═╡ 72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
 md"""
 # Orbit-based biological significance
 """
-
-# ╔═╡ 0f82d5eb-c1d1-4406-b356-ada7d229074e
-NetworkConstruction.draw_graphlet("coding_coding_noncoding_noncoding_4-path")
-
-# ╔═╡ baba57a5-0c24-4620-b0c2-450db2a89f44
-NetworkConstruction.draw_graphlet("coding_noncoding_noncoding_3-path")
-
-# ╔═╡ 901287ea-9b03-4067-aea1-d039304ebf0a
-NetworkConstruction.draw_graphlet("coding_coding_noncoding_coding_4-star")
-
-# ╔═╡ 937fd5dc-1423-468d-8ec6-518f58ae8807
-NetworkConstruction.draw_graphlet("coding_coding_uncoding_noncoding_4-tail")
-
-# ╔═╡ d999c806-aafe-442d-8ab7-56360b6c60b2
-NetworkConstruction.draw_graphlet("coding_noncoding_coding_noncoding_4-cycle")
-
-# ╔═╡ 4771b9a4-fe7b-4678-8175-542b012094d4
-NetworkConstruction.draw_graphlet("coding_noncoding_noncoding_coding_4-chord")
-
-# ╔═╡ cde04746-9a5a-4e8d-8a3b-b6bac523a72e
-NetworkConstruction.draw_graphlet("coding_coding_noncoding_noncoding_4-clique")
-
-# ╔═╡ 75dec48b-6fa2-426d-978a-f4278552c700
-NetworkConstruction.draw_graphlet("coding_boncoding_uncoding_noncoding_4-clique")
 
 # ╔═╡ 28836056-6604-4918-9f74-39bf81ad0559
 md"""
@@ -1743,17 +1710,7 @@ version = "3.5.0+0"
 # ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
 # ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
 # ╟─312f20e3-3c97-4108-847d-f2276abfab9a
-# ╟─16594a10-f747-49f7-9dea-81724ec3ae4d
-# ╟─9007eba9-a579-4946-a502-1a86399c419f
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
-# ╟─0f82d5eb-c1d1-4406-b356-ada7d229074e
-# ╟─baba57a5-0c24-4620-b0c2-450db2a89f44
-# ╟─901287ea-9b03-4067-aea1-d039304ebf0a
-# ╟─937fd5dc-1423-468d-8ec6-518f58ae8807
-# ╟─d999c806-aafe-442d-8ab7-56360b6c60b2
-# ╟─4771b9a4-fe7b-4678-8175-542b012094d4
-# ╟─cde04746-9a5a-4e8d-8a3b-b6bac523a72e
-# ╟─75dec48b-6fa2-426d-978a-f4278552c700
 # ╟─28836056-6604-4918-9f74-39bf81ad0559
 # ╟─67f24598-4b27-4dd8-b533-45c1cc4e44a6
 # ╟─4861b8cf-cf59-4cfd-b412-089ccfc00e90
