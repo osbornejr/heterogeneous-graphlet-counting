@@ -14,27 +14,28 @@ for i in term_list()
     exec "bd! ".i
 endfor
 
-"set up local and remote terminals
-term
+"set up local and remote terminals (without swapfiles)
+nos term
 file local
 wincmd c
-term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test"
+nos term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test"
 file remote
 wincmd c
 
 "setup unison file sync
-term unison heterogeneous-graphlet-counting 
+nos term unison heterogeneous-graphlet-counting 
 wincmd c
 
 "setup terminal with port connection 
-term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -t julia-server'"
+nos term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -t julia-server'"
 file julia-port
 wincmd c
 
 "open REPL terminal vertically on right
-vert term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -t julia'"
+nos vert term zsh -is eval "conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -t julia'"
 file repl
 wincmd p
+
 
 "clear old slime variable from each loaded buffer
 let buffers = map(filter(copy(getbufinfo()), 'v:val.listed'), 'v:val.bufnr')
