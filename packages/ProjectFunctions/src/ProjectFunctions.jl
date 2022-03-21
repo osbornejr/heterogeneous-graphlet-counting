@@ -6,7 +6,7 @@ include("RunFunctions.jl")
 cwd = ENV["PWD"]
 #define structure for run_parameters (nb... at this stage has to be rerun if values change). Also needs to be defined before including any package that depends on it
 #struct RunParameters
-#    test_name::String   
+#    test_name::String
 #    page_name::String
 #    website_dir::String
 #    expression_cutoff::Int
@@ -45,7 +45,7 @@ function distributed_setup(inclusions::Symbol...)
 
     #first clean to make sure there are no stray workers already around
     rmprocs(workers())
-    #add workers equal to the number of available cpus      
+    #add workers equal to the number of available cpus
     addprocs(Threads.nthreads();exeflags="--project=$cwd")
     #addprocs(8)
     #@everywhere inclusions

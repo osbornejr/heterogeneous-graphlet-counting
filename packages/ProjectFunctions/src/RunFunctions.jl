@@ -6,7 +6,7 @@ using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,Li
 
 function run_all(config_file::String)
    
-    if (length(workers())!=Threads.nthreads()) 
+    if (length(workers())!=Threads.nthreads())
         #Pkg.resolve()
        #Pkg.precompile()
         @info "Setting up worker processes"
@@ -44,7 +44,7 @@ export load_config
 
 function cache_setup()
     ##create directory for run
-    cache_dir = join([cwd,params["cache"]["base_dir"],params["test_name"]],"/") 
+    cache_dir = join([cwd,params["cache"]["base_dir"],params["test_name"]],"/")
     run(`mkdir -p $(cache_dir)`)
     params["cache"]["cur_dir"] = cache_dir
     ##check if whole cache_dir should be removed
@@ -70,10 +70,9 @@ end
 export cache_update
 
 function cache_update(general::String,specific::String="",side_dir::String="")
-    ##method to update or add cache path 
-    
+    ##method to update or add cache path
     ##update current dir, possibly with specific subdir
-    if (side_dir=="") 
+    if (side_dir=="")
         cache_dir = params["cache"]["cur_dir"]*"/"*general  
         params["cache"]["cur_dir"] = cache_dir
         run(`mkdir -p $(cache_dir)`)
@@ -84,8 +83,8 @@ function cache_update(general::String,specific::String="",side_dir::String="")
         end
     else
         ##create side dir, possiblly with specific subdir
-        cache_dir = params["cache"]["cur_dir"]*"/"*general  
-        params["cache"][side_dir] = cache_dir 
+        cache_dir = params["cache"]["cur_dir"]*"/"*general
+        params["cache"][side_dir] = cache_dir
         run(`mkdir -p $(cache_dir)`)
         if(specific!="")
             cache_dir = params["cache"][sid_dir]*"/"*specific
