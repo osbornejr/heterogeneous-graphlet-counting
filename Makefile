@@ -79,3 +79,16 @@ swapfile: ##manually create large (5g) swapfile for kernel to use
 	sudo mkswap /mnt/swapfile
 	#add to swap
 	sudo swapon /mnt/swapfile
+
+edit: ## vim command to initialise editing environment via nectar-ssh
+	vim -c "source config/julia-remote.vim" packages/ProjectFunctions/src/* packages/GraphletCounting/src/* packages/GraphletAnalysis/src/* packages/NetworkConstruction/src/* packages/DataPreprocessing/src/*
+
+
+tmux_session:="julia-vim-ssh"
+tmux: ## setup tmux session for this project based on edit command
+	tmux new -d -s $(tmux_session)
+	tmux send-keys -t $(tmux_session) 'make edit' C-m C-m
+	tmux set-option -t $(tmux_session) status-bg blue
+	tmux set-option -t $(tmux_session) status-left '#S'
+	tmux set-option -t $(tmux_session) status-left-length 100
+	tmux set-window-option -t $(tmux_session) window-status-current-format ''
