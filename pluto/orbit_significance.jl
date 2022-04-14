@@ -88,6 +88,9 @@ begin
 
 end;
 
+# ╔═╡ 7211b91e-3ca1-4688-b88f-e9e5e92ca918
+Coincidents
+
 # ╔═╡ 72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
 md"""
 # Orbit-based biological significance
@@ -214,6 +217,9 @@ we identify $v$ as a putative member of the pathway $S$.
 After applying the above process to all nodes in our network, we get the following associations:
 
 """
+
+# ╔═╡ 1e1cbc16-7b42-4711-99e5-9bb9968c9039
+
 
 # ╔═╡ f34235b1-0e47-4f28-94db-ce3cfa598a91
 begin
@@ -1710,6 +1716,7 @@ version = "3.5.0+0"
 # ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
 # ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
 # ╟─312f20e3-3c97-4108-847d-f2276abfab9a
+# ╠═7211b91e-3ca1-4688-b88f-e9e5e92ca918
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
 # ╟─28836056-6604-4918-9f74-39bf81ad0559
 # ╟─67f24598-4b27-4dd8-b533-45c1cc4e44a6
@@ -1725,7 +1732,7 @@ version = "3.5.0+0"
 # ╟─6a2d3d61-cc8e-48ba-8839-705979033484
 # ╟─812abebd-a67d-498c-939b-98f9b4d8a300
 # ╟─b0ce6943-a214-4f5c-a75a-c3d59c71aa81
-# ╠═0c721876-736e-495e-85b6-490ea7ded8f2
+# ╟─0c721876-736e-495e-85b6-490ea7ded8f2
 # ╟─2abc718c-e711-4b7f-880c-38922e225dd2
 # ╟─4ee8ef83-ee2a-458c-b7ce-bf16fd4c5baa
 # ╟─f7b11d20-9e7e-4197-b9b4-136d3e86644f
@@ -1740,6 +1747,7 @@ version = "3.5.0+0"
 # ╟─84aa8941-8766-4482-ba97-cfb5c477a072
 # ╟─ebaa8810-9096-4cc2-9c28-31143143bf14
 # ╟─3f3e6d45-d576-4385-bea8-e55a37d34512
+# ╟─1e1cbc16-7b42-4711-99e5-9bb9968c9039
 # ╟─f34235b1-0e47-4f28-94db-ce3cfa598a91
 # ╟─9bb259ec-8528-4049-80bf-5fa0d543e47c
 # ╟─c2ddfc1b-5ef7-4c0f-82fb-d86c015aba74
