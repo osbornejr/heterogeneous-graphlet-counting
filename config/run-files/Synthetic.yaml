@@ -1,0 +1,31 @@
+test_name: Synthetic   
+
+
+raw_counts_script: "config/input_scripts/GSE68559.jl"
+cache:
+  keep_cache: true
+  base_dir: "output/cache"
+  clear:
+    all: false
+    archive: false
+
+website:
+  page_name: "menu1"
+  website_dir: "website"
+
+data_preprocessing: 
+  expression_cutoff: 1
+  norm_method: "upper_quartile"
+  variance_percent: 0.025
+    
+network_construction:
+  coexpression: "pidc"
+  threshold: 0.95
+  threshold_method: "empirical_dist_zero"
+
+analysis:    
+  graphlet_counting: true
+  null_model_size: 1000
+  wgcna: false
+  func_annotate: false
+  visualise: false
