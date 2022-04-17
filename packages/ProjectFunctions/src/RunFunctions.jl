@@ -22,6 +22,14 @@ function run_all(config_file::String)
     @info "Constructing network"
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
 
+
+    #Synthetic patch: put here for now (TODO integrate this better)
+    #
+    if(params["test_name"] == "Synthetic")
+        @info "Switching to synthetic network"
+        edgelist,vertexlist = synthetic_network(vertexlist,edgelist)
+    end
+
     cache_update("analysis")
     # @info "Finding communities"
     # com_anal = community_analysis(network_counts,adj_matrix)
@@ -29,10 +37,10 @@ function run_all(config_file::String)
     graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
 
     cache_update("graphlets")
-    @info "Comparing typed graphlet representations"
-    typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+    #@info "Comparing typed graphlet representations"
+    #typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     @info "Conducting coincident graphlet analysis"
-    coinc_anal = coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
+    coinc_anal = coincident_analysis(network_counts,vertexlist,edgelist)
 end
 
 function load_config(config_file::String)
@@ -221,17 +229,20 @@ function  network_construction(sample_counts::DataFrame)
 end
 export network_construction
 
-function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)       
+
+function synthetic_network(vertexlist, edgelist)
     #Synthetic test (just override vertex and edge lists here-- is that ok?)
-    if(params["test_name"] == "Synthetic") 
-        n = length(vertexlist) 
-        m = length(edgelist) 
-        # construct erdos renyi random network based on vertex and edge structure of real network
-        edgelist = Pair.(collect(edges(erdos_renyi(n,m/(n*(n-1)/2)))))
-        #percentage of coding vertices in synthetic network
-        percentage = 0.72
-        vertexlist = vcat(repeat(["coding"],Int(floor(percentage*n))),repeat(["noncoding"],Int(ceil((1-percentage)*n))))
-    end
+    n = length(vertexlist) 
+    m = length(edgelist) 
+    # construct erdos renyi random network based on vertex and edge structure of real network
+    edgelist = Pair.(collect(edges(erdos_renyi(n,m/(n*(n-1)/2)))))
+    #percentage of coding vertices in synthetic network
+    percentage = 0.72
+    vertexlist = vcat(repeat(["coding"],Int(floor(percentage*n))),repeat(["noncoding"],Int(ceil((1-percentage)*n))))
+    return [edgelist,vertexlist]
+end
+
+function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)       
 
     #Network visualisation
     g = SimpleGraph(adj_matrix)
@@ -297,6 +308,7 @@ function graphlet_counting(vertexlist,edgelist)
     end
     return [graphlet_counts,timer]
 end
+export graphlet_counting
         
 function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     #method to deduce which run method the null model should use given the run time of graphlets above ($timer)
@@ -449,6 +461,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
 
     #pretty_table(random_edges,backend=:html,standalone = false)
 end 
+export typed_representations
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 
 
@@ -459,7 +472,7 @@ end
 #               # looking at identified significant graphlets and seeing if they check out biologically
 #               # the most taxing step is to identify the graphlets that are coincident in some way to KEGG pathways. We cache these coincidents as a dataframe (using CSV instead of JLD)  
                 #
-function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
+function coincident_analysis(network_counts,vertexlist,edgelist)
     vertex_names = network_counts[!,:transcript_id]
     #Coincident analysis
     coinc_dir = "$(params["cache"]["cur_dir"])/coincidents"
@@ -787,6 +800,6 @@ function coincident_analysis(adj_matrix,network_counts,vertexlist,edgelist)
 
     return sig_nodes_dict
 end                    
-
+export coincident_analysis
 
 
