@@ -40,6 +40,11 @@ function top_adjacency(sim_matrix::AbstractArray,top_scores::Int)
     return adj
 end
 
+
+function adj_from_edgelist(edgelist)
+    
+end
+
 function edgelist_from_adj(adjacency_matrix::AbstractArray)
     edgelist=Array{Pair}(undef,sum(UpperTriangular(adjacency_matrix)))
     count=0
