@@ -50,14 +50,18 @@ function distributed_setup(inclusions::Symbol...)
     #addprocs(8)
     #@everywhere inclusions
     for inc in inclusions
-        eval(macroexpand(Distributed,quote @everywhere using $(inc) end))
+        eval(macroexpand(Distributed,quote 
+                                        @everywhere using $(inc) 
+                                     end))
     end
 end
 export distributed_setup
 
 function distributed_code_load(inclusions::Symbol...)
     for package in inclusions
-        eval(macroexpand(Distributed,quote @everywhere using $(package) end))
+        eval(macroexpand(Distributed,quote     
+                                        @everywhere using $(package) 
+                                    end))
     end
 end
 
