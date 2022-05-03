@@ -750,12 +750,20 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
     end
 
     ##now remove duplicates from each graphlet file, writing to one relationships file
+    #TODO this is currently breaking on larger networks, where one graphlet with lots of occurences will break memory constraints
+    #solution is to break up the deduplication into batches, and then condensing into one smaller file, where final (cross bin) duplicates can be found (is this best method though?)
     progress ? (@info "Removing duplicates") : nothing 
     for file in filter(x->occursin(".csv",x),readdir(temp_dir,join=true))
         #run(`/bin/bash -c "sort -u $(file) >> $(temp_dir)/relationships.csv"`)
-        run(`awk -v var="$(temp_dir)/" '!seen[$0] {print >> var"relationships.csv"} {seen[$0] += 1}' $file`)
+        #run(`awk -v var="$(temp_dir)/" '!seen[$0] {print >> var"relationships.csv"} {seen[$0] += 1}' $file`)
+        ### for sort: if switch to individual output files use -o $(temp_dir)/$(split(file,".")[1])_dedup.csv
+        #run(`sort -us --parallel=$(Threads.nthreads()) -T $(temp_dir) $file '>>' $(temp_dir)/relationships.csv`)
+        open( io -> run(pipeline(`sort -us --parallel=$(Threads.nthreads()) -T $(temp_dir) $file`,stdout=io)), "$(temp_dir)/relationships.csv","a")
         run(`rm $file`)
     end
+    
+    
+
     ## load final file onto heap memory
     
     progress ? (@info "Loading relationships into memory") : nothing 
