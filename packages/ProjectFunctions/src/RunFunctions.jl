@@ -514,6 +514,8 @@ function coincident_analysis(network_counts,vertexlist,edgelist)
         @info "Counting per-edge graphlet relationships..."
         ## graphlet_relationships already caches final file in csv form at temp_dir location
         Rel = GraphletCounting.graphlet_relationships(vertexlist,edgelist,graphlet_size,run_method="distributed",progress = true,temp_dir = rel_dir)
+        ## remove workers now (no further distributed at this stage)
+        rmprocs(workers())
         cleaner()
         ## convert relationships to array, clear 
         @info "Converting relationships into array form"
