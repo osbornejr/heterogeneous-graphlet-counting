@@ -472,6 +472,43 @@ export typed_representations
 #               # looking at identified significant graphlets and seeing if they check out biologically
 #               # the most taxing step is to identify the graphlets that are coincident in some way to KEGG pathways. We cache these coincidents as a dataframe (using CSV instead of JLD)  
                 #
+function load_relationships(file_path)  
+    rel_dir = dirname(file_path)
+    ## first divide csv into the node ids (integers) and the graphlet ids (string)
+    #TODO adjustable to graphlet size?
+    run(pipeline(`cut -d' ' -f 1-4 $(file_path)`,"$(rel_dir)/nodes"))
+    run(pipeline(`cut -d' ' -f 5 $(file_path)`,"$(rel_dir)/graphlets"))
+    
+    ##First read in nodes
+    node_path = rel_dir*"/nodes"
+    graphlet_path = rel_dir*"/graphlets"
+    nodes = CSV.File(node_path,delim=' ',header = false) |> Tables.matrix
+    cleaner()
+    graphlets = CSV.File(graphlet_path,delim=' ',header = false) |> Tables.matrix
+    cleaner()
+    ##cleanup split files
+    run(`rm $(node_path) $(graphlet_path)`)
+    ##Getting by without splits for now, but maybe in future will be necessary
+    ##see how many split files are required
+    #bins = Int(ceil(filesize(node_path)/5368709120))
+    ## find line splits to match bins (so we don't split across lines)
+    #linecount = countlines(node_path) 
+    #lines = Int(ceil(linecount/bins))
+    ##if file is too big, we need to split up and load in separately
+    #run(`split -l$(lines) $(node_path) $(rel_dir)/split_rels.`)  
+
+    #nodes = [0 0 0 0]
+    #for file in filter(x->occursin("split_rels.",x),readdir(dirname(file_path),join=true))
+     #   Rel = CSV.read(file,DataFrame,delim = " ",header = false) 
+    #cleaner()
+     #  nodes = vcat(nodes,Matrix(Rel))
+      ##cleanup split file
+       # run(`rm $(file)`)
+        #cleaner()
+    #end
+    return [nodes, graphlets]
+ end
+
 function coincident_analysis(network_counts,vertexlist,edgelist)
     vertex_names = network_counts[!,:transcript_id]
     #Coincident analysis
@@ -499,52 +536,10 @@ function coincident_analysis(network_counts,vertexlist,edgelist)
     if (isfile(relationships_file))
         cleaner()
         @info "Loading per-edge graphlet relationships from $relationships_file"
-        
-function load_relationships(file_path)  
-    rel_dir = dirname(file_path)
-    ## first divide csv into the node ids (integers) and the graphlet ids (string)
-    #TODO adjustable to graphlet size?
-    run(pipeline(`cut -d' ' -f 1-4 $(file_path)`,"$(rel_dir)/nodes"))
-    run(pipeline(`cut -d' ' -f 5 $(file_path)`,"$(rel_dir)/graphlets"))
-    
-    ##First read in nodes
-    node_path = rel_dir*"/nodes"
-    graphlet_path = rel_dir*"/graphlets"
-    nodes = CSV.File(node_path,delim=' ',header = false) |> Tables.matrix
-    cleaner()
-    graphlets = CSV.File(graphlet_path,delim=' ',header = false) |> Tables.matrix
-    cleaner()
-    ##Getting by without splits for now, but maybe in future will be necessary
-    ##see how many split files are required
-    #bins = Int(ceil(filesize(node_path)/5368709120))
-    ## find line splits to match bins (so we don't split across lines)
-    #linecount = countlines(node_path) 
-    #lines = Int(ceil(linecount/bins))
-    ##if file is too big, we need to split up and load in separately
-    #run(`split -l$(lines) $(node_path) $(rel_dir)/split_rels.`)  
-
-    #nodes = [0 0 0 0]
-    #for file in filter(x->occursin("split_rels.",x),readdir(dirname(file_path),join=true))
-     #   Rel = CSV.read(file,DataFrame,delim = " ",header = false) 
-    #cleaner()
-     #  nodes = vcat(nodes,Matrix(Rel))
-      ##cleanup split file
-       # run(`rm $(file)`)
-        #cleaner()
-    #end
-    return nodes, graphlets
-end
-
-
-        Rel = CSV.read("$rel_dir/relationships.csv",DataFrame,header=false)
         ## remove workers now (no further distributed at this stage)
         rmprocs(workers())
         cleaner()
-        ## convert relationships to array, clear 
-        @info "Converting relationships into array form"
-        rel = Array(Rel[:,1:graphlet_size])
-        rel_types = Rel[:,end]
-        Rel = nothing
+        rel,rel_types = load_relationships(relationships_file)
         cleaner()
     else
         cleaner()
@@ -554,11 +549,8 @@ end
         ## remove workers now (no further distributed at this stage)
         rmprocs(workers())
         cleaner()
-        ## convert relationships to array, clear 
-        @info "Converting relationships into array form"
-        rel = Array(Rel[:,1:graphlet_size])
-        rel_types = Rel[:,end]
-        Rel = nothing
+        rel,rel_types = load_relationships(relationships_file)
+        cleaner()
         cleaner()
     end
     
