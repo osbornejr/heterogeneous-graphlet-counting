@@ -1,4 +1,4 @@
-using DataStructures,Distributed,ProgressMeter,StatsBase,CSV,DataFrames
+using DataStructures,Distributed,ProgressMeter,StatsBase
 
 #module GraphletCounting
 #export Neighbours, mergecum, add3graphlets
@@ -762,14 +762,13 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
         run(`rm $file`)
     end
     
-    
+    @info "Finished. Relationships stored in a CSV file at $(temp_dir)/relationships.csv"    
 
     ## load final file onto heap memory
     
-    progress ? (@info "Loading relationships into memory") : nothing 
-    Rel = CSV.read("$temp_dir/relationships.csv",DataFrame,header=false)
-    #TODO switch this to use stdlib module DelimtedFiles (removing dependencies)  
-    return Rel
+    #progress ? (@info "Loading relationships into memory") : nothing 
+    #Rel = CSV.read("$temp_dir/relationships.csv",DataFrame,header=false)
+    return nothing 
 end
 
 
