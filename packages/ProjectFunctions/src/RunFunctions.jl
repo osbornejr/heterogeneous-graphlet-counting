@@ -484,8 +484,10 @@ function load_relationships(file_path)
     ##First read in nodes
     node_path = rel_dir*"/nodes"
     graphlet_path = rel_dir*"/graphlets"
+    @info "Loading relationship node info"
     nodes = CSV.File(node_path,delim=' ',header = false) |> Tables.matrix
     cleaner()
+    @info "Loading relationship graphlet info"
     graphlets = CSV.File(graphlet_path,delim=' ',header = false) |> Tables.matrix
     cleaner()
     ##cleanup split files
