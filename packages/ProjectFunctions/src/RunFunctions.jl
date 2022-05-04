@@ -49,6 +49,7 @@ function load_config(config_file::String)
         cache_setup()
 end
 export load_config
+export params
 
 function cache_setup()
     ##create directory for run
@@ -241,6 +242,7 @@ function synthetic_network(vertexlist, edgelist)
     vertexlist = vcat(repeat(["coding"],Int(floor(percentage*n))),repeat(["noncoding"],Int(ceil((1-percentage)*n))))
     return [edgelist,vertexlist]
 end
+export synthetic_network
 
 function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)       
 
@@ -508,6 +510,7 @@ function load_relationships(file_path)
     #end
     return [nodes, graphlets]
  end
+ export load_relationships
 
 function coincident_analysis(network_counts,vertexlist,edgelist)
     vertex_names = network_counts[!,:transcript_id]
