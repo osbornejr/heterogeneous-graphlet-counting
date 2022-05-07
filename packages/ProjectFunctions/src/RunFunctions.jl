@@ -292,7 +292,7 @@ end
 function graphlet_counting(vertexlist,edgelist)
 
     ##update cache
-    anal_dir = "$(params["cache"]["cur_dir"])/graphlets"
+    anal_dir = "$(params["cache"]["cur_dir"])/graphlets/$(params["analysis"]["graphlet_size"])"
     run(`mkdir -p $(anal_dir)`)
     graphlet_file = "$anal_dir/graphlets.jld2" 
     if (isfile(graphlet_file))
@@ -301,7 +301,7 @@ function graphlet_counting(vertexlist,edgelist)
         timer = cache_load(graphlet_file,"time")
     else
         @info "Counting graphlets..."
-        timer=@elapsed graphlet_counts = GraphletCounting.count_graphlets(vertexlist,edgelist,4,run_method="distributed-old")
+        timer=@elapsed graphlet_counts = GraphletCounting.count_graphlets(vertexlist,edgelist,params["analysis"]["graphlet_size"],run_method="distributed-old")
         #graphlet_concentrations = concentrate(graphlet_counts) 
         @info "Saving graphlet counts at $anal_dir..."
         ##save the per-edge array as well in case we need it in the future (exp for debugging)
@@ -311,7 +311,7 @@ function graphlet_counting(vertexlist,edgelist)
     return [graphlet_counts,timer]
 end
 export graphlet_counting
-        
+        params["analysis"]["graphlet_size"]
 function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     #method to deduce which run method the null model should use given the run time of graphlets above ($timer)
     if (timer<30)
