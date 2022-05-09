@@ -36,7 +36,6 @@ function run_all(config_file::String)
     @info "Counting graphlets"
     graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
 
-    cache_update("graphlets")
     #@info "Comparing typed graphlet representations"
     #typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     @info "Conducting coincident graphlet analysis"
@@ -292,9 +291,9 @@ end
 function graphlet_counting(vertexlist,edgelist)
 
     ##update cache
-    anal_dir = "$(params["cache"]["cur_dir"])/graphlets/$(params["analysis"]["graphlet_size"])"
+    anal_dir = "$(params["cache"]["cur_dir"])/graphlets/$(params["analysis"]["graphlet_size"])/graphlet-counting"
     run(`mkdir -p $(anal_dir)`)
-    graphlet_file = "$anal_dir/graphlets.jld2" 
+    graphlet_file = "$anal_dir/graphlet-counting.jld2" 
     if (isfile(graphlet_file))
         @info "Loading graphlet counts from $anal_dir..."
         graphlet_counts = cache_load(graphlet_file,"graphlets")
@@ -309,10 +308,11 @@ function graphlet_counting(vertexlist,edgelist)
 
     end
     return [graphlet_counts,timer]
-end
+end 
 export graphlet_counting
-        params["analysis"]["graphlet_size"]
+
 function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+    #TODO rewrite this function so that the guts of it is in appropriate package
     #method to deduce which run method the null model should use given the run time of graphlets above ($timer)
     if (timer<30)
         null_run = "distributed-short"
@@ -324,7 +324,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     @info "Looking at typed representations of graphlets..."
 
     ##update cache
-    rep_dir = "$(params["cache"]["cur_dir"])/typed_representations/nullmodel/$(params["analysis"]["null_model_size"])_simulations"
+    rep_dir = "$(params["cache"]["cur_dir"])/graphlets/$(params["analysis"]["graphlet_size"])/graphlet-counting/typed_representations/nullmodel/$(params["analysis"]["null_model_size"])_simulations"
     run(`mkdir -p $(rep_dir)`)
     N=params["analysis"]["null_model_size"]
     rand_graphlets_file = "$rep_dir/rand_graphlets.jld2"
@@ -341,11 +341,11 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         @info "Counting graphlets on null model" 
         if (null_run=="distributed-short")
             #rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed-old")
-            rand_graphlet_counts = @showprogress pmap(x->GraphletCounting.count_graphlets(x,edgelist,4,run_method="serial"),rand_types_set,batch_size =10)
+            rand_graphlet_counts = @showprogress pmap(x->GraphletCounting.count_graphlets(x,edgelist,params["analysis"]["graphlet_size"],run_method="serial"),rand_types_set,batch_size =10)
         end
         if (null_run=="distributed-long")
             #rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
-            rand_graphlet_counts = @showprogress map(x->count_graphlets(x,edgelist,4,run_method="distributed"),rand_types_set)
+            rand_graphlet_counts = @showprogress map(x->count_graphlets(x,edgelist,params["analysis"]["graphlet_size"],run_method="distributed"),rand_types_set)
         end
         rand_graphlet_collection = vcat(collect.(rand_graphlet_counts)...)
         @info "Saving random graphlet count information at $rep_dir..."
@@ -517,7 +517,7 @@ function load_relationships(file_path)
 function coincident_analysis(network_counts,vertexlist,edgelist)
     vertex_names = network_counts[!,:transcript_id]
     #Coincident analysis
-    coinc_dir = "$(params["cache"]["cur_dir"])/coincidents"
+    coinc_dir = "$(params["cache"]["cur_dir"])/graphlets/$(params["analysis"]["graphlet_size"])/coincidents"
     run(`mkdir -p $(coinc_dir)`)
     #get baseline entrez and kegg info about transcripts
     kegg_file = "$(coinc_dir)/kegg_info.jld2"
@@ -535,7 +535,7 @@ function coincident_analysis(network_counts,vertexlist,edgelist)
 
 
     ##relationships 
-    graphlet_size = 4 #TODO selectable?
+    graphlet_size = params["analysis"]["graphlet_size"]  
     rel_dir = "$coinc_dir/relationships"
     relationships_file = "$rel_dir/relationships.csv"
     if (isfile(relationships_file))
