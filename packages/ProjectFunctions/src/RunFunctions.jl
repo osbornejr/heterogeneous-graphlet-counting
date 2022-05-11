@@ -534,34 +534,6 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     candidate_pathways = collect(keys(candidates))
 
 
-    ##relationships 
-    graphlet_size = params["analysis"]["graphlet_size"]  
-    rel_dir = "$coinc_dir/relationships"
-    relationships_file = "$rel_dir/relationships.csv"
-    if (isfile(relationships_file))
-        cleaner()
-        @info "Loading per-edge graphlet relationships from $relationships_file"
-        ## remove workers now (no further distributed at this stage)
-        rmprocs(workers())
-        cleaner()
-        rel,rel_types = load_relationships(relationships_file)
-        cleaner()
-    else
-        cleaner()
-        @info "Counting per-edge graphlet relationships..."
-        ## graphlet_relationships already caches final file in csv form at temp_dir location
-        Rel = GraphletCounting.graphlet_relationships(vertexlist,edgelist,graphlet_size,run_method="distributed",progress = true,temp_dir = rel_dir)
-        ## remove workers now (no further distributed at this stage)
-        rmprocs(workers())
-        cleaner()
-        rel,rel_types = load_relationships(relationships_file)
-        cleaner()
-        cleaner()
-    end
-    
-    ##trim to just 4 node graphlets here (for now) TODO integrate this better. Graphlet orders should be distinct and non-implicit throughout codebase
-    rel = rel[map(x->occursin(string(graphlet_size),x),rel_types),:]
-    rel_types = rel_types[map(x->occursin(string(graphlet_size),x),rel_types)]
 
     #coincidents
     coincidents_file ="$coinc_dir/coincidents.csv"
@@ -578,6 +550,35 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         Coincidents.Transcript_type = fix.(Coincidents.Transcript_type)
         Coincidents.Inclusion = fix_bool.(Coincidents.Inclusion)
     else
+        ##relationships 
+        #Here we only load relationships file (which is huge!) if absolutely required i.e. the smaller resultant coincidents file does not exist
+        graphlet_size = params["analysis"]["graphlet_size"]  
+        rel_dir = "$coinc_dir/relationships"
+        relationships_file = "$rel_dir/relationships.csv"
+        if (isfile(relationships_file))
+            cleaner()
+            @info "Loading per-edge graphlet relationships from $relationships_file"
+            ## remove workers now (no further distributed at this stage)
+            rmprocs(workers())
+            cleaner()
+            rel,rel_types = load_relationships(relationships_file)
+            cleaner()
+        else
+            cleaner()
+            @info "Counting per-edge graphlet relationships..."
+            ## graphlet_relationships already caches final file in csv form at temp_dir location
+            Rel = GraphletCounting.graphlet_relationships(vertexlist,edgelist,graphlet_size,run_method="distributed",progress = true,temp_dir = rel_dir)
+            ## remove workers now (no further distributed at this stage)
+            rmprocs(workers())
+            cleaner()
+            rel,rel_types = load_relationships(relationships_file)
+            cleaner()
+            cleaner()
+        end
+
+        ##trim to just 4 node graphlets here (for now) TODO integrate this better. Graphlet orders should be distinct and non-implicit throughout codebase
+        rel = rel[map(x->occursin(string(graphlet_size),x),rel_types),:]
+        rel_types = rel_types[map(x->occursin(string(graphlet_size),x),rel_types)]
         @info "Conducting per graphlet pathway coincidence analysis..."
         Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,entrez_id_vector,candidates)
         @info "Saving coincidents at $coinc_dir..."
