@@ -576,3 +576,226 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
      return df
      #@info "Finished $i..."
 end
+
+
+##ANalysis of coincidents (messy and incoherent) TODO needs to be formalised and put into proper package places
+    ##find which types are excluded in general, and then only as a cause of having no Entrez id
+    #Coincidents.excluded = [Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]]
+    #Coincidents.excluded_Entrez = [Coincidents.Transcript_type[i][Coincidents.Entrez[i].==0] for i in 1:size(Coincidents)[1]]
+    ##find only those coincidents that involve non-coding transcripts
+    #Coincidents_noncoding = Coincidents[findall(x-> "noncoding" in x, Coincidents.Transcript_type),:]
+
+    ##Nonuniformity test: finds graphlets where the included nodes differ across different pathways (sampling for now for speed)
+    #graphlet = "4-star"
+    #nonuniforms = []
+    #for y in filter(p->last(p)>1,countmap(filter(:Hom_graphlet=> x-> x == graphlet, Coincidents[1:199000,:]).Vertices))
+    #    test = sum(filter(:Vertices => x-> x == first(y),filter(:Hom_graphlet => x-> x == graphlet,Coincidents))[!,8])/last(y)
+    #    if (sum(((test.>0) - (test.<1)).==0)>0)
+    #        push!(nonuniforms,first(y))
+    #    end
+    #end
+    ##types of exlusions: which transcript types are most likely to be missing from the pathway in a graphlet
+    #countmap([Coincidents.Transcript_type[i][Coincidents.Inclusion[i].==0] for i in 1:size(Coincidents)[1]])
+    #countmap([Coincidents_noncoding.Transcript_type[i][Coincidents_noncoding.Inclusion[i].==0] for i in 1:size(Coincidents_noncoding)[1]])
+
+    ##agreement between entrez and inclusion info
+    #sum(map(x->x.!==0,Coincidents.Entrez).==Coincidents.Inclusion)
+    #sum(map(x->x.!==0,Coincidents_noncoding.Entrez).==Coincidents_noncoding.Inclusion)
+
+
+ 
+
+   # # this table stores the average for each pathway (of nodes that are known to be in the pathway)
+  #  significance_bars = zeros(length(keys(candidates)),size(orbit_sigs_array[1])[2])
+  #  for (i,c) in enumerate(keys(candidates))
+  #      significance_bars[i,:] = (sum(map(x->Array(x[!,2:end]),orbit_sigs[candidates[c]]))./length(vertexlist))[i,:]
+  #  end
+  #  ##now compare bars against profiles of non-pathway nodes
+  #  ## choose a subset of nodes to look at. Can be boolean BitArray (with length equal to all nodes) or a specific list of nodes 
+  #  subset = entrez_id_vector.==0
+  #  putative_pathways = Array{Array{String,1}}(undef,length(orbit_sigs_array[subset]))
+  #  for (i,t) in enumerate(orbit_sigs_array[subset])
+  #      putative_pathways[i] = collect(keys(candidates))[vec((sum(t.>significance_bars,dims=2).>2))]
+  #  end
+
+    # Gadfly beeswarm visualisation:
+ #   output_dir = "$cwd/output/plots/orbit_significance_$(orbit_sigs_method)/"
+ #   run(`mkdir -p $output_dir`)
+ #   # get data into wide format
+ #   # size of each df
+ #   last_col = size(orbit_sigs[1])[2]-1
+ #   wide_orbit_sigs = vcat(map(x->stack(x,2:last_col+1),orbit_sigs)...)
+ #   #for each pathway, we map the three orbit categories side by side
+ #   palette = ["#db63c5","#bababa","#32a852"]
+#    for p in keys(candidates)
+#        @info "Drawing beeswarm for $p..."    
+#        p_df = filter(:Pathway=>x->x == p,wide_orbit_sigs)
+#        #insertcols!(p_df,:log_value =>log.(p_df.value))
+#        #define colors by whether entrez id of node is in pathway
+#        in_pathway = vcat(collect(eachrow(repeat(in.(1:length(vertexlist),Ref(candidates[p])),1,last_col)))...)
+#        non_entrez = vcat(collect(eachrow(repeat(entrez_id_vector.==0,1,last_col)))...)
+#        coloring = CategoricalArray(in_pathway-non_entrez)
+#        coloring = recode(coloring,-1=>"unidentified",0=>"not in pathway",1=>"in pathway")
+#        insertcols!(p_df,:color =>coloring)
+#        #remove non pathway nodes
+#        #filter!(:color=>x->x!="not in pathway",p_df)
+#        #remove zero nodes
+#        filter!(:value=>x->x!=0,p_df)
+#        pl = plot(p_df,x = :variable,y = :value, color = :color,Guide.title(p),Geom.beeswarm(padding = 1mm),Theme(bar_spacing=1mm,point_size=0.5mm),Scale.color_discrete_manual(palette...));
+#        draw(SVG("$(output_dir)/$(p)_beeswarm.svg",30cm,20cm),pl)
+#    end
+    #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
+
+    #High zero exploration
+    #TODO remove this and just use low_filter method below to more organically acheive same thing
+    ## over all transcripts 
+   # total_zero_proportion = sum(map(x->x.==0,orbit_sigs_array))./length(orbit_sigs_array)
+   # ##over a subset
+   # subset = candidates[candidate_pathways[1]] 
+   # subset_zero_proportion = sum(map(x->x.==0,orbit_sigs_array[subset]))./length(orbit_sigs_array[subset])
+   # #compare
+   # zero_comparison = subset_zero_proportion.<total_zero_proportion
+   # #compare for all pathways,speficically for that pathway
+   # zero_scores = zeros(Int,length(candidate_pathways),last_col) 
+   # for (i,p) in enumerate(candidate_pathways)
+   #     subset = candidates[p] 
+   #     subset_zero_proportion = sum(map(x->x.==0,orbit_sigs_array[subset]))./length(orbit_sigs_array[subset])
+   #     #compare
+   #     zero_scores[i,:] = (subset_zero_proportion.<total_zero_proportion)[i,:]
+   # end
+   # #find those pathways with majority of zero proportions below total proportions 
+   # zero_passes = vec(sum(zero_scores,dims=2).>(last_col/2))
+   # zero_candidate_pathways = candidate_pathways[zero_passes]
+   # zero_orbit_sigs = map(x->filter(:Pathway=>y->y in zero_candidate_pathways,x),orbit_sigs)
+   # zero_orbit_sigs_array = map(x->Array(x[!,2:end]),zero_orbit_sigs)
+   # zero_candidates = Dict(Pair.(zero_candidate_pathways,[candidates[x] for x in zero_candidate_pathways]))
+
+   # #uniqueness of pathway contributors (concerns of too much overlap) 
+   # sig_pathway_occurences = countmap(vcat([candidates[x] for x in zero_candidate_pathways]...))
+   # m = max(collect(values(sig_pathway_occurences))...) 
+   # #m = 8
+   # supersharers = first.(filter(x->last(x)==m,collect(sig_pathway_occurences)))
+   # #for these supersharers, find the set of pathways they are involved in
+   # supersharer_pathways = GraphletAnalysis.pathways_per_node_dict(supersharers,zero_candidates)
+   # in_group = collect(keys(countmap(vcat(collect(values(supersharer_pathways))...))))
+   # not_in_group = zero_candidate_pathways[.!(in.(zero_candidate_pathways,Ref(collect(keys(countmap(vcat(collect(values(supersharer_pathways))...)))))))]
+   # countmap(collect(values(supersharer_pathways)))
+   # #do we need to rule out pathways dominated by supersharers? TODO
+
+
+#    #ecdfs
+#    #store ecdf functions in table
+#    ecdf_table = Array{ECDF,2}(undef,length(zero_candidate_pathways),last_col)
+#    for (i,p) in enumerate(zero_candidate_pathways)
+#        for j in 1:last_col
+#            ecdf_table[i,j] = ecdf(map(x->x[i,j],zero_orbit_sigs_array))
+#        end
+#    end
+#    #first check candidate probabilities across all categories
+#    known_pathway_probs = Array{Array{Float64,2},1}(undef,length(zero_candidate_pathways))
+#    for (i,c) in enumerate(zero_candidate_pathways)
+#        known_pathway_probs[i] = hcat([map(ecdf_table[i,j],map(x->x[i,j],orbit_sigs_array[zero_candidates[c]])) for j in 1:last_col]...)
+#    end
+#
+#    #define orbit names here for now
+#    orbit_names = names(orbit_sigs[1])[2:last_col+1]
+#
+#    #collect known pathway vectors for corresponding known pathway nodes
+#    known_pathway_dfs = Array{DataFrame,1}(undef,length(zero_candidate_pathways))
+#    for (i,p) in enumerate(zero_candidate_pathways)
+#        subset = zero_candidates[p]
+#        df_build = DataFrame(hcat(map(x->x[i,:],zero_orbit_sigs_array[subset])...)',orbit_names)
+#        insertcols!(df_build,1,:shared=>[sig_pathway_occurences[x] for x in subset].-1)
+#        insertcols!(df_build,1,:transcript_id=>subset)
+#        known_pathway_dfs[i] = df_build 
+#        #print("Known nodes in pathway $p are in this many other pathways:\n")
+#        #print([sig_pathway_occurences[x] for x in subset].-1)
+#        #print("\n")
+#    end
+#    known_pathway_arrays = map(x->Array(x[!,3:end]),known_pathway_dfs)
+#    #known ecdfs
+#    #calculate ecdfs just for known pathway node values (each row corresponds to a pathway, each column to an orbit) 
+#    known_ecdf_table = Array{ECDF,2}(undef,length(zero_candidate_pathways),last_col)
+#    for (i,p) in enumerate(zero_candidate_pathways)
+#        known_ecdf_table[i,:] = ecdf.(eachcol(known_pathway_arrays[i]))
+#    end
+#
+#    ##compare each unknown node to known ecdfs
+#    #set threshold for which to check on i.e. is node orbit count higher than the top ~thresh~% of known nodes
+#    thresh = 0.05
+#    ub = 1 -thresh
+#    #first check if there are any orbits for any pathways that have such low representation that 0 count exceed threshold. we will filter these out of analysis
+#    low_filter = .!(map(x->x(0),known_ecdf_table).>ub)
+#    #for each node, map each known ecdf to the corresponding orbit count and check against threshold, factoring in the low filter
+#    unknown_ecdf_comparison = map(y->(reshape(map(x->known_ecdf_table[x](y[x]),1:length(known_ecdf_table)),size(known_ecdf_table)[1],size(known_ecdf_table)[2]).>ub).*low_filter,zero_orbit_sigs_array)
+#    #determine a node as significantly linked to a pathway if at least half its orbit counts are significant
+#    sig_check = map(x->(sum(x,dims=2).>(last_col/2)),unknown_ecdf_comparison)
+#    sig_nodes= findall(x->sum(x)>0,sig_check)
+#    sig_nodes_dict = Dict(Pair.(sig_nodes,map(x->zero_candidate_pathways[vec(x)],sig_check[sig_nodes])))
+#
+#    #shape plots into a grid
+#    ncols = 6
+#    dims = fldmod(length(zero_candidate_pathways),ncols)
+#    plots = Array{Union{Plot,Context},2}(undef,dims[1]+(dims[2]>0),ncols)
+#    #plots = Array{Union{Plot,Context},1}(undef,length(keys(candidates)))
+#    for (i,p) in enumerate(zero_candidate_pathways)
+#        #For total ecdfs:
+#        #find max over all measures for pathway
+#        #                    m = max([map(x->x[i,1],orbit_sigs_array)...,map(x->x[i,2],orbit_sigs_array)..., map(x->x[i,3],orbit_sigs_array)...]...)
+#        #                    plots[i] = plot([layer(x->ecdf(map(x->x[i,j],orbit_sigs_array))(x),0,m,color=[j]) for j in 1:last_col]...,
+#        #                              Scale.color_discrete_manual("orange", "green", "purple"),
+#        #                              Guide.title(p),
+#        #                              Guide.xlabel("count"),
+#        #                              Theme(major_label_font_size=4pt,key_position=:none));
+#        #                              #Guide.colorkey(title="orbit position"),
+#        #                              #Guide.title(p));
+#        #                              #
+#        #for known ecdfs only:
+#        m = max(known_pathway_arrays[i]...)
+#        plots[i] = plot([layer(x->known_ecdf_table[i,j](x),0,m,color=[orbit_names[j]]) for j in 1:last_col]...,
+#                        Scale.color_discrete_manual("orange", "green", "purple"),
+#                        Guide.title(p),
+#                        Guide.xlabel("count"),
+#                        Theme(major_label_font_size=4pt,key_position=:none));
+#        #Guide.colorkey(title="orbit position"),
+#        #Guide.title(p));
+#    end
+#    #Add legend pane
+#    legend = plot(wide_orbit_sigs,color=:variable,
+#                  Geom.blank,
+#                  Scale.color_discrete_manual("orange", "green", "purple"));
+#    #append blank gridspots if necessary
+#    for i in 1:length(plots)
+#        if(!isassigned(plots,i))
+#            plots[i] = context()
+#        end
+#    end
+#    #TODO this needs to be more generalised for any dimension of gridstack/number of pathways 
+#    plots[2,6] = legend;
+#    draw(SVG("$(output_dir)/known_ecdfs.svg",30cm,20cm),gridstack(plots))
+#
+#
+#    ## make a table to analyse different candidate levels for coincident graphlets
+#
+#
+#    ##function to get the n permutations of a set xs
+#    all_perm(xs, n) = vec(map(collect, Iterators.product(ntuple(_ -> xs, n)...)))
+#    ## method to find all orbit permutations of a type set
+#    set = ["coding","noncoding"]
+#
+#    # specify orbit classes
+#    orbit = [1,1,1,1]
+#    order = length(orbit)
+#    ##get all possible combinations from set (before sorting)
+#    base = collect.(vcat(collect(Iterators.product(repeat([set],order)...))...))
+#    #sort via each orbit equivalence class 
+#    for o in unique(orbit)
+#        template = orbit.==o
+#        for i in base
+#            i[template] = sort(i[template])
+#        end
+#    end
+#    #find unique permutations
+#    gs = unique(base)  
+#
+    #return sig_nodes_dict
