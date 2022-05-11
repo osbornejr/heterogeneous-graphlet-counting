@@ -79,7 +79,7 @@ swapfile: ##manually create large (5g) swapfile for kernel to use
 	sudo swapon /mnt/swapfile
 
 edit: ## vim command to initialise editing environment via nectar-ssh
-	vim -c "source config/julia-remote.vim" packages/ProjectFunctions/src/* packages/GraphletCounting/src/* packages/GraphletAnalysis/src/* packages/NetworkConstruction/src/* packages/DataPreprocessing/src/*
+	vim -c "source config/julia-remote.vim" packages/ProjectFunctions/src/* packages/GraphletCounting/src/* packages/GraphletAnalysis/src/* packages/NetworkConstruction/src/* packages/DataPreprocessing/src/* config/run-files/*
 
 
 tmux_session:="julia-vim-ssh"
