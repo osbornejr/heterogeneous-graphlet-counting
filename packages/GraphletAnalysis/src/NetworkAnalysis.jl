@@ -288,7 +288,7 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
             #two_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
             #three_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
             #four_coincidents = Array{Array{Int64,1}}(undef,length(keys(graphlet_rels))) 
-            #one_coincidents = Array{Tuple,1}()
+            one_coincidents = Array{Tuple,1}()
             two_coincidents = Array{Tuple,1}()
             three_coincidents = Array{Tuple,1}()
             four_coincidents = Array{Tuple,1}()
@@ -297,7 +297,9 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
             
             for (i,r) in enumerate(eachrow(rel))
 
-                if(sum(map(x->x in cands,r))==2)         
+                if(sum(map(x->x in cands,r))==1)         
+                    push!(one_coincidents,tuple(r,rel_types[i]))                
+                elseif(sum(map(x->x in cands,r))==2)         
                     push!(two_coincidents,tuple(r,rel_types[i]))                
                 
                 elseif(sum(map(x->x in cands,r))==3)         
