@@ -25,7 +25,7 @@ network_construction:
 
 analysis:    
   graphlet_counting: true
-  graphlet_size: 4
+  graphlet_size: 3
   recursive: true #count lower graphlets as well
   null_model_size: 1000
   wgcna: false
