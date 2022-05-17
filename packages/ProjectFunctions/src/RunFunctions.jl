@@ -5,13 +5,13 @@ using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,Li
 
 
 function run_all(config_file::String)
-   
-    if (length(workers())!=Threads.nthreads())
-        #Pkg.resolve()
-       #Pkg.precompile()
-        @info "Setting up worker processes"
-        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
-    end
+    ##TODO move the adding/removing of workers to align with the individual functions that require distributed framework (adds sometimes unnessesary load time to start of run otherwise). Turning off the global initialisation here for now   
+#    if (length(workers())!=Threads.nthreads())
+#        #Pkg.resolve()
+#       #Pkg.precompile()
+#        @info "Setting up worker processes"
+#        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
+#    end
 
     @info "Loading parameters"
     load_config(config_file)
@@ -578,7 +578,6 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
             cleaner()
         end
 
-        ##trim to just 4 node graphlets here (for now) TODO integrate this better. Graphlet orders should be distinct and non-implicit throughout codebase
         rel = rel[findall(x->occursin(string(graphlet_size),x),rel_types),:]        
         rel_types = rel_types[findall(x->occursin(string(graphlet_size),x),rel_types)]
         @info "Conducting per graphlet pathway coincidence analysis..."
