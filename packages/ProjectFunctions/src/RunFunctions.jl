@@ -577,9 +577,13 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
             cleaner()
             cleaner()
         end
-
+        
+        ##trim relationships list to just the graphlet order of interest. Zero column(s) will need to be trimmed for smaller graphlet orders atm
         rel = rel[findall(x->occursin(string(graphlet_size),x),rel_types),:]        
         rel_types = rel_types[findall(x->occursin(string(graphlet_size),x),rel_types)]
+        if (size(rel)[2] > graphlet_size)
+            rel = rel[:,(1+size(rel)[2]-graphlet_size):end]
+        end
         @info "Conducting per graphlet pathway coincidence analysis..."
         Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,entrez_id_vector,candidates)
         @info "Saving coincidents at $coinc_dir..."
