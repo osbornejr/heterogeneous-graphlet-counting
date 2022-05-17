@@ -510,7 +510,8 @@ function load_relationships(file_path)
        # run(`rm $(file)`)
         #cleaner()
     #end
-    
+    #convert graphlets to vector instead of matrix
+    graphlets = vec(graphlets)
     return [nodes, graphlets]
  end
 export load_relationships
@@ -578,8 +579,8 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         end
 
         ##trim to just 4 node graphlets here (for now) TODO integrate this better. Graphlet orders should be distinct and non-implicit throughout codebase
-        rel = rel[findall(x->occursin(string(graphlet_size),x),vec(rel_types)),:]        
-        rel_types = rel_types[findall(x->occursin(string(graphlet_size),x),vec(rel_types))]
+        rel = rel[findall(x->occursin(string(graphlet_size),x),rel_types),:]        
+        rel_types = rel_types[findall(x->occursin(string(graphlet_size),x),rel_types)]
         @info "Conducting per graphlet pathway coincidence analysis..."
         Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,entrez_id_vector,candidates)
         @info "Saving coincidents at $coinc_dir..."
