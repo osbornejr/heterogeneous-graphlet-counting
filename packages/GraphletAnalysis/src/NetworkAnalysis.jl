@@ -323,7 +323,7 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
             #    push!(four_coincidents,map(x->tuple(graphlet_rels[g][x],g),findall(x->sum(map(y->in(y,x),cands))==4,graphlet_rels[g]))...)
             #end
             #save each in dictionary for candidate
-            Coincidents[first(ent)] = Dict("two"=>two_coincidents,"three"=>three_coincidents,"four"=>four_coincidents) 
+            Coincidents[first(ent)] = Dict("one"=>one_coincidents,"two"=>two_coincidents,"three"=>three_coincidents,"four"=>four_coincidents) 
         end
 
         #Get data into wide form dataframe, with info on transcript type, ensembl code, entrez id etc...
