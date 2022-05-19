@@ -542,12 +542,14 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
      # setup a counter for i for each pathway that features a coincident graphlet of i
      i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
      for p in candidate_pathways
-         i_counter[p] =  Dict( "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
-     "4-star" => Dict(("peripheral" => 0), ("supercentral" => 0)),
-     "4-tail" => Dict(("peripheral" => 0), ("central" => 0), ("supercentral" => 0)),
-     "4-cycle" => Dict(("central"=>0)),
-     "4-chord" => Dict(("supercentral"=>0),("central"=>0)),
-     "4-clique" => Dict(("supercentral"=>0))) 
+         i_counter[p] =  Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
+                           "3-tri" => Dict(("central" => 0)),
+                           "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
+                           "4-star" => Dict(("peripheral" => 0), ("supercentral" => 0)),
+                           "4-tail" => Dict(("peripheral" => 0), ("central" => 0), ("supercentral" => 0)),
+                           "4-cycle" => Dict(("central"=>0)),
+                           "4-chord" => Dict(("supercentral"=>0),("central"=>0)),
+                           "4-clique" => Dict(("supercentral"=>0))) 
     ##three node version needed
     #"3-path" => Dict(("central" => 0), ("peripheral" => 0)),
     # "3-tri" => Dict(("central" => 0)),
