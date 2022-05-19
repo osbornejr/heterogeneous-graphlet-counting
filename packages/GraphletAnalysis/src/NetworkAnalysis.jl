@@ -569,8 +569,8 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
          end
      end
      
-     #find score for each individual orbit
-     orbit_names = vcat(map(y->map(x->collect(keys(i_counter[candidate_pathways[1]]))[y]*"_"*x, map(x->collect(keys(last(x))),collect(i_counter[candidate_pathways[1]]))[y]),1:6)...)
+     #find score for each individual orbit TODO fix reliance on 1:8 vector covering arbitrary number of graphlet entries
+     orbit_names = vcat(map(y->map(x->collect(keys(i_counter[candidate_pathways[1]]))[y]*"_"*x, map(x->collect(keys(last(x))),collect(i_counter[candidate_pathways[1]]))[y]),1:8)...)
      orbit_scores = zeros(Int,length(candidate_pathways),length(orbit_names)) 
      for (i,p) in enumerate(candidate_pathways)
          orbit_scores[i,:] = vcat(map(x->collect(values(last(x))),collect(i_counter[p]))...)
