@@ -53,6 +53,7 @@ begin
 			params_threshold = ProjectFunctions.params["network_construction"]["threshold"] 
 			params_threshold_method = ProjectFunctions.params["network_construction"]["threshold_method"] 
 			params_coexpression = ProjectFunctions.params["network_construction"]["coexpression"]
+			params_graphlet_size = ProjectFunctions.params["analysis"]["graphlet_size"]
 			raw_counts = ProjectFunctions.get_input_data();
 			processed_counts = ProjectFunctions.data_preprocessing(raw_counts);
 			    adj_matrix,network_counts,vertexlist,edgelist = ProjectFunctions.network_construction(processed_counts)
@@ -67,7 +68,7 @@ end;
 # ╔═╡ 3f3e6d45-d576-4385-bea8-e55a37d34512
 begin
 	using CSV
-	coincidents_file = "$cwd/output/cache/$(params_test_name)/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/coincidents/coincidents.csv";
+	coincidents_file = "$cwd/output/cache/$(params_test_name)/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/$(params_graphlet_size)/coincidents/coincidents.csv";
 	                        Coincidents = CSV.read(coincidents_file,DataFrame)
                         #because CSV converts the array columns to strings, we have to convert back (cost of using the easy/dirty CSV option!)
                         fix(g) = split(replace(replace(replace(replace(g,("["=>"")),("]"=>"")),("\""=>"")),(" "=>"")),",")
@@ -218,9 +219,6 @@ After applying the above process to all nodes in our network, we get the followi
 
 """
 
-# ╔═╡ 1e1cbc16-7b42-4711-99e5-9bb9968c9039
-
-
 # ╔═╡ f34235b1-0e47-4f28-94db-ce3cfa598a91
 begin
 	
@@ -234,7 +232,7 @@ sub_Coincidents
 
 # ╔═╡ 9bb259ec-8528-4049-80bf-5fa0d543e47c
 begin
-	kegg_file = "/home/osbornejr/app/output/cache/GSE68559/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/coincidents/kegg_info.jld2"
+	kegg_file = "/home/osbornejr/app/output/cache/GSE68559/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/$(params_graphlet_size)/coincidents/kegg_info.jld2"
 
 	                    entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
                     candidates = cache_load(kegg_file,"candidates")
@@ -279,7 +277,7 @@ cm"""
 # ╔═╡ f24286b1-a29f-49dc-8005-058dfcf4440f
 begin
 
-	orbit_sigs_file = "$cwd/output/cache/$(params_test_name)/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/coincidents/orbit_sigs.jld2"
+	orbit_sigs_file = "$cwd/output/cache/$(params_test_name)/expression_cutoff/$(params_expression_cutoff)/normalisation/$(params_norm_method)/sampling/$(params_variance_percent)/similarity/$(params_coexpression)/threshold/$(params_threshold)/threshold_method/$(params_threshold_method)/analysis/graphlets/$(params_graphlet_size)/coincidents/orbit_sigs.jld2"
 	orbit_sigs =  cache_load(orbit_sigs_file,"orbit_sigs")
 	                        
 	                
@@ -333,7 +331,7 @@ end;
 
 # ╔═╡ 812abebd-a67d-498c-939b-98f9b4d8a300
 begin
-	plot_1 = "Mineral absorption" 
+	plot_1 = "Thermogenesis" 
 	plot_grid[findall(x-> occursin(plot_1, x),candidate_pathways)...]
 end
 
@@ -1722,7 +1720,7 @@ version = "3.5.0+0"
 # ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
 # ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
 # ╟─312f20e3-3c97-4108-847d-f2276abfab9a
-# ╠═7211b91e-3ca1-4688-b88f-e9e5e92ca918
+# ╟─7211b91e-3ca1-4688-b88f-e9e5e92ca918
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
 # ╟─28836056-6604-4918-9f74-39bf81ad0559
 # ╟─67f24598-4b27-4dd8-b533-45c1cc4e44a6
@@ -1753,7 +1751,6 @@ version = "3.5.0+0"
 # ╟─84aa8941-8766-4482-ba97-cfb5c477a072
 # ╟─ebaa8810-9096-4cc2-9c28-31143143bf14
 # ╟─3f3e6d45-d576-4385-bea8-e55a37d34512
-# ╟─1e1cbc16-7b42-4711-99e5-9bb9968c9039
 # ╟─f34235b1-0e47-4f28-94db-ce3cfa598a91
 # ╟─9bb259ec-8528-4049-80bf-5fa0d543e47c
 # ╟─c2ddfc1b-5ef7-4c0f-82fb-d86c015aba74
