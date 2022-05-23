@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.7
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -489,7 +489,7 @@ begin
                 #for each node, map each known ecdf to the corresponding orbit count and check against threshold, factoring in the low filter
                 unknown_ecdf_comparison = map(y->(reshape(map(x->known_ecdf_table[x](y[x]),1:length(known_ecdf_table)),size(known_ecdf_table)[1],size(known_ecdf_table)[2]).>ub).*low_filter,zero_orbit_sigs_array)
                 #determine a node as significantly linked to a pathway if at least half its orbit counts are significant
-				sig_cut = 7
+				sig_cut = 1
                 sig_check = map(x->(sum(x,dims=2).>(sig_cut)),unknown_ecdf_comparison)
                 sig_nodes= findall(x->sum(x)>0,sig_check)
                 sig_nodes_dict = Dict(Pair.(sig_nodes,map(x->zero_candidate_pathways[vec(x)],sig_check[sig_nodes])))
@@ -1718,7 +1718,7 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╟─74c92bd0-ef4f-41a0-bc4b-5063ffcd12df
 # ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
-# ╟─940181d4-a9b0-47e4-a13d-db2eb175e22e
+# ╠═940181d4-a9b0-47e4-a13d-db2eb175e22e
 # ╟─312f20e3-3c97-4108-847d-f2276abfab9a
 # ╟─7211b91e-3ca1-4688-b88f-e9e5e92ca918
 # ╟─72b2183e-99a9-4c9b-b74b-7e7966eb4bb8
@@ -1758,11 +1758,11 @@ version = "3.5.0+0"
 # ╟─c5f26162-6c29-46c2-b08b-8832ea301207
 # ╟─33367e44-3233-4200-a091-a4bd4ea9adeb
 # ╟─92c7926c-f21f-4665-84df-1ea98229cd4d
-# ╟─534b73a8-ced9-4e8c-a9df-ef73af97198d
-# ╟─c2d2fe61-9e00-4db8-aa80-97deb551486a
-# ╟─87c1ea4a-26b2-42af-a21d-b6ff80366562
-# ╟─3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
-# ╟─61a6f729-141c-4892-b983-dd48d78b6b7d
+# ╠═534b73a8-ced9-4e8c-a9df-ef73af97198d
+# ╠═c2d2fe61-9e00-4db8-aa80-97deb551486a
+# ╠═87c1ea4a-26b2-42af-a21d-b6ff80366562
+# ╠═3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
+# ╠═61a6f729-141c-4892-b983-dd48d78b6b7d
 # ╟─ea2da746-ac59-4a54-99c1-5ab39a2f3221
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

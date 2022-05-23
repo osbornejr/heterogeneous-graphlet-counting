@@ -678,6 +678,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     sig_check = map(x->(sum(x,dims=2).>(last_col/2)),unknown_ecdf_comparison)
     sig_nodes= findall(x->sum(x)>0,sig_check)
     sig_nodes_dict = Dict(Pair.(sig_nodes,map(x->candidate_pathways[vec(x)],sig_check[sig_nodes])))
- return sig_nodes_dict
+
+    return sig_nodes_dict
 end
 export coincident_graphlets
