@@ -549,7 +549,9 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         Coincidents.Vertices = fix_int.(Coincidents.Vertices)
         Coincidents.Entrez = fix_int.(Coincidents.Entrez)
         Coincidents.Ensembl = fix.(Coincidents.Ensembl)
+        Coincidents.Ensembl = map(x->string.(x),Coincidents.Ensembl)
         Coincidents.Transcript_type = fix.(Coincidents.Transcript_type)
+        Coincidents.Transcript_type = map(x->string.(x),Coincidents.Transcript_type)
         Coincidents.Inclusion = fix_bool.(Coincidents.Inclusion)
     else
         ##relationships 
@@ -578,7 +580,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
             cleaner()
         end
         
-        ##trim relationships list to just the graphlet order of interest. Zero column(s) will need to be trimmed for smaller graphlet orders atm
+        ##TODO remove need for 0 columns (each order is stored separately?) trim relationships list to just the graphlet order of interest. Zero column(s) will need to be trimmed for smaller graphlet orders atm
         rel = rel[findall(x->occursin(string(graphlet_size),x),rel_types),:]        
         rel_types = rel_types[findall(x->occursin(string(graphlet_size),x),rel_types)]
         if (size(rel)[2] > graphlet_size)
@@ -678,7 +680,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     @infiltrate 
     sig_cut = 1
     sig_check = map(x->(sum(x,dims=2).>(sig_cut)),unknown_ecdf_comparison)
-    sig_nodes= findall(x->sum(x)>0,sig_check)
+    sig_nodes = findall(x->sum(x)>0,sig_check)
     sig_nodes_dict = Dict(Pair.(sig_nodes,map(x->candidate_pathways[vec(x)],sig_check[sig_nodes])))
 
     return sig_nodes_dict
