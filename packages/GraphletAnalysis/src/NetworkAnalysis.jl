@@ -519,19 +519,22 @@ function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidate_pathwa
      #@info "Finished $i..."
 end
 
-function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
+function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,graphlet_size::Int,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
     ##for orbit level significance, this function takes a specific node and finds all its coincident graphlets, and then counts the orbit position the node is in in each. returns a dataframe detailing these stats
     ##find those graphlets that include i
     pre_graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
-    #filter further to find cases where at least 2 OTHER nodes in graphlet are in pathway (i.e. self coincidence does not count)
-    _nodespath_graphlets = filter(:Coincident_nodes=>x->x>2,filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
-    nonpath_graphlets = filter(:Pathway=>x-> !in(x,candidate_pathways[in_key]),pre_graphlets)
+    #filter further to find cases where at least `thresh` OTHER nodes in graphlet are in pathway (i.e. self coincidence does not count)
+    #TODO coincidence threshold settable in config? May need logic check against graphlet size
+    thresh = graphlet_size - 1
+    path_graphlets = filter(:Coincident_nodes=>x->x>thresh,filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
+    ##for nonpath, we only require coincident node count to be equal to thresh
+    nonpath_graphlets = filter(:Coincident_nodes=>x->x>=thresh,filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
     graphlets = vcat(path_graphlets,nonpath_graphlets) 
     ##set up orbit templates to be checked against
                 #peripheral: degree one orbit
                 #central: degree two orbit
                 #supercentral: degree three orbit
-    
+                ##all possible 3 and 4 nodes)
     orbit_templates = Dict("3-path" => Dict(("central" => [0,1,0]), ("peripheral" => [1,0,1])),
                            "3-tri" => Dict(("central" => [1,1,1])),
                            "4-path" => Dict(("peripheral" => [1,0,0,1]), ("central" => [0,1,1,0])),
@@ -540,11 +543,14 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
                            "4-cycle" => Dict(("central"=>[1,1,1,1])),
                            "4-chord" => Dict(("supercentral"=>[0,1,1,0]),("central"=>[1,0,0,1])),
                            "4-clique" => Dict(("supercentral"=>[1,1,1,1]))) 
+    #condense down to those that occur in Sub_coincidents only
+    present = unique(graphlets)
+    orbit_templates = Dict(present .=> [orbit_templates[x] for x in present])
+
+
 
      # setup a counter for i for each pathway that features a coincident graphlet of i
-     i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
-     for p in candidate_pathways
-         i_counter[p] =  Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
+     empty_counter = Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
                            "3-tri" => Dict(("central" => 0)),
                            "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
                            "4-star" => Dict(("peripheral" => 0), ("supercentral" => 0)),
@@ -552,6 +558,14 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,candidate
                            "4-cycle" => Dict(("central"=>0)),
                            "4-chord" => Dict(("supercentral"=>0),("central"=>0)),
                            "4-clique" => Dict(("supercentral"=>0))) 
+     ##condense
+
+     empty_counter = Dict(present .=> [empty_counter[x] for x in present])
+
+    ## store all pathway counters in this dict
+     i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
+     for p in candidate_pathways 
+         i_counter[p] =  empty_counter     
     ##three node version needed
     #"3-path" => Dict(("central" => 0), ("peripheral" => 0)),
     # "3-tri" => Dict(("central" => 0)),
