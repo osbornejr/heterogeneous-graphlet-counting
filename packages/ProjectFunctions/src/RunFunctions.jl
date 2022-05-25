@@ -1,6 +1,6 @@
 #using Distributed, JLD2, CSV
 #using StatsBase,Gadfly,Compose,DataFrames,YAML,Dates, LightGraphs, Colors, Random, Distributions, ProgressMeter
-using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,LightGraphs,Dates,Colors,Gadfly,Compose,DataStructures,CategoricalArrays
+using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,LightGraphs,Dates,Colors,Gadfly,Compose,DataStructures,CategoricalArrays,Infiltrator
 
 
 
@@ -675,6 +675,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     #for each node, map each known ecdf to the corresponding orbit count and check against threshold, factoring in the low filter
     unknown_ecdf_comparison = map(y->(reshape(map(x->known_ecdf_table[x](y[x]),1:length(known_ecdf_table)),size(known_ecdf_table)[1],size(known_ecdf_table)[2]).>ub).*low_filter,orbit_sigs_array)
     #determine a node as significantly linked to a pathway if at least half its orbit counts are significant
+    @infiltrate 
     sig_cut = 1
     sig_check = map(x->(sum(x,dims=2).>(sig_cut)),unknown_ecdf_comparison)
     sig_nodes= findall(x->sum(x)>0,sig_check)
