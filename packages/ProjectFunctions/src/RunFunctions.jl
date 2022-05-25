@@ -538,6 +538,8 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
 
 
     #coincidents
+    #TODO for smaller networks/lower order graphlets, it may take longer to load CSV than to just run
+    #coincident analysis (set switch to turn on/off caching? detect automatically?)
     coincidents_file ="$coinc_dir/coincidents.csv"
     if (isfile(coincidents_file))
         @info "Loading coincidents dataframe from $coinc_dir..."
@@ -600,6 +602,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     #collect dataframe for each node in this array
     #per_node_significance = Array{DataFrame,1}(undef,length(vertexlist))
     #choose just one order of graphlets (3 or 4)
+    #TODO ideally getting sub_Coincidents shouldn't be necessary
     sub_Coincidents = filter(:Hom_graphlet=>x->occursin("$(params["analysis"]["graphlet_size"])-",x),Coincidents)
     orbit_sigs_file = "$coinc_dir/orbit_sigs.jld2" 
     ## select whether we are looking at "detailed" or "collated" significance
