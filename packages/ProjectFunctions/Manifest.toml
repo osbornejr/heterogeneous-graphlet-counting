@@ -355,12 +355,6 @@ git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
 uuid = "9b13fd28-a010-5f03-acff-a1bbcff69959"
 version = "1.0.0"
 
-[[deps.Infiltrator]]
-deps = ["InteractiveUtils", "REPL", "UUIDs"]
-git-tree-sha1 = "ef9eb0ccbd760c4ed0ca2ad532e519f1a36081ca"
-uuid = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
-version = "1.4.0"
-
 [[deps.Inflate]]
 git-tree-sha1 = "f5fc07d4e706b84f72d54eedcc1c13d92fb0871c"
 uuid = "d25df0c9-e2be-5dd7-82c8-3ad0b3e990b9"

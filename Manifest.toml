@@ -896,7 +896,7 @@ uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.7.2"
 
 [[deps.ProjectFunctions]]
-deps = ["CSV", "CategoricalArrays", "Colors", "Compose", "DataFrames", "DataPreprocessing", "DataStructures", "Dates", "Distributed", "Gadfly", "GraphletAnalysis", "GraphletCounting", "JLD2", "LightGraphs", "NetworkConstruction", "Pkg", "ProgressMeter", "Random", "StatsBase", "YAML"]
+deps = ["CSV", "CategoricalArrays", "Colors", "Compose", "DataFrames", "DataPreprocessing", "DataStructures", "Dates", "Distributed", "Gadfly", "GraphletAnalysis", "GraphletCounting", "Infiltrator", "JLD2", "LightGraphs", "NetworkConstruction", "Pkg", "ProgressMeter", "Random", "StatsBase", "YAML"]
 path = "packages/ProjectFunctions"
 uuid = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 version = "0.1.0"
