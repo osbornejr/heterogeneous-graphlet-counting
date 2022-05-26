@@ -458,6 +458,7 @@ end
 
 
 function pernode_significance(i::Int,sub_Coincidents::DataFrame,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
+    ### NOTE: Currently depreceated. Will need to be updated in line with detail function/ 
     ##for orbit level significance, this function takes a specific node and finds all its coincident graphlets, and then counts the orbit position the node is in in each. returns a dataframe detailing these stats
     ##find those graphlets that include i
     pre_graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
@@ -535,33 +536,30 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,graphlet_
                 #central: degree two orbit
                 #supercentral: degree three orbit
                 ##all possible 3 and 4 nodes)
-    orbit_templates = Dict("3-path" => Dict(("central" => [0,1,0]), ("peripheral" => [1,0,1])),
-                           "3-tri" => Dict(("central" => [1,1,1])),
-                           "4-path" => Dict(("peripheral" => [1,0,0,1]), ("central" => [0,1,1,0])),
+                ## note: we set up as a template here to ensure that all orbits are recorded, not just those that occur in node (or even network) subset 
+    if (graphlet_size == 3)
+        orbit_templates = Dict("3-path" => Dict(("central" => [0,1,0]), ("peripheral" => [1,0,1])),
+                           "3-tri" => Dict(("central" => [1,1,1])))
+        # setup a counter for i for each pathway that features a coincident graphlet of i
+        empty_counter = Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
+                          "3-tri" => Dict(("central" => 0)))
+    elseif (graphlet_size == 4)
+    
+        orbit_templates = Dict("4-path" => Dict(("peripheral" => [1,0,0,1]), ("central" => [0,1,1,0])),
                            "4-star" => Dict(("peripheral" => [1,1,0,1]), ("supercentral" => [0,0,1,0])),
                            "4-tail" => Dict(("peripheral" => [0,0,0,1]), ("central" => [1,1,0,0]), ("supercentral" => [0,0,1,0])),
                            "4-cycle" => Dict(("central"=>[1,1,1,1])),
                            "4-chord" => Dict(("supercentral"=>[0,1,1,0]),("central"=>[1,0,0,1])),
                            "4-clique" => Dict(("supercentral"=>[1,1,1,1]))) 
-    #condense down to those that occur in Sub_coincidents only
-    present = unique(graphlets)
-    orbit_templates = Dict(present .=> [orbit_templates[x] for x in present])
-
-
-
      # setup a counter for i for each pathway that features a coincident graphlet of i
-     empty_counter = Dict("3-path" => Dict(("central" => 0), ("peripheral" => 0)),
-                           "3-tri" => Dict(("central" => 0)),
-                           "4-path" => Dict(("peripheral" => 0), ("central" => 0)),
+     empty_counter = Dict("4-path" => Dict(("peripheral" => 0), ("central" => 0)),
                            "4-star" => Dict(("peripheral" => 0), ("supercentral" => 0)),
                            "4-tail" => Dict(("peripheral" => 0), ("central" => 0), ("supercentral" => 0)),
                            "4-cycle" => Dict(("central"=>0)),
                            "4-chord" => Dict(("supercentral"=>0),("central"=>0)),
                            "4-clique" => Dict(("supercentral"=>0))) 
-     ##condense
-
-     empty_counter = Dict(present .=> [empty_counter[x] for x in present])
-
+    
+    end
     ## store all pathway counters in this dict
      i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
      for p in candidate_pathways 
@@ -586,7 +584,7 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,graphlet_
      end
      
      #find score for each individual orbit TODO fix reliance on 1:8 vector covering arbitrary number of graphlet entries
-     orbit_names = vcat(map(y->map(x->collect(keys(i_counter[candidate_pathways[1]]))[y]*"_"*x, map(x->collect(keys(last(x))),collect(i_counter[candidate_pathways[1]]))[y]),1:8)...)
+     orbit_names = vcat(map(y->map(x->collect(keys(i_counter[candidate_pathways[1]]))[y]*"_"*x, map(x->collect(keys(last(x))),collect(i_counter[candidate_pathways[1]]))[y]),1:length(orbit_templates))...)
      orbit_scores = zeros(Int,length(candidate_pathways),length(orbit_names)) 
      for (i,p) in enumerate(candidate_pathways)
          orbit_scores[i,:] = vcat(map(x->collect(values(last(x))),collect(i_counter[p]))...)
