@@ -280,7 +280,7 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
 
 
         @info "Checking for coincident candidates..."
-        Coincidents = Dict{Int,Dict{String,Array{Tuple,1}}}()
+        Coincidents = Dict{String,Dict{Int,Array{Tuple,1}}}()
         for ent in candidates
             @info "checking candidates for $(first(ent))..."
             cands = last(ent)
