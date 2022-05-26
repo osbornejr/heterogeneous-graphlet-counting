@@ -604,12 +604,16 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     #choose just one order of graphlets (3 or 4)
     #TODO ideally getting sub_Coincidents shouldn't be necessary
     sub_Coincidents = filter(:Hom_graphlet=>x->occursin("$(params["analysis"]["graphlet_size"])-",x),Coincidents)
-    orbit_sigs_file = "$coinc_dir/orbit_sigs.jld2" 
+
+
+    orbit_dir = coinc_dir*"/orbit_sigs" 
+    run(`mkdir -p $(orbit_dir)`)
+    orbit_sigs_file = "$orbit_dir/orbit_sigs.jld2" 
     ## select whether we are looking at "detailed" or "collated" significance
     orbit_sigs_method ="detailed"
     
     if (isfile(orbit_sigs_file))
-        @info "Loading orbit significance dataframe from $coinc_dir..."
+        @info "Loading orbit significance dataframe from $orbit_dir..."
         orbit_sigs = cache_load(orbit_sigs_file,"orbit_sigs")
     else
 
