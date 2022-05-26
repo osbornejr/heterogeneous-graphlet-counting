@@ -563,7 +563,7 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,graphlet_
     ## store all pathway counters in this dict
      i_counter = Dict{String,Dict{String,Dict{String,Int64}}}()
      for p in candidate_pathways 
-         i_counter[p] =  empty_counter     
+         i_counter[p] =  deepcopy(empty_counter)
     ##three node version needed
     #"3-path" => Dict(("central" => 0), ("peripheral" => 0)),
     # "3-tri" => Dict(("central" => 0)),
@@ -594,7 +594,6 @@ function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,graphlet_
      return df
      #@info "Finished $i..."
 end
-
 
 ##ANalysis of coincidents (messy and incoherent) TODO needs to be formalised and put into proper package places
     ##find which types are excluded in general, and then only as a cause of having no Entrez id
