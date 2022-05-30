@@ -22,12 +22,14 @@ cwd = ENV["PWD"];
 	using StatsBase
 	using Gadfly,CategoricalArrays,Colors, Compose
 	using DataFrames
+	using YAML
+	using Infiltrator
+	## load dev packages last
 	using DataPreprocessing
 	using NetworkConstruction
 	using GraphletCounting
 	using GraphletAnalysis
 	using ProjectFunctions
-	using YAML
 	
 	TableOfContents()
 end;
@@ -511,6 +513,12 @@ unique(vcat(values(sig_nodes_dict)...))
 # ╔═╡ 61a6f729-141c-4892-b983-dd48d78b6b7d
 unique(vcat(values(sig_nodes_dict)...))
 
+# ╔═╡ 726ac732-b9c4-439a-867c-61fcc34abedb
+
+
+# ╔═╡ f520c106-6e0d-49ec-8b9d-d656daa5b8dd
+orbit_sigs_array
+
 # ╔═╡ ea2da746-ac59-4a54-99c1-5ab39a2f3221
 length(sig_nodes_dict)
 
@@ -527,6 +535,7 @@ DataPreprocessing = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
 Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 GraphletAnalysis = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
+Infiltrator = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
@@ -547,6 +556,7 @@ DataPreprocessing = "~0.1.0"
 Gadfly = "~1.3.4"
 GraphletAnalysis = "~0.1.0"
 GraphletCounting = "~0.1.0"
+Infiltrator = "~1.4.0"
 JLD2 = "~0.4.17"
 NetworkConstruction = "~0.1.0"
 PlutoUI = "~0.7.32"
@@ -952,6 +962,12 @@ version = "0.2.2"
 git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
 uuid = "9b13fd28-a010-5f03-acff-a1bbcff69959"
 version = "1.0.0"
+
+[[deps.Infiltrator]]
+deps = ["InteractiveUtils", "REPL", "UUIDs"]
+git-tree-sha1 = "ef9eb0ccbd760c4ed0ca2ad532e519f1a36081ca"
+uuid = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
+version = "1.4.0"
 
 [[deps.Inflate]]
 git-tree-sha1 = "f5fc07d4e706b84f72d54eedcc1c13d92fb0871c"
@@ -1716,7 +1732,7 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─74c92bd0-ef4f-41a0-bc4b-5063ffcd12df
+# ╠═74c92bd0-ef4f-41a0-bc4b-5063ffcd12df
 # ╟─6ea01822-2aa0-4073-84b0-304e5a86f9ea
 # ╠═940181d4-a9b0-47e4-a13d-db2eb175e22e
 # ╟─312f20e3-3c97-4108-847d-f2276abfab9a
@@ -1763,6 +1779,8 @@ version = "3.5.0+0"
 # ╠═87c1ea4a-26b2-42af-a21d-b6ff80366562
 # ╠═3d0da8ba-1b04-462a-82e3-8b50eb1c29d8
 # ╠═61a6f729-141c-4892-b983-dd48d78b6b7d
+# ╠═726ac732-b9c4-439a-867c-61fcc34abedb
+# ╠═f520c106-6e0d-49ec-8b9d-d656daa5b8dd
 # ╟─ea2da746-ac59-4a54-99c1-5ab39a2f3221
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
