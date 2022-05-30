@@ -50,28 +50,31 @@ end
 export load_config
 export params
 
+function make_cache(dirs...)
+    dir = join(dirs,"/") 
+    run(`mkdir -p $(dir)`)
+    return dir
+end
 function cache_setup()
     ##create directory for run
-    cache_dir = join([cwd,params["cache"]["base_dir"],params["test_name"]],"/")
-    run(`mkdir -p $(cache_dir)`)
-    params["cache"]["test_dir"] = cache_dir
+    params["cache"]["test_dir"] = make_cache(cwd,params["cache"]["base_dir"],params["test_name"])
     ##switching to new method where each path is declared explicitly here (avoids run overlaps making a mess, and is easier with pluto load ins etc)
     ##data preprocessing dirs:
-    params["cache"]["cutoff_dir"] = join([params["cache"]["test_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"])],"/")
-    params["cache"]["norm_dir"] = join([params["cache"]["cutoff_dir"],"normalisation",params["data_preprocessing"]["norm_method"]],"/")
-    params["cache"]["sampling_dir"] = join([params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"])],"/")
+    params["cache"]["cutoff_dir"] = make_cache(params["cache"]["test_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]))
+    params["cache"]["norm_dir"] = make_cache(params["cache"]["cutoff_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
+    params["cache"]["sampling_dir"] = make_cache(params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
     #network construction dirs:
-    params["cache"]["similarity_dir"] = join([params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"]],"/")
-    params["cache"]["adjacency_dir"] = join([params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"]],"/")
+    params["cache"]["similarity_dir"] = make_cache(params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"])
+    params["cache"]["adjacency_dir"] = make_cache(params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"])
 
     #analyis dirs:
-    params["cache"]["anal_dir"] = join([params["cache"]["adjacency_dir"],"analysis"],"/")
-    params["cache"]["community_dir"] = join([params["cache"]["anal_dir"],"communities"],"/")
-    params["cache"]["graphlet_counting_dir"] = join([params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting"],"/")
-    params["cache"]["rep_dir"] = join([params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations"],"/")
-    params["cache"]["graphlet_enum_dir"] = join([params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-enumeration"],"/")
-    params["cache"]["coinc_dir"] = join([params["cache"]["graphlet_enum_dir"],"coincidents"],"/")
-    params["cache"]["orbit_dir"] = join([params["cache"]["coinc_dir"],"orbit-significance"],"/")
+    params["cache"]["anal_dir"] = make_cache(params["cache"]["adjacency_dir"],"analysis")
+    params["cache"]["community_dir"] = make_cache(params["cache"]["anal_dir"],"communities")
+    params["cache"]["graphlet_counting_dir"] = make_cache(params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting")
+    params["cache"]["rep_dir"] = make_cache(params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations")
+    params["cache"]["graphlet_enum_dir"] = make_cache(params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-enumeration")
+    params["cache"]["coinc_dir"] = make_cache(params["cache"]["graphlet_enum_dir"],"coincidents")
+    params["cache"]["orbit_dir"] = make_cache(params["cache"]["coinc_dir"],"orbit-significance")
 
 
     ##check if whole cache_dir should be removed
