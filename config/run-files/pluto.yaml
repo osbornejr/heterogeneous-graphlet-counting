@@ -1,4 +1,4 @@
-test_name: GSE68559   
+test_name: Synthetic
 
 
 raw_counts_script: "config/input_scripts/GSE68559.jl"
