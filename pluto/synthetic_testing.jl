@@ -40,13 +40,39 @@ config_file = "$cwd/config/run-files/pluto.yaml"
 			ProjectFunctions.load_config(config_file)
 end;			
 
-# ╔═╡ d9991686-e0b9-49d6-8c70-d39ed88087b0
+# ╔═╡ d35a83f9-3ba9-441b-a643-4272df67c635
 begin
+	kegg_file =  params["cache"]["coinc_dir"]*"/kegg_info.jld2"
+	        entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
+        candidates = cache_load(kegg_file,"candidates")
+        top_terms = cache_load(kegg_file,"top_terms")
+end
 
-end;
+# ╔═╡ 15f12b74-cb1a-4929-a3af-84d224b4bc71
+orbit_sigs = cache_load(params["cache"]["orbit_dir"]*"/orbit_sigs.jld2","orbit_sigs");
 
-# ╔═╡ c607663c-a1e6-4e93-bc87-f9df6012d262
-params["cache"]["orbit_dir"]
+# ╔═╡ f8048c7a-7de7-4d98-90b6-8bb43270f852
+orbit_sigs_array = map(x->Array(x[!,2:end]),orbit_sigs)
+
+# ╔═╡ e9b8b806-59de-474c-abc7-b6bef6fce2e2
+orbit_sigs
+
+# ╔═╡ 7e54213a-80c9-4683-87f4-73ba821def7f
+candidate_members = collect(values(candidates))
+
+# ╔═╡ b948e336-a930-467a-b3e7-ac24792756f2
+begin
+	## Gadfly style
+	pathway_number = size(orbit_sigs_array[1])[1]
+	##get pathway specific arrays
+	orbit_sigs_per_pathway = map(y->hcat(map(x->x[y,:],orbit_sigs_array)...),1:pathway_number)
+	p = 16
+	test = orbit_sigs_per_pathway[p]
+	vertices = 1:2595
+	t = candidate_members[p]
+	candidate_categories = map(x->x in(t) ? "in pathway" : "not in pathway",vertices)
+	Gadfly.plot([layer(x=1:size(test)[1], y=test[:,i], color = [candidate_categories[i]],Geom.point, Geom.line) for i in vcat(t,1:1000) ]...)
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -76,10 +102,15 @@ Colors = "~0.12.8"
 CommonMark = "~0.8.6"
 Compose = "~0.9.3"
 DataFrames = "~1.3.4"
+DataPreprocessing = "~0.1.0"
 Gadfly = "~1.3.4"
+GraphletAnalysis = "~0.1.0"
+GraphletCounting = "~0.1.0"
 Infiltrator = "~1.4.0"
 JLD2 = "~0.4.22"
+NetworkConstruction = "~0.1.0"
 PlutoUI = "~0.7.39"
+ProjectFunctions = "~0.1.0"
 Revise = "~3.3.3"
 StatsBase = "~0.33.16"
 YAML = "~0.4.7"
@@ -1278,7 +1309,11 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═13dc908c-e0d3-11ec-177e-25c2ed2cbdba
 # ╠═49631bdf-8f4d-428f-bfe5-6a06b89c7cae
-# ╠═d9991686-e0b9-49d6-8c70-d39ed88087b0
-# ╠═c607663c-a1e6-4e93-bc87-f9df6012d262
+# ╠═d35a83f9-3ba9-441b-a643-4272df67c635
+# ╠═15f12b74-cb1a-4929-a3af-84d224b4bc71
+# ╠═f8048c7a-7de7-4d98-90b6-8bb43270f852
+# ╠═b948e336-a930-467a-b3e7-ac24792756f2
+# ╠═e9b8b806-59de-474c-abc7-b6bef6fce2e2
+# ╠═7e54213a-80c9-4683-87f4-73ba821def7f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
