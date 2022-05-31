@@ -54,7 +54,26 @@ function cache_setup()
     ##create directory for run
     cache_dir = join([cwd,params["cache"]["base_dir"],params["test_name"]],"/")
     run(`mkdir -p $(cache_dir)`)
-    params["cache"]["cur_dir"] = cache_dir
+    params["cache"]["test_dir"] = cache_dir
+    ##switching to new method where each path is declared explicitly here (avoids run overlaps making a mess, and is easier with pluto load ins etc)
+    ##data preprocessing dirs:
+    params["cache"]["cutoff_dir"] = join([params["cache"]["test_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"])],"/")
+    params["cache"]["norm_dir"] = join([params["cache"]["cutoff_dir"],"normalisation",params["data_preprocessing"]["norm_method"]],"/")
+    params["cache"]["sampling_dir"] = join([params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"])],"/")
+    #network construction dirs:
+    params["cache"]["similarity_dir"] = join([params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"]],"/")
+    params["cache"]["adjacency_dir"] = join([params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"]],"/")
+
+    #analyis dirs:
+    params["cache"]["anal_dir"] = join([params["cache"]["adjacency_dir"],"analysis"],"/")
+    params["cache"]["community_dir"] = join([params["cache"]["anal_dir"],"communities"],"/")
+    params["cache"]["graphlet_counting_dir"] = join([params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting"],"/")
+    params["cache"]["rep_dir"] = join([params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations"],"/")
+    params["cache"]["graphlet_enum_dir"] = join([params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-enumeration"],"/")
+    params["cache"]["coinc_dir"] = join([params["cache"]["graphlet_enum_dir"],"coincidents"],"/")
+    params["cache"]["orbit_dir"] = join([params["cache"]["coinc_dir"],"orbit-significance"],"/")
+
+
     ##check if whole cache_dir should be removed
     if(params["cache"]["clear"]["all"])
         if(params["cache"]["clear"]["archive"])
@@ -103,7 +122,7 @@ function cache_update(general::String,specific::String="",side_dir::String="")
 end
 
 function get_input_data()
-    file = join([params["cache"]["cur_dir"],"raw_counts.jld2"],"/")
+    file = join([params["cache"]["test_dir"],"raw_counts.jld2"],"/")
     #cache_check(file)
     if isfile(file) 
         raw_counts = cache_load(file,"raw counts")  
@@ -120,8 +139,7 @@ export get_input_data
 function data_preprocessing(raw_counts::DataFrame)
     
     ## Clean - remove transcripts with total counts across all samples less than Cut
-    cache_update("expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]))
-    file = "$(params["cache"]["cur_dir"])/clean_counts.jld2"
+    file = "$(params["cache"]["cutoff_dir"])/clean_counts.jld2"
 
     ##plot before cut
     #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
@@ -141,8 +159,7 @@ function data_preprocessing(raw_counts::DataFrame)
 
     ### Normalisation
     ##update cache
-    cache_update("normalisation",params["data_preprocessing"]["norm_method"])
-    file = "$(params["cache"]["cur_dir"])/norm_counts.jld2"
+    file = "$(params["cache"]["norm_dir"])/norm_counts.jld2"
 
     if(isfile(file))
         norm_counts = cache_load(file,"norm counts")
@@ -154,8 +171,7 @@ function data_preprocessing(raw_counts::DataFrame)
 
     ##Sampling for most variable transcripts
     ##update cache
-    cache_update("sampling",string(params["data_preprocessing"]["variance_percent"]))
-    file = "$(params["cache"]["cur_dir"])/sample_counts.jld2"
+    file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
 
     if(isfile(file))
         sample_counts = cache_load(file,"sample counts")
@@ -175,11 +191,10 @@ function  network_construction(sample_counts::DataFrame)
     ##Measure of coexpression
     ##update cache
 
-    cache_update("similarity",params["network_construction"]["coexpression"])
 
     #similarity_matrix=mutual_information(data)
     ## file to cache similarity matrix for use later:
-    sim_file = "$(params["cache"]["cur_dir"])/similarity_matrix.jld2"
+    sim_file = "$(params["cache"]["similarity_dir"])/similarity_matrix.jld2"
     if (isfile(sim_file))
         similarity_matrix = cache_load(sim_file,"similarity_matrix")
     else
@@ -192,9 +207,7 @@ function  network_construction(sample_counts::DataFrame)
 
     ## Adjacency matrix 
     ##update cache
-    cache_update("threshold",params["network_construction"]["threshold"])
-    cache_update("threshold_method",params["network_construction"]["threshold_method"])
-    adj_file = "$(params["cache"]["cur_dir"])/adjacency_matrix.jld2"
+    adj_file = "$(params["cache"]["adjacency_dir"])/adjacency_matrix.jld2"
     if (isfile(adj_file))
         pre_adj_matrix = cache_load(adj_file,"pre-adj_matrix")
         adj_matrix = cache_load(adj_file,"adjacency_matrix")
@@ -261,8 +274,9 @@ function community_analysis(network_counts,adj_matrix)
     #Type representations 
     ## Community structure
     ##update cache
-    anal_dir = "$(params["cache"]["cur_dir"])/communities"
+    anal_dir = params["cache"]["community_dir"]    
     run(`mkdir -p $(anal_dir)`)
+
     ##use gene ids here, as they have more chance of getting a GO annotation
     if(params["analysis"]["func_annotate"]==true)
         vertex_gene_names = network_counts[!,:gene_id]
@@ -291,7 +305,7 @@ end
 function graphlet_counting(vertexlist,edgelist)
 
     ##update cache
-    anal_dir = "$(params["cache"]["cur_dir"])/graphlets/$(params["analysis"]["graphlet_size"])/graphlet-counting"
+    anal_dir = params["cache"]["graphlet_counting_dir"]    
     run(`mkdir -p $(anal_dir)`)
     graphlet_file = "$anal_dir/graphlet-counting.jld2" 
     if (isfile(graphlet_file))
@@ -324,7 +338,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     @info "Looking at typed representations of graphlets..."
 
     ##update cache
-    rep_dir = "$(params["cache"]["cur_dir"])/graphlets/$(params["analysis"]["graphlet_size"])/graphlet-counting/typed_representations/nullmodel/$(params["analysis"]["null_model_size"])_simulations"
+    rep_dir = params["cache"]["rep_dir"]    
     run(`mkdir -p $(rep_dir)`)
     N=params["analysis"]["null_model_size"]
     rand_graphlets_file = "$rep_dir/rand_graphlets.jld2"
@@ -519,7 +533,7 @@ export load_relationships
 function coincident_graphlets(network_counts,vertexlist,edgelist)
     vertex_names = network_counts[!,:transcript_id]
     #Coincident analysis
-    coinc_dir = "$(params["cache"]["cur_dir"])/graphlets/$(params["analysis"]["graphlet_size"])/coincidents"
+    coinc_dir = params["cache"]["coinc_dir"]
     run(`mkdir -p $(coinc_dir)`)
     #get baseline entrez and kegg info about transcripts
     kegg_file = "$(coinc_dir)/kegg_info.jld2"
@@ -559,7 +573,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         ##relationships 
         #Here we only load relationships file (which is huge!) if absolutely required i.e. the smaller resultant coincidents file does not exist
         graphlet_size = params["analysis"]["graphlet_size"]  
-        rel_dir = "$coinc_dir/relationships"
+        rel_dir = params["cache"]["graphlet_enum_dir"]
         relationships_file = "$rel_dir/relationships.csv"
         if (isfile(relationships_file))
             cleaner()
@@ -606,7 +620,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     sub_Coincidents = filter(:Hom_graphlet=>x->occursin("$(params["analysis"]["graphlet_size"])-",x),Coincidents)
 
 
-    orbit_dir = coinc_dir*"/orbit_sigs" 
+    orbit_dir = params["cache"]["orbit_dir"]
     run(`mkdir -p $(orbit_dir)`)
     orbit_sigs_file = "$orbit_dir/orbit_sigs.jld2" 
     ## select whether we are looking at "detailed" or "collated" significance
