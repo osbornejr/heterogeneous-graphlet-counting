@@ -20,22 +20,29 @@ WORKDIR $PROJECT_DIR
 
 # build the conda environment
 ENV ENV_PREFIX julia-workspace
+##NOT RUNNING CONDA UPDATE ATM AS IT BREAK MAMBA
 RUN conda update --name base --channel defaults conda && \
+    conda install conda=4.12 && \
     mamba env update --file $PROJECT_DIR/environment.yml && \
     conda clean --all --yes
 
 #build the julia environment TODO find out why RCall does not install properly
 ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
-RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
-#RUN julia --project=$PROJECT_DIR/Project.toml -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
+
+
+#RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
+##TODO FIX ISSUE WHERE DEV PACKAGES (IN Project.toml) CANT BE PRECOMPILED HERE
+#RUN julia --project=$PROJECT_DIR/Project.toml -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end" 
 #RUN julia --project=$PROJECT_DIR/Project.toml -e "using Pkg;using CSV"
 # run the postBuild script to install any JupyterLab extensions
 #RUN conda activate $ENV_PREFIX && \
  #   /usr/local/bin/postBuild.sh && \
   #  conda deactivate
 
+ENV startup docker/env/startup.jl
 #setup entrypoint
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
 
 # default command will launch julia
-CMD julia --project=$PROJECT_DIR/Project.toml
+CMD ["sh", "-c", "julia --project=$PROJECT_DIR/Project.toml -i ${startup}"]
+
