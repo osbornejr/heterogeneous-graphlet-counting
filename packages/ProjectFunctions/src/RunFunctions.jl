@@ -695,7 +695,6 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     known_pathway_dfs = Array{DataFrame,1}(undef,length(candidate_pathways))
     for (i,p) in enumerate(candidate_pathways)
         subset = candidates[p]
-        Main.@infiltrate
         df_build = DataFrame(hcat(map(x->x[i,:],orbit_sigs_array[subset])...)',orbit_names)
         insertcols!(df_build,1,:shared=>[sig_pathway_occurences[x] for x in subset].-1)
         insertcols!(df_build,1,:transcript_id=>subset)
