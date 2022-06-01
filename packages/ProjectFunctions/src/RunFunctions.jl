@@ -23,18 +23,39 @@ function run_all(config_file::String)
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
 
 
-    #Synthetic patch: put here for now (TODO integrate this better)
+    ## For analysis step, we need to run for both real and synthetic networks
+    #this means we will need to reload the cache dirs for each run
+    #run first on synthetic network, as that is what will be loaded in if "synthetic" parameter is true
+    # we then reload network_construction with "synthetic" updated to false
     #
+    anal_flag = 0
+    while anal_flag == 0  
+        # @info "Finding communities"
+        # com_anal = community_analysis(network_counts,adj_matrix)
+        @info "Counting graphlets"
+        graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
 
-    # @info "Finding communities"
-    # com_anal = community_analysis(network_counts,adj_matrix)
-    @info "Counting graphlets"
-    graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
+        #@info "Comparing typed graphlet representations"
+        #typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+        @info "Conducting coincident graphlet analysis"
+        coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
+        
+        
 
-    #@info "Comparing typed graphlet representations"
-    #typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
-    @info "Conducting coincident graphlet analysis"
-    coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
+
+        ##reload analysis if necessary
+        if (params["network_construction"]["synthetic"] == true)
+            #synthetic run complete, update cache directories for real network
+            params["network_construction"]["synthetic"] = false
+            cache_setup()
+            @info "Synthetic network analysis complete, loading in real network for analysis"
+            adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
+        else
+            anal_flag == 1
+        end
+    end
+
+
 end
 
 function load_config(config_file::String)
@@ -62,8 +83,13 @@ function cache_setup()
     params["cache"]["similarity_dir"] = make_cache(params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"])
     params["cache"]["adjacency_dir"] = make_cache(params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"])
 
-    #analyis dirs:
-    params["cache"]["anal_dir"] = make_cache(params["cache"]["adjacency_dir"],"analysis")
+    #analyis dirs :
+    if (params["network_construction"]["synthetic"] == true)
+        params["cache"]["anal_dir"] = make_cache(params["cache"]["adjacency_dir"],"analysis","synthetic")
+    else
+        params["cache"]["anal_dir"] = make_cache(params["cache"]["adjacency_dir"],"analysis","real")
+    end
+
     params["cache"]["community_dir"] = make_cache(params["cache"]["anal_dir"],"communities")
     params["cache"]["graphlet_counting_dir"] = make_cache(params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting")
     params["cache"]["rep_dir"] = make_cache(params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations")
@@ -95,6 +121,7 @@ end
 export cache_update
 
 function cache_update(general::String,specific::String="",side_dir::String="")
+    ##depreceated currently, as we prefer explicit directory creation at beginning of run
     ##method to update or add cache path
     ##update current dir, possibly with specific subdir
     if (side_dir=="")
@@ -242,7 +269,7 @@ function  network_construction(sample_counts::DataFrame)
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-    if(params["test_name"] == "Synthetic")
+    if(params["network_construction"]["synthetic"] == true)
         ##slightly hacky way to do this still (TODO does the vertexlist (types) need to be randomised? it is atm)
         @info "Switching to synthetic network"
         edgelist,vertexlist = NetworkConstruction.synthetic_network(vertexlist,edgelist)
@@ -668,6 +695,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     known_pathway_dfs = Array{DataFrame,1}(undef,length(candidate_pathways))
     for (i,p) in enumerate(candidate_pathways)
         subset = candidates[p]
+        Main.@infiltrate
         df_build = DataFrame(hcat(map(x->x[i,:],orbit_sigs_array[subset])...)',orbit_names)
         insertcols!(df_build,1,:shared=>[sig_pathway_occurences[x] for x in subset].-1)
         insertcols!(df_build,1,:transcript_id=>subset)
