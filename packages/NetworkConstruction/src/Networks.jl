@@ -59,6 +59,17 @@ function edgelist_from_adj(adjacency_matrix::AbstractArray)
     return edgelist
 end
 
+function synthetic_network(vertexlist, edgelist)
+    #Synthetic test (just override vertex and edge lists here-- is that ok?)
+    n = length(vertexlist) 
+    m = length(edgelist) 
+    # construct erdos renyi random network based on vertex and edge structure of real network
+    edgelist = Pair.(collect(edges(erdos_renyi(n,m/(n*(n-1)/2)))))
+    #percentage of coding vertices in synthetic network
+    percentage = 0.72
+    vertexlist = vcat(repeat(["coding"],Int(floor(percentage*n))),repeat(["noncoding"],Int(ceil((1-percentage)*n))))
+    return [edgelist,vertexlist]
+end
 
 function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     #transpose for WGCNA

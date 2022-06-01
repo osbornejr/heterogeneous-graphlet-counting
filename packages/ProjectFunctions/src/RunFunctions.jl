@@ -25,10 +25,6 @@ function run_all(config_file::String)
 
     #Synthetic patch: put here for now (TODO integrate this better)
     #
-    if(params["test_name"] == "Synthetic")
-        @info "Switching to synthetic network"
-        edgelist,vertexlist = synthetic_network(vertexlist,edgelist)
-    end
 
     cache_update("analysis")
     # @info "Finding communities"
@@ -241,23 +237,16 @@ function  network_construction(sample_counts::DataFrame)
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
+    if(params["test_name"] == "Synthetic")
+        ##slightly hacky way to do this still (TODO does the vertexlist (types) need to be randomised? it is atm)
+        @info "Switching to synthetic network"
+        edgelist,vertexlist = NetworkConstruction.synthetic_network(vertexlist,edgelist)
+    end
     return [adj_matrix, network_counts,vertexlist,edgelist]       
 end
 export network_construction
 
 
-function synthetic_network(vertexlist, edgelist)
-    #Synthetic test (just override vertex and edge lists here-- is that ok?)
-    n = length(vertexlist) 
-    m = length(edgelist) 
-    # construct erdos renyi random network based on vertex and edge structure of real network
-    edgelist = Pair.(collect(edges(erdos_renyi(n,m/(n*(n-1)/2)))))
-    #percentage of coding vertices in synthetic network
-    percentage = 0.72
-    vertexlist = vcat(repeat(["coding"],Int(floor(percentage*n))),repeat(["noncoding"],Int(ceil((1-percentage)*n))))
-    return [edgelist,vertexlist]
-end
-export synthetic_network
 
 function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)       
 
