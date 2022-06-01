@@ -375,17 +375,18 @@ function biomaRt_connect()
         """
 end
 
-function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String) 
+function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
     restart_R()
     #use small sample for now
-    @info "Geting KEGG matches..."
+    @info "Getting KEGG matches..."
     @rput vertex_names
     biomaRt_connect()
     R"""
         library(edgeR)
         library(tidyverse)
+        library(httr)
     """
-    
+
     if(nametype == "transcripts")
         R"""
        
@@ -399,11 +400,16 @@ function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String)
             transcripts$entrez_id = entrez_from_transcripts[match(transcripts_trimmed,entrez_from_transcripts[[1]]),3]
             
             #get list of entrez ids mapped to KEGG pathways 
-            KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+            ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
+            #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+            pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
+            names(pathway_links) <- c("GeneID","PathwayID")
+            pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
+            names(pathway_list) <- c("PathwayID","PathwayName")
             ## get top hits to select from
-            top_terms = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34))
+            top_terms = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
             ##get the network candidates for each pathway
-            per_pathway = sapply(1:nrow(top_terms),function(x) KEGG$GeneID[ KEGG$PathwayID == row.names(top_terms)[x]])
+            per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
             in_network = lapply(per_pathway,function(x) transcripts$entrez_id %in% x)
             names(in_network) = top_terms$Pathway
             entrez_id_vector = transcripts$entrez_id
@@ -417,12 +423,16 @@ function get_KEGG_pathways(vertex_names::Array{String,1},nametype::String)
             gene_coverage = length(entrez_from_genes[[2]])-sum(is.na(entrez_from_genes[[2]]))
             genes$entrez_id = entrez_from_genes[match(genes_trimmed,entrez_from_genes[[1]]),2]
             
-            #get list of entrez ids mapped to KEGG pathways 
-            KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+            ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
+            #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+            pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
+            names(pathway_links) <- c("GeneID","PathwayID")
+            pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
+            names(pathway_list) <- c("PathwayID","PathwayName")
             ## get top hits to select from
-            top_terms = topKEGG(kegga(entrez_from_genes[[3]],n=Inf,truncate = 34))
+            top_terms = topKEGG(kegga(entrez_from_genes[[3]],n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
             ##get the network candidates for each pathway
-            per_pathway = sapply(1:nrow(top_terms),function(x) KEGG$GeneID[ KEGG$PathwayID == row.names(top_terms)[x]])
+            per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
             in_network = lapply(per_pathway,function(x) genes$entrez_id %in% x)
             names(in_network) = top_terms$Pathway
             entrez_id_vector = genes$entrez_id
