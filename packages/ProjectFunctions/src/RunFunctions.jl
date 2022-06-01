@@ -26,7 +26,6 @@ function run_all(config_file::String)
     #Synthetic patch: put here for now (TODO integrate this better)
     #
 
-    cache_update("analysis")
     # @info "Finding communities"
     # com_anal = community_analysis(network_counts,adj_matrix)
     @info "Counting graphlets"
@@ -198,9 +197,15 @@ function  network_construction(sample_counts::DataFrame)
         similarity_matrix = cache_load(sim_file,"similarity_matrix")
     else
         @info "Generating similarity matrix"
+        #Setup workers
+        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
+        
         similarity_matrix = NetworkConstruction.coexpression_measure(data_from_dataframe(sample_counts,"data"),params["network_construction"]["coexpression"])
         @info "Saving similarity matrix at $sim_file"
         cache_save(sim_file,"similarity_matrix"=>similarity_matrix)
+        ##cleanup distributed
+        rmprocs(workers())
+        cleaner()
     end
 
 
