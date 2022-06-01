@@ -1,4 +1,4 @@
-test_name: Synthetic
+test_name: GSE68559_shifted
 
 
 raw_counts_script: "config/input_scripts/GSE68559.jl"
@@ -22,12 +22,14 @@ network_construction:
   coexpression: "pidc"
   threshold: 0.95
   threshold_method: "empirical_dist_zero"
+  visualise: false
+  synthetic: true
 
 analysis:    
   graphlet_counting: true
-  graphlet_size: 3
+  graphlet_size: 4
   recursive: true #count lower graphlets as well
   null_model_size: 1000
   wgcna: false
   func_annotate: true
-  visualise: false
+

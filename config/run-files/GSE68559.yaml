@@ -22,6 +22,8 @@ network_construction:
   coexpression: "pidc"
   threshold: 0.95
   threshold_method: "empirical_dist_zero"
+  visualise: false
+  synthetic: true
 
 analysis:    
   graphlet_counting: true
@@ -30,4 +32,4 @@ analysis:
   null_model_size: 1000
   wgcna: false
   func_annotate: true
-  visualise: false
+
