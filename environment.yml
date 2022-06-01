@@ -4,7 +4,7 @@ channels:
         - bioconda
         - defaults
 dependencies:
-        - r-base
+        - r-base>=4.0
         - r-tidyverse 
         - r-data.table
         - r-wgcna
@@ -13,14 +13,12 @@ dependencies:
         - r-igraph
         - r-threejs
         - r-pcit
-        - r-rnentropy
         - bioconductor-edger
         - bioconductor-deseq2
         - bioconductor-ebseq
         - bioconductor-biomaRt
         - bioconductor-go.db
         - bioconductor-topgo
-        - openmpi
-        - cmake 
+        
         
 
