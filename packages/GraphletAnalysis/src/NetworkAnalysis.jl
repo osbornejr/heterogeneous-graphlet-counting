@@ -65,7 +65,8 @@ th.rowNumber, td.rowNumber {
     close(io)
 end
 
-function get_community_structure(adj_matrix::AbstractArray,vertex_names::Array{String,1},detection_method::String;plot_prefix::String = "", threejs_plot::Bool = false)
+
+function get_community_structure(adj_matrix::AbstractArray,vertex_names::Vector{<:AbstractString},detection_method::String;plot_prefix::String = "", threejs_plot::Bool = false)
     ## Get community structure of a network using r-igraph package 
     R"""
     sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
@@ -310,6 +311,9 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
                 end
 
             end
+           
+            
+
 
             #for g in keys(graphlet_rels) 
             #    #graphlets with at least two candidate transcripts involved in process
