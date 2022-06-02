@@ -29,7 +29,8 @@ function run_all(config_file::String)
     # we then reload network_construction with "synthetic" updated to false
     #
     anal_flag = 0
-    while anal_flag == 0  
+    while (anal_flag == 0)  
+            
         # @info "Finding communities"
         # com_anal = community_analysis(network_counts,adj_matrix)
         @info "Counting graphlets"
@@ -51,7 +52,7 @@ function run_all(config_file::String)
             @info "Synthetic network analysis complete, loading in real network for analysis"
             adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
         else
-            anal_flag == 1
+            anal_flag = 1
         end
     end
 
