@@ -267,7 +267,7 @@ end
 function per_graphlet_coincidence(graphlet::AbstractArray,type::AbstractString,candidates)
 
 end
-function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertexlist::Array{String,1},vertex_names::Array{String,1},entrez_id_vector::Array{Int,1},candidates::Dict{String,Array{Int,1}})
+function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertexlist::Vector{<:AbstractString},vertex_names::Vector{<:AbstractString},entrez_id_vector::Array{Int,1},candidates::Dict{String,Array{Int,1}})
         #convert into "nicer" format
         #rel_array = eachrow(rel)
         
