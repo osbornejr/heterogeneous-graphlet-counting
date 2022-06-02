@@ -53,3 +53,9 @@ let g:slime_default_config = {"bufnr": term_list()[0]}
 let g:slime_dont_ask_default = 1
 "for testing only
 "e julia-remote.vim
+
+
+"add in infiltrator breakpoint here
+nnoremap * O<Esc>xOMain.@infiltrate<Esc>:w<CR> 
+"remove all breakpoints in file
+nnoremap ** :%s/Main.@infiltrate//g<CR>:w<CR> 
