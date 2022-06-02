@@ -21,7 +21,7 @@ function run_all(config_file::String)
     processed_counts = data_preprocessing(raw_counts)
     @info "Constructing network"
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
-
+#TODO resolve contradiction here where, if synthetic is true, the output here gives the real adj_matrix but the synthetic edgelist/vertexlist
 
     ## For analysis step, we need to run for both real and synthetic networks
     #this means we will need to reload the cache dirs for each run
@@ -67,53 +67,42 @@ end
 export load_config
 export params
 
-function make_cache(dirs...)
+function make_cache(dirs...;dir_name::String)
+    #join args into dir path
     dir = join(dirs,"/") 
+    #make dir if does not exist
     run(`mkdir -p $(dir)`)
-    return dir
+    #store dir path in cache params
+    params["cache"][dir_name] = dir
+    ##remove contents if cache clear is set
+    params["cache"]["clear"][dir_name] ? run(`rm -r $(dir)/`) : nothing
 end
 function cache_setup()
     ##create directory for run
-    params["cache"]["test_dir"] = make_cache(cwd,params["cache"]["base_dir"],params["test_name"])
+    make_cache(dir_name="test_dir",cwd,params["cache"]["base_dir"],params["test_name"])
     ##switching to new method where each path is declared explicitly here (avoids run overlaps making a mess, and is easier with pluto load ins etc)
     ##data preprocessing dirs:
-    params["cache"]["cutoff_dir"] = make_cache(params["cache"]["test_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]))
-    params["cache"]["norm_dir"] = make_cache(params["cache"]["cutoff_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
-    params["cache"]["sampling_dir"] = make_cache(params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
+    make_cache(dir_name="cutoff_dir",params["cache"]["test_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]))
+    make_cache(dir_name="norm_dir",params["cache"]["cutoff_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
+    make_cache(dir_name="sampling_dir",params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
     #network construction dirs:
-    params["cache"]["similarity_dir"] = make_cache(params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"])
-    params["cache"]["adjacency_dir"] = make_cache(params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"])
+    make_cache(dir_name="similarity_dir",params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"])
+    make_cache(dir_name="adjacency_dir",params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"])
 
     #analyis dirs :
     if (params["network_construction"]["synthetic"] == true)
-        params["cache"]["anal_dir"] = make_cache(params["cache"]["adjacency_dir"],"analysis","synthetic")
+        make_cache(dir_name="anal_dir",params["cache"]["adjacency_dir"],"analysis","synthetic")
     else
-        params["cache"]["anal_dir"] = make_cache(params["cache"]["adjacency_dir"],"analysis","real")
+        make_cache(dir_name="anal_dir",params["cache"]["adjacency_dir"],"analysis","real")
     end
 
-    params["cache"]["community_dir"] = make_cache(params["cache"]["anal_dir"],"communities")
-    params["cache"]["graphlet_counting_dir"] = make_cache(params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting")
-    params["cache"]["rep_dir"] = make_cache(params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations")
-    params["cache"]["graphlet_enum_dir"] = make_cache(params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-enumeration")
-    params["cache"]["coinc_dir"] = make_cache(params["cache"]["graphlet_enum_dir"],"coincidents")
-    params["cache"]["orbit_dir"] = make_cache(params["cache"]["coinc_dir"],"orbit-significance")
-
-
-    ##check if whole cache_dir should be removed
-    if(params["cache"]["clear"]["all"])
-        if(params["cache"]["clear"]["archive"])
-            #if both clear cache and archive are true, then cache will be moved to archive. otherwise, cache will be deleted permanently.
-            @info "Archiving previous cache files at archives/$(params["test_name"])..."
-            run(`mkdir -p $(join([cwd,params["cache"]["base_dir"]],"/"))/archive`)
-            run(`mv $(cache_dir) $(join([cwd,params["cache"]["base_dir"]],"/"))/archive/$(params["test_name"]*"_"*string(now()))`)
-            run(`mkdir -p $(cache_dir)`)
-        else
-            @info "Clearing previous cache..."
-            run(`rm -r $(cache_dir)`)
-            run(`mkdir -p $(cache_dir)`)
-        end
-    end
-
+    make_cache(dir_name="community_dir",params["cache"]["anal_dir"],"communities")
+    make_cache(dir_name="graphlet_counting_dir",params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting")
+    make_cache(dir_name="rep_dir",params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations")
+    make_cache(dir_name="graphlet_enum_dir",params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-enumeration")
+    make_cache(dir_name="coinc_dir",params["cache"]["graphlet_enum_dir"],"coincidents")
+    make_cache(dir_name="orbit_dir",params["cache"]["coinc_dir"],"orbit-significance")
+    #TODO setup archive method under new cache system
 end
 
 function cache_update(general::String,specific::Any)
@@ -622,6 +611,9 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         end
         
         ##TODO remove need for 0 columns (each order is stored separately?) trim relationships list to just the graphlet order of interest. Zero column(s) will need to be trimmed for smaller graphlet orders atm
+        
+        
+
         rel = rel[findall(x->occursin(string(graphlet_size),x),rel_types),:]        
         rel_types = rel_types[findall(x->occursin(string(graphlet_size),x),rel_types)]
         if (size(rel)[2] > graphlet_size)
@@ -722,7 +714,8 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     #for each node, map each known ecdf to the corresponding orbit count and check against threshold, factoring in the low filter
     unknown_ecdf_comparison = map(y->(reshape(map(x->known_ecdf_table[x](y[x]),1:length(known_ecdf_table)),size(known_ecdf_table)[1],size(known_ecdf_table)[2]).>ub).*low_filter,orbit_sigs_array)
     #determine a node as significantly linked to a pathway if at least half its orbit counts are significant
-    #Main.@infiltrate
+
+    
 
     sig_cut = 1
     sig_check = map(x->(sum(x,dims=2).>(sig_cut)),unknown_ecdf_comparison)
