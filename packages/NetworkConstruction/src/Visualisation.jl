@@ -68,7 +68,7 @@ function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{Strin
     write(outfile,table)
 end
 
-function threejs_plot(adj_matrix::AbstractArray,vertex_names::Array{String,1},colour_by::Array{String,1},plot_prefix::String,colours::Array{String,1})
+function threejs_plot(adj_matrix::AbstractArray,vertex_names::Vector{<:AbstractString},colour_by::Vector{<:AbstractString},plot_prefix::String="",colours::Vector{<:AbstractString}=["blue","green"])
     R"""
     sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
     """
@@ -110,13 +110,10 @@ function threejs_plot(adj_matrix::AbstractArray,vertex_names::Array{String,1},co
     edges <- as_tibble(as.data.frame(get.edgelist(g)))
     g <- graph_from_data_frame(edges,directed = F, vertices)
     vertex_attr(g,"size") <- 0.5
-    plot = graphjs(g,bg = "white");
+    plot = graphjs(g,bg = "white")
     saveWidget(plot,paste0(plot_prefix,"_threejs_plot.html"))
     """
-
-    @info "threejs plot saved as HTML page at $(plot_prefix)."
 end
-
 
 function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,out_format::String;ylabel::String="value")
     # generates a modified version of plot discussed at https://tex.stackexchange.com/a/495207
@@ -335,4 +332,47 @@ function draw_graphlet(node_schematic::Array{String,1},edge_schematic::Array{Boo
     end
     finish()
     preview()
+end
+
+function three_js_network(adj_matrix::AbstractArray,vertex_names::Vector{<:AbstractString},colours::Vector{<:AbstractString})
+
+    R"""
+    sapply(names(sessionInfo()$otherPkgs),function(pkg) detach(paste0('package:',pkg),character.only =T,force = T));rm(list=ls())
+    """
+    @rput adj_matrix
+    @rput vertex_names
+    @rput colours
+
+    R"""
+    library(RColorBrewer)
+    library(igraph)
+    library(threejs)
+    library(htmlwidgets)
+    #keep this last to mask other packages:
+    library(tidyverse)
+    
+    ##change to tibble
+    vertex_names = tibble(vertex_names)
+    vertex_names_trimmed = sapply(vertex_names,tools::file_path_sans_ext)
+    pre_g <- graph.adjacency(adj_matrix,mode="undirected",diag=F)
+    #Now we add attributes to graph by rebuilding it via edge and vertex lists
+    edges <- as_tibble(as.data.frame(get.edgelist(pre_g)))
+    vertices <- tibble(name = 1:nrow(vertex_names),vertex_names)%>% dplyr::rename(label=vertex_names)
+    
+    g <- graph_from_data_frame(edges,directed = F, vertices)
+    #
+    ##delete zero degree vertices
+    g <- delete.vertices(g,igraph::degree(g)==0)
+    ##find maximum connected component
+    g <- decompose(g, mode = "strong", max.comps = NA, min.vertices = 10)[[1]]
+    #
+    ##add colours to graph
+    vertices <- vertices %>% mutate(group = as_factor(colours),color = group)
+    colour_palette = brewer.pal(name = "Spectral", n = length(unique(colours)))
+    levels(vertices$color) <- colour_palette
+    edges <- as_tibble(as.data.frame(get.edgelist(g)))
+    g <- graph_from_data_frame(edges,directed = F, vertices)
+    vertex_attr(g,"size") <- 0.5
+    plot = graphjs(g,bg = "white")
+    """
 end
