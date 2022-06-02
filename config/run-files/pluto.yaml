@@ -1,4 +1,4 @@
-test_name: GSE68559_shifted
+test_name: GSE68559   
 
 
 raw_counts_script: "config/input_scripts/GSE68559.jl"
@@ -6,8 +6,20 @@ cache:
   keep_cache: true
   base_dir: "output/cache"
   clear:
-    all: false
     archive: false
+    test_dir: false
+    cutoff_dir: false 
+    norm_dir: false 
+    sampling_dir: false 
+    similarity_dir: false 
+    adjacency_dir: false 
+    anal_dir: false 
+    community_dir: false 
+    graphlet_counting_dir: false 
+    rep_dir: false 
+    graphlet_enum_dir: false 
+    coinc_dir: false 
+    orbit_dir: false 
 
 website:
   page_name: "menu1"
@@ -27,7 +39,7 @@ network_construction:
 
 analysis:    
   graphlet_counting: true
-  graphlet_size: 4
+  graphlet_size: 3
   recursive: true #count lower graphlets as well
   null_model_size: 1000
   wgcna: false
