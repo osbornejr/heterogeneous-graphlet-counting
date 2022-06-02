@@ -6,12 +6,12 @@ using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,Li
 
 function run_all(config_file::String)
     ##TODO move the adding/removing of workers to align with the individual functions that require distributed framework (adds sometimes unnessesary load time to start of run otherwise). Turning off the global initialisation here for now   
-#    if (length(workers())!=Threads.nthreads())
-#        #Pkg.resolve()
-#       #Pkg.precompile()
-#        @info "Setting up worker processes"
-#        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
-#    end
+    if (length(workers())!=Threads.nthreads())
+        #Pkg.resolve()
+       #Pkg.precompile()
+        @info "Setting up worker processes"
+        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
+    end
 
     @info "Loading parameters"
     load_config(config_file)

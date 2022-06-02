@@ -35,11 +35,11 @@ network_construction:
   threshold: 0.95
   threshold_method: "empirical_dist_zero"
   visualise: false
-  synthetic: true
+  synthetic: false
 
 analysis:    
   graphlet_counting: true
-  graphlet_size: 3
+  graphlet_size: 4
   recursive: true #count lower graphlets as well
   null_model_size: 1000
   wgcna: false
