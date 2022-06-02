@@ -404,6 +404,8 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
             #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
             pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
             names(pathway_links) <- c("GeneID","PathwayID")
+            ##need to convert gene ids to correct integer format
+            pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) str_remove(x,"hsa:")))
             pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
             names(pathway_list) <- c("PathwayID","PathwayName")
             ## get top hits to select from
@@ -427,6 +429,8 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
             #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
             pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
             names(pathway_links) <- c("GeneID","PathwayID")
+            ##need to convert gene ids to correct integer format
+            pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) str_remove(x,"hsa:")))
             pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
             names(pathway_list) <- c("PathwayID","PathwayName")
             ## get top hits to select from
