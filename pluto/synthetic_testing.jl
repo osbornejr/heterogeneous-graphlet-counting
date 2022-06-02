@@ -24,6 +24,7 @@ cwd = ENV["PWD"];
 	using DataFrames
 	using YAML
 	using Infiltrator
+	using RCall
 	## load dev packages last
 	using DataPreprocessing
 	using NetworkConstruction
@@ -38,14 +39,57 @@ end;
 begin
 config_file = "$cwd/config/run-files/pluto.yaml"
 			ProjectFunctions.load_config(config_file)
-end;			
+	
+end;
+
+# ╔═╡ 43bb79ac-72c1-4f0c-8b24-60b7f959c0f5
+begin
+##network visualisation
+	raw_counts = get_input_data()
+    processed_counts = data_preprocessing(raw_counts)
+	adj_matrix,network_counts,vertexlist,syn_edgelist = network_construction(processed_counts)
+end
+
+# ╔═╡ 6b11444b-a7c6-423e-b3b3-134f09a1f1e9
+begin
+	syn_adj_matrix = NetworkConstruction.adj_from_edgelist(syn_edgelist)
+	edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
+end
+
+# ╔═╡ 75ffe824-504a-4c10-bacc-6fd20e7628e2
+vertex_names = network_counts.transcript_id
+
+# ╔═╡ e7fe7230-c021-4785-b53b-e72bc069ee2b
+
+
+# ╔═╡ 88dd5c8a-1a55-48bc-88a7-0608eb28f1de
+function Base.show(io::IO, ::MIME"text/html", p::RObject{VecSxp})
+    (path, _) = mktemp()
+	R"ggsave($path, plot=$p, device = 'png')"
+	print(io,"""""")
+endG
+
+# ╔═╡ 4f481101-8063-4f83-82d7-eb268b42c134
+NetworkConstruction.threejs_plot(adj_matrix,vertex_names,candidate_categories)
 
 # ╔═╡ d35a83f9-3ba9-441b-a643-4272df67c635
 begin
 	kegg_file =  params["cache"]["coinc_dir"]*"/kegg_info.jld2"
-	        entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
-        candidates = cache_load(kegg_file,"candidates")
-        top_terms = cache_load(kegg_file,"top_terms")
+	entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
+    candidates = cache_load(kegg_file,"candidates")
+    top_terms = cache_load(kegg_file,"top_terms")
+end
+
+# ╔═╡ 1bd83813-eb26-4f2c-a2a5-6111c6088df5
+candidate_members = collect(values(candidates))
+
+# ╔═╡ 8d698cfa-d4f1-4c97-8a26-15e5bf7cd483
+candidate_pathways = collect(keys(candidates))
+
+# ╔═╡ e7e1a437-9dfc-4790-83cd-e9c0e489423a
+begin
+params["network_construction"]["synthetic"] = true
+ProjectFunctions.cache_setup()
 end
 
 # ╔═╡ 15f12b74-cb1a-4929-a3af-84d224b4bc71
@@ -54,24 +98,42 @@ orbit_sigs = cache_load(params["cache"]["orbit_dir"]*"/orbit_sigs.jld2","orbit_s
 # ╔═╡ f8048c7a-7de7-4d98-90b6-8bb43270f852
 orbit_sigs_array = map(x->Array(x[!,2:end]),orbit_sigs)
 
-# ╔═╡ e9b8b806-59de-474c-abc7-b6bef6fce2e2
-orbit_sigs
-
-# ╔═╡ 7e54213a-80c9-4683-87f4-73ba821def7f
-candidate_members = collect(values(candidates))
-
 # ╔═╡ b948e336-a930-467a-b3e7-ac24792756f2
 begin
 	## Gadfly style
+	#shape plots into a grid
+    ncols = 3
+	dims = fldmod(length(candidate_pathways),ncols)
+	graphlet_plots = Array{Union{Plot,Context},2}(undef,dims[1]+(dims[2]>0),ncols)
 	pathway_number = size(orbit_sigs_array[1])[1]
 	##get pathway specific arrays
 	orbit_sigs_per_pathway = map(y->hcat(map(x->x[y,:],orbit_sigs_array)...),1:pathway_number)
-	p = 16
-	test = orbit_sigs_per_pathway[p]
-	vertices = 1:2595
-	t = candidate_members[p]
+	
+	for (j,p) in enumerate(candidate_pathways)
+	path_sigs = orbit_sigs_per_pathway[j]
+	vertices = 1:length(vertexlist)
+	t = candidate_members[j]
+	#categorise for colouring 
 	candidate_categories = map(x->x in(t) ? "in pathway" : "not in pathway",vertices)
-	Gadfly.plot([layer(x=1:size(test)[1], y=test[:,i], color = [candidate_categories[i]],Geom.point, Geom.line) for i in vcat(t,1:1000) ]...)
+	graphlet_plots[j] = Gadfly.plot([layer(x=1:size(path_sigs)[1], y=path_sigs[:,i], color = [candidate_categories[i]],Geom.point, Geom.line) for i in vcat(t,1:100) ]...
+	,Scale.color_discrete_manual("orange", "green", "purple"),
+						  Guide.title(p)
+						  ,Guide.xlabel("count")
+						  ,Theme(major_label_font_size=5pt,key_position=:none)
+						,Guide.colorkey(title="orbit position"))
+	end
+	#append blank gridspots if necessary
+                for i in 1:length(graphlet_plots)
+                    if(!isassigned(graphlet_plots,i))
+                        graphlet_plots[i] = context()
+                    end
+                end
+end
+
+# ╔═╡ 2d359ab7-1e9f-4ad5-8e4c-d43088a9d370
+begin
+	set_default_plot_size(500pt,1000pt)
+	gridstack(graphlet_plots)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -92,6 +154,7 @@ NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 ProjectFunctions = "a8586eae-54f0-4952-9436-ba92c8ab3181"
+RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
@@ -111,6 +174,7 @@ JLD2 = "~0.4.22"
 NetworkConstruction = "~0.1.0"
 PlutoUI = "~0.7.39"
 ProjectFunctions = "~0.1.0"
+RCall = "~0.13.13"
 Revise = "~3.3.3"
 StatsBase = "~0.33.16"
 YAML = "~0.4.7"
@@ -1309,11 +1373,19 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═13dc908c-e0d3-11ec-177e-25c2ed2cbdba
 # ╠═49631bdf-8f4d-428f-bfe5-6a06b89c7cae
+# ╠═43bb79ac-72c1-4f0c-8b24-60b7f959c0f5
+# ╠═6b11444b-a7c6-423e-b3b3-134f09a1f1e9
+# ╠═1bd83813-eb26-4f2c-a2a5-6111c6088df5
+# ╠═8d698cfa-d4f1-4c97-8a26-15e5bf7cd483
+# ╠═75ffe824-504a-4c10-bacc-6fd20e7628e2
+# ╠═e7fe7230-c021-4785-b53b-e72bc069ee2b
+# ╠═88dd5c8a-1a55-48bc-88a7-0608eb28f1de
+# ╠═4f481101-8063-4f83-82d7-eb268b42c134
 # ╠═d35a83f9-3ba9-441b-a643-4272df67c635
+# ╠═e7e1a437-9dfc-4790-83cd-e9c0e489423a
 # ╠═15f12b74-cb1a-4929-a3af-84d224b4bc71
 # ╠═f8048c7a-7de7-4d98-90b6-8bb43270f852
 # ╠═b948e336-a930-467a-b3e7-ac24792756f2
-# ╠═e9b8b806-59de-474c-abc7-b6bef6fce2e2
-# ╠═7e54213a-80c9-4683-87f4-73ba821def7f
+# ╠═2d359ab7-1e9f-4ad5-8e4c-d43088a9d370
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
