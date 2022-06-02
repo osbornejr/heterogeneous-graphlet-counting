@@ -42,7 +42,17 @@ end
 
 
 function adj_from_edgelist(edgelist)
-    
+    ##get dimensions of adj_matrix (max value in edgelist)
+    m = max(vcat(first.(edgelist),last.(edgelist))...)
+    ##generate empty adj_matrix
+    adj = zeros(m,m)|>BitArray
+    #iterate through edges to add them to adj matrix
+    for e in edgelist
+        adj[first(e),last(e)] = true  
+    end
+    # need to reflect upper triangular to lower
+    adj = BitArray(UpperTriangular(adj) + UpperTriangular(adj)')
+    return adj
 end
 
 function edgelist_from_adj(adjacency_matrix::AbstractArray)
