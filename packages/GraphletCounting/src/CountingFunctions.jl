@@ -58,15 +58,15 @@ function add3graphlets(vertexlist::Array{String,1},nodelist::Array{Int,1},count_
     return count_dict
 end
 
-function graphlet_string(a::String,b::String,c::String,graphlet::String,delim::String)
+function graphlet_string(a::AbstractString,b::AbstractString,c::AbstractString,graphlet::AbstractString,delim::AbstractString)
     return string(a,delim,b,delim,c,delim,graphlet)
 end
-function graphlet_string(a::String,b::String,c::String,d::String,graphlet::String,delim::String)
+function graphlet_string(a::AbstractString,b::AbstractString,c::AbstractString,d::AbstractString,graphlet::AbstractString,delim::AbstractString)
     return string(a,delim,b,delim,c,delim,d,delim,graphlet)
 end
 
 
-function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},outfile::String;write_out=false)
+function per_edge_relationships(edge::Int,vertex_type_list::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}},outfile::String;write_out=false)
     h=edge  
 #   # get nodes i and j for this edge
         i = edgelist[h].first
@@ -245,7 +245,7 @@ function per_edge_relationships(edge::Int,vertex_type_list::Array{String,1},edge
     end
 end
 
-function per_edge_relationships_alt(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+function per_edge_relationships_alt(edge::Int,vertex_type_list::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
     ###OUTDATED
     throw(MethodError("method is depreceated"))
     ###Turns out, this method is slower than old method, with seemingly no memory gains! strange, but it might prove better on LARGER networks (if they are ever possible memory wise).
@@ -414,7 +414,7 @@ end
 
 end
 
-function per_edge_counts(edge::Int,vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
+function per_edge_counts(edge::Int,vertex_type_list::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int,neighbourdict::Dict{Int,Vector{Int}})
     count_dict = DefaultDict{String,Int}(0)
     h=edge  
 #   # get nodes i and j for this edge
@@ -617,7 +617,7 @@ function count_graphlets(args...;run_method::String="serial",progress::Bool=fals
 end
 
 
-function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",temp_dir::String="rel_dir",progress::Bool=false)
+function graphlet_relationships(vertex_type_list::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",temp_dir::String="rel_dir",progress::Bool=false)
     #get neighbourhood for each vertex in advance (rather than calling per-edge)
     neighbourdict=Neighbours(edgelist)
     #preallocate array to store each edge relationship dict 
@@ -774,7 +774,7 @@ function graphlet_relationships(vertex_type_list::Array{String,1},edgelist::Unio
 end
 
 
-function local_graphlets(vertex_type_list::Array{String,1},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",progress::Bool=false)
+function local_graphlets(vertex_type_list::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",progress::Bool=false)
     ##INPUTS TO PER EDGE FUNCTION
     #get neighbourhood for each vertex in advance (rather than calling per-edge)
     neighbourdict=Neighbours(edgelist)
