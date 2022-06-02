@@ -59,15 +59,8 @@ end
 # ╔═╡ 75ffe824-504a-4c10-bacc-6fd20e7628e2
 vertex_names = network_counts.transcript_id
 
-# ╔═╡ e7fe7230-c021-4785-b53b-e72bc069ee2b
-
-
 # ╔═╡ 88dd5c8a-1a55-48bc-88a7-0608eb28f1de
-function Base.show(io::IO, ::MIME"text/html", p::RObject{VecSxp})
-    (path, _) = mktemp()
-	R"ggsave($path, plot=$p, device = 'png')"
-	print(io,"""""")
-endG
+
 
 # ╔═╡ 4f481101-8063-4f83-82d7-eb268b42c134
 NetworkConstruction.threejs_plot(adj_matrix,vertex_names,candidate_categories)
@@ -88,21 +81,20 @@ candidate_pathways = collect(keys(candidates))
 
 # ╔═╡ e7e1a437-9dfc-4790-83cd-e9c0e489423a
 begin
-params["network_construction"]["synthetic"] = true
+params["network_construction"]["synthetic"] = false
 ProjectFunctions.cache_setup()
+orbit_sigs = cache_load(params["cache"]["orbit_dir"]*"/orbit_sigs.jld2","orbit_sigs")
+orbit_sigs_array = map(x->Array(x[!,2:end]),orbit_sigs);
 end
-
-# ╔═╡ 15f12b74-cb1a-4929-a3af-84d224b4bc71
-orbit_sigs = cache_load(params["cache"]["orbit_dir"]*"/orbit_sigs.jld2","orbit_sigs");
-
-# ╔═╡ f8048c7a-7de7-4d98-90b6-8bb43270f852
-orbit_sigs_array = map(x->Array(x[!,2:end]),orbit_sigs)
 
 # ╔═╡ b948e336-a930-467a-b3e7-ac24792756f2
 begin
 	## Gadfly style
 	#shape plots into a grid
     ncols = 3
+	orbit_names = names(orbit_sigs[1])[2:end]
+	ticks = [NetworkConstruction.draw_graphlet("red_red_red_3-tri"),NetworkConstruction.draw_graphlet("red_red_red_3-tri"),NetworkConstruction.draw_graphlet("red_red_red_3-tri")]
+	
 	dims = fldmod(length(candidate_pathways),ncols)
 	graphlet_plots = Array{Union{Plot,Context},2}(undef,dims[1]+(dims[2]>0),ncols)
 	pathway_number = size(orbit_sigs_array[1])[1]
@@ -112,14 +104,21 @@ begin
 	for (j,p) in enumerate(candidate_pathways)
 	path_sigs = orbit_sigs_per_pathway[j]
 	vertices = 1:length(vertexlist)
-	t = candidate_members[j]
+	##nodes to plot (here we choose any nodes with non zero counts in some orbit)
+	t = findall(x->x==1,vec(sum(orbit_sigs_per_pathway[j],dims=1)).!=0)
+	c = candidate_members[j]
+
 	#categorise for colouring 
-	candidate_categories = map(x->x in(t) ? "in pathway" : "not in pathway",vertices)
-	graphlet_plots[j] = Gadfly.plot([layer(x=1:size(path_sigs)[1], y=path_sigs[:,i], color = [candidate_categories[i]],Geom.point, Geom.line) for i in vcat(t,1:100) ]...
-	,Scale.color_discrete_manual("orange", "green", "purple"),
-						  Guide.title(p)
-						  ,Guide.xlabel("count")
-						  ,Theme(major_label_font_size=5pt,key_position=:none)
+	candidate_categories = map(x->x in(c) ? "in pathway" : "not in pathway",vertices)
+	#plot layers-- note we add a "dummy" node (1, which is in no pathways) to ensure colouring is the same across all grids to match legend
+		graphlet_plots[j] = Gadfly.plot([layer(x=orbit_names, y=path_sigs[:,i], color = [candidate_categories[i]], Geom.line) for i in vcat(1,t) ]...
+	,Scale.color_discrete_manual("orange", "green")
+						  ,Guide.title(p)
+						  ,Guide.xlabel("orbit")
+						  ,Guide.ylabel("counts")
+						,Guide.xticks(orientation=:horizontal)
+			,Scale.y_continuous(minvalue=0, maxvalue=1000)
+						,Theme(point_size=0.5pt,line_width=0.1pt,major_label_font_size=5pt,minor_label_font_size=4pt,grid_line_width=0mm,key_position=:none)
 						,Guide.colorkey(title="orbit position"))
 	end
 	#append blank gridspots if necessary
@@ -128,13 +127,43 @@ begin
                         graphlet_plots[i] = context()
                     end
                 end
-end
+	## add legend to last grid
+	categories = ["not in pathway","in pathway"]
+	legend = plot(color=categories,
+                             Geom.blank,
+                             Scale.color_discrete_manual("orange", "green"));
+	graphlet_plots[end] = legend;
+end;
 
 # ╔═╡ 2d359ab7-1e9f-4ad5-8e4c-d43088a9d370
 begin
-	set_default_plot_size(500pt,1000pt)
+	set_default_plot_size(500pt,1200pt)
 	gridstack(graphlet_plots)
 end
+
+# ╔═╡ 800ca785-597c-4adc-a2ee-c26f31875431
+h =13
+
+# ╔═╡ 7a73d16c-f27f-48e6-850a-41538b39a33c
+test = findall(x->x==1,vec(sum(orbit_sigs_per_pathway[h],dims=1)).!=0)
+
+# ╔═╡ 8685c564-44c6-4b1b-8192-2d07e25a67bb
+chest = candidate_members[h]
+
+# ╔═╡ b2ab5919-54be-45c5-9677-7a3cd0eec37b
+bi = intersect(test,chest)
+
+# ╔═╡ 2f1e5152-d385-4166-9f35-e3bad780cff9
+length(test)
+
+# ╔═╡ daa49ff1-9a69-4080-ab33-c4d1b1ee0e4f
+length(chest)
+
+# ╔═╡ fcaf8beb-24e3-4ea6-aac5-fee2c3a2d9fb
+length(bi)
+
+# ╔═╡ f82e60fa-0e3a-4d7f-8500-37deb102debf
+candidate_pathways[h]
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1378,14 +1407,19 @@ version = "3.5.0+0"
 # ╠═1bd83813-eb26-4f2c-a2a5-6111c6088df5
 # ╠═8d698cfa-d4f1-4c97-8a26-15e5bf7cd483
 # ╠═75ffe824-504a-4c10-bacc-6fd20e7628e2
-# ╠═e7fe7230-c021-4785-b53b-e72bc069ee2b
 # ╠═88dd5c8a-1a55-48bc-88a7-0608eb28f1de
 # ╠═4f481101-8063-4f83-82d7-eb268b42c134
 # ╠═d35a83f9-3ba9-441b-a643-4272df67c635
 # ╠═e7e1a437-9dfc-4790-83cd-e9c0e489423a
-# ╠═15f12b74-cb1a-4929-a3af-84d224b4bc71
-# ╠═f8048c7a-7de7-4d98-90b6-8bb43270f852
 # ╠═b948e336-a930-467a-b3e7-ac24792756f2
 # ╠═2d359ab7-1e9f-4ad5-8e4c-d43088a9d370
+# ╠═800ca785-597c-4adc-a2ee-c26f31875431
+# ╠═7a73d16c-f27f-48e6-850a-41538b39a33c
+# ╠═8685c564-44c6-4b1b-8192-2d07e25a67bb
+# ╠═b2ab5919-54be-45c5-9677-7a3cd0eec37b
+# ╠═2f1e5152-d385-4166-9f35-e3bad780cff9
+# ╠═daa49ff1-9a69-4080-ab33-c4d1b1ee0e4f
+# ╠═fcaf8beb-24e3-4ea6-aac5-fee2c3a2d9fb
+# ╠═f82e60fa-0e3a-4d7f-8500-37deb102debf
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
