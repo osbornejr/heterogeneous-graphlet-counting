@@ -59,12 +59,6 @@ end
 # ╔═╡ 75ffe824-504a-4c10-bacc-6fd20e7628e2
 vertex_names = network_counts.transcript_id
 
-# ╔═╡ 88dd5c8a-1a55-48bc-88a7-0608eb28f1de
-
-
-# ╔═╡ 4f481101-8063-4f83-82d7-eb268b42c134
-NetworkConstruction.threejs_plot(adj_matrix,vertex_names,candidate_categories)
-
 # ╔═╡ d35a83f9-3ba9-441b-a643-4272df67c635
 begin
 	kegg_file =  params["cache"]["coinc_dir"]*"/kegg_info.jld2"
@@ -76,12 +70,18 @@ end
 # ╔═╡ 1bd83813-eb26-4f2c-a2a5-6111c6088df5
 candidate_members = collect(values(candidates))
 
+# ╔═╡ 300f718b-cb8f-49e6-a8ea-e12a01989b48
+colours = map(x->x in(candidate_members[1]) ? "in pathway" : "not in pathway",1:length(vertexlist))
+
+# ╔═╡ 4f481101-8063-4f83-82d7-eb268b42c134
+NetworkConstruction.threejs_plot(adj_matrix,vertex_names,colours)
+
 # ╔═╡ 8d698cfa-d4f1-4c97-8a26-15e5bf7cd483
 candidate_pathways = collect(keys(candidates))
 
 # ╔═╡ e7e1a437-9dfc-4790-83cd-e9c0e489423a
 begin
-params["network_construction"]["synthetic"] = false
+params["network_construction"]["synthetic"] = true
 ProjectFunctions.cache_setup()
 orbit_sigs = cache_load(params["cache"]["orbit_dir"]*"/orbit_sigs.jld2","orbit_sigs")
 orbit_sigs_array = map(x->Array(x[!,2:end]),orbit_sigs);
@@ -142,22 +142,22 @@ begin
 end
 
 # ╔═╡ 800ca785-597c-4adc-a2ee-c26f31875431
-h =13
+h =14
 
 # ╔═╡ 7a73d16c-f27f-48e6-850a-41538b39a33c
-test = findall(x->x==1,vec(sum(orbit_sigs_per_pathway[h],dims=1)).!=0)
+non_zero = findall(x->x==1,vec(sum(orbit_s igs_per_pathway[h],dims=1)).!=0)
 
 # ╔═╡ 8685c564-44c6-4b1b-8192-2d07e25a67bb
-chest = candidate_members[h]
+in_pathway = candidate_members[h]
 
 # ╔═╡ b2ab5919-54be-45c5-9677-7a3cd0eec37b
-bi = intersect(test,chest)
+bi = intersect(non_zero,in_pathway)
 
 # ╔═╡ 2f1e5152-d385-4166-9f35-e3bad780cff9
-length(test)
+length(non_zero)
 
 # ╔═╡ daa49ff1-9a69-4080-ab33-c4d1b1ee0e4f
-length(chest)
+length(in_pathway)
 
 # ╔═╡ fcaf8beb-24e3-4ea6-aac5-fee2c3a2d9fb
 length(bi)
@@ -1407,7 +1407,7 @@ version = "3.5.0+0"
 # ╠═1bd83813-eb26-4f2c-a2a5-6111c6088df5
 # ╠═8d698cfa-d4f1-4c97-8a26-15e5bf7cd483
 # ╠═75ffe824-504a-4c10-bacc-6fd20e7628e2
-# ╠═88dd5c8a-1a55-48bc-88a7-0608eb28f1de
+# ╠═300f718b-cb8f-49e6-a8ea-e12a01989b48
 # ╠═4f481101-8063-4f83-82d7-eb268b42c134
 # ╠═d35a83f9-3ba9-441b-a643-4272df67c635
 # ╠═e7e1a437-9dfc-4790-83cd-e9c0e489423a
