@@ -612,6 +612,8 @@ end
 
 function count_graphlets(args...;run_method::String="serial",progress::Bool=false)
     Chi = local_graphlets(args...;run_method=run_method,progress=progress)
+    Main.@infiltrate
+
     graphlets = total_graphlets(Chi)
     return graphlets
 end

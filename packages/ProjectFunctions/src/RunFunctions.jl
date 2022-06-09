@@ -36,10 +36,10 @@ function run_all(config_file::String)
         @info "Counting graphlets"
         graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
 
-        #@info "Comparing typed graphlet representations"
-        #typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
-        @info "Conducting coincident graphlet analysis"
-        coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
+        @info "Comparing typed graphlet representations"
+        typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+        #@info "Conducting coincident graphlet analysis"
+        #coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
         
         
 
@@ -373,7 +373,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         end
         if (null_run=="distributed-long")
             #rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
-            rand_graphlet_counts = @showprogress map(x->count_graphlets(x,edgelist,params["analysis"]["graphlet_size"],run_method="distributed"),rand_types_set)
+            rand_graphlet_counts = @showprogress map(x->GraphletCounting.count_graphlets(x,edgelist,params["analysis"]["graphlet_size"],run_method="distributed"),rand_types_set)
         end
         rand_graphlet_collection = vcat(collect.(rand_graphlet_counts)...)
         @info "Saving random graphlet count information at $rep_dir..."
