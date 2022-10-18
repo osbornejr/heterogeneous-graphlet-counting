@@ -239,7 +239,40 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
 end 
 
 
+function generate_heterogeneous_graphlet_list(orbits::Vector{Int},types::Vector{String})
+#method to find all possible permutations of a heterogeneous graphlet given an orbit classification and a set of types.
 
+#check to make sure types are sorted
+types = sort(types)
+
+#generate all possible permutations of the type list
+n = length(types)
+m = length(orbits)
+comb = []
+for i in 1:m
+    push!(comb,repeat(vcat([repeat([types[x]],n^(m-i)) for x in 1:length(types)]...),n^(i-1)))
+end
+candidates = hcat(comb...)
+
+
+#now check each candidate to see if it has a unique symmetry under the orbit structure
+#initialise empty graphlet list
+graphlets = String[]
+for c in eachrow(candidates)
+    flag = 0
+    for o in unique(orbits)
+        test = c[orbits.==o]
+        if !(test == sort(test))
+            flag = 1
+        end
+    end
+    if (flag == 0)
+        push!(graphlets,join(c,"_"))
+    end
+end
+
+return graphlets
+end
 
 
 
