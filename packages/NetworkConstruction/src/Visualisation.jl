@@ -49,6 +49,7 @@ function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{Strin
                 table = table*"\t\t\t\t\t\t<td>$(@sprintf "%.3g" d)</td>\n"
             # add image to table (asssumes image is located at figs/$d.svg)
             elseif (d in imgs)
+
                 table = table*"""\t\t\t\t\t\t<td><img  width=80% src="$figpath/$d.svg" title="$d"/></td>\n"""               
                 
             else
@@ -237,6 +238,72 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
     write(out_file,tex)
 end 
 
+function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::Vector{Bool};out_file::String,colours::Vector{String}=["black"])
+    #function to create tikz drawings of a given graphlet
+   
+    #initialise tex text
+    tex = "\\begin{tikzpicture}[main_node/.style={circle,fill=black,minimum size=1em,inner sep=3pt]}]\n"
+
+    #NODES
+    order = length(node_schematic)
+    node_names = sort(unique(node_schematic))
+    ##colour mapping
+    #first check that there are enough provided colours. If not, default to black
+    if(length(node_names)>length(colours))     
+        @info "Insufficient number of colours provided, defaulting to black for all nodes"
+        colours = fill("black",length(node_names))
+    end
+    colour_schematic = copy(node_schematic)
+    for (i,node) in enumerate(node_names)
+        replace!(colour_schematic,node=>colours[i])  
+    end
+
+    ##add in node points (with colours)
+    tex = tex*"\\node[main_node,fill=$(colour_schematic[1])] (1) at (0,0) {};\n"
+
+    tex = tex*"\\node[main_node,fill=$(colour_schematic[2])] (2) at (0, -1.5)  {};\n"
+    
+    if (order>2)
+        tex = tex*"\\node[main_node,fill=$(colour_schematic[3])] (3) at (1.5, -1.5) {};\n"
+    end
+    if (order>3)
+        tex = tex*"\\node[main_node,fill=$(colour_schematic[4])] (4) at (1.5, 0) {};\n"
+    end
+
+
+    #EDGES
+    #check edge schematic is valid for order
+    s_l = Int(order*(order-1)/2)
+    if (length(edge_schematic)!= s_l)
+        throw(DimensionMismatch("Graphlet edge schematic is not valid. For order $order graphlet, please provide edge schematic of length $s_l."))
+    end
+    if (edge_schematic[1])
+        tex = tex*"\\draw (1) -- (2);\n"
+    end
+    if (order>2)
+        if (edge_schematic[2])
+            tex = tex*"\\draw (1) -- (3);\n"
+        end
+        if (edge_schematic[3])
+            tex = tex*"\\draw (2) -- (3);\n"
+        end
+    end
+    if (order>3)
+        if (edge_schematic[4])
+            tex = tex*"\\draw (1) -- (4);\n"
+        end
+        if (edge_schematic[5])
+            tex = tex*"\\draw (2) -- (4);\n"
+        end
+        if (edge_schematic[6])
+            tex = tex*"\\draw (3) -- (4);\n"
+        end
+    end
+        
+    tex = tex*"\\end{tikzpicture}\n"    
+    write(out_file,tex)
+end
+
 function draw_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
     slice = string.(split(graphlet_name,split_char)) 
     return draw_graphlet(slice[1:end-1],slice[end];kwargs...)
@@ -267,6 +334,8 @@ function draw_graphlet(node_schematic::Array{String,1},edge_name::String;kwargs.
         throw(ArgumentError("$edge_name not recognised as a valid default schematic. Please provide edge schematic explicitly"))
     end
 end
+
+
 
 function draw_graphlet(node_schematic::Array{String,1},edge_schematic::Array{Bool,1};dim::Int=50,rotation::Float64=0.0,node_colours::Array{String,1}=["hotpink","gold","skyblue","limegreen"],line_colour::String = "lightgrey",file::Union{Symbol,String}=:svg) 
  #function to create graphlet images programatically using Luxor tools.
