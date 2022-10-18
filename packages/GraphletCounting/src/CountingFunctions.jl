@@ -612,7 +612,7 @@ end
 
 function count_graphlets(args...;run_method::String="serial",progress::Bool=false)
     Chi = local_graphlets(args...;run_method=run_method,progress=progress)
-    Main.@infiltrate
+    
 
     graphlets = total_graphlets(Chi)
     return graphlets
@@ -848,7 +848,7 @@ function local_graphlets(vertex_type_list::Vector{<:AbstractString},edgelist::Un
     return Chi
 end
 
-function total_graphlets(Chi::Array{Dict{String,Int}})    
+function total_graphlets(Chi::Array{AbstractDict{String,Int}})    
     @info "Calculating total counts for each graphlet..."
     #total counts for each graphlet
     total_counts = reduce(mergecum,Chi)
