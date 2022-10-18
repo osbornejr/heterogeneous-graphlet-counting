@@ -238,6 +238,85 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
     write(out_file,tex)
 end 
 
+
+
+
+
+
+
+
+
+function draw_tex_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
+    slice = string.(split(graphlet_name,split_char)) 
+    return draw_tex_graphlet(slice[1:end-1],slice[end];kwargs...)
+end
+
+function draw_tex_graphlet(node_schematic::Array{String,1},edge_name::String;kwargs...)
+    if (edge_name == "2-path")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true];kwargs...)
+    elseif (edge_name == "3-path")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,false,true];kwargs...)
+    elseif (edge_name == "3-tri")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,true,true];kwargs...)
+    elseif (edge_name == "3-clique")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,true,true];kwargs...)
+    elseif (edge_name == "4-path")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,false,true,false,false,true];kwargs...)
+    elseif (edge_name == "4-star")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,false,true,false,true,false];kwargs...)
+    elseif (edge_name == "4-tail")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,false,true,false,true,true];kwargs...)
+    elseif (edge_name == "4-cycle")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,false,true,true,false,true];kwargs...)
+    elseif (edge_name == "4-chord")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,true,true,true,false,true];kwargs...)
+    elseif (edge_name == "4-clique")
+        if(length(node_schematic)==0)
+            #homogeneous case
+            node_schematic = ["one","one","one","one"]
+        end
+        return draw_tex_graphlet(node_schematic,[true,true,true,true,true,true];kwargs...)
+    else
+        throw(ArgumentError("$edge_name not recognised as a valid default schematic. Please provide edge schematic explicitly"))
+    end
+end
+
 function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::Vector{Bool};out_file::String,colours::Vector{String}=["black"])
     #function to create tikz drawings of a given graphlet
    
