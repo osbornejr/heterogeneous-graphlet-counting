@@ -275,10 +275,6 @@ return graphlets
 end
 
 
-
-
-
-
 function draw_tex_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
     slice = string.(split(graphlet_name,split_char)) 
     return draw_tex_graphlet(slice[1:end-1],slice[end];kwargs...)
