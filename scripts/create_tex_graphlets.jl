@@ -25,8 +25,14 @@ end
 out = ENV["PWD"]*"/output/share/graphlets/" 
 run(`mkdir -p $(out)`)
 for g in List
-    NetworkConstruction.draw_tex_graphlet(g,colours=colours,out_file = out*g*".tex")
+    ## colours need to be reversed if graphlet is all noncoding TODO make work for any number of types
+    if ((!occursin("_coding",g)) & (!startswith(g,"coding")))
+        NetworkConstruction.draw_tex_graphlet(g,colours=reverse(colours),out_file = out*g*".tex")
+    else
+        NetworkConstruction.draw_tex_graphlet(g,colours=colours,out_file = out*g*".tex")
+    end
 end
+
 #save list to file as well
 outfile= out*"list.txt"
 open(outfile, "w") do f
