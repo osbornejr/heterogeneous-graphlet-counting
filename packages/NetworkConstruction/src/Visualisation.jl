@@ -377,6 +377,11 @@ function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::Vector
     if (order>3)
         tex = tex*"\\node[main_node,fill=$(colour_schematic[4])] (4) at (1.5, 0) {};\n"
     end
+    #add dummy node for 2-path to keep size fitting
+    if (order==2)
+        tex = tex*"\\node[main_node,fill=white,opacity=0] (3) at (1.5, -1.5) {};\n"
+    end
+    
 
 
     #EDGES
