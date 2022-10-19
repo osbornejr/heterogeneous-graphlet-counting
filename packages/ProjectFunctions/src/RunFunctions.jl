@@ -23,6 +23,11 @@ function run_all(config_file::String)
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
 #TODO resolve contradiction here where, if synthetic is true, the output here gives the real adj_matrix but the synthetic edgelist/vertexlist
 
+
+
+
+
+
     ## For analysis step, we need to run for both real and synthetic networks
     #this means we will need to reload the cache dirs for each run
     #run first on synthetic network, as that is what will be loaded in if "synthetic" parameter is true
@@ -38,6 +43,7 @@ function run_all(config_file::String)
 
         @info "Comparing typed graphlet representations"
         typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+        
         #@info "Conducting coincident graphlet analysis"
         #coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
         
@@ -470,9 +476,12 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
     insig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array_under)...)
 
+    
+    
     #save in output cache
-    NetworkConstruction.html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet)                          
-    NetworkConstruction.html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet)                              
+    NetworkConstruction.html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
+    NetworkConstruction.html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
+                              
     #save for website version
     #NetworkConstruction.html_table_maker(sig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
     #NetworkConstruction.html_table_maker(insig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
