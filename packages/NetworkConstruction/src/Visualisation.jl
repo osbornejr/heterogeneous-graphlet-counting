@@ -17,6 +17,55 @@ function cytoscape_elements(vertices::Array{String,2},edges::Array{Pair},output_
     close(io)
 end
 
+
+function tex_table_maker(dataframe::DataFrame,outfile::String)
+    table = "\\begin{tabular}"
+
+
+    #number of rows and columns
+    rows = size(dataframe)[1]
+    columns = size(dataframe)[2]
+    
+    table *= "{@{}$(repeat("l",columns))@{}}\n"
+    table *= "\\toprule\n"
+
+    #add in column names
+    for (i,n) in enumerate(names(dataframe))
+        #latex doesn't like _
+        cn = replace(n,"_"=>"-")
+        table *= "$(cn)"
+        if (i<columns)
+            table *=" & "
+        end
+    end
+    table *= " \\\\\n"
+    table *= "\\midrule\n"
+
+    for (i,r) in enumerate(eachrow(dataframe))
+        for (j,d) in enumerate(r)
+            #format floats and ints
+            if (typeof(d)<:AbstractFloat)
+                if (d>10000)
+                    table *= " $(Int(round(d))) "
+                else
+                    table *= "$(round(d,digits=4)) "
+                end
+            else
+                table *= "$(d) "
+            end 
+            if (j<columns)
+                table *=" & "
+            end
+        end
+        table *= "\\\\\n"
+    end
+    table*= "\\bottomrule\n"
+
+    table*= "\\end{tabular}\n"
+
+    write(outfile,table)
+end
+
 function html_table_maker(dataframe::DataFrame,outfile::String;imgs::Array{String,1}=[],figpath::String=".figs/")
     #begin table container with scoped styling
     table ="""<div id="table container">\n\t<style type="text/css" scoped>\n\t\t.row {\n\t\t\tmargin-left:-5px;\n\t\t\tmargin-right:-5px;\n\t\t}\n\t\t.column {\n\t\t\tfloat: left;\n\t\t\twidth: 50%;\n\t\t}\n\t\ttd {\n\t\t\ttext-align:center;\n\t\t\tvertical-align:middle;\n\t\t}\n\t</style>\n\t<div class="row">\n\t\t<div class="column">\n"""
@@ -316,13 +365,13 @@ function draw_tex_graphlet(node_schematic::Array{String,1},edge_name::String;kwa
             #homogeneous case
             node_schematic = ["one","one","one","one"]
         end
-        return draw_tex_graphlet(node_schematic,[true,false,true,false,true,false];kwargs...)
+        return draw_tex_graphlet(node_schematic,[false,true,true,false,false,true];kwargs...)
     elseif (edge_name == "4-tail")
         if(length(node_schematic)==0)
             #homogeneous case
             node_schematic = ["one","one","one","one"]
         end
-        return draw_tex_graphlet(node_schematic,[true,false,true,false,true,true];kwargs...)
+        return draw_tex_graphlet(node_schematic,[true,true,true,false,false,true];kwargs...)
     elseif (edge_name == "4-cycle")
         if(length(node_schematic)==0)
             #homogeneous case
