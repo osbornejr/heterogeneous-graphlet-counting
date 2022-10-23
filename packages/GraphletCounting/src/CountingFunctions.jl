@@ -863,6 +863,7 @@ function total_graphlets(Chi::Array{AbstractDict{String,Int}})
             if (graphlet_names[el][1]!=graphlet_names[el][2] && graphlet_names[el][3]!=graphlet_names[el][2] && graphlet_names[el][4]=="3-path")
                 graphlet_names[el][[1,3]] =sort(graphlet_names[el][[1,3]])
             else
+                #for all other paths and triangles
                 graphlet_names[el][1:3]=sort(graphlet_names[el][1:3])
             end
         end
