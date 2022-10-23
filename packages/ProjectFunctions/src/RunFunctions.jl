@@ -499,6 +499,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     end
 
     #pretty_table(random_edges,backend=:html,standalone = false)
+    return [sig_graphlets,insig_graphlets]
 end 
 export typed_representations
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
