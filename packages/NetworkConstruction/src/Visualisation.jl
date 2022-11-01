@@ -288,6 +288,11 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
 end 
 
 
+
+function generate_heterogeneous_graphlet_list(vecc::Vector{Int64},types::Vector{String})
+    return generate_heterogeneous_graphlet_list(BitVector(vecc),types)
+end
+
 function generate_heterogeneous_graphlet_list(vecc::BitVector,types::Vector{String})
 ##allows for simplifying entry for each edge only. We convert here to a bit matrix and then feed to main function
 
@@ -311,10 +316,14 @@ for i in 1:(n-1)
     adj = vcat(adj,zeros(Int,i),vecc[vstep:(vstep-1)+(n-i)])
 end
 adj = vcat(adj,zeros(Int,n))
-adj = reshape(adj,3,3)
+adj = reshape(adj,n,n)
 adj = BitMatrix(adj + adj')
-return adj
+return generate_heterogeneous_graphlet_list(adj,types)
 
+end
+
+function generate_heterogeneous_graphlet_list(adj::Matrix{Int64},types::Vector{String})
+    return generate_heterogeneous_graphlet_list(BitMatrix(adj),types)
 end
 
 function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{String})
