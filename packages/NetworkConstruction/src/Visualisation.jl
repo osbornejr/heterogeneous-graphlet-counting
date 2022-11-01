@@ -342,6 +342,7 @@ orbits = vec(sum(adj,dims=1))
 #generate all possible permutations of the type list
 n = length(types)
 m = length(orbits)
+
 comb = []
 for i in 1:m
     push!(comb,repeat(vcat([repeat([types[x]],n^(m-i)) for x in 1:n]...),n^(i-1)))
@@ -445,7 +446,7 @@ function draw_tex_graphlet(node_schematic::Array{String,1},edge_name::String;kwa
     end
 end
 
-function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::Vector{Bool};out_file::String,colours::Vector{String}=["black"])
+function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::BitVector;out_file::String,colours::Vector{String}=["black"])
     #function to create tikz drawings of a given graphlet
    
     #initialise tex text
@@ -549,7 +550,7 @@ end
 
 
 
-function draw_graphlet(node_schematic::Array{String,1},edge_schematic::Array{Bool,1};dim::Int=50,rotation::Float64=0.0,node_colours::Array{String,1}=["hotpink","gold","skyblue","limegreen"],line_colour::String = "lightgrey",file::Union{Symbol,String}=:svg) 
+function draw_graphlet(node_schematic::Vector{String},edge_schematic::BitVector;dim::Int=50,rotation::Float64=0.0,node_colours::Array{String,1}=["hotpink","gold","skyblue","limegreen"],line_colour::String = "lightgrey",file::Union{Symbol,String}=:svg) 
  #function to create graphlet images programatically using Luxor tools.
  #`file` can be either a filepath string to save a hard copy of image, or a symbol (either :svg or :png) to only create image in memory (useful for cases (i.e. Pluto) where separate file artefacts are a drawback.  
     Drawing(dim,dim,file) 
