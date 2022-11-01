@@ -288,11 +288,43 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
 end 
 
 
-function generate_heterogeneous_graphlet_list(orbits::Vector{Int},types::Vector{String})
+function generate_heterogeneous_graphlet_list(vecc::BitVector,types::Vector{String})
+##allows for simplifying entry for each edge only. We convert here to a bit matrix and then feed to main function
+
+## provided vector must be of length equal to triangular number associated with dims of adj/graphlet. Find here and check that length corresponds to a dim that is whole number
+
+## inverse triangular number
+m = length(vecc)
+n = sqrt(2*m+0.25)-0.5 
+if !(isinteger(n))
+    throw(ArgumentError("provided vector does not correspond to any graphlet dimension n>1. Vector must be of length T(n-1)")) 
+else
+    #now we find graphlet dimension
+    n = Int(n)+1
+end
+
+#now add zeros appropriately to vector and then reshape
+adj = []
+
+for i in 1:(n-1)
+    vstep = 2i-1
+    adj = vcat(adj,zeros(Int,i),vecc[vstep:(vstep-1)+(n-i)])
+end
+adj = vcat(adj,zeros(Int,n))
+adj = reshape(adj,3,3)
+adj = BitMatrix(adj + adj')
+return adj
+
+end
+
+function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{String})
 #method to find all possible permutations of a heterogeneous graphlet given an orbit classification and a set of types.
 
 #check to make sure types are sorted
 types = sort(types)
+
+##deduce orbits from adj
+
 
 #generate all possible permutations of the type list
 n = length(types)
@@ -311,13 +343,18 @@ for c in eachrow(candidates)
     flag = 0
     for o in unique(orbits)
         test = c[orbits.==o]
-        if !(test == sort(test))
+        if (test == sort(test))
             flag = 1
         end
     end
     if (flag == 0)
+        ##candidate checked out for all orbits, so we add it.
         push!(graphlets,join(c,"_"))
+    else
+        #reflect by first orbit first, sorting all nodes in that orbit and adjacent ones if necessary   
+
     end
+
 end
 
 return graphlets
