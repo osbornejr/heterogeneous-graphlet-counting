@@ -290,7 +290,7 @@ end
 
 
 function graphlet_adjacency_to_edgelist_array(adj::Matrix{Int64})
-    return graphlet_edgelist_array_to_adjacency(BitMatrix(adj))
+    return graphlet_adjacency_to_edgelist_array(BitMatrix(adj))
 end
 
 function graphlet_adjacency_to_edgelist_array(adj::AbstractMatrix{Bool})
@@ -531,7 +531,7 @@ function draw_graphlet(adj::AbstractMatrix;kwargs...)
 end
 
 function draw_graphlet(node_schematic::Vector{String},adj::AbstractMatrix;kwargs...)
-    return draw_graphlet(node_schematic,graphlet_adjacency_to_edgelist_array(adj);kwargs)
+    return draw_graphlet(node_schematic,graphlet_adjacency_to_edgelist_array(adj);kwargs...)
 end
 
 function draw_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
@@ -565,9 +565,7 @@ function draw_graphlet(node_schematic::Vector{String},edge_name::String;kwargs..
     end
 end
 
-
-
-function draw_graphlet(node_schematic::Vector{String},edge_schematic::BitVector;dim::Int=50,rotation::Float64=0.0,node_colours::Array{String,1}=["hotpink","gold","skyblue","limegreen"],line_colour::String = "lightgrey",file::Union{Symbol,String}=:svg) 
+function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVector{Bool};dim::Int=50,rotation::Float64=0.0,node_colours::Array{String,1}=["hotpink","gold","skyblue","limegreen"],line_colour::String = "lightgrey",file::Union{Symbol,String}=:svg) 
  #function to create graphlet images programatically using Luxor tools.
  #`file` can be either a filepath string to save a hard copy of image, or a symbol (either :svg or :png) to only create image in memory (useful for cases (i.e. Pluto) where separate file artefacts are a drawback.  
     Drawing(dim,dim,file) 
@@ -626,7 +624,7 @@ function draw_graphlet(node_schematic::Vector{String},edge_schematic::BitVector;
         @error "Graphlet node schematic is not valid. Ensure length of node schematic is equal to $order."
     end
     #draw and colour nodes according to node schematic
-    for (i,type) in enumerate(types)
+    for i in 1:length(corners)
         setcolor(col_pal[i])
         Luxor.circle.(corners[reverse(node_schematic.==type)], dim/10, action=:fill)
     end
