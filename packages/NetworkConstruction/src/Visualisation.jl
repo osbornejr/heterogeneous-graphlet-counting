@@ -289,11 +289,18 @@ end
 
 
 
+function graphlet_adjacency_to_edgelist_array(adj::Matrix{Int64})
+    return graphlet_edgelist_array_to_adjacency(BitMatrix(adj))
+end
+
+function graphlet_adjacency_to_edgelist_array(adj::AbstractMatrix{Bool})
+    return [adj[i,j] for i in 1:size(adj)[1]-1 for j in i+1:size(adj)[2]]
+end
 function graphlet_edgelist_array_to_adjacency(vecc::Vector{Int64})
     return graphlet_edgelist_array_to_adjacency(BitVector(vecc))
 end
 
-function graphlet_edgelist_array_to_adjacency(vecc::BitVector)
+function graphlet_edgelist_array_to_adjacency(vecc::AbstractVector{Bool})
     ## provided vector must be of length equal to triangular number associated with dims of adj/graphlet. Find here and check that length corresponds to a dim that is whole number
 
     ## inverse triangular number
@@ -319,7 +326,7 @@ function graphlet_edgelist_array_to_adjacency(vecc::BitVector)
     adj = BitMatrix(adj + adj')
     return adj
 end
-function generate_heterogeneous_graphlet_list(vecc::BitVector,types::Vector{String})
+function generate_heterogeneous_graphlet_list(vecc::AbstractVector{Bool},types::Vector{String})
 ##allows for simplifying entry for each edge only. We convert here to a bit matrix and then feed to main function
 adj = graphlet_edgelist_array_to_adjacency(vecc)
 return generate_heterogeneous_graphlet_list(adj,types)
@@ -517,6 +524,10 @@ function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::BitVec
     write(out_file,tex)
 end
 
+
+function draw_graphlet(adj::AbstractMatrix{Bool})
+end
+
 function draw_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
     slice = string.(split(graphlet_name,split_char)) 
     return draw_graphlet(slice[1:end-1],slice[end];kwargs...)
@@ -603,6 +614,7 @@ function draw_graphlet(node_schematic::Vector{String},edge_schematic::BitVector;
         col_pal = distinguishable_colors(length(types)) 
     end
     
+
     #check that length of node_schematic matches order
     if (length(node_schematic)!=order)
         @error "Graphlet node schematic is not valid. Ensure length of node schematic is equal to $order."
