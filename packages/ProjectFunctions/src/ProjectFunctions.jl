@@ -230,6 +230,26 @@ function tmap(f, xs::AbstractArray)
     a
 end
 
+function permute_all(F::AbstractVector,m::Int;replace::Bool=false)
+    ##find all sets of objects F choose m
+    ## F is the set of objects, m is how many we choose for each permutation
+    #if replace is false, m!>|F|
+    if((replace == false) & (m>length(F)))
+        throw(ArgumentError("When replace=false, m!>|F| (i.e. cannot choose more elements than provided)"))
+    end
+    n = length(F)
+    comb = []
+    for i in 1:m
+        push!(comb,repeat(vcat([repeat([F[x]],n^(m-i)) for x in 1:n]...),n^(i  -1)))
+    end
+    candidates = hcat(comb...)
+    if replace==false
+        candidates = candidates[length.(unique.(eachrow(candidates))).==m,:]   
+    end
+    return candidates
+end;   
+export permute_all
+
 
 end # module
 
