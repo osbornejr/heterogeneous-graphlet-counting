@@ -296,6 +296,7 @@ end
 function graphlet_adjacency_to_edgelist_array(adj::AbstractMatrix{Bool})
     return [adj[i,j] for i in 1:size(adj)[1]-1 for j in i+1:size(adj)[2]]
 end
+
 function graphlet_edgelist_array_to_adjacency(vecc::Vector{Int64})
     return graphlet_edgelist_array_to_adjacency(BitVector(vecc))
 end
@@ -525,7 +526,12 @@ function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::BitVec
 end
 
 
-function draw_graphlet(adj::AbstractMatrix{Bool})
+function draw_graphlet(adj::AbstractMatrix;kwargs...)
+    return draw_graphlet(["v" for i in 1:size(adj)[1]], graphlet_adjacency_to_edgelist_array(adj);kwargs...)
+end
+
+function draw_graphlet(node_schematic::Vector{String},adj::AbstractMatrix;kwargs...)
+    return draw_graphlet(node_schematic,graphlet_adjacency_to_edgelist_array(adj);kwargs)
 end
 
 function draw_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
@@ -533,7 +539,7 @@ function draw_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
     return draw_graphlet(slice[1:end-1],slice[end];kwargs...)
 end
 
-function draw_graphlet(node_schematic::Array{String,1},edge_name::String;kwargs...)
+function draw_graphlet(node_schematic::Vector{String},edge_name::String;kwargs...)
     if (edge_name == "2-path")
         return draw_graphlet(node_schematic,[true];kwargs...)
     elseif (edge_name == "3-path")
