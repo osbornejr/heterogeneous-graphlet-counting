@@ -289,35 +289,39 @@ end
 
 
 
-function generate_heterogeneous_graphlet_list(vecc::Vector{Int64},types::Vector{String})
-    return generate_heterogeneous_graphlet_list(BitVector(vecc),types)
+function graphlet_edgelist_array_to_adjacency(vecc::Vector{Int64})
+    return graphlet_edgelist_array_to_adjacency(BitVector(vecc))
 end
 
+function graphlet_edgelist_array_to_adjacency(vecc::BitVector)
+    ## provided vector must be of length equal to triangular number associated with dims of adj/graphlet. Find here and check that length corresponds to a dim that is whole number
+
+    ## inverse triangular number
+    m = length(vecc)
+    n = sqrt(2*m+0.25)-0.5 
+    if !(isinteger(n))
+        throw(ArgumentError("provided vector does not correspond to any graphlet dimension n>1. Vector must be of length T(n-1)")) 
+    else
+        #now we find graphlet dimension
+        n = Int(n)+1
+    end
+
+    #now add zeros appropriately to vector and then reshape
+    adj = []
+
+    for i in 1:(n-1)
+        step = n-i
+        start = m - Int((step*(step+1))/2) 
+        adj = vcat(adj,zeros(Int,i),vecc[start+1:start+step])
+    end
+    adj = vcat(adj,zeros(Int,n))
+    adj = reshape(adj,n,n)
+    adj = BitMatrix(adj + adj')
+    return adj
+end
 function generate_heterogeneous_graphlet_list(vecc::BitVector,types::Vector{String})
 ##allows for simplifying entry for each edge only. We convert here to a bit matrix and then feed to main function
-
-## provided vector must be of length equal to triangular number associated with dims of adj/graphlet. Find here and check that length corresponds to a dim that is whole number
-
-## inverse triangular number
-m = length(vecc)
-n = sqrt(2*m+0.25)-0.5 
-if !(isinteger(n))
-    throw(ArgumentError("provided vector does not correspond to any graphlet dimension n>1. Vector must be of length T(n-1)")) 
-else
-    #now we find graphlet dimension
-    n = Int(n)+1
-end
-
-#now add zeros appropriately to vector and then reshape
-adj = []
-
-for i in 1:(n-1)
-    vstep = 2i-1
-    adj = vcat(adj,zeros(Int,i),vecc[vstep:(vstep-1)+(n-i)])
-end
-adj = vcat(adj,zeros(Int,n))
-adj = reshape(adj,n,n)
-adj = BitMatrix(adj + adj')
+adj = graphlet_edgelist_array_to_adjacency(vecc)
 return generate_heterogeneous_graphlet_list(adj,types)
 
 end
@@ -332,15 +336,15 @@ function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{Strin
 #check to make sure types are sorted
 types = sort(types)
 
-##deduce orbits from adj
-
+##deduce orbits from adj (sum across one dim)
+orbits = vec(sum(adj,dims=1)) 
 
 #generate all possible permutations of the type list
 n = length(types)
 m = length(orbits)
 comb = []
 for i in 1:m
-    push!(comb,repeat(vcat([repeat([types[x]],n^(m-i)) for x in 1:length(types)]...),n^(i-1)))
+    push!(comb,repeat(vcat([repeat([types[x]],n^(m-i)) for x in 1:n]...),n^(i-1)))
 end
 candidates = hcat(comb...)
 
@@ -352,7 +356,7 @@ for c in eachrow(candidates)
     flag = 0
     for o in unique(orbits)
         test = c[orbits.==o]
-        if (test == sort(test))
+        if !(test == sort(test))
             flag = 1
         end
     end
