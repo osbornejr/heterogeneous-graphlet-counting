@@ -536,7 +536,35 @@ end
 
 function draw_graphlet(graphlet_name::String;split_char::String="_",kwargs...)
     slice = string.(split(graphlet_name,split_char)) 
-    return draw_graphlet(slice[1:end-1],slice[end];kwargs...)
+    
+    if (length(slice)==1)
+        edge_name = slice[1]
+        if (edge_name == "2-path")
+            return draw_graphlet(["v","v"],[true];kwargs...)
+        elseif (edge_name == "3-path")
+            return draw_graphlet(["v","v","v"],[true,false,true];kwargs...)
+        elseif (edge_name == "3-tri")
+            return draw_graphlet(["v","v","v"],[true,true,true];kwargs...)
+        elseif (edge_name == "3-clique")
+            return draw_graphlet(["v","v","v"],[true,true,true];kwargs...)
+        elseif (edge_name == "4-path")
+            return draw_graphlet(["v","v","v","v"],[true,false,false,true,false,true];kwargs...)
+        elseif (edge_name == "4-star")
+            return draw_graphlet(["v","v","v","v"],[false,true,false,true,false,true];kwargs...)
+        elseif (edge_name == "4-tail")
+            return draw_graphlet(["v","v","v","v"],[true,true,false,true,false,true];kwargs...)
+        elseif (edge_name == "4-cycle")
+            return draw_graphlet(["v","v","v","v"],[true,false,true,true,false,true];kwargs...)
+        elseif (edge_name == "4-chord")
+            return draw_graphlet(["v","v","v","v"],[true,true,true,true,false,true];kwargs...)
+        elseif (edge_name == "4-clique")
+            return draw_graphlet(["v","v","v","v"],[true,true,true,true,true,true];kwargs...)
+        else
+            throw(ArgumentError("$edge_name not recognised as a valid default schematic. Please provide edge schematic explicitly"))
+        end
+    else
+        return draw_graphlet(slice[1:end-1],slice[end];kwargs...)
+    end
 end
 
 function draw_graphlet(node_schematic::Vector{String},edge_name::String;kwargs...)
@@ -565,6 +593,10 @@ function draw_graphlet(node_schematic::Vector{String},edge_name::String;kwargs..
     end
 end
 
+function draw_graphlet(node_schematic::Vector{String},edge_schematic::Vector{Int};kwargs...)
+    return draw_graphlet(node_schematic,BitVector(edge_schematic);kwargs...)
+end
+
 function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVector{Bool};dim::Int=50,rotation::Float64=0.0,node_colours::Array{String,1}=["hotpink","gold","skyblue","limegreen"],line_colour::String = "lightgrey",file::Union{Symbol,String}=:svg) 
  #function to create graphlet images programatically using Luxor tools.
  #`file` can be either a filepath string to save a hard copy of image, or a symbol (either :svg or :png) to only create image in memory (useful for cases (i.e. Pluto) where separate file artefacts are a drawback.  
@@ -575,19 +607,22 @@ function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVe
     if (rotation!=0.0)
         r = rotation
     elseif (order == 2)
-        r = pi/4
+        r = -pi/4
     elseif (order == 3)
-        r = 3*pi/2
+        r = -3*pi/2
     elseif (order == 4)
-        r = -3*pi/4
+        r = 3*pi/4
     else
         r = 0.0
     end
+
+    
+
     Luxor.rotate(r)
    
     #create node points around origin
     corners = Luxor.ngon(Point(0, 0), dim/3,order, vertices=true)
-    
+    polyreflect!(corners)    
 
     ##EDGES
     #draw lines according to edge schematic 
@@ -617,16 +652,24 @@ function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVe
         #if more colors are required than provided, create new palette to ensure distinguishable colours
         col_pal = distinguishable_colors(length(types)) 
     end
-    
 
+    #now add chosen colours to node schematic in place of types
+    #first make sure colours are in same order as types (to avoid erroneous swapping)
+    sort!(col_pal)
+    for (i,t) in enumerate(types)
+        replace!(node_schematic,t=>col_pal[i])
+    end
+    
     #check that length of node_schematic matches order
     if (length(node_schematic)!=order)
         @error "Graphlet node schematic is not valid. Ensure length of node schematic is equal to $order."
     end
+    
+    
     #draw and colour nodes according to node schematic
     for i in 1:length(corners)
-        setcolor(col_pal[i])
-        Luxor.circle.(corners[reverse(node_schematic.==type)], dim/10, action=:fill)
+        setcolor(node_schematic[i])
+        Luxor.circle.(corners[i], dim/10, action=:fill)
     end
     finish()
     preview()
