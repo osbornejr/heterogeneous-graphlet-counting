@@ -1,7 +1,7 @@
 
 types = ["coding","noncoding"]
 colours = ["coding","noncoding"]
-orbits = Dict{String,Vector{Int}}("2-path"=>[1,1],
+orbits = Dict{String,BitMatrix}("2-path"=>[1,1],
                                  "3-path"=>[1,2,1],
                                  "3-tri"=>[1,1,1],
                                  "4-path"=>[1,2,2,1],
