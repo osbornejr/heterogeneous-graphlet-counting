@@ -144,6 +144,9 @@ Ps = permute_all([1,2,3,4],4)
 # ╔═╡ 44935760-b605-4377-8fc0-be4ed15dccbf
 @bind x Slider(1:length([eachrow(Ps)...]))
 
+# ╔═╡ 13082f84-6865-49fc-aa92-3bc2b56b1664
+x
+
 # ╔═╡ 816e3aef-9deb-41b4-85fb-0335c2ae1223
 P_sel=collect(eachrow(Ps))[x]
 
@@ -165,6 +168,15 @@ round.(eb,digits=5) == round.(ea,digits=5)
 # ╔═╡ bd905b08-d1dd-4f0e-9a46-097c16b8d489
 adj
 
+# ╔═╡ 3f6c85a2-37fa-4781-a32f-ac159d3fe1da
+T_sel = collect(eachrow(Ps))[11]
+
+# ╔═╡ a5c91f26-7a29-4ca9-a9d7-4fac9b1c3f40
+T = P_1[[T_sel...],:]
+
+# ╔═╡ a996201a-93a6-473a-8165-a38f10a66f64
+C = T*(P'*adj*P)*T'
+
 # ╔═╡ 7763e722-795a-44d4-aa4b-1c469e0e45e7
 colours = ["coding","noncoding","coding","noncoding"];
 
@@ -173,6 +185,9 @@ NetworkConstruction.draw_graphlet(colours,B)
 
 # ╔═╡ 95f73c2e-0812-4b19-ab35-c8b9185c79d4
 NetworkConstruction.draw_graphlet(colours,adj)
+
+# ╔═╡ dfe3c6ad-5c16-4881-aae1-7d1b402b18c4
+NetworkConstruction.draw_graphlet(colours,C)
 
 # ╔═╡ 16b46372-fd1b-4255-b414-5f69a3112cac
 collect(diagind(adj))
@@ -183,6 +198,9 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DataPreprocessing = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
+GraphletAnalysis = "32f39a16-8143-4a50-a7e7-080c0e917f42"
+GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
@@ -1407,7 +1425,7 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─dc4c8b66-5a4b-11ed-26fa-270253ed99a4
+# ╠═dc4c8b66-5a4b-11ed-26fa-270253ed99a4
 # ╟─a09d4bcc-9150-46da-b82a-f9b42c568dd4
 # ╟─a627c686-e4d5-4992-9ddf-2788352e4492
 # ╟─ac880dc5-ff53-49a4-82a7-4bd6922192e0
@@ -1432,6 +1450,7 @@ version = "3.5.0+0"
 # ╠═e893c13e-1514-47f3-8a89-6a0c4960d53f
 # ╠═dad28152-3495-4bb8-9b84-f0ba0aa2fbd3
 # ╠═44935760-b605-4377-8fc0-be4ed15dccbf
+# ╠═13082f84-6865-49fc-aa92-3bc2b56b1664
 # ╠═816e3aef-9deb-41b4-85fb-0335c2ae1223
 # ╠═1d523005-3b0d-4d38-9966-329c2bdd8db4
 # ╠═dec8d1cc-4600-49cc-988b-306bfd6cd52e
@@ -1441,6 +1460,10 @@ version = "3.5.0+0"
 # ╠═a20944af-340a-4020-a515-b630d43f24b8
 # ╠═bd905b08-d1dd-4f0e-9a46-097c16b8d489
 # ╠═95f73c2e-0812-4b19-ab35-c8b9185c79d4
+# ╠═3f6c85a2-37fa-4781-a32f-ac159d3fe1da
+# ╠═a5c91f26-7a29-4ca9-a9d7-4fac9b1c3f40
+# ╠═a996201a-93a6-473a-8165-a38f10a66f64
+# ╠═dfe3c6ad-5c16-4881-aae1-7d1b402b18c4
 # ╠═7763e722-795a-44d4-aa4b-1c469e0e45e7
 # ╠═16b46372-fd1b-4255-b414-5f69a3112cac
 # ╟─00000000-0000-0000-0000-000000000001
