@@ -327,10 +327,21 @@ function graphlet_edgelist_array_to_adjacency(vecc::AbstractVector{Bool})
     adj = BitMatrix(adj + adj')
     return adj
 end
+
+function generate_heterogeneous_graphlet_list(vecc::AbstractVector{Int},types::Vector{String})
+    ##allows for simplifying entry for each edge only. We convert here to a bit matrix and then feed to main function
+    #first convert int to Bitvector (all nonzero values converted to true)
+    vec = .!(iszero.(vecc))
+    adj = graphlet_edgelist_array_to_adjacency(vecc)
+    return generate_heterogeneous_graphlet_list(adj,types)
+end
+
 function generate_heterogeneous_graphlet_list(vecc::AbstractVector{Bool},types::Vector{String})
-##allows for simplifying entry for each edge only. We convert here to a bit matrix and then feed to main function
-adj = graphlet_edgelist_array_to_adjacency(vecc)
-return generate_heterogeneous_graphlet_list(adj,types)
+    ##allows for simplifying entry for each edge only. We convert here to a bit matrix and then feed to main function
+    adj = graphlet_edgelist_array_to_adjacency(vecc)
+    return generate_heterogeneous_graphlet_list(adj,types)
+
+
 
 end
 
@@ -339,47 +350,48 @@ function generate_heterogeneous_graphlet_list(adj::Matrix{Int64},types::Vector{S
 end
 
 function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{String})
-#method to find all possible permutations of a heterogeneous graphlet given an orbit classification and a set of types.
+    #method to find all possible permutations of a heterogeneous graphlet given an orbit classification and a set of types.
 
-#check to make sure types are sorted
-types = sort(types)
+    #check to make sure types are sorted
+    types = sort(types)
 
-##deduce orbits from adj (sum across one dim)
-orbits = vec(sum(adj,dims=1)) 
+    ##deduce orbits from adj (sum across one dim)
+    orbits = vec(sum(adj,dims=1)) 
 
-#generate all possible permutations of the type list
-n = length(types)
-m = length(orbits)
+    #generate all possible permutations of the type list
+    n = length(types)
+    m = length(orbits)
 
-comb = []
-for i in 1:m
-    push!(comb,repeat(vcat([repeat([types[x]],n^(m-i)) for x in 1:n]...),n^(i-1)))
-end
-candidates = hcat(comb...)
+    comb = []
+    for i in 1:m
+        push!(comb,repeat(vcat([repeat([types[x]],n^(m-i)) for x in 1:n]...),n^(i-1)))
+    end
+    candidates = hcat(comb...)
 
+    
 
-#now check each candidate to see if it has a unique symmetry under the orbit structure
-#initialise empty graphlet list
-graphlets = String[]
-for c in eachrow(candidates)
-    flag = 0
-    for o in unique(orbits)
-        test = c[orbits.==o]
-        if !(test == sort(test))
-            flag = 1
+    #now check each candidate to see if it has a unique symmetry under the orbit structure
+    #initialise empty graphlet list
+    graphlets = String[]
+    for c in eachrow(candidates)
+        flag = 0
+        for o in unique(orbits)
+            test = c[orbits.==o]
+            if !(test == sort(test))
+                flag = 1
+            end
         end
-    end
-    if (flag == 0)
-        ##candidate checked out for all orbits, so we add it.
-        push!(graphlets,join(c,"_"))
-    else
-        #reflect by first orbit first, sorting all nodes in that orbit and adjacent ones if necessary   
+        if (flag == 0)
+            ##candidate checked out for all orbits, so we add it.
+            push!(graphlets,join(c,"_"))
+        else
+            #reflect by first orbit first, sorting all nodes in that orbit and adjacent ones if necessary   
+
+        end
 
     end
 
-end
-
-return graphlets
+    return graphlets
 end
 
 
