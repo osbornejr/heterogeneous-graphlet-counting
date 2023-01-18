@@ -65,7 +65,7 @@ edgelist_array = [1,0,0,1,0,1];
 
 # ╔═╡ e98280f0-7fab-45c2-aa39-2e68724c7234
 NetworkConstruction.draw_graphlet(
-	["y","y","y","y"],
+	["a","b","c","d"],
 	Bool.(edgelist_array))
 
 # ╔═╡ 20634c7e-6805-409e-b3da-aeab4a2f5396
@@ -109,8 +109,11 @@ function adj_is_connected(adj)
 	return test>0
 end
 
+# ╔═╡ 1cff9fa3-9a80-47ad-9c14-8c542b3596ef
+
+
 # ╔═╡ 07965931-0048-49b1-bfc9-6c8233e6e851
-candidates
+
 
 # ╔═╡ b6d6d8d0-c20b-487d-82ac-5079c89e1ec4
 adj_is_connected(adj)
@@ -119,9 +122,6 @@ adj_is_connected(adj)
 begin
 	fournode_perms = NetworkConstruction.draw_graphlet.(Ref(["y","y","y","y"]),BitVector.(eachrow(candidates)));
 end;
-
-# ╔═╡ 1cff9fa3-9a80-47ad-9c14-8c542b3596ef
-fournode_perms[adj_is_connected.(NetworkConstruction.graphlet_edgelist_array_to_adjacency.(eachrow(candidates)))]
 
 # ╔═╡ 94802d0f-6fec-4d8d-a897-a874a4a344d5
 md"""
@@ -136,6 +136,9 @@ connected = fournode_perms[adj_is_connected.(candidate_adj)];
 
 # ╔═╡ 2eebe1c5-e33c-4d05-9dae-af8d1a692300
 connected_w = fournode_perms[.!(in.(0,sum.(candidate_adj,dims =1)))];
+
+# ╔═╡ 6bff6f09-0921-49e5-a5e0-816366f965ed
+r_candidates = candidates[.!(in.(0,sum.(candidate_adj,dims =1))),:];
 
 # ╔═╡ ca96804f-5477-4ba0-9338-a31fe9d6a596
 DataFrame(reshape(connected_w,1,41),:auto)
@@ -154,9 +157,30 @@ eigvals(adj)
 
 # ╔═╡ 686fca35-cdf0-4e25-89c7-48114dada641
 begin
-	ev = eigvals.(NetworkConstruction.graphlet_edgelist_array_to_adjacency.(BitVector.(eachrow(candidates[sum.(eachrow(candidates)).== sum(edgelist_array),:]))))
+	ev = eigvals.(NetworkConstruction.graphlet_edgelist_array_to_adjacency.(BitVector.(eachrow(r_candidates[sum.(eachrow(r_candidates)).== sum(edgelist_array),:]))))
 	countmap(map(x->round.(x,digits = 5).+0.0,ev))
 end
+
+
+# ╔═╡ e6794ba9-a0e0-4529-bf8f-7a971e755a84
+f_candidates = r_candidates[sum.(eachrow(r_candidates)).== sum(edgelist_array),:][map(x->round.(x,digits=5).+0.0 == round.(eigvals(adj),digits=5).+0.0,ev),:]
+
+# ╔═╡ c4f8c854-0a8a-40aa-af23-b7236cc307d1
+begin
+	r_fournode_perms = NetworkConstruction.draw_graphlet.(Ref(["a","a","a","a"]),BitVector.(eachrow(f_candidates)));
+end;
+
+# ╔═╡ 445e028e-b867-4329-9bbe-91fed8589f76
+DataFrame(reshape(r_fournode_perms,4,3),:auto)
+
+# ╔═╡ 39e74e23-b5b9-4978-aefe-1a81719de76f
+f_candidate_adj = NetworkConstruction.graphlet_edgelist_array_to_adjacency.(eachrow(f_candidates));
+
+# ╔═╡ 5b2250b5-cc98-4627-a8a7-8606628cd1ce
+adj
+
+# ╔═╡ 82e8ffab-1814-46f4-960a-be34c133d2a3
+f_candidate_adj[1]
 
 # ╔═╡ dffad11e-4376-4cb6-8584-1959f85bc39b
 md"""
@@ -185,6 +209,9 @@ perm = P_1[[1,3,2,4],:]
 # ╔═╡ dad28152-3495-4bb8-9b84-f0ba0aa2fbd3
 Ps = permute_all([1,2,3,4],4)
 
+# ╔═╡ 46ab2012-702b-49f8-be70-1d89c2d9637b
+Ps
+
 # ╔═╡ 44935760-b605-4377-8fc0-be4ed15dccbf
 @bind x Slider(1:length([eachrow(Ps)...]))
 
@@ -198,7 +225,7 @@ P_sel=collect(eachrow(Ps))[x]
 P = P_1[[P_sel...],:]
 
 # ╔═╡ dec8d1cc-4600-49cc-988b-306bfd6cd52e
-B = P'*adj*P
+B = P*adj*P'
 
 # ╔═╡ a147ede3-b611-48a7-b85a-08626674bb5a
 eb= eigvals(B)
@@ -222,7 +249,7 @@ T = P_1[[T_sel...],:]
 C = T*(P'*adj*P)*T'
 
 # ╔═╡ 7763e722-795a-44d4-aa4b-1c469e0e45e7
-colours = ["coding","coding","coding","coding"];
+colours = ["a","b","c","d"];
 
 # ╔═╡ a20944af-340a-4020-a515-b630d43f24b8
 NetworkConstruction.draw_graphlet(colours,B)
@@ -1494,14 +1521,22 @@ version = "3.5.0+0"
 # ╠═0e8bb9f4-b9bc-4697-8cfd-0f9da7a28fc5
 # ╠═7412bd3b-9c51-43b1-aaf9-f74f37908038
 # ╠═2eebe1c5-e33c-4d05-9dae-af8d1a692300
+# ╠═6bff6f09-0921-49e5-a5e0-816366f965ed
 # ╠═ca96804f-5477-4ba0-9338-a31fe9d6a596
 # ╠═ddbdfba5-6f1a-40d4-878a-9fc92a6da910
 # ╠═1e8b7b0f-4d2c-41ed-b0e1-75c453289e02
 # ╟─7bd295de-0d3e-4086-b624-3f4454c19302
 # ╟─30f1b607-7f7b-43e1-8e3f-c0b0ba238d6b
 # ╠═bdffc448-f488-49aa-8252-82294c92c6cd
-# ╟─686fca35-cdf0-4e25-89c7-48114dada641
-# ╟─dffad11e-4376-4cb6-8584-1959f85bc39b
+# ╠═686fca35-cdf0-4e25-89c7-48114dada641
+# ╠═e6794ba9-a0e0-4529-bf8f-7a971e755a84
+# ╠═c4f8c854-0a8a-40aa-af23-b7236cc307d1
+# ╠═445e028e-b867-4329-9bbe-91fed8589f76
+# ╠═39e74e23-b5b9-4978-aefe-1a81719de76f
+# ╠═5b2250b5-cc98-4627-a8a7-8606628cd1ce
+# ╠═46ab2012-702b-49f8-be70-1d89c2d9637b
+# ╠═82e8ffab-1814-46f4-960a-be34c133d2a3
+# ╠═dffad11e-4376-4cb6-8584-1959f85bc39b
 # ╟─4f816b90-b16b-459a-9595-02ca0e53da9a
 # ╠═e893c13e-1514-47f3-8a89-6a0c4960d53f
 # ╠═dad28152-3495-4bb8-9b84-f0ba0aa2fbd3
