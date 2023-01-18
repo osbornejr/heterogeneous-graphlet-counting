@@ -369,7 +369,7 @@ function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{Strin
     candidates = hcat(comb...)
 
     
-    Main.@infiltrate
+    
 
 
     #now check each candidate to see if it has a unique symmetry under the orbit structure
