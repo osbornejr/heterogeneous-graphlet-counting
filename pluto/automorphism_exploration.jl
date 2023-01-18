@@ -63,12 +63,6 @@ We select a graphlet of interest:
 # ╔═╡ df0c12e2-c27f-45ee-8465-c4af08e57630
 edgelist_array = [1,0,0,1,0,1];
 
-# ╔═╡ 34b818a2-eb34-4786-a396-39fafed0fc37
-
-
-# ╔═╡ 626a999e-51c7-4dc7-8bae-f1045b186c02
-
-
 # ╔═╡ e98280f0-7fab-45c2-aa39-2e68724c7234
 NetworkConstruction.draw_graphlet(
 	["y","y","y","y"],
@@ -89,16 +83,66 @@ First, let's generate all possible permutations of 4-node graphlets.
 """
 
 # ╔═╡ 6c99d430-fc54-4ceb-9b1c-14a45d9e50f8
-candidates = permute_all([0,1],length(edgelist_array),replace = true);
+candidates = permute_all([0,1],length(edgelist_array),replace = true)
+
+# ╔═╡ f054b7c9-e919-4d08-b9df-83081250550a
+test = candidates[1,:]
+
+# ╔═╡ 654360e3-f807-4862-aadb-ca0c47edffca
+test_adj = NetworkConstruction.graphlet_edgelist_array_to_adjacency(test)
+
+# ╔═╡ 209eb172-c8e1-465d-a591-faed350e1a17
+test_deg = diagm(vec(sum(test_adj,dims=1)))
+
+# ╔═╡ 6a7d107e-ded5-4f5b-a04e-31dc4a79f3bb
+Lap = test_deg - test_adj
+
+# ╔═╡ 194d6979-3ac7-4831-a21c-d59a8983fcaf
+eigvals(Lap)
+
+# ╔═╡ c6da6178-44a3-40e0-b5dc-10955f45f9d3
+function adj_is_connected(adj)
+	#using the Fieldler value to determine if a graph is connected
+	deg = diagm(vec(sum(adj,dims=1)))
+	Lap = deg - adj
+	test = eigvals(Lap)[2]
+	return test>0
+end
+
+# ╔═╡ 07965931-0048-49b1-bfc9-6c8233e6e851
+candidates
+
+# ╔═╡ b6d6d8d0-c20b-487d-82ac-5079c89e1ec4
+adj_is_connected(adj)
 
 # ╔═╡ 2635ff89-044b-4dd8-87d3-22cbbd47e70b
 begin
 	fournode_perms = NetworkConstruction.draw_graphlet.(Ref(["y","y","y","y"]),BitVector.(eachrow(candidates)));
 end;
 
+# ╔═╡ 1cff9fa3-9a80-47ad-9c14-8c542b3596ef
+fournode_perms[adj_is_connected.(NetworkConstruction.graphlet_edgelist_array_to_adjacency.(eachrow(candidates)))]
+
+# ╔═╡ 94802d0f-6fec-4d8d-a897-a874a4a344d5
+md"""
+We get only connected graphlets using Fielder values, and then further restrict to those with a certain amount of edges.
+"""
+
+# ╔═╡ 0e8bb9f4-b9bc-4697-8cfd-0f9da7a28fc5
+candidate_adj = NetworkConstruction.graphlet_edgelist_array_to_adjacency.(eachrow(candidates))
+
+# ╔═╡ 7412bd3b-9c51-43b1-aaf9-f74f37908038
+connected = fournode_perms[adj_is_connected.(candidate_adj)];
+
+# ╔═╡ 2eebe1c5-e33c-4d05-9dae-af8d1a692300
+connected_w = fournode_perms[.!(in.(0,sum.(candidate_adj,dims =1)))];
+
+# ╔═╡ ca96804f-5477-4ba0-9338-a31fe9d6a596
+DataFrame(reshape(connected_w,1,41),:auto)
+
 # ╔═╡ 1e8b7b0f-4d2c-41ed-b0e1-75c453289e02
 ##TODO come up with a better way to display as table in pluto (using show() and markdown/html?)
-DataFrame(reshape(fournode_perms,8,8),:auto)
+DataFrame(reshape(fournode_perms,8,8),:auto);
 
 # ╔═╡ 7bd295de-0d3e-4086-b624-3f4454c19302
 md"""
@@ -178,7 +222,7 @@ T = P_1[[T_sel...],:]
 C = T*(P'*adj*P)*T'
 
 # ╔═╡ 7763e722-795a-44d4-aa4b-1c469e0e45e7
-colours = ["coding","noncoding","coding","noncoding"];
+colours = ["coding","coding","coding","coding"];
 
 # ╔═╡ a20944af-340a-4020-a515-b630d43f24b8
 NetworkConstruction.draw_graphlet(colours,B)
@@ -1430,17 +1474,29 @@ version = "3.5.0+0"
 # ╟─a627c686-e4d5-4992-9ddf-2788352e4492
 # ╟─ac880dc5-ff53-49a4-82a7-4bd6922192e0
 # ╟─74a350d8-31b5-4d03-b1eb-d6834edbe1df
-# ╟─df0c12e2-c27f-45ee-8465-c4af08e57630
-# ╠═34b818a2-eb34-4786-a396-39fafed0fc37
-# ╠═626a999e-51c7-4dc7-8bae-f1045b186c02
+# ╠═df0c12e2-c27f-45ee-8465-c4af08e57630
 # ╠═e98280f0-7fab-45c2-aa39-2e68724c7234
 # ╟─20634c7e-6805-409e-b3da-aeab4a2f5396
-# ╟─4175d1ff-bc77-43ca-97e2-2c1b370d3db0
+# ╠═4175d1ff-bc77-43ca-97e2-2c1b370d3db0
 # ╟─926bbcd0-4ef6-4b90-ac2b-d639878fb3d8
-# ╟─6c99d430-fc54-4ceb-9b1c-14a45d9e50f8
-# ╟─2635ff89-044b-4dd8-87d3-22cbbd47e70b
-# ╟─ddbdfba5-6f1a-40d4-878a-9fc92a6da910
-# ╟─1e8b7b0f-4d2c-41ed-b0e1-75c453289e02
+# ╠═6c99d430-fc54-4ceb-9b1c-14a45d9e50f8
+# ╠═f054b7c9-e919-4d08-b9df-83081250550a
+# ╠═654360e3-f807-4862-aadb-ca0c47edffca
+# ╠═209eb172-c8e1-465d-a591-faed350e1a17
+# ╠═6a7d107e-ded5-4f5b-a04e-31dc4a79f3bb
+# ╠═194d6979-3ac7-4831-a21c-d59a8983fcaf
+# ╠═c6da6178-44a3-40e0-b5dc-10955f45f9d3
+# ╠═1cff9fa3-9a80-47ad-9c14-8c542b3596ef
+# ╠═07965931-0048-49b1-bfc9-6c8233e6e851
+# ╠═b6d6d8d0-c20b-487d-82ac-5079c89e1ec4
+# ╠═2635ff89-044b-4dd8-87d3-22cbbd47e70b
+# ╠═94802d0f-6fec-4d8d-a897-a874a4a344d5
+# ╠═0e8bb9f4-b9bc-4697-8cfd-0f9da7a28fc5
+# ╠═7412bd3b-9c51-43b1-aaf9-f74f37908038
+# ╠═2eebe1c5-e33c-4d05-9dae-af8d1a692300
+# ╠═ca96804f-5477-4ba0-9338-a31fe9d6a596
+# ╠═ddbdfba5-6f1a-40d4-878a-9fc92a6da910
+# ╠═1e8b7b0f-4d2c-41ed-b0e1-75c453289e02
 # ╟─7bd295de-0d3e-4086-b624-3f4454c19302
 # ╟─30f1b607-7f7b-43e1-8e3f-c0b0ba238d6b
 # ╠═bdffc448-f488-49aa-8252-82294c92c6cd
