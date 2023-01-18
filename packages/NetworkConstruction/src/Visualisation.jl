@@ -297,7 +297,7 @@ function graphlet_adjacency_to_edgelist_array(adj::AbstractMatrix{Bool})
     return [adj[i,j] for i in 1:size(adj)[1]-1 for j in i+1:size(adj)[2]]
 end
 
-function graphlet_edgelist_array_to_adjacency(vecc::Vector{Int64})
+function graphlet_edgelist_array_to_adjacency(vecc::AbstractVector{Int})
     return graphlet_edgelist_array_to_adjacency(BitVector(vecc))
 end
 
@@ -369,6 +369,8 @@ function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{Strin
     candidates = hcat(comb...)
 
     
+    Main.@infiltrate
+
 
     #now check each candidate to see if it has a unique symmetry under the orbit structure
     #initialise empty graphlet list
@@ -378,7 +380,11 @@ function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{Strin
         for o in unique(orbits)
             test = c[orbits.==o]
             if !(test == sort(test))
+                #reject as soon as one orbit is not sorted correctly 
                 flag = 1
+
+            elseif(length(unique(test))>1)
+                #if orbit is sorted correctly on two
             end
         end
         if (flag == 0)
