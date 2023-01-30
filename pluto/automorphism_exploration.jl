@@ -264,6 +264,9 @@ NetworkConstruction.draw_graphlet(colours,C)
 collect(diagind(adj))
 
 
+# ╔═╡ 6fb1d600-08bc-4b6d-b886-c9600734ed48
+
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -1557,5 +1560,6 @@ version = "3.5.0+0"
 # ╠═dfe3c6ad-5c16-4881-aae1-7d1b402b18c4
 # ╠═7763e722-795a-44d4-aa4b-1c469e0e45e7
 # ╠═16b46372-fd1b-4255-b414-5f69a3112cac
+# ╠═6fb1d600-08bc-4b6d-b886-c9600734ed48
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
