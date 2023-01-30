@@ -368,34 +368,44 @@ function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{Strin
     end
     candidates = hcat(comb...)
 
-    
-    
 
+    ##find typed orbits for each candidate
+    typed_orbits = map(y->map(x->countmap(candidates[y,:][adj[x,:]]),1:m),1:size(candidates,1))    
+    ## convert to dict to ignore order and find matching candidates, then finding uniques
+    to_dict = countmap.(typed_orbits)
+    un_to = unique(to_dict)     
 
-    #now check each candidate to see if it has a unique symmetry under the orbit structure
-    #initialise empty graphlet list
+    #for each unique typed orbit, match to first occurence in candidates
+    # and add to graphlet list
     graphlets = String[]
-    for c in eachrow(candidates)
-        flag = 0
-        for o in unique(orbits)
-            test = c[orbits.==o]
-            if !(test == sort(test))
-                #reject as soon as one orbit is not sorted correctly 
-                flag = 1
-
-            elseif(length(unique(test))>1)
-                #if orbit is sorted correctly on two
-            end
-        end
-        if (flag == 0)
-            ##candidate checked out for all orbits, so we add it.
-            push!(graphlets,join(c,"_"))
-        else
-            #reflect by first orbit first, sorting all nodes in that orbit and adjacent ones if necessary   
-
-        end
-
+    for o in un_to
+        c = candidates[findfirst(isequal(o),to_dict),:]
+        push!(graphlets,join(c,"_"))
     end
+#OUTDATED    #now check each candidate to see if it has a unique symmetry under the orbit structure
+#    #initialise empty graphlet list
+#    graphlets = String[]
+#    for c in eachrow(candidates)
+#        flag = 0
+#        for o in unique(orbits)
+#            test = c[orbits.==o]
+#            if !(test == sort(test))
+#                #reject as soon as one orbit is not sorted correctly 
+#                flag = 1
+#
+#            elseif(length(unique(test))>1)
+#                #if orbit is sorted correctly on two
+#            end
+#        end
+#        if (flag == 0)
+#            ##candidate checked out for all orbits, so we add it.
+#            push!(graphlets,join(c,"_"))
+#        else
+#            #reflect by first orbit first, sorting all nodes in that orbit and adjacent ones if necessary   
+#
+#        end
+#
+#    end
 
     return graphlets
 end
