@@ -2,9 +2,9 @@
 sshargs = -i ~/.ssh/nectar
 
 ##Roots
-root = /Users/rolljob/git/heterogeneous-graphlet-counting
+root = /Users/osbornejr/git/heterogeneous-graphlet-counting
 root = ssh://ubuntu@118.138.237.216//pvol/heterogeneous-graphlet-counting
-prefer = /Users/rolljob/git/heterogeneous-graphlet-counting
+prefer = /Users/osbornejr/git/heterogeneous-graphlet-counting
 servercmd = /pvol/heterogeneous-graphlet-counting/bin/unison
 
 ##Paths to sync
@@ -12,6 +12,7 @@ path = src
 path = test
 path = packages
 path = pluto
+path = scripts
 path = Makefile
 path = Project.toml
 path = Manifest.toml
