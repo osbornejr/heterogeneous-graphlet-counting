@@ -482,11 +482,11 @@ function draw_tex_graphlet(node_schematic::Array{String,1},edge_name::String;kwa
     end
 end
 
-function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::BitVector;out_file::String,colours::Vector{String}=["black"])
+function draw_tex_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVector{Bool};out_file::String,colours::Vector{String}=["black"])
     #function to create tikz drawings of a given graphlet
    
     #initialise tex text
-    tex = "\\begin{tikzpicture}[main_node/.style={circle,fill=black,minimum size=1em,inner sep=3pt]}]\n"
+    tex = "\\begin{tikzpicture}[main_node/.style={circle,fill=black,minimum size=2em,inner sep=3pt]}]\n"
 
     #NODES
     order = length(node_schematic)
