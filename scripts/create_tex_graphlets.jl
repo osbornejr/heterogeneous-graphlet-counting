@@ -1,20 +1,26 @@
 
 types = ["coding","noncoding"]
 colours = ["coding","noncoding"]
-orbits = Dict{String,BitMatrix}("2-path"=>[1,1],
-                                 "3-path"=>[1,2,1],
-                                 "3-tri"=>[1,1,1],
-                                 "4-path"=>[1,2,2,1],
-                                 "4-star"=>[1,1,2,1],
-                                 "4-tail"=>[1,1,2,3],
-                                 "4-cycle"=>[1,2,1,2],
-                                 "4-chord"=>[1,2,1,2],
-                                 "4-clique"=>[1,1,1,1]
+
+#Input the adj matrix (upper triangle fill style) for each graphlet. Note, this must match the configuration baked into the draw_tex_graphlets function of
+#          1--------4
+#          |        |        
+#          |        |        
+#          |        |        
+#          2--------3
+adjs = Dict{String,BitVector}("2-path"=>[true],
+                                 "3-path"=>[true,false,true],
+                                 "3-tri"=>[true,true,true],
+                                 "4-path"=>[true,false,false,true,false,true],
+                                 "4-star"=>[false,true,false,true,false,true],
+                                 "4-tail"=>[true,true,false,true,false,true],
+                                 "4-cycle"=>[true,false,true,true,false,true],
+                                 "4-chord"=>[true,true,true,true,false,true],
+                                 "4-clique"=>[true,true,true,true,true,true]
                                 )
-###note that the above orbit input for 4-cycle is technically incorrect, but it allows us to generate in this case the sole(?) het graphlet that is not implied by orbit structure. It also produces 3 other non-unique-symmetry 4-cycle graphlets that can be ignored.  
 #generate list of all required graphlets
 List = String[]
-for (g,o) in orbits
+for (g,o) in adjs
     #generate list and append graphlet name
     list = NetworkConstruction.generate_heterogeneous_graphlet_list(o,types)
     list = list.*"_$(g)"
@@ -22,8 +28,12 @@ for (g,o) in orbits
         push!(List,x)
     end
 end
+
+
 #where to store tex pics
 out = ENV["PWD"]*"/output/share/graphlets/" 
+#clear and remake directory to update
+run(`rm -r $(out)`)
 run(`mkdir -p $(out)`)
 for g in List
     ## colours need to be reversed if graphlet is all noncoding TODO currently only works if number of types is 2; make work for any number of types
