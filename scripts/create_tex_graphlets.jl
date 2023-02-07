@@ -15,7 +15,7 @@ adjs = Dict{String,BitVector}("2-path"=>[true],
                                  "4-star"=>[false,true,false,true,false,true],
                                  "4-tail"=>[true,true,false,true,false,true],
                                  "4-cycle"=>[true,false,true,true,false,true],
-                                 "4-chord"=>[true,true,true,true,false,true],
+                                 "4-chord"=>[true,true,false,true,true,true],
                                  "4-clique"=>[true,true,true,true,true,true]
                                 )
 #generate list of all required graphlets
