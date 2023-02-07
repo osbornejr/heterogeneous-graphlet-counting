@@ -476,7 +476,8 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
     insig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array_under)...)
 
-    
+
+        
     
     #save in output cache
     NetworkConstruction.html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
@@ -485,18 +486,20 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     #save for website version
     #NetworkConstruction.html_table_maker(sig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
     #NetworkConstruction.html_table_maker(insig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
+    
+
     ##look at edge types in randomised networks
-    real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
-    rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
-    rand_edge_collection = vcat(collect.(rand_types_edgecounts)...)
-    rand_edge_df = DataFrame(graphlet = broadcast(first,rand_edge_collection),value = broadcast(last,rand_edge_collection))
-    random_edges = DataFrame()
-    for t in unique(rand_edge_df[!,:graphlet])
-        rand_vals = filter(:graphlet=>x->x==t,rand_edge_df)[!,:value]
-        rand_exp = sum(rand_vals)/N
-        real_obs = real_type_edgecounts[t]
-        append!(random_edges,DataFrame(Graphlet = first(t)*"_"*last(t)*"_edge", Expected = rand_exp,Observed = real_obs))       
-    end
+   # real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
+   # rand_types_edgecounts = map(y->(countmap(splat(tuple).(sort.(eachrow(hcat(map(x->y[x],first.(edgelist)),map(x->y[x],last.(edgelist)))))))),rand_types_set)
+   # rand_edge_collection = vcat(collect.(rand_types_edgecounts)...)
+   # rand_edge_df = DataFrame(graphlet = broadcast(first,rand_edge_collection),value = broadcast(last,rand_edge_collection))
+   # random_edges = DataFrame()
+   # for t in unique(rand_edge_df[!,:graphlet])
+   #     rand_vals = filter(:graphlet=>x->x==t,rand_edge_df)[!,:value]
+   #     rand_exp = sum(rand_vals)/N
+   #     real_obs = real_type_edgecounts[t]
+   #     append!(random_edges,DataFrame(Graphlet = first(t)*"_"*last(t)*"_edge", Expected = rand_exp,Observed = real_obs))       
+   # end
 
     #pretty_table(random_edges,backend=:html,standalone = false)
     return [sig_graphlets,insig_graphlets]
