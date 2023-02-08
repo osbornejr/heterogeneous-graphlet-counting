@@ -10,13 +10,52 @@ colours = ["coding","noncoding"]
 #          2--------3
 adjs = Dict{String,BitVector}("2-path"=>[true],
                                  "3-path"=>[true,false,true],
+                                 #          1   4
+                                 #          |              
+                                 #          |              
+                                 #          2---3
                                  "3-tri"=>[true,true,true],
+                                 #          1   4
+                                 #          |\             
+                                 #          | \             
+                                 #          |  \            
+                                 #          2---3
                                  "4-path"=>[true,false,false,true,false,true],
+                                 #          1   4
+                                 #          |   |         
+                                 #          |   |          
+                                 #          |   |          
+                                 #          2---3
                                  "4-star"=>[false,true,false,true,false,true],
+                                 #          1   4
+                                 #           \  |           
+                                 #            \ |          
+                                 #             \|          
+                                 #          2---3
                                  "4-tail"=>[true,true,false,true,false,true],
+                                 #          1   4
+                                 #          |\  |           
+                                 #          | \ |          
+                                 #          |  \|          
+                                 #          2---3
                                  "4-cycle"=>[true,false,true,true,false,true],
+                                 #          1---4
+                                 #          |   |          
+                                 #          |   |          
+                                 #          |   |          
+                                 #          2---3
                                  "4-chord"=>[true,true,false,true,true,true],
+                                 #          1   4
+                                 #          |\ /|          
+                                 #          | X |          
+                                 #          |/ \|          
+                                 #          2---3
                                  "4-clique"=>[true,true,true,true,true,true]
+                                 #          1---4
+                                 #          |\ /|          
+                                 #          | X |          
+                                 #          |/ \|          
+                                 #          2---3
                                 )
 #generate list of all required graphlets
 List = String[]
