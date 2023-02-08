@@ -470,7 +470,7 @@ function draw_tex_graphlet(node_schematic::Array{String,1},edge_name::String;kwa
             #homogeneous case
             node_schematic = ["one","one","one","one"]
         end
-        return draw_tex_graphlet(node_schematic,[true,true,true,true,false,true];kwargs...)
+        return draw_tex_graphlet(node_schematic,[true,true,true,false,true,true];kwargs...)
     elseif (edge_name == "4-clique")
         if(length(node_schematic)==0)
             #homogeneous case
