@@ -377,7 +377,7 @@ function generate_heterogeneous_graphlet_list(adj::BitMatrix,types::Vector{Strin
 
     #for each unique typed orbit, match to first occurence in candidates
     # and add to graphlet list
-    Main.@infiltrate
+    
 
     graphlets = String[]
     for o in un_to
