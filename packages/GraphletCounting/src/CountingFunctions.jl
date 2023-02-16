@@ -848,7 +848,7 @@ function local_graphlets(vertex_type_list::Vector{<:AbstractString},edgelist::Un
     return Chi
 end
 
-function total_graphlets(Chi::Array{AbstractDict{String,Int}})    
+function total_graphlets(Chi::AbstractArray{T}) where T<: AbstractDict{String,Int}    
     @info "Calculating total counts for each graphlet..."
     #total counts for each graphlet
     total_counts = reduce(mergecum,Chi)
