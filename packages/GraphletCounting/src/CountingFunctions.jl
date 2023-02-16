@@ -876,14 +876,14 @@ function total_graphlets(Chi::Array{AbstractDict{String,Int}})
 
             #paths (maintain and order centre edge, moving others accordingly)
             if (graphlet_names[el][5] == "4-path")
-                #we iwant to switch if interior needs switching: 
-                if (graphlet_names[el][[2,3]][1] != sort(graphlet_names[el][[2,3]])[1])
-                    graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
-                    graphlet_names[el][[1,4]] = graphlet_names[el][[4,1]]
+                #we iwant to switch if exterior needs switching: 
+                if (graphlet_names[el][[1,4]][1] != sort(graphlet_names[el][[1,4]])[1])
+                    graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]])
+                    graphlet_names[el][[2,3]] = graphlet_names[el][[3,2]]
                 end
-                #or if interior is the same, we sort outer types:
-                if (graphlet_names[el][[2]] == graphlet_names[el][[3]])
-                    graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]]) 
+                #or if exterior is the same, we sort inner types:
+                if (graphlet_names[el][[1]] == graphlet_names[el][[4]])
+                    graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]]) 
                 end
                 #stars (maintain star centre (3rd entry), order others)
             elseif (graphlet_names[el][5] == "4-star")
