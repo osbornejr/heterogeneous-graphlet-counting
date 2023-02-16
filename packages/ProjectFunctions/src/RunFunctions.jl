@@ -81,7 +81,10 @@ function make_cache(dirs...;dir_name::String)
     #store dir path in cache params
     params["cache"][dir_name] = dir
     ##remove contents if cache clear is set
-    params["cache"]["clear"][dir_name] ? run(`rm -r $(dir)/`) : nothing
+    if(params["cache"]["clear"][dir_name])
+        @info "Removing cached $(dir_name) data (and all dependent cached data) from $(dir)"
+run(`rm -r $(dir)/`)
+    end 
 end
 function cache_setup()
     ##create directory for run
