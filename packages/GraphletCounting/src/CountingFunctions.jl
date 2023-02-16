@@ -895,7 +895,7 @@ function total_graphlets(Chi::AbstractArray{T}) where T<: AbstractDict{String,In
             elseif (graphlet_names[el][5] == "4-chord")
                 graphlet_names[el][[2,3]] = sort(graphlet_names[el][[2,3]])
                 graphlet_names[el][[1,4]] = sort(graphlet_names[el][[1,4]])
-                ## cycles (differentiate between instances where a) there is a triplet of same type, which will occupy first three slots; b) at least on pair of adjacent nodes are of same type, in which case make first two be the pair (and if there are two pairs, choose first pair via sorting),; or c) all adjacent node pairs are of different type, in which case let any matching non adjacent pairs take slots 1 and 3, and if there two non adjacent pairs, choose first pair via sorting).    
+                ##cycles OUTDATED-- we now sort in a similar way, but always priotising global type order first... cycles (differentiate between instances where a) there is a triplet of same type, which will occupy first three slots; b) at least on pair of adjacent nodes are of same type, in which case make first two be the pair (and if there are two pairs, choose first pair via sorting),; or c) all adjacent node pairs are of different type, in which case let any matching non adjacent pairs take slots 1 and 3, and if there two non adjacent pairs, choose first pair via sorting).    
             elseif (graphlet_names[el][5] == "4-cycle")
                 #get occurences of each type in graphlet
                 occs = countmap(graphlet_names[el][1:4])
@@ -906,34 +906,65 @@ function total_graphlets(Chi::AbstractArray{T}) where T<: AbstractDict{String,In
                     #triplet case
                     #find type and position that is not in triplet
                     solo = collect(keys(filter(x->last(x) !== moccs,occs)))[1]
+                    gang = collect(keys(filter(x->last(x) == moccs,occs)))[1]
                     switch = findall(x->x == solo,graphlet_names[el])
-                    #switch solo type to last position (potentially trivially but thats ok) 
-                    graphlet_names[el][switch...] = graphlet_names[el][4]
-                    graphlet_names[el][4] = solo
+                    #switch solo type to last or first position depending on type order (potentially trivially but thats ok). 
+
+                    if (solo>gang)  
+                        graphlet_names[el][switch...] = graphlet_names[el][4]
+                        graphlet_names[el][4] = solo
+                    else
+                        graphlet_names[el][switch...] = graphlet_names[el][1]
+                        graphlet_names[el][1] = solo
+                    end
+
                 elseif (moccs == 2)
                     ## find which first type that matches max occs 
                     primary_pair_type = sort(collect(keys(filter(x->last(x) == moccs,occs))))[1]
+                    #find if primary pair type is greater than other types 
+                    pair_supremacists =sum(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]).>primary_pair_type) 
                     sig = graphlet_names[el].==primary_pair_type
-                    ##check for case c)
-                    if (sig == BitArray(vec([true false true false false])))
-                        ## sort non primary non-adjecent pair nodes 
-                        graphlet_names[el][[2,4]] = sort(graphlet_names[el][[2,4]])
-                    elseif (sig == BitArray(vec([false true false true false])))
-                        ##switch primary nonadjacent pair to positions 1 and 3, and sort the other nodes
-                        graphlet_names[el][[2,4]] = sort(graphlet_names[el][[1,3]])
-                        graphlet_names[el][[1,3]] = [primary_pair_type, primary_pair_type]
+                    ##check for case c) i.e. nonadj primary pair
+
+                    if (sig in [BitArray(vec([true false true false false])),BitArray(vec([false true false true false]))])
+
+                        if (pair_supremacists == 0)
+                            graphlet_names[el][[2,4]] = sort(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]))
+                            graphlet_names[el][[1,3]] = [primary_pair_type, primary_pair_type]
+                        else #in either other case, nonadj pair goes 2nd and 4th
+                            graphlet_names[el][[1,3]] = sort(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]))
+                            graphlet_names[el][[2,4]] = [primary_pair_type, primary_pair_type]
+                        end
                     else
                         ## it must be case b)
-                        graphlet_names[el][[3,4]] = sort(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]))
-                        graphlet_names[el][[1,2]] = [primary_pair_type, primary_pair_type]
+                        if (pair_supremacists == 0)
+                            graphlet_names[el][[3,4]] = sort(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]))
+                            graphlet_names[el][[1,2]] = [primary_pair_type, primary_pair_type]
+                        elseif (pair_supremacists == 1)
+                            graphlet_names[el][[1,4]] = sort(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]))
+                            graphlet_names[el][[2,3]] = [primary_pair_type, primary_pair_type]
+                        else
+                            graphlet_names[el][[1,2]] = sort(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]))
+                            graphlet_names[el][[3,4]] = [primary_pair_type, primary_pair_type]
+                        end
+
 
                     end
                 else
-                    ## all types must be unique (and thus there must be at least 4 types present) so we sort on all nodes
-                    graphlet_names[el][1:4] = sort(graphlet_names[el][1:4])
-
-                    #now need to find out if 
-                    #if (length(occs) == 2)
+                    ## all types must be unique (and thus there must be at least 4 types present) so we sort so htat primary type is first
+                    
+                    ## find which first type that matches max occs 
+                    primary_type = sort(collect(keys(filter(x->last(x) == moccs,occs))))[1]
+                    ##find which position primary is in
+                    loc = findall(x-> x == primary_type,graphlet_names[el])[1]
+                    ##find non-adjacent type to loc
+                    nonadj = mod(loc+2,Base.OneTo(4))
+                    nonadj_type = graphlet_names[el][nonadj]
+                    ## primary and non adj go in slots 1 and 3, the other two are sorted into slots 2 and 4
+                    graphlet_names[el][[2,4]] = sort(graphlet_names[el][[mod(loc+1,Base.OneTo(4)),mod(nonadj+1,Base.OneTo(4))]])
+                    graphlet_names[el][[1,3]] = [primary_type,nonadj_type]
+                    #now need to find out if
+                    #if (length(occs) == 2)z
 
                 end
                 #for cliques, just order everything
