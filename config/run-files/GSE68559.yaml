@@ -16,10 +16,10 @@ cache:
     adjacency_dir: false 
     anal_dir: false 
     community_dir: false 
-    graphlet_counting_dir: true 
+    graphlet_counting_dir: false 
     rep_dir: false 
     graphlet_enum_dir: false 
-    coinc_dir: true 
+    coinc_dir: false 
     orbit_dir: false 
 
 website:
