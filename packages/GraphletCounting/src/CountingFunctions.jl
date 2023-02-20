@@ -921,10 +921,11 @@ function total_graphlets(Chi::AbstractArray{T}) where T<: AbstractDict{String,In
                 elseif (moccs == 2)
                     ## find which first type that matches max occs 
                     primary_pair_type = sort(collect(keys(filter(x->last(x) == moccs,occs))))[1]
-                    #find if primary pair type is greater than other types 
-                    pair_supremacists =sum(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]).>primary_pair_type) 
+                    #find if primary pair type is greater (in alphabetical order) than other types 
+                    pair_supremacists =sum(filter(x->x!=primary_pair_type,graphlet_names[el][1:4]).<primary_pair_type) 
                     sig = graphlet_names[el].==primary_pair_type
                     ##check for case c) i.e. nonadj primary pair
+
 
                     if (sig in [BitArray(vec([true false true false false])),BitArray(vec([false true false true false]))])
 
