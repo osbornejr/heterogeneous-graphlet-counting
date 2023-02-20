@@ -485,7 +485,10 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     #save in output cache
     NetworkConstruction.html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
     NetworkConstruction.html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
-                              
+    NetworkConstruction.tex_table_maker(sig_graphlets,"output/share/overrepresented_graphlets.tex")
+    NetworkConstruction.tex_table_maker(insig_graphlets,"output/share/underrepresented_graphlets.tex")
+
+
     #save for website version
     #NetworkConstruction.html_table_maker(sig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
     #NetworkConstruction.html_table_maker(insig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
