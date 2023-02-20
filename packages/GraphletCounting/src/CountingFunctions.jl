@@ -610,14 +610,51 @@ function t2(d1,d2)
     d1
 end
 
-function count_graphlets(args...;run_method::String="serial",progress::Bool=false)
-    Chi = local_graphlets(args...;run_method=run_method,progress=progress)
-    
+function count_graphlets(vertex_type_list::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",progress::Bool=false)
+    if (graphlet_size == 2)
+        ## get typed degree distribution for nodes 
+        degree_dist = typed_degree_distribution(vertex_type_list,edgelist)
+        
+        types = sort(unique(vertex_type_list))
+        ##merge these to identify total counts of typed edges (i.e. 2-paths)
+        #initialise empty Array 
+        Chi = Vector{Dict{String,Int}}()
+        for t in types 
+            ## dd of subset of nodes of type t
+            nt = degree_dist[vertex_type_list .== t]
+            ## reduce to global count
+            push!(Chi,reduce(mergecum,nt))
+        end
+        ##now need to match types to each dict in Chi
+        #append type to keys in dicts
+        col_dicts = map(y->Dict(Pair.(map(x->join(sort([types[y],x]),"_"),collect(keys(Chi[y]))),collect(values(Chi[y])))),1:length(types))
+        ##merge down collated dicts into one graphlet count dict
+        graphlets = reduce(mergecum,col_dicts)
+        ##divide to dodge double counting
+        for (k,v) in graphlets
+            graphlets[k] = div(v,2)
+        end
 
-    graphlets = total_graphlets(Chi)
+    elseif (graphlet_size in [3,4]) 
+        #get per edge graphlet counts
+        Chi = local_graphlets(vertex_type_list,edgelist,graphlet_size;run_method=run_method,progress=progress)
+        #merge into total graphlet counts
+        graphlets = total_graphlets(Chi)
+    else
+        throw(ArgumentError("Graphlet counting only supported for orders 2,3 and 4."))
+    end
+    
     return graphlets
 end
 
+function typed_degree_distribution(vertexlist::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}})
+    #ensure strings are tidied up for counting
+    vertexlist = String.(vertexlist)
+    #get neighbours of each node and sort
+    neighbourdict = sort(Neighbours(edgelist))
+    dd = countmap.(map(x->vertexlist[x],collect(values(neighbourdict))))
+   return dd 
+end
 
 function graphlet_relationships(vertex_type_list::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},graphlet_size::Int=3;run_method::String="serial",temp_dir::String="rel_dir",progress::Bool=false)
     #get neighbourhood for each vertex in advance (rather than calling per-edge)
