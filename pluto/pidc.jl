@@ -45,8 +45,8 @@ load_config(config_file)
 # ╠═╡ show_logs = false
 raw_counts = get_input_data();
 
-# ╔═╡ b26c4639-1e52-4e51-b248-7e736c6cc968
-
+# ╔═╡ 279445ca-ed7b-49ba-a595-bc026a5aad8c
+raw_counts
 
 # ╔═╡ a0bf30fb-a809-4e2e-93db-22e33b9eb107
 processed_counts = ProjectFunctions.data_preprocessing(raw_counts);
@@ -1310,7 +1310,7 @@ version = "3.5.0+0"
 # ╠═8bed797f-a8d9-4de9-853b-01ed2f80a380
 # ╠═75c0b729-9b2d-4820-a36e-0fe751ccf4cc
 # ╠═3c0ca971-44ae-44cc-940c-3f6b3844474f
-# ╠═b26c4639-1e52-4e51-b248-7e736c6cc968
+# ╠═279445ca-ed7b-49ba-a595-bc026a5aad8c
 # ╠═a0bf30fb-a809-4e2e-93db-22e33b9eb107
 # ╠═a85de550-e0db-4b5b-a9d3-71e5744da601
 # ╠═61b3fa91-dada-4bda-a1a7-f1c06a4cbd16
