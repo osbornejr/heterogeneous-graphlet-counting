@@ -209,7 +209,32 @@ function data_preprocessing(raw_counts::DataFrame)
 end 
 export data_preprocessing
 
-function  network_construction(sample_counts::DataFrame)
+
+function network_construction()
+    ##alt method that allows loading of cache if output exists, and gives an error otherwise.
+    samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
+    adj_file = "$(params["cache"]["adjacency_dir"])/adjacency_matrix.jld2"
+    if ((isfile(adj_file)) && (isfile(samp_file)))
+        pre_adj_matrix = cache_load(adj_file,"pre-adj_matrix")
+        adj_matrix = cache_load(adj_file,"adjacency_matrix")
+        sample_counts = cache_load(samp_file,"sample counts")
+   else
+       throw(ArgumentError("No cached files exist at either $adj_file or $samp_file, please provide processed counts input data."))
+    end
+    #Trim nodes with degree zero
+    network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+    #maintain list of vertices in graph
+    vertexlist = copy(network_counts[!,:transcript_type])     
+    edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
+    if(params["network_construction"]["synthetic"] == true)
+        ##slightly hacky way to do this still (TODO does the vertexlist (types) need to be randomised? it is atm)
+        @info "Switching to synthetic network"
+        edgelist,vertexlist = NetworkConstruction.synthetic_network(vertexlist,edgelist)
+    end
+    return [adj_matrix, network_counts,vertexlist,edgelist]       
+end
+
+ function  network_construction(sample_counts::DataFrame)
 
     ##Network construction
     ##Measure of coexpression
@@ -219,7 +244,7 @@ function  network_construction(sample_counts::DataFrame)
     #similarity_matrix=mutual_information(data)
     ## file to cache similarity matrix for use later:
     sim_file = "$(params["cache"]["similarity_dir"])/similarity_matrix.jld2"
-    if (isfile(sim_file))
+     if (isfile(sim_file))
         similarity_matrix = cache_load(sim_file,"similarity_matrix")
     else
         @info "Generating similarity matrix"
