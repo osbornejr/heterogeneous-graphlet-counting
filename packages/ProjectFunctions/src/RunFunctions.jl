@@ -1,6 +1,6 @@
 #using Distributed, JLD2, CSV
-#using StatsBase,Gadfly,Compose,DataFrames,YAML,Dates, LightGraphs, Colors, Random, Distributions, ProgressMeter
-using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,LightGraphs,Dates,Colors,Gadfly,Compose,DataStructures,CategoricalArrays
+#using StatsBase,Gadfly,Compose,DataFrames,YAML,Dates, Graphs, Colors, Random, Distributions, ProgressMeter
+using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,Graphs,Dates,Colors,Gadfly,Compose,DataStructures,CategoricalArrays,GraphPlot
 
 
 
@@ -23,11 +23,6 @@ function run_all(config_file::String)
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
 #TODO resolve contradiction here where, if synthetic is true, the output here gives the real adj_matrix but the synthetic edgelist/vertexlist
 
-
-
-
-
-
     ## For analysis step, we need to run for both real and synthetic networks
     #this means we will need to reload the cache dirs for each run
     #run first on synthetic network, as that is what will be loaded in if "synthetic" parameter is true
@@ -36,8 +31,9 @@ function run_all(config_file::String)
     anal_flag = 0
     while (anal_flag == 0)  
             
-        # @info "Finding communities"
-        # com_anal = community_analysis(network_counts,adj_matrix)
+         @info "Finding communities"
+         com_anal = community_analysis(network_counts,adj_matrix)
+        
         @info "Counting graphlets"
         graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
 
@@ -81,6 +77,7 @@ function make_cache(dirs...;dir_name::String)
     #store dir path in cache params
     params["cache"][dir_name] = dir
     ##remove contents if cache clear is set
+    #TODO setup user input warning at start of run if any data is to be cleared.
     if(params["cache"]["clear"][dir_name])
         @info "Removing cached $(dir_name) data (and all dependent cached data) from $(dir)"
 run(`rm -r $(dir)/`)
@@ -165,8 +162,7 @@ function data_preprocessing(raw_counts::DataFrame)
     ## Clean - remove transcripts with total counts across all samples less than Cut
     file = "$(params["cache"]["cutoff_dir"])/clean_counts.jld2"
 
-    ##plot before cut
-    #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
+    
     if(isfile(file))
         clean_counts = cache_load(file,"clean counts")
     else
@@ -176,10 +172,6 @@ function data_preprocessing(raw_counts::DataFrame)
         cache_save(file,"clean counts"=>clean_counts)
     end
 
-    ##plot after cut
-    #DataPreprocessing.histogram(DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/clean_data_cut_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
-
-    #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
 
     ### Normalisation
     ##update cache
@@ -226,11 +218,6 @@ function network_construction()
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-    if(params["network_construction"]["synthetic"] == true)
-        ##slightly hacky way to do this still (TODO does the vertexlist (types) need to be randomised? it is atm)
-        @info "Switching to synthetic network"
-        edgelist,vertexlist = NetworkConstruction.synthetic_network(vertexlist,edgelist)
-    end
     return [adj_matrix, network_counts,vertexlist,edgelist]       
 end
 
@@ -328,8 +315,11 @@ function community_analysis(network_counts,adj_matrix)
     ##use gene ids here, as they have more chance of getting a GO annotation
     if(params["analysis"]["func_annotate"]==true)
         vertex_gene_names = network_counts[!,:gene_id]
-        #community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
-        community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain") 
+        if (params["website"]["website"] == true)
+            community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
+        else
+            community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain") 
+        end
         ## functional annotations of communities
         func_file = "$anal_dir/func_annotations.jld2" 
         if (isfile(func_file))
@@ -339,13 +329,16 @@ function community_analysis(network_counts,adj_matrix)
             functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75")       
             cache_save(func_file,"functional annotations"=>functional_annotations)
         end 
-    return [community_vertices,functional_annotations]
+        return [community_vertices,functional_annotations]
     else
         vertex_names = network_counts[!,:transcript_id]
-        #community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
-        community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain") 
+        if (params["website"]["website"] == true)
+            community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
+        else
+            community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain") 
+        end
         #find nodes who are not in any community (usually because they are not in connected component).
-        community_orphans = findall(x->x==0,in.(1:length(vertexlist),Ref(community_vertices.name)))
+        #community_orphans = findall(x->x==0,in.(1:length(vertexlist),Ref(community_vertices.name)))
         return community_vertices
     end
 end
@@ -451,9 +444,12 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
             summary.variable = [heg*"_"*hog]
             append!(summaries,summary)
             ##histogram for each heterogeneous graphlet
-            #histogram(rand_fil_fil,:value,:graphlet,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(heg)_$(hog)_histogram.svg")
-            ##log version
-            #histogram(rand_fil_fil,:log_value,:graphlet,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(heg)_$(hog)_log_histogram.svg")
+            #
+            if (params["website"]["website"] == true)
+                DataPreprocessing.histogram(rand_fil_fil,:value,:graphlet,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(heg)_$(hog)_histogram.svg")
+                ##log version
+                #histogram(rand_fil_fil,:log_value,:graphlet,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(heg)_$(hog)_log_histogram.svg")
+            end
             rand_vals = rand_fil_fil[!,:value]
             log_rand_vals =rand_fil_fil[!,:log_value]
             rand_exp = sum(rand_vals)/N
@@ -483,9 +479,11 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         log_real_fil.value =log.(log_real_fil.value)
         log_rand_fil = copy(rand_fil)
         log_rand_fil.value =log.(log_rand_fil.value)
-        #SVG plot (for web)
-        #p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
-        #draw(SVG("$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(hog)_boxplot.svg",4inch,6inch),p)
+        if (params["website"]["website"] == true)
+            #SVG plot (for web)
+            p = plot(layer(filter(:graphlet=>x->occursin(hog,x),log_real_fil),x = :graphlet,y = :value, Geom.point,color=["count in graph"]),Guide.xticks(label=true),Theme(key_position = :none),Guide.xlabel(nothing),Guide.ylabel("log value"),Guide.yticks(orientation=:vertical),layer(filter(:graphlet=>x->occursin(hog,x),log_rand_fil),x=:graphlet,y=:value,Geom.boxplot(suppress_outliers = true),color=:graphlet));
+            draw(SVG("$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/plots/$(hog)_boxplot.svg",4inch,6inch),p)
+        end
         #TeX plot (via PGFPlots) 
         #add real log values to summaries, order from lowest to highest)
         summaries.values = log_real_fil.value
@@ -508,16 +506,17 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         
     
     #save in output cache
-    NetworkConstruction.html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
-    NetworkConstruction.html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
+    #NetworkConstruction.html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
+    #NetworkConstruction.html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
     NetworkConstruction.tex_table_maker(sig_graphlets,"output/share/overrepresented_graphlets.tex")
     NetworkConstruction.tex_table_maker(insig_graphlets,"output/share/underrepresented_graphlets.tex")
 
 
-    #save for website version
-    #NetworkConstruction.html_table_maker(sig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
-    #NetworkConstruction.html_table_maker(insig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
-    
+    if (params["website"]["website"] == true)
+        #save for website version
+        NetworkConstruction.html_table_maker(sig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath="../figs/")
+        NetworkConstruction.html_table_maker(insig_graphlets,"$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/insig_type_representations.html",imgs=insig_graphlets.Graphlet,figpath="../figs/")  
+    end 
 
     ##look at edge types in randomised networks
    # real_type_edgecounts = countmap(splat(tuple).(sort.(eachrow(hcat(map(x->vertexlist[x],first.(edgelist)),map(x->vertexlist[x],last.(edgelist)))))))
@@ -769,3 +768,107 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     return sig_nodes_dict
 end
 export coincident_graphlets
+
+
+function webpage_construction()
+        @info "Building website directory structure..."
+        #set up output directories
+        output_dir = "$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])"
+        #run(`mkdir -p "$(params["website"]["website_dir"])/$(params["website"]["page_name"])"`)
+        run(`mkdir -p "$output_dir/tableinput"`)
+        run(`mkdir -p "$output_dir/plots"`)
+        
+        ##build run parameter table
+        run_parameter_df = DataFrame(
+                                     Test = params["test_name"], 
+                                     Expression_cut_off = params["data_preprocessing"]["expression_cutoff"],
+                                     Normalisation = params["data_preprocessing"]["norm_method"],
+                                     Variance_cut_off = params["data_preprocessing"]["variance_percent"],
+                                     Coexpression_measure = params["network_construction"]["coexpression"],
+                                     Edge_threshold = params["network_construction"]["threshold"],
+                                     Threshold_method = params["network_construction"]["threshold_method"])
+        CSV.write("$output_dir/tableinput/run_parameters.csv",run_parameter_df)
+
+        #Network visualisation
+        @info "Visualising network..."
+        #load network (assumes is in cache)
+        adj_matrix,network_counts,vertexlist,edgelist = network_construction()
+        g = SimpleGraph(adj_matrix)
+        ##get largest component
+        components = connected_components(g)
+        largest = components[length.(components).==max(length.(components)...)]
+        adj_matrix_comp = adj_matrix[largest[1],largest[1]]
+        g_comp = Graph(adj_matrix_comp)
+        ##update vertexlist
+        vertexlist_comp = vertexlist[largest[1]]
+        ##plot (either connected component or whole network
+        nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist_comp.=="coding").+1]
+        draw(SVG("$output_dir/component_network.svg",16cm,16cm),gplot(g_comp,nodefillc = nodefillc))
+        nodefillc = [colorant"lightseagreen", colorant"orange"][(vertexlist.=="coding").+1]
+        draw(SVG("$output_dir/network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+        
+        #load in data
+        raw_counts = get_input_data()
+        clean_counts = cache_load("$(params["cache"]["cutoff_dir"])/clean_counts.jld2","clean counts")
+        norm_counts = cache_load("$(params["cache"]["norm_dir"])/norm_counts.jld2","norm counts")
+        sample_counts = cache_load("$(params["cache"]["sampling_dir"])/sample_counts.jld2","sample counts")
+    
+
+        ##plot before cut
+        raw_data = data_from_dataframe(raw_counts,"data")
+        DataPreprocessing.histogram(
+                                    DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],
+                                              [:sum,:transcript_type]),
+                                    :sum,
+                                    :transcript_type,
+                                    "$output_dir/raw_data_histogram.svg",
+                                    xaxis =" sum of expression (log2 adjusted)")
+
+        ##plot after cut
+        clean_data = data_from_dataframe(clean_counts,"data")
+        DataPreprocessing.histogram(
+                                    DataFrame([log2.(vec(sum(clean_data,dims=2))),clean_counts[!,:transcript_type]],
+                                              [:sum,:transcript_type]),
+                                    :sum,
+                                    :transcript_type,
+                                    "$output_dir/clean_data_cut_histogram.svg",
+                                    xaxis =" sum of expression (log2 adjusted)")
+
+        #boxplot(raw_counts,"raw_data_cleaned_boxplot.svg")
+    
+        ##Type breakdown table 
+        ##set up csv string
+        csv = "Step,Coding counts,Non-coding counts,Non-coding proportion\n"
+        csv = csv*"Raw counts,"*string(size(raw_counts,1)-size(filter(:transcript_type=>x->x=="noncoding",raw_counts),1))*","*string(size(filter(:transcript_type=>x->x=="noncoding",raw_counts),1))*","*string(round(size(filter(:transcript_type=>x->x=="noncoding",raw_counts),1)/size(raw_counts,1),sigdigits=3))*"\n"
+        csv = csv*"Clean counts,"*string(size(clean_counts,1)-size(filter(:transcript_type=>x->x=="noncoding",clean_counts),1))*","*string(size(filter(:transcript_type=>x->x=="noncoding",clean_counts),1))*","*string(round(size(filter(:transcript_type=>x->x=="noncoding",clean_counts),1)/size(clean_counts,1),sigdigits=3))*"\n"
+        csv = csv*"Sample counts,"*string(size(sample_counts,1)-size(filter(:transcript_type=>x->x=="noncoding",sample_counts),1))*","*string(size(filter(:transcript_type=>x->x=="noncoding",sample_counts),1))*","*string(round(size(filter(:transcript_type=>x->x=="noncoding",sample_counts),1)/size(sample_counts,1),sigdigits=3))*"\n"
+        csv = csv*"Network counts,"*string(size(network_counts,1)-size(filter(:transcript_type=>x->x=="noncoding",network_counts),1))*","*string(size(filter(:transcript_type=>x->x=="noncoding",network_counts),1))*","*string(round(size(filter(:transcript_type=>x->x=="noncoding",network_counts),1)/size(network_counts,1),sigdigits=3))*"\n"
+        write("$output_dir/tableinput/type_representation.csv",csv)
+        
+        #Degrees
+        #homogonous degree distribution
+        degrees = vec(sum(adj_matrix,dims=2))
+        p = plot(DataFrame([sort(degrees)],:auto),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
+        draw(SVG("$output_dir/degree_distribution.svg"),p)
+        
+        #degrees for each transcript type
+        for type in unique(vertexlist)
+                p = plot(DataFrame([sort(degrees[vertexlist.==type])],:auto),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
+                draw(SVG("$output_dir/$(type)_degree_distribution.svg"),p)
+        end
+        
+        ## Hubs
+        @info "Identifying hubs..."
+        deg_thresh = Int(floor(mean(degrees)+2*std(degrees)))
+        nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
+        draw(SVG("$output_dir/two_std_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+        deg_thresh = 70#mean(degrees)+2*std(degrees)
+        nodefillc = [colorant"black", colorant"red"][(degrees.>deg_thresh).+1]
+        draw(SVG("$output_dir/alt_hub_network.svg",16cm,16cm),gplot(g,nodefillc = nodefillc))
+        
+        ##Network stats table
+        ##set up csv string
+        csv = "Nodes,Edges,Components,Nodes in largest component,Maximal degree\n"
+        csv = csv*string(length(vertexlist))*","*string(length(edgelist))*","*string(length(components))*","*string(length(largest...))*","*string(max(degrees...))*"\n"
+        write("$output_dir/tableinput/network_stats.csv",csv)
+end
