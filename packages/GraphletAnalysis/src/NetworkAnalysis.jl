@@ -1,4 +1,4 @@
-using LightGraphs,RCall,DataFrames,GraphletCounting,NetworkConstruction
+using Graphs,RCall,DataFrames,GraphletCounting,NetworkConstruction
 #using PrettyTables
 
 function connected_components_html_table(adjacency_matrix::AbstractArray,filename::String)

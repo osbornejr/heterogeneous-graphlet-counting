@@ -14,11 +14,11 @@ function edgelists_null_model(edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,
     ##using default switching value of 100*m as per Milo et al TODO user can set this
     switching_factor =100
     switching_val = switching_factor*length(edgelist)
-    if (method == "erdos_renyi")
-        for i in 1:n
-                edgelists[i] = edgelist_from_adj(LightGraphs.LinAlg.adj_matrix(erdos_renyi(size(degrees,1),Int(sum(degrees)/2))))
-            end
-    end
+    #if (method == "erdos_renyi")
+    #    for i in 1:n
+    #            edgelists[i] = edgelist_from_adj(Graphs.LinAlg.adj_matrix(erdos_renyi(size(degrees,1),Int(sum(degrees)/2))))
+    #        end
+    #end
     if(method == "switching")
         for i in 1:n
             print("Switching network $i...\n")

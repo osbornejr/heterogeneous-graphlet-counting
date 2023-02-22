@@ -1,4 +1,4 @@
-using LightGraphs
+using Graphs
 #using PrettyTables
 
 function connected_components_html_table(adjacency_matrix::AbstractArray,filename::String)
