@@ -2,7 +2,7 @@ test_name: GSE68559
 
 
 raw_counts_script: "config/input_scripts/GSE68559.jl"
-distributed: false
+distributed: true
 cache:
   keep_cache: true
   base_dir: "output/cache"
@@ -16,13 +16,14 @@ cache:
     adjacency_dir: false 
     anal_dir: false 
     community_dir: false 
-    graphlet_counting_dir: true
+    graphlet_counting_dir: false
     rep_dir: false 
     graphlet_enum_dir: false 
     coinc_dir: false 
     orbit_dir: false 
 
 website:
+  website: true
   page_name: "menu1"
   website_dir: "website"
 
@@ -44,5 +45,5 @@ analysis:
   recursive: true #count lower graphlets as well
   null_model_size: 1000
   wgcna: false
-  func_annotate: true
+  func_annotate: false
 
