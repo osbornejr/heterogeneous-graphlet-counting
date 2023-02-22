@@ -1,2 +1,2 @@
 Test,Expression_cut_off,Normalisation,Variance_cut_off,Coexpression_measure,Edge_threshold,Threshold_method
-GSE68559,25,upper_quartile,0.025,pidc,0.95,empirical_dist_zero
+GSE68559,1,upper_quartile,0.025,pidc,0.95,empirical_dist_zero
