@@ -12,7 +12,7 @@ parBCA = (S[<span class=hljs-number >2</span>,<span class=hljs-number >3</span>]
 <span class=hljs-meta >@show</span> parBCA
 <span class=hljs-comment >## partial correlation of B and A when we exclude the influence of C:</span>
 parBAC = (S[<span class=hljs-number >1</span>,<span class=hljs-number >2</span>]-S[<span class=hljs-number >2</span>,<span class=hljs-number >3</span>]*S[<span class=hljs-number >1</span>,<span class=hljs-number >3</span>])/(sqrt(<span class=hljs-number >1</span>-(S[<span class=hljs-number >2</span>,<span class=hljs-number >3</span>])^<span class=hljs-number >2</span>)*sqrt(<span class=hljs-number >1</span>-(S[<span class=hljs-number >1</span>,<span class=hljs-number >3</span>])^<span class=hljs-number >2</span>))
-<span class=hljs-meta >@show</span> parBAC</code></pre> <pre><code class="plaintext hljs">S = [1.0 0.9433648390658638 0.9306599740710443; 0.9433648390658638 1.0 0.8741732272201435; 0.9306599740710443 0.8741732272201435 1.0]
-parBCA = -0.03112961614718157
-parBAC = 0.7305688890720404
+<span class=hljs-meta >@show</span> parBAC</code></pre> <pre><code class="plaintext hljs">S = [1.0 0.9403511883338987 0.936649458042651; 0.9403511883338987 1.0 0.8984941976767531; 0.936649458042651 0.8984941976767531 1.0]
+parBCA = 0.14865985106737467
+parBAC = 0.6423998899403371
 </code></pre> <div class=page-foot > <div class=copyright > &copy; Joel Robertson. Last modified: February 22, 2023. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>. </div> </div> </div> </div> </div>
