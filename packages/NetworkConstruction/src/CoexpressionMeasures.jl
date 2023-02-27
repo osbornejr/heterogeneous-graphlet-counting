@@ -70,7 +70,7 @@ function get_unique_values(data,i,j)		#set unique vectors
 	ux_vector = Vector{Float64}(undef,size(data,1))
 	##calculate unique scores for every triplet involving i and j 
 	for k in 1:size(data,1)
-		ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:])["unique_1"]
+		ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:],include_synergy=false)["unique_1"]
 	end
 	return sum(ux_vector)
 end
@@ -79,7 +79,6 @@ end
 function partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed::Bool = false )
 	## set up bins in advance, we can then calculate probabilities within triple loop 
 	nvars, nvals = size(data)
-	matrix = zeros(nvars,nvars)
 	if (distributed == true)
 		##TODO need shared array for larger data matrices?
 		#S = SharedArray(data)
@@ -89,18 +88,21 @@ function partial_information_decomposition(data; discretizer = "uniform_width", 
 		uniques = reshape(uniques,nvars,nvars)
 
 	else
-		for i in 1 : nvars, j in i : nvars
-			@info "Calculating for gene pair $i, $j..."
-			#reset unique vectors
-			ux_vector = Vector{Float64}(undef,nvars)
-			uy_vector = Vector{Float64}(undef,nvars)
-			##calculate unique scores for every triplet involving i and j 
-			for k in 1: nvars
-				ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:])["unique_1"]
-				uy_vector[k] = get_partial_information_decomposition(data[i,:],data[k,:],data[j,:])["unique_1"]
-			end
-		end
-	end
+            matrix = zeros(nvars,nvars)
+            for i in 1 : nvars, j in 1 : nvars
+                @info "Calculating for gene pair $i, $j..."
+                #reset unique vectors
+                ux_vector = Vector{Float64}(undef,nvars)
+                #uy_vector = Vector{Float64}(undef,nvars)
+                ##calculate unique scores for every triplet involving i and j 
+                for k in 1: nvars
+                    ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:],include_synergy=false)["unique_1"]
+                end
+                matrix[i,j] = sum(ux_vector)
+                uniques = matrix
+            end
+        end
+        #get mutual information to normalise with
 	MI = mutual_information(data)
 	#add unique_xy and unique_yx together, maintaining symmetry in matrix
 	PUC = UpperTriangular(uniques)'+LowerTriangular(uniques)+UpperTriangular(uniques)+LowerTriangular(uniques)'
