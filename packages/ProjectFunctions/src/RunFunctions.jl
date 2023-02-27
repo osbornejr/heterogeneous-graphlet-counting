@@ -789,11 +789,11 @@ function webpage_construction()
                                      Threshold_method = params["network_construction"]["threshold_method"])
         CSV.write("$output_dir/tableinput/run_parameters.csv",run_parameter_df)
 
-        #Network visualisation
-        @info "Visualising network..."
         #load network (assumes is in cache)
         adj_matrix,network_counts,vertexlist,edgelist = network_construction()
         g = SimpleGraph(adj_matrix)
+        #Network visualisation
+        @info "Visualising network..."
         ##get largest component
         components = connected_components(g)
         largest = components[length.(components).==max(length.(components)...)]
@@ -848,6 +848,9 @@ function webpage_construction()
         #Degrees
         #homogonous degree distribution
         degrees = vec(sum(adj_matrix,dims=2))
+        
+
+
         p = plot(DataFrame([sort(degrees)],:auto),x = "x1",Geom.histogram,Guide.title("Degree distribution"),Guide.xlabel("degree"));
         draw(SVG("$output_dir/degree_distribution.svg"),p)
         
