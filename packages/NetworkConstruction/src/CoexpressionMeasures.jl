@@ -88,7 +88,7 @@ function partial_information_decomposition(data; discretizer = "uniform_width", 
 		uniques = reshape(uniques,nvars,nvars)
 
 	else
-            matrix = zeros(nvars,nvars)
+            uniques = zeros(nvars,nvars)
             for i in 1 : nvars, j in 1 : nvars
                 @info "Calculating for gene pair $i, $j..."
                 #reset unique vectors
@@ -98,8 +98,7 @@ function partial_information_decomposition(data; discretizer = "uniform_width", 
                 for k in 1: nvars
                     ux_vector[k] = get_partial_information_decomposition(data[j,:],data[k,:],data[i,:],include_synergy=false)["unique_1"]
                 end
-                matrix[i,j] = sum(ux_vector)
-                uniques = matrix
+                uniques[i,j] = sum(ux_vector)
             end
         end
         #get mutual information to normalise with
