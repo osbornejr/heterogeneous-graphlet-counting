@@ -37,14 +37,17 @@ function mutual_information(data; discretizer = "uniform_width", estimator = "ma
 	nvars, nvals = size(data)
 
 	bin_ids = zeros(Int, (nvars, nvals))
-	nbins = Int(round(sqrt(nvals)))
+	#nbins = Int(round(sqrt(nvals)))
+	nbins = Int(round(nvals/2))
+
 	#mis = zeros(binomial(nvars, 2))
-	matrix = zeros(nvars,nvars)
+
 	for i in 1 : nvars
 		get_bin_ids!(view(data,i,1:nvals), discretizer, nbins, view(bin_ids, i, 1:nvals))
 	end
 
 	#index = 1
+	matrix = zeros(nvars,nvars)
 	for i in 1 : nvars, j in i : nvars
 		f = get_frequencies_from_bin_ids(view(bin_ids,i,1:nvals), view(bin_ids,j,1:nvals), nbins, nbins)
 		p = get_probabilities(estimator, f) 
