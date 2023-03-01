@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -48,13 +48,13 @@ load_config(cwd*"/config/run-files/GSE68559.yaml")
 
 # ╔═╡ 170965d2-0728-4baf-950e-f2b56739427d
 # ╠═╡ show_logs = false
-adj_matrix,network_counts,vertexlist,edgelist = network_construction();
+raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = get_output_data();
 
 # ╔═╡ 02211a8a-87a4-4bd5-acf8-74cd27b902c6
 dd = GraphletCounting.typed_degree_distribution(vertexlist,edgelist);
 
 # ╔═╡ 5e6beb8d-47fc-4a1b-926e-ae17a51b2ee4
-data = DataFrame(coding = map(x->DefaultDict(0,x)["coding"],dd),noncoding = map(x->DefaultDict(0,x)["noncoding"],dd))
+data = DataFrame(coding = map(x->DefaultDict(0,x)["coding"],dd),noncoding = map(x->DefaultDict(0,x)["noncoding"],dd));
 
 # ╔═╡ db25a7ae-26b0-40da-97d3-06edb70c70d9
 bc = 50
@@ -70,11 +70,8 @@ plot(
 	Guide.xlabel("degree"),
 	Guide.ylabel("frequency"))
 
-# ╔═╡ 59a53882-786f-44ee-9607-c93b65db9635
-
-
-# ╔═╡ 0502e056-3059-4941-84d0-fe7da897bc48
-data[vertexlist.=="coding",:]
+# ╔═╡ 0ed6a565-9abc-428b-bf0f-81be4a0b1f9c
+components = NetworkConstruction.network_components(adj_matrix)
 
 # ╔═╡ Cell order:
 # ╠═63f79e1a-b0d8-11ed-1669-a770b3844775
@@ -84,5 +81,4 @@ data[vertexlist.=="coding",:]
 # ╠═5e6beb8d-47fc-4a1b-926e-ae17a51b2ee4
 # ╠═db25a7ae-26b0-40da-97d3-06edb70c70d9
 # ╠═53770902-0cee-4880-b480-e475e158a369
-# ╠═59a53882-786f-44ee-9607-c93b65db9635
-# ╠═0502e056-3059-4941-84d0-fe7da897bc48
+# ╠═0ed6a565-9abc-428b-bf0f-81be4a0b1f9c
