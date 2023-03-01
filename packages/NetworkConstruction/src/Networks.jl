@@ -69,6 +69,12 @@ function edgelist_from_adj(adjacency_matrix::AbstractArray)
     return edgelist
 end
 
+function network_components(adj_matrix)       
+    g = SimpleGraph(adj_matrix)
+    components = connected_components(g)
+   return components 
+end
+
 function synthetic_network(vertexlist, edgelist)
     #Synthetic test (just override vertex and edge lists here-- is that ok?)
     n = length(vertexlist) 
