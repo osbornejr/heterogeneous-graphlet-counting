@@ -157,6 +157,22 @@ function get_input_data()
 end 
 export get_input_data
 
+function get_output_data()
+    ##method to get all outputs at once
+    raw_counts =  get_input_data()
+    samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
+    sim_file = "$(params["cache"]["similarity_dir"])/similarity_matrix.jld2"
+    if ((isfile(sim_file)) && (isfile(samp_file)))
+        similarity_matrix = cache_load(sim_file,"similarity_matrix")
+        processed_counts = cache_load(samp_file,"sample counts")
+    else
+        throw(ArgumentError("No cached files exist at either $sim_file or $samp_file, please run from scratch using run_all method."))
+    end
+    adj_matrix,network_counts,vertexlist,edgelist = network_construction()
+    return [raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist]
+end
+export get_output_data
+
 function data_preprocessing(raw_counts::DataFrame)
     
     ## Clean - remove transcripts with total counts across all samples less than Cut
@@ -302,7 +318,9 @@ function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)
     g_comp = Graph(adj_matrix_comp)
     ##update vertexlist
     vertexlist_comp = vertexlist[largest[1]]
+    
 end
+
        
 function community_analysis(network_counts,adj_matrix)
     #Network Analysis
