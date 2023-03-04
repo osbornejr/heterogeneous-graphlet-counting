@@ -68,7 +68,8 @@ plot(
 	layer(plot_dd_data[vertexlist.=="noncoding",:],x = "noncoding",Geom.line,Stat.histogram(bincount=bc),color=["noncoding->noncoding"]),
 	Guide.title("Typed degree distribution"),
 	Guide.xlabel("degree"),
-	Guide.ylabel("frequency"))
+	Guide.ylabel("frequency"),
+	Theme(grid_line_width = 0mm))
 
 # ╔═╡ 0ed6a565-9abc-428b-bf0f-81be4a0b1f9c
 components = NetworkConstruction.network_components(adj_matrix) 
@@ -79,12 +80,24 @@ components = NetworkConstruction.network_components(adj_matrix)
 # ╔═╡ 96e7e7aa-ec6a-44fd-8914-70c3f44c771f
 dodgy_component_data = processed_data[components[2],:]
 
+# ╔═╡ 05cec146-5a7b-4bc6-8797-d7f89f5b8b8b
+comp_col = in.(1:2582,Ref(components[2]))
+
 # ╔═╡ 7e828b37-d757-4c23-bf21-aa821e776291
 processed_long_data = DataFrame(
 	names = repeat(processed_counts.transcript_id,length(2:99)),
+	component = repeat(comp_col,length(2:99)),
 	var = stack(processed_counts[:,2:99])[:,1],
 	val = stack(processed_counts[:,2:99])[:,2]
 );
+
+# ╔═╡ f179209c-cb71-437c-95c6-ba39513ee394
+Gadfly.plot(processed_long_data,x=:var,y=:val,group=:names,color= :component,Geom.line,Guide.xticks(label=false),
+	Guide.xlabel("sample"),
+	Guide.ylabel("count"),
+	Guide.title("All processed counts in network"),
+	Theme(grid_line_width=0mm))
+
 
 # ╔═╡ 69a0ad82-e6e7-4832-b393-95ff5561722e
 processed_long_data_comp_2 = DataFrame(
@@ -93,19 +106,22 @@ processed_long_data_comp_2 = DataFrame(
 	val = stack(processed_counts[components[2],2:99])[:,2]
 );
 
-# ╔═╡ a854f969-4a58-4ef6-bfb5-0156650932e7
-raw_long_data_comp_2 = DataFrame(
-	names = repeat(raw_counts.transcript_id[components[2]],length(2:99)),
-	var = stack(raw_counts[components[2],2:99])[:,1],
-	val = stack(raw_counts[components[2],2:99])[:,2]
-);
-
-# ╔═╡ f179209c-cb71-437c-95c6-ba39513ee394
-Gadfly.plot(raw_long_data_comp_2,x=:var,y=:val,group=:names,Geom.line,Guide.xticks(label=false),Theme(key_position = :none))
-
+# ╔═╡ c97ea9f4-c179-4b8e-9abe-d180b75e1abb
+Gadfly.plot(processed_long_data_comp_2,x=:var,y=:val,group=:names,Geom.line,Guide.xticks(label=false),
+	Guide.xlabel("sample"),
+	Guide.ylabel("count"),
+	Guide.title("2nd component (clique) processed counts"),
+	Theme(key_position = :none,grid_line_width=0mm))
 
 # ╔═╡ d651be50-9d95-49fc-bc70-dfc119947a6c
 map_component_back_to_raw = findall(x->x in processed_counts.transcript_id[components[2]],raw_counts.transcript_id)
+
+# ╔═╡ a854f969-4a58-4ef6-bfb5-0156650932e7
+raw_long_data_comp_2 = DataFrame(
+	names = repeat(raw_counts.transcript_id[map_component_back_to_raw],length(2:99)),
+	var = stack(raw_counts[map_component_back_to_raw,2:99])[:,1],
+	val = stack(raw_counts[map_component_back_to_raw,2:99])[:,2]
+);
 
 # ╔═╡ e6670e4e-e11a-4603-a4cb-fea6bc603933
 begin
@@ -121,8 +137,14 @@ prob = processed_counts.transcript_id[components[2]][86]
 # ╔═╡ 0c47136e-c65c-421c-bdec-318c61a75282
 raw_counts[findall(raw_counts.transcript_id .== prob),:]
 
-# ╔═╡ a65a8563-ec0e-4627-8ca0-7271a03db258
+# ╔═╡ b46d29a7-6615-4499-8cb0-0a10fb513443
+yodel = countmap(raw_counts.transcript_id)
 
+# ╔═╡ a65a8563-ec0e-4627-8ca0-7271a03db258
+collect(keys(yodel))[values(yodel).!==1]
+
+# ╔═╡ adc42541-74d1-4ef4-a231-67630241e9d3
+yodel["ENST00000335426.4"]
 
 # ╔═╡ Cell order:
 # ╠═63f79e1a-b0d8-11ed-1669-a770b3844775
@@ -136,6 +158,8 @@ raw_counts[findall(raw_counts.transcript_id .== prob),:]
 # ╠═392062f3-e17f-4532-9337-692c229944a1
 # ╠═96e7e7aa-ec6a-44fd-8914-70c3f44c771f
 # ╠═f179209c-cb71-437c-95c6-ba39513ee394
+# ╠═c97ea9f4-c179-4b8e-9abe-d180b75e1abb
+# ╠═05cec146-5a7b-4bc6-8797-d7f89f5b8b8b
 # ╠═7e828b37-d757-4c23-bf21-aa821e776291
 # ╠═69a0ad82-e6e7-4832-b393-95ff5561722e
 # ╠═a854f969-4a58-4ef6-bfb5-0156650932e7
@@ -144,3 +168,5 @@ raw_counts[findall(raw_counts.transcript_id .== prob),:]
 # ╠═72849afd-0f69-4b1b-ba2f-5d7567a6b682
 # ╠═0c47136e-c65c-421c-bdec-318c61a75282
 # ╠═a65a8563-ec0e-4627-8ca0-7271a03db258
+# ╠═adc42541-74d1-4ef4-a231-67630241e9d3
+# ╠═b46d29a7-6615-4499-8cb0-0a10fb513443
