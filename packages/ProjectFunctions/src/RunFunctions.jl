@@ -175,6 +175,8 @@ export get_output_data
 
 function data_preprocessing(raw_counts::DataFrame)
     
+    #TODO need to add some kind of deduplication step!
+
     ## Clean - remove transcripts with total counts across all samples less than Cut
     file = "$(params["cache"]["cutoff_dir"])/clean_counts.jld2"
 
