@@ -70,6 +70,13 @@ raw_counts = vcat(filter(:transcript_type=>x->x=="noncoding",raw_counts),filter(
 ## set transcripts that biomart identifies as lncRNA to noncoding
 raw_counts.transcript_type = @. ifelse(raw_counts.biomart_type=="lncRNA","noncoding",raw_counts.transcript_type)
 
+##fix string types to all be standard strings
+for i in 1:size(raw_counts)[2]
+    if (eltype(raw_counts[:,i])<:AbstractString)
+        raw_counts[!,i] = String.(raw_counts[:,i])
+    end
+end
+
 file = "$cwd/output/cache/GSE68559/raw_counts.jld2"
 
 @info "Saving raw counts to $file"
