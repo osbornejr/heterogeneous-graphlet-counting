@@ -292,11 +292,18 @@ function network_construction(sample_counts::DataFrame)
         @info "Saving adjacency matrix to $adj_file"
         cache_save(adj_file,["adjacency_matrix"=>adj_matrix,"pre-adj_matrix"=>pre_adj_matrix])
     end 
-    #Trim nodes with degree zero
-    network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+
+    ##TODO HACK: remove dodgy second component from network
+    #get components
+    components = NetworkConstruction.network_components(adj_matrix)
+    adj_matrix = adj_matrix[components[1],components[1]]  
+
+    #Trim nodes with degree zero (and TODO HACK remove component 2 as well!
+    network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0)[components[1]],:]
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
+
     if(params["network_construction"]["synthetic"] == true)
         ##slightly hacky way to do this still (TODO does the vertexlist (types) need to be randomised? it is atm)
         @info "Switching to synthetic network"
