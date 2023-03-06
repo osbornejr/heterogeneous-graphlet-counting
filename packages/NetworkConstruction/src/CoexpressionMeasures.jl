@@ -30,6 +30,23 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
     end
 end
 
+function discretise(data::AbstractMatrix;nbins::Int=0,discretizer::String="uniform_width")
+    nvars, nvals = size(data)
+
+    bin_ids = zeros(Int, (nvars, nvals))
+    if nbins==0    
+        nbins = Int(round(sqrt(nvals)))
+        #nbins = Int(round(nvals/2))
+    end
+    
+    #mis = zeros(binomial(nva  rs, 2))
+    
+    for i in 1 : nvars
+        get_bin_ids!(view(data,i,1:nvals), discretizer, nbins, view(bin_ids, i, 1:nvals))
+    end
+
+    return bin_ids
+end  
 
 #modified form of function described on InformationMeasures.jl github page. Faster than old method because bin calculation isn't repeated for each variable for every element. Main changes are orientation (variables as rows) and outputting as a symmetric matrix rather than a one dimensional array.
 function mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2)
