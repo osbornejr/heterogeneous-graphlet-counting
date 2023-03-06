@@ -84,7 +84,7 @@ dodgy_component_data = processed_data[components[2],:]
 #create binned counts to compare in plot (only for component 2)
 begin
 	binned_counts = processed_counts[components[2],:];
-	binned_counts[:,2:99] = NetworkConstruction.discretise(processed_data[components[2],:],nbins = 50);
+	binned_counts[:,2:99] = NetworkConstruction.discretise(processed_data[components[2],:],nbins = 200);
 	binned_long_data = DataFrame(
 	names = repeat(binned_counts.transcript_id,length(2:99)),
 	var = stack(binned_counts[:,2:99])[:,1],
@@ -101,11 +101,11 @@ end
 # ╔═╡ 05cec146-5a7b-4bc6-8797-d7f89f5b8b8b
 comp_col = string.(in.(1:2582,Ref(components[2])).+1);
 
-# ╔═╡ 02d67238-533e-4c36-85c4-f828f130e340
-#comp_col[top_count] = "782";
-
 # ╔═╡ 7882c063-a58f-4747-a3b0-54c4a756bcf4
 top_count = findall(processed_data.==max(processed_data...))[1][1]
+
+# ╔═╡ 02d67238-533e-4c36-85c4-f828f130e340
+comp_col[top_count] = "782";
 
 # ╔═╡ 7e828b37-d757-4c23-bf21-aa821e776291
 processed_long_data = DataFrame(
@@ -159,6 +159,34 @@ raw_long_data = DataFrame(
 	val = stack(raw_counts[map_processed_back_to_raw,:][:,2:99])[:,2]
 );
 
+# ╔═╡ 3158824b-6a0c-48b8-ae9b-ab2ebef0d192
+map_duplicates_back_to_raw = findall(x->x =="ENST00000389614.5",raw_counts.transcript_id);
+
+# ╔═╡ 188f390e-0106-4b01-b6ae-594f7dfe2d5d
+duplicate_test = raw_counts[map_duplicates_back_to_raw,:]
+
+# ╔═╡ 3f3d92fc-7ae3-49e4-9d47-0984bd79b1cc
+duplicates_long_data = DataFrame(
+	names = repeat(duplicate_test.transcript_id,length(2:99)),
+	var = stack(duplicate_test[:,2:99])[:,1],
+	val = stack(duplicate_test[:,2:99])[:,2]
+);
+
+# ╔═╡ c2e33cda-5d64-4796-9bbb-9e1f484726e5
+##plot showing counts across samples for each node in network. Coloured by two components in network
+Gadfly.plot(duplicates_long_data,x=:var,y=:val,color=:names,Geom.line,Guide.xticks(label=false),
+	Guide.xlabel("sample"),
+	Guide.ylabel("count"),
+	Guide.title("Duplicate counts in network"),
+	Theme(grid_line_width=0mm))
+
+
+# ╔═╡ 34de62ba-948b-4c34-b04d-9c5346bc067f
+duplicates_long_data
+
+# ╔═╡ b11785e8-ecd5-46ad-b348-a1adfe8cbda5
+duplicate_test.transcript_id = duplicate_test.transcript_id.*string.(collect(1:8))
+
 # ╔═╡ e6670e4e-e11a-4603-a4cb-fea6bc603933
 begin
 	test = zeros(Int,140)
@@ -180,6 +208,9 @@ yodel = countmap(raw_counts.transcript_id)
 # ╔═╡ a65a8563-ec0e-4627-8ca0-7271a03db258
 collect(keys(yodel))[values(yodel).!==1]
 
+# ╔═╡ c3eee765-92fe-4dc0-882e-9f24cf9f1316
+sum(collect(values(yodel))[values(yodel).!==1])
+
 # ╔═╡ adc42541-74d1-4ef4-a231-67630241e9d3
 yodel["ENST00000335426.4"]
 
@@ -195,6 +226,8 @@ yodel["ENST00000335426.4"]
 # ╠═392062f3-e17f-4532-9337-692c229944a1
 # ╠═96e7e7aa-ec6a-44fd-8914-70c3f44c771f
 # ╠═f179209c-cb71-437c-95c6-ba39513ee394
+# ╠═c2e33cda-5d64-4796-9bbb-9e1f484726e5
+# ╠═34de62ba-948b-4c34-b04d-9c5346bc067f
 # ╠═df684d90-6453-41f8-b0b2-7ca47a4f9ce3
 # ╠═c97ea9f4-c179-4b8e-9abe-d180b75e1abb
 # ╠═05cec146-5a7b-4bc6-8797-d7f89f5b8b8b
@@ -203,12 +236,17 @@ yodel["ENST00000335426.4"]
 # ╠═7e828b37-d757-4c23-bf21-aa821e776291
 # ╠═69a0ad82-e6e7-4832-b393-95ff5561722e
 # ╠═67bd2eef-b716-41f0-89b0-4edc07c88948
+# ╠═3f3d92fc-7ae3-49e4-9d47-0984bd79b1cc
+# ╠═188f390e-0106-4b01-b6ae-594f7dfe2d5d
+# ╠═b11785e8-ecd5-46ad-b348-a1adfe8cbda5
 # ╠═a854f969-4a58-4ef6-bfb5-0156650932e7
 # ╠═d651be50-9d95-49fc-bc70-dfc119947a6c
 # ╠═6112be32-1cff-4eda-8a9c-b2bf350e1e0e
+# ╠═3158824b-6a0c-48b8-ae9b-ab2ebef0d192
 # ╠═e6670e4e-e11a-4603-a4cb-fea6bc603933
 # ╠═72849afd-0f69-4b1b-ba2f-5d7567a6b682
 # ╠═0c47136e-c65c-421c-bdec-318c61a75282
 # ╠═a65a8563-ec0e-4627-8ca0-7271a03db258
+# ╠═c3eee765-92fe-4dc0-882e-9f24cf9f1316
 # ╠═adc42541-74d1-4ef4-a231-67630241e9d3
 # ╠═b46d29a7-6615-4499-8cb0-0a10fb513443
