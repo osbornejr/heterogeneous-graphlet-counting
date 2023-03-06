@@ -21,7 +21,6 @@ function run_all(config_file::String)
     processed_counts = data_preprocessing(raw_counts)
     @info "Constructing network"
     adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
-#TODO resolve contradiction here where, if synthetic is true, the output here gives the real adj_matrix but the synthetic edgelist/vertexlist
 
     ## For analysis step, we need to run for both real and synthetic networks
     #this means we will need to reload the cache dirs for each run
@@ -239,7 +238,7 @@ function network_construction()
     return [adj_matrix, network_counts,vertexlist,edgelist]       
 end
 
- function  network_construction(sample_counts::DataFrame)
+function  network_construction(sample_counts::DataFrame)
 
     ##Network construction
     ##Measure of coexpression
@@ -302,6 +301,7 @@ end
         ##slightly hacky way to do this still (TODO does the vertexlist (types) need to be randomised? it is atm)
         @info "Switching to synthetic network"
         edgelist,vertexlist = NetworkConstruction.synthetic_network(vertexlist,edgelist)
+        adj_matrix = NetworkConstruction.adj_from_edgelist(edgelist)
     end
     return [adj_matrix, network_counts,vertexlist,edgelist]       
 end
