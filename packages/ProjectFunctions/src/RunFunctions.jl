@@ -30,8 +30,8 @@ function run_all(config_file::String)
     anal_flag = 0
     while (anal_flag == 0)  
             
-         @info "Finding communities"
-         com_anal = community_analysis(network_counts,adj_matrix)
+        #@info "Finding communities"
+        #com_anal = community_analysis(network_counts,adj_matrix)
         
         @info "Counting graphlets"
         graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
@@ -238,7 +238,7 @@ function network_construction()
     return [adj_matrix, network_counts,vertexlist,edgelist]       
 end
 
-function  network_construction(sample_counts::DataFrame)
+function network_construction(sample_counts::DataFrame)
 
     ##Network construction
     ##Measure of coexpression
