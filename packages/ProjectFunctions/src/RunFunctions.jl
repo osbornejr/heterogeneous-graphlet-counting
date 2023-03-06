@@ -289,17 +289,22 @@ function network_construction(sample_counts::DataFrame)
         adj_matrix = copy(pre_adj_matrix)
         adj_matrix = adj_matrix[:,vec(sum(pre_adj_matrix,dims=1).!=0)]
         adj_matrix = adj_matrix[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+
+
         @info "Saving adjacency matrix to $adj_file"
         cache_save(adj_file,["adjacency_matrix"=>adj_matrix,"pre-adj_matrix"=>pre_adj_matrix])
     end 
 
-    ##TODO HACK: remove dodgy second component from network
+
+    ##TODO HACK: remove dodgy second component from network (kinda assumes there are no zero nodes)
     #get components
     components = NetworkConstruction.network_components(adj_matrix)
+    pre_adj_matrix = pre_adj_matrix[components[1],components[1]]
     adj_matrix = adj_matrix[components[1],components[1]]  
 
     #Trim nodes with degree zero (and TODO HACK remove component 2 as well!
-    network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0)[components[1]],:]
+
+    network_counts = sample_counts[components[1],:][vec(sum(pre_adj_matrix,dims=2).!=0),:]
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
