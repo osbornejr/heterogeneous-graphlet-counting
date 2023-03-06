@@ -10,6 +10,9 @@ function data_from_dataframe(df::DataFrame,identifier::String)
 end
 
 function clean_raw_counts(raw_counts::DataFrame,expression_cutoff::Int)
+
+    ##Deduplicate-- there may be multiple entries for the same transcript, we need to select only one of these
+
     ## Clean - remove transcripts with total counts across all samples less than Cut
     ##plot before cut
     #  histogram(DataFrame([log2.(vec(sum(raw_data,dims=2))),raw_counts[!,:transcript_type]],[:sum,:transcript_type]),:sum,:transcript_type,"$(outdir)/raw_data_histogram.svg",xaxis =" sum of expression (log2 adjusted)")
