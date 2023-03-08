@@ -356,7 +356,7 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
         elseif params["network_construction"]["nbins"] == "n_over_2"
             nbs = Int(round(nvals/2))
         end
-        return mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,nbins = nbs )
+        return NetworkConstruction.mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,nbins = nbs )
     end
     if (method=="pidc")
         ##determine nbins from config
@@ -366,10 +366,10 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
         elseif params["network_construction"]["nbins"] == "n_over_2"
             nbs = Int(round(nvals/2))
         end
-        return partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed = true, nbins = nbs)
+        return NetworkConstruction.partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed = true, nbins = nbs)
     end
     if (method=="pcit")
-        return pcit(data)
+        return NetworkConstruction.pcit(data)
     end
 end
 
