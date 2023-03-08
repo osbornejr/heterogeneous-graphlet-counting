@@ -91,7 +91,15 @@ function cache_setup()
     make_cache(dir_name="norm_dir",params["cache"]["cutoff_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
     make_cache(dir_name="sampling_dir",params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
     #network construction dirs:
-    make_cache(dir_name="similarity_dir",params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"])
+    ##at present we want to trial different bin sizes for the information measures, so we add the extra split here if "coexpression" is either MI or PID.
+    if params["network_construction"]["coexpression"] in ["pidc","mutual_information"]
+        
+        make_cache(dir_name="similarity_dir",params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"],params["network_construction"]["nbins"])
+    else
+        make_cache(dir_name="similarity_dir",params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"])
+    end
+    
+
     make_cache(dir_name="adjacency_dir",params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"])
 
     #analyis dirs :
@@ -345,7 +353,7 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
         nvars,nvals = size(data)
         if params["network_construction"]["nbins"] == "sqrt_n"
             nbs = Int(round(sqrt(nvals)))
-        elseif params["network_construction"]["nbins"] == "n/2"
+        elseif params["network_construction"]["nbins"] == "n_over_2"
             nbs = Int(round(nvals/2))
         end
         return mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,nbins = nbs )
@@ -355,7 +363,7 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
         nvars,nvals = size(data)
         if params["network_construction"]["nbins"] == "sqrt_n"
             nbs = Int(round(sqrt(nvals)))
-        elseif params["network_construction"]["nbins"] == "n/2"
+        elseif params["network_construction"]["nbins"] == "n_over_2"
             nbs = Int(round(nvals/2))
         end
         return partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed = true, nbins = nbs)
