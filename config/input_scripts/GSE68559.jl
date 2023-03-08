@@ -48,7 +48,7 @@ library(tidyverse,quietly = T)
 transcripts_trimmed = sapply(transcripts,tools::file_path_sans_ext)
 ## connect to biomart
 set_config(config(ssl_verifypeer = 0L))
-ensembl_version = "current"	
+ensembl_version = "109"	
 if (ensembl_version=="current")
 {
     ##mirrors to try: "useast" "uswest" "asia"
