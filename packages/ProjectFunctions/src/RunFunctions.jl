@@ -255,7 +255,7 @@ function network_construction(sample_counts::DataFrame)
         #Setup workers
         distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
         
-        similarity_matrix = NetworkConstruction.coexpression_measure(data_from_dataframe(sample_counts,"data"),params["network_construction"]["coexpression"])
+        similarity_matrix = coexpression_measure(data_from_dataframe(sample_counts,"data"),params["network_construction"]["coexpression"])
         @info "Saving similarity matrix at $sim_file"
         cache_save(sim_file,"similarity_matrix"=>similarity_matrix)
         ##cleanup distributed
@@ -319,7 +319,51 @@ function network_construction(sample_counts::DataFrame)
 end
 export network_construction
 
+##catch all function to call desired coexpression_measure 
+function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
+    ## wrapper for all possible different coexpression measure methods
+    ## convert to array if necessary
+    if(typeof(data)<:AbstractDataFrame)
+        data = DataPreprocessing.data_from_dataframe(data,"data")
+    end 
 
+    if (method =="pearson")
+        return cor(data')
+    end
+
+    if (method=="spearman")
+        return corspearman(data')
+    end
+
+    if (method== "kendall")
+        return corkendall(data')
+    end
+
+    if (method=="mutual_information")
+        
+        ##determine nbins from config
+        nvars,nvals = size(data)
+        if params["network_construction"]["nbins"] == "sqrt_n"
+            nbs = Int(round(sqrt(nvals)))
+        elseif params["network_construction"]["nbins"] == "n/2"
+            nbs = Int(round(nvals/2))
+        end
+        return mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,nbins = nbs )
+    end
+    if (method=="pidc")
+        ##determine nbins from config
+        nvars,nvals = size(data)
+        if params["network_construction"]["nbins"] == "sqrt_n"
+            nbs = Int(round(sqrt(nvals)))
+        elseif params["network_construction"]["nbins"] == "n/2"
+            nbs = Int(round(nvals/2))
+        end
+        return partial_information_decomposition(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,distributed = true, nbins = nbs)
+    end
+    if (method=="pcit")
+        return pcit(data)
+    end
+end
 
 function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)       
 

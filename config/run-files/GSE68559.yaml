@@ -8,7 +8,7 @@ cache:
   base_dir: "output/cache"
   clear:
     archive: false
-    test_dir: true
+    test_dir: false
     cutoff_dir: false 
     norm_dir: false 
     sampling_dir: false 
@@ -34,7 +34,7 @@ data_preprocessing:
     
 network_construction:
   coexpression: "pidc"
-  nbins: 50  
+  nbins: "sqrt_n"  
   threshold: 0.95
   threshold_method: "empirical_dist_zero"
   visualise: false
