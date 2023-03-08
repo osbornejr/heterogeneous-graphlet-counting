@@ -8,12 +8,12 @@ cache:
   base_dir: "output/cache"
   clear:
     archive: false
-    test_dir: false
+    test_dir: true
     cutoff_dir: false 
     norm_dir: false 
     sampling_dir: false 
     similarity_dir: false 
-    adjacency_dir: true
+    adjacency_dir: false
     anal_dir: false 
     community_dir: false 
     graphlet_counting_dir: false
@@ -34,6 +34,7 @@ data_preprocessing:
     
 network_construction:
   coexpression: "pidc"
+  nbins: 50  
   threshold: 0.95
   threshold_method: "empirical_dist_zero"
   visualise: false
