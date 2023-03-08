@@ -11,7 +11,7 @@ cwd = ENV["PWD"];
 	import Pkg
 	Pkg.activate(mktempdir())
     Pkg.add([
-        Pkg.PackageSpec(name="DataFrames", version="1.3"),
+        Pkg.PackageSpec(name="DataFrames"),
 		Pkg.PackageSpec(name="Revise"),
 		Pkg.PackageSpec(name="CommonMark"),
 		Pkg.PackageSpec(name="PlutoUI"),
@@ -160,10 +160,13 @@ raw_long_data = DataFrame(
 );
 
 # ╔═╡ 3158824b-6a0c-48b8-ae9b-ab2ebef0d192
-map_duplicates_back_to_raw = findall(x->x =="ENST00000389614.5",raw_counts.transcript_id);
+map_duplicates_back_to_raw = findall(x->x =="ENST00000400521.1",raw_counts.transcript_id);
 
 # ╔═╡ 188f390e-0106-4b01-b6ae-594f7dfe2d5d
+begin
 duplicate_test = raw_counts[map_duplicates_back_to_raw,:]
+duplicate_test.transcript_id = duplicate_test.transcript_id.*string.(collect(1:size(duplicate_test)[1]))
+end
 
 # ╔═╡ 3f3d92fc-7ae3-49e4-9d47-0984bd79b1cc
 duplicates_long_data = DataFrame(
@@ -183,9 +186,6 @@ Gadfly.plot(duplicates_long_data,x=:var,y=:val,color=:names,Geom.line,Guide.xtic
 
 # ╔═╡ 34de62ba-948b-4c34-b04d-9c5346bc067f
 duplicates_long_data
-
-# ╔═╡ b11785e8-ecd5-46ad-b348-a1adfe8cbda5
-duplicate_test.transcript_id = duplicate_test.transcript_id.*string.(collect(1:8))
 
 # ╔═╡ e6670e4e-e11a-4603-a4cb-fea6bc603933
 begin
@@ -238,7 +238,6 @@ yodel["ENST00000335426.4"]
 # ╠═67bd2eef-b716-41f0-89b0-4edc07c88948
 # ╠═3f3d92fc-7ae3-49e4-9d47-0984bd79b1cc
 # ╠═188f390e-0106-4b01-b6ae-594f7dfe2d5d
-# ╠═b11785e8-ecd5-46ad-b348-a1adfe8cbda5
 # ╠═a854f969-4a58-4ef6-bfb5-0156650932e7
 # ╠═d651be50-9d95-49fc-bc70-dfc119947a6c
 # ╠═6112be32-1cff-4eda-8a9c-b2bf350e1e0e
