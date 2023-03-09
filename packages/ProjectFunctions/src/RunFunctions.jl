@@ -497,13 +497,14 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         rand_types_set = [copy(vertexlist) for i in 1:N]
         broadcast(shuffle!,rand_types_set) 
         @info "Counting graphlets on null model" 
+        order = params["analysis"]["graphlet_size"]
         if (null_run=="distributed-short")
             #rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed-old")
-            rand_graphlet_counts = @showprogress pmap(x->GraphletCounting.count_graphlets(x,edgelist,params["analysis"]["graphlet_size"],run_method="serial"),rand_types_set,batch_size =10)
+            rand_graphlet_counts = @showprogress pmap(x->GraphletCounting.count_graphlets(x,edgelist,order,run_method="serial"),rand_types_set,batch_size =10)
         end
         if (null_run=="distributed-long")
             #rand_graphlet_counts = count_graphlets.(rand_types_set,Ref(edgelist),4,run_method="distributed")
-            rand_graphlet_counts = @showprogress map(x->GraphletCounting.count_graphlets(x,edgelist,params["analysis"]["graphlet_size"],run_method="distributed"),rand_types_set)
+            rand_graphlet_counts = @showprogress map(x->GraphletCounting.count_graphlets(x,edgelist,order,run_method="distributed"),rand_types_set)
         end
         rand_graphlet_collection = vcat(collect.(rand_graphlet_counts)...)
         @info "Saving random graphlet count information at $rep_dir..."
