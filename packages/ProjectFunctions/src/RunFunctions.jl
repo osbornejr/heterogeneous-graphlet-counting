@@ -175,10 +175,27 @@ function get_output_data()
     else
         throw(ArgumentError("No cached files exist at either $sim_file or $samp_file, please run from scratch using run_all method."))
     end
-    adj_matrix,network_counts,vertexlist,edgelist = network_construction()
+    adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
     return [raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist]
 end
 export get_output_data
+
+function get_preprocessed_data()
+    ##method to get preprocessed dataframes before any network construction
+    raw_counts =  get_input_data()
+    clean_file = "$(params["cache"]["cutoff_dir"])/clean_counts.jld2"
+    norm_file = "$(params["cache"]["norm_dir"])/norm_counts.jld2"
+    samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
+    if ((isfile(clean_file)) && (isfile(norm_file)) && (isfile(samp_file)))
+        clean_counts = cache_load(clean_file,"clean counts")
+        norm_counts = cache_load(norm_file,"norm counts")
+        sample_counts = cache_load(samp_file,"sample counts")
+    else
+        throw(ArgumentError("No cached files exist at least one of $clean_file, $norm_file or $samp_file, please run from scratch using run_all method."))
+    end
+    return [raw_counts,clean_counts,norm_counts,sample_counts]
+end
+export get_preprocessed_data
 
 function data_preprocessing(raw_counts::DataFrame)
     
@@ -227,7 +244,7 @@ end
 export data_preprocessing
 
 
-function network_construction()
+function get_network_construction()
     ##alt method that allows loading of cache if output exists, and gives an error otherwise.
     samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
     adj_file = "$(params["cache"]["adjacency_dir"])/adjacency_matrix.jld2"
@@ -278,6 +295,8 @@ function network_construction(sample_counts::DataFrame)
     if (isfile(adj_file))
         pre_adj_matrix = cache_load(adj_file,"pre-adj_matrix")
         adj_matrix = cache_load(adj_file,"adjacency_matrix")
+        components =cache_load(adj_file,"components")
+
     else
         @info "Generating adjacency matrix..."
         if (params["network_construction"]["threshold_method"]=="empirical_dist")
@@ -306,7 +325,7 @@ function network_construction(sample_counts::DataFrame)
     adj_matrix = adj_matrix[components[1],components[1]]  
 
         @info "Saving adjacency matrix to $adj_file"
-        cache_save(adj_file,["adjacency_matrix"=>adj_matrix,"pre-adj_matrix"=>pre_adj_matrix])
+        cache_save(adj_file,["adjacency_matrix"=>adj_matrix,"pre-adj_matrix"=>pre_adj_matrix,"components"=>components])
     end 
 
 
