@@ -251,12 +251,13 @@ function get_network_construction()
     if ((isfile(adj_file)) && (isfile(samp_file)))
         pre_adj_matrix = cache_load(adj_file,"pre-adj_matrix")
         adj_matrix = cache_load(adj_file,"adjacency_matrix")
+        components = cache_load(adj_file,"components")
         sample_counts = cache_load(samp_file,"sample counts")
    else
        throw(ArgumentError("No cached files exist at either $adj_file or $samp_file, please provide processed counts input data."))
     end
     #Trim nodes with degree zero
-    network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
+    network_counts = sample_counts[components[1],:][vec(sum(pre_adj_matrix,dims=2).!=0),:]
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
