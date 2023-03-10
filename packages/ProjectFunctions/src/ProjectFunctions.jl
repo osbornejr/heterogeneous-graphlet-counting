@@ -47,7 +47,7 @@ function distributed_setup(inclusions::Symbol...)
     rmprocs(workers())
     #add workers equal to the number of available cpus
     #addprocs(Threads.nthreads();exeflags="--project=$cwd")
-    addprocs(24;exeflags="---project=$cwd")
+    addprocs(24;exeflags="--project=$cwd")
     #@everywhere inclusions
     for inc in inclusions
         eval(macroexpand(Distributed,quote 

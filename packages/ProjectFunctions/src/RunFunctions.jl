@@ -895,7 +895,7 @@ function webpage_construction()
         CSV.write("$output_dir/tableinput/run_parameters.csv",run_parameter_df)
 
         #load network (assumes is in cache)
-        adj_matrix,network_counts,vertexlist,edgelist = network_construction()
+        adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
         g = SimpleGraph(adj_matrix)
         #Network visualisation
         @info "Visualising network..."
