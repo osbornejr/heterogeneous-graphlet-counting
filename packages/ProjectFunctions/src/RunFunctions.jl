@@ -6,12 +6,12 @@ using Pkg,ProgressMeter,DataFrames,YAML,Distributed,JLD2,CSV,StatsBase,Random,Gr
 
 function run_all(config_file::String)
     ##TODO move the adding/removing of workers to align with the individual functions that require distributed framework (adds sometimes unnessesary load time to start of run otherwise). Turning off the global initialisation here for now   
-    if (length(workers())!=Threads.nthreads())
-        #Pkg.resolve()
-       #Pkg.precompile()
-        @info "Setting up worker processes"
-        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
-    end
+#    if (length(workers())!=Threads.nthreads())
+#        #Pkg.resolve()
+#       #Pkg.precompile()
+#        @info "Setting up worker processes"
+#        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
+#    end
 
     @info "Loading parameters"
     load_config(config_file)
@@ -494,6 +494,9 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     else
         ## randomise node types
 
+        #Setup workers
+        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction,nthreads=24)
+        
         #number of randomised graphs
         rand_types_set = [copy(vertexlist) for i in 1:N]
         broadcast(shuffle!,rand_types_set) 
@@ -510,6 +513,9 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         rand_graphlet_collection = vcat(collect.(rand_graphlet_counts)...)
         @info "Saving random graphlet count information at $rep_dir..."
         cache_save(rand_graphlets_file,["rand graphlets"=>rand_graphlet_collection,"rand vertices"=>rand_types_set])
+        ##cleanup distributed
+        rmprocs(workers())
+        cleaner()
     end
 
 

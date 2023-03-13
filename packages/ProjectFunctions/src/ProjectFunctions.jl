@@ -39,15 +39,18 @@ function distributed_setup(inclusions::Vector{Symbol})
     distributed_setup(inclusions...)
 end
 
-function distributed_setup(inclusions::Symbol...)
+function distributed_setup(inclusions::Symbol...;nthreads::Int=0)
 
     ##set up for distributed mode
 
     #first clean to make sure there are no stray workers already around
     rmprocs(workers())
-    #add workers equal to the number of available cpus
-    #addprocs(Threads.nthreads();exeflags="--project=$cwd")
-    addprocs(24;exeflags="--project=$cwd")
+    #add workers equal to the number of available cpus if no threads is provided
+    if nthreads == 0
+        nthreads = Threads.nthreads();
+    end
+
+    addprocs(nthreads;exeflags="--project=$cwd")
     #@everywhere inclusions
     for inc in inclusions
         eval(macroexpand(Distributed,quote 
