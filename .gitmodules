@@ -1,0 +1,3 @@
+[submodule "packages/GraphletCounting"]
+	path = packages/GraphletCounting
+	url = https://github.com/osbornejr/GraphletCounting.jl.git
