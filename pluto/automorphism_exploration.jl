@@ -32,7 +32,7 @@ cwd = ENV["PWD"];
 	## load dev packages last
 	#using DataPreprocessing
 	using NetworkConstruction
-	#using GraphletCounting
+	using GraphletCounting
 	#using GraphletAnalysis
 	using ProjectFunctions
 end
@@ -74,7 +74,7 @@ This graphlet has this adjacency matrix:
 """
 
 # ╔═╡ 4175d1ff-bc77-43ca-97e2-2c1b370d3db0
-adj = NetworkConstruction.graphlet_edgelist_array_to_adjacency(edgelist_array)
+adj = GraphletCounting.graphlet_edgelist_array_to_adjacency(edgelist_array)
 
 # ╔═╡ 926bbcd0-4ef6-4b90-ac2b-d639878fb3d8
 md"""
@@ -89,7 +89,7 @@ candidates = permute_all([0,1],length(edgelist_array),replace = true)
 test = candidates[1,:]
 
 # ╔═╡ 654360e3-f807-4862-aadb-ca0c47edffca
-test_adj = NetworkConstruction.graphlet_edgelist_array_to_adjacency(test)
+test_adj = GraphletCounting.graphlet_edgelist_array_to_adjacency(test)
 
 # ╔═╡ 209eb172-c8e1-465d-a591-faed350e1a17
 test_deg = diagm(vec(sum(test_adj,dims=1)))
@@ -129,7 +129,7 @@ We get only connected graphlets using Fielder values, and then further restrict 
 """
 
 # ╔═╡ 0e8bb9f4-b9bc-4697-8cfd-0f9da7a28fc5
-candidate_adj = NetworkConstruction.graphlet_edgelist_array_to_adjacency.(eachrow(candidates))
+candidate_adj = GraphletCounting.graphlet_edgelist_array_to_adjacency.(eachrow(candidates))
 
 # ╔═╡ 7412bd3b-9c51-43b1-aaf9-f74f37908038
 connected = fournode_perms[adj_is_connected.(candidate_adj)];
@@ -157,7 +157,7 @@ eigvals(adj)
 
 # ╔═╡ 686fca35-cdf0-4e25-89c7-48114dada641
 begin
-	ev = eigvals.(NetworkConstruction.graphlet_edgelist_array_to_adjacency.(BitVector.(eachrow(r_candidates[sum.(eachrow(r_candidates)).== sum(edgelist_array),:]))))
+	ev = eigvals.(GraphletCounting.graphlet_edgelist_array_to_adjacency.(BitVector.(eachrow(r_candidates[sum.(eachrow(r_candidates)).== sum(edgelist_array),:]))))
 	countmap(map(x->round.(x,digits = 5).+0.0,ev))
 end
 
@@ -174,7 +174,7 @@ end;
 DataFrame(reshape(r_fournode_perms,4,3),:auto)
 
 # ╔═╡ 39e74e23-b5b9-4978-aefe-1a81719de76f
-f_candidate_adj = NetworkConstruction.graphlet_edgelist_array_to_adjacency.(eachrow(f_candidates));
+f_candidate_adj = GraphletCounting.graphlet_edgelist_array_to_adjacency.(eachrow(f_candidates));
 
 # ╔═╡ 5b2250b5-cc98-4627-a8a7-8606628cd1ce
 adj
@@ -272,8 +272,6 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-DataPreprocessing = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
-GraphletAnalysis = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
