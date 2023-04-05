@@ -986,3 +986,5 @@ function webpage_construction()
         csv = csv*string(length(vertexlist))*","*string(length(edgelist))*","*string(length(components))*","*string(length(largest...))*","*string(max(degrees...))*"\n"
         write("$output_dir/tableinput/network_stats.csv",csv)
 end
+
+
