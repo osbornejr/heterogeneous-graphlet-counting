@@ -1,3 +1,7 @@
 [deps]
 Franklin = "713c75ef-9fc9-4b05-94a9-213340da978e"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 NodeJS = "2bd173c7-0d6d-553b-b6af-13a54713934c"
