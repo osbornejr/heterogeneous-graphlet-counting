@@ -81,6 +81,11 @@ swapfile: ##manually create large (5g) swapfile for kernel to use
 edit: ## vim command to initialise editing environment via nectar-ssh
 	vim -c "source config/julia-remote.vim" packages/ProjectFunctions/src/* packages/GraphletCounting/src/* packages/GraphletAnalysis/src/* packages/NetworkConstruction/src/* packages/DataPreprocessing/src/* config/run-files/*
 
+website: ##set up website branch under separate subdir
+	mkdir -p website
+	git fetch origin website
+	git worktree website website
+
 
 tmux_session:="julia-vim-ssh"
 tmux: ## setup tmux session for this project based on edit command
