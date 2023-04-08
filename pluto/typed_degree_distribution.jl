@@ -95,23 +95,9 @@ components = NetworkConstruction.network_components(adj_matrix)
  processed_data = DataPreprocessing.data_from_dataframe(processed_counts,"data")
 
 # ╔═╡ 96e7e7aa-ec6a-44fd-8914-70c3f44c771f
-#=╠═╡
 dodgy_component_data = processed_data[components[2],:]
-  ╠═╡ =#
-
-# ╔═╡ f179209c-cb71-437c-95c6-ba39513ee394
-#=╠═╡
-##plot showing counts across samples for each node in network. Coloured by two components in network
-Gadfly.plot(processed_long_data,x=:var,y=:val,group=:names,color= :component,Geom.line,Guide.xticks(label=false),
-	Guide.xlabel("sample"),
-	Guide.ylabel("count"),
-	Guide.title("All processed counts in network"),
-	Theme(grid_line_width=0mm))
-
-  ╠═╡ =#
 
 # ╔═╡ df684d90-6453-41f8-b0b2-7ca47a4f9ce3
-#=╠═╡
 #create binned counts to compare in plot (only for component 2)
 begin
 	binned_counts = processed_counts[components[2],:];
@@ -128,63 +114,57 @@ Gadfly.plot(binned_long_data,x=:var,y=:val,group=:names,Geom.line,Guide.xticks(l
 	Guide.title("All bin values across samples for nodes in network"),
 	Theme(grid_line_width=0mm));
 end
-  ╠═╡ =#
-
-# ╔═╡ c97ea9f4-c179-4b8e-9abe-d180b75e1abb
-#=╠═╡
-##separate plot for 2nd component (if needed)
-Gadfly.plot(processed_long_data_comp_2,x=:var,y=:val,group=:names,Geom.line,Guide.xticks(label=false),
-	Guide.xlabel("sample"),
-	Guide.ylabel("count"),
-	Guide.title("2nd component (clique) processed counts"),
-	Theme(key_position = :none,grid_line_width=0mm));
-  ╠═╡ =#
 
 # ╔═╡ 05cec146-5a7b-4bc6-8797-d7f89f5b8b8b
-#=╠═╡
 comp_col = string.(in.(1:2582,Ref(components[2])).+1);
-  ╠═╡ =#
-
-# ╔═╡ 02d67238-533e-4c36-85c4-f828f130e340
-#=╠═╡
-comp_col[top_count] = "782";
-  ╠═╡ =#
 
 # ╔═╡ 7882c063-a58f-4747-a3b0-54c4a756bcf4
 top_count = findall(processed_data.==max(processed_data...))[1][1]
 
+# ╔═╡ 02d67238-533e-4c36-85c4-f828f130e340
+comp_col[top_count] = "782";
+
 # ╔═╡ 7e828b37-d757-4c23-bf21-aa821e776291
-#=╠═╡
 processed_long_data = DataFrame(
 	names = repeat(processed_counts.transcript_id,length(2:99)),
 	component = repeat(comp_col,length(2:99)),
 	var = stack(processed_counts[:,2:99])[:,1],
 	val = stack(processed_counts[:,2:99])[:,2]
 );
-  ╠═╡ =#
+
+# ╔═╡ f179209c-cb71-437c-95c6-ba39513ee394
+##plot showing counts across samples for each node in network. Coloured by two components in network
+Gadfly.plot(processed_long_data,x=:var,y=:val,group=:names,color= :component,Geom.line,Guide.xticks(label=false),
+	Guide.xlabel("sample"),
+	Guide.ylabel("count"),
+	Guide.title("All processed counts in network"),
+	Theme(grid_line_width=0mm))
+
 
 # ╔═╡ 69a0ad82-e6e7-4832-b393-95ff5561722e
-#=╠═╡
 processed_long_data_comp_2 = DataFrame(
 	names = repeat(processed_counts.transcript_id[components[2]],length(2:99)),
 	var = stack(processed_counts[components[2],2:99])[:,1],
 	val = stack(processed_counts[components[2],2:99])[:,2]
 );
-  ╠═╡ =#
+
+# ╔═╡ c97ea9f4-c179-4b8e-9abe-d180b75e1abb
+##separate plot for 2nd component (if needed)
+Gadfly.plot(processed_long_data_comp_2,x=:var,y=:val,group=:names,Geom.line,Guide.xticks(label=false),
+	Guide.xlabel("sample"),
+	Guide.ylabel("count"),
+	Guide.title("2nd component (clique) processed counts"),
+	Theme(key_position = :none,grid_line_width=0mm));
+
+# ╔═╡ d651be50-9d95-49fc-bc70-dfc119947a6c
+map_component_back_to_raw = findall(x->x in processed_counts.transcript_id[components[2]],raw_counts.transcript_id);
 
 # ╔═╡ a854f969-4a58-4ef6-bfb5-0156650932e7
-#=╠═╡
 raw_long_data_comp_2 = DataFrame(
 	names = repeat(raw_counts.transcript_id[map_component_back_to_raw],length(2:99)),
 	var = stack(raw_counts[map_component_back_to_raw,2:99])[:,1],
 	val = stack(raw_counts[map_component_back_to_raw,2:99])[:,2]
 );
-  ╠═╡ =#
-
-# ╔═╡ d651be50-9d95-49fc-bc70-dfc119947a6c
-#=╠═╡
-map_component_back_to_raw = findall(x->x in processed_counts.transcript_id[components[2]],raw_counts.transcript_id);
-  ╠═╡ =#
 
 # ╔═╡ 6112be32-1cff-4eda-8a9c-b2bf350e1e0e
 map_processed_back_to_raw = findall(x->x in processed_counts.transcript_id,raw_counts.transcript_id);
@@ -197,25 +177,19 @@ raw_long_data = DataFrame(
 );
 
 # ╔═╡ e6670e4e-e11a-4603-a4cb-fea6bc603933
-#=╠═╡
 begin
 	test = zeros(Int,140)
 	for i in 1:140 
 		test[i] = length(filter(x->x == processed_counts.transcript_id[components[2]][i],raw_counts.transcript_id))
 	end
 end
-  ╠═╡ =#
 
 # ╔═╡ 72849afd-0f69-4b1b-ba2f-5d7567a6b682
-#=╠═╡
 ##node that is repeated in network!
 prob = processed_counts.transcript_id[components[2]][86]
-  ╠═╡ =#
 
 # ╔═╡ 0c47136e-c65c-421c-bdec-318c61a75282
-#=╠═╡
 raw_counts[findall(raw_counts.transcript_id .== prob),:]
-  ╠═╡ =#
 
 # ╔═╡ b46d29a7-6615-4499-8cb0-0a10fb513443
 yodel = countmap(clean_counts.transcript_id)
@@ -665,7 +639,7 @@ uuid = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 version = "0.1.0"
 
 [[deps.GraphletCounting]]
-deps = ["CSV", "DataFrames", "DataStructures", "Distributed", "Graphs", "ProgressMeter", "RCall", "StatsBase"]
+deps = ["CSV", "DataFrames", "DataStructures", "Distributed", "Graphs", "LinearAlgebra", "ProgressMeter", "StatsBase"]
 path = "/home/osbornejr/app/packages/GraphletCounting"
 uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 version = "0.1.0"

@@ -272,6 +272,8 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DataPreprocessing = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
+GraphletAnalysis = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
@@ -662,7 +664,7 @@ uuid = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 version = "0.1.0"
 
 [[deps.GraphletCounting]]
-deps = ["CSV", "DataFrames", "DataStructures", "Distributed", "Graphs", "ProgressMeter", "RCall", "StatsBase"]
+deps = ["CSV", "DataFrames", "DataStructures", "Distributed", "Graphs", "LinearAlgebra", "ProgressMeter", "StatsBase"]
 path = "/home/osbornejr/app/packages/GraphletCounting"
 uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 version = "0.1.0"
