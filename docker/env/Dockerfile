@@ -27,7 +27,6 @@ WORKDIR $PROJECT_DIR
 # build the conda environment
 ENV ENV_PREFIX julia-workspace
 RUN conda update --name base --channel defaults conda && \
-    conda install conda=4.12 && \
     mamba env create --file $PROJECT_DIR/environment.yml --force && \
     conda clean --all --yes
 

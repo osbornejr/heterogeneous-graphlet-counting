@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 # install Julia packages in /opt/julia instead of $HOME
 #ENV JULIA_DEPOT_PATH=/opt/julia
 #ENV JULIA_PKGDIR=/opt/julia
-ENV JULIA_VERSION=1.7.2
+ENV JULIA_VERSION=1.8.5
 
 WORKDIR /tmp
 
