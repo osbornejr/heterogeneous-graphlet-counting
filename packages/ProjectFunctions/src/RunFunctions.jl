@@ -467,11 +467,17 @@ function graphlet_counting(vertexlist,edgelist)
         timer = cache_load(graphlet_file,"time")
     else
         @info "Counting graphlets..."
+        #Setup workers
+        distributed_setup(:ProjectFunctions,:GraphletCounting,:GraphletAnalysis,:NetworkConstruction)
+
         timer=@elapsed graphlet_counts = GraphletCounting.count_graphlets(vertexlist,edgelist,params["analysis"]["graphlet_size"],run_method="distributed-old")
         #graphlet_concentrations = concentrate(graphlet_counts) 
         @info "Saving graphlet counts at $anal_dir..."
         ##save the per-edge array as well in case we need it in the future (exp for debugging)
         cache_save(graphlet_file,["graphlets"=>graphlet_counts,"time"=>timer])
+        ##cleanup distributed
+        rmprocs(workers())
+        cleaner()
 
     end
     return [graphlet_counts,timer]
