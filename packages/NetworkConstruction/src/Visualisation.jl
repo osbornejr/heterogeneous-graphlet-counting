@@ -177,7 +177,7 @@ function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,o
     if (out_format in ["standalone","input"])
         tex *= "\\begin{tikzpicture}\n\\pgfplotstableread{%\nx min q25 median q75 max\n"
          for row in eachrow(data)
-             arr = vec(convert(Array,row))
+             arr = collect(row)
              for a in arr
                  tex *= string(a)*" "
              end
@@ -185,16 +185,16 @@ function tex_boxplot(data::DataFrame,points::Array{Float64,1},out_file::String,o
          end
         tex *= "}\\datatable\n\\begin{axis}[boxplot/draw direction=y,\nxticklabels={"
         #get row names (from column one). IMPORTANTLY, latex cant handle underscores in name. Plots also present better with short labels, so we initialise each typed graphlet
-        for a in data[1]
+        for a in data[!,1]
             tex *= replace(replace(replace(a,"_"=>"-"),"oding"=>""),"on"=>"")*","
         end
         tex = chop(tex,tail=1)
         tex *= "},\nxtick={"
-        for a in 1:length(data[1])
+        for a in 1:length(data[!,1])
             tex *= string(a)
-            if(a<length(data[1]))
+            if(a<length(data[!,1]))
                tex*= ","
-           end
+           end 
         end
         tex *= "},\nx tick label style={scale=0.5,font=\\bfseries, rotate=60,,align=center,anchor = east},\nylabel={$ylabel},cycle list/Set3 ]\n\\pgfplotstablegetrowsof{\\datatable}\n\\pgfmathtruncatemacro{\\rownumber}{\\pgfplotsretval-1}\n\\pgfplotsinvokeforeach{0,...,\\rownumber}{ \n\\pgfplotstablegetelem{#1}{min}\\of\\datatable \n\\edef\\mymin{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q25}\\of\\datatable \n\\edef\\myql{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{median}\\of\\datatable \n\\edef\\mymedian{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{q75}\\of\\datatable \n\\edef\\myqu{\\pgfplotsretval} \n \n\\pgfplotstablegetelem{#1}{max}\\of\\datatable \n\\edef\\mymax{\\pgfplotsretval} \n \n\\typeout{\\mymin,\\myql,\\mymedian,\\myqu,\\mymax} \n\\pgfmathsetmacro{\\mylowerq}{\\myql} \n\\pgfmathsetmacro{\\myupperq}{\\myqu} \n\\edef\\temp{\\noexpand\\addplot+[, \nboxplot prepared={ \n     lower whisker=\\mymin, \n     upper whisker=\\mymax, \n     lower quartile=\\mylowerq, \n     upper quartile=\\myupperq, \n     median=\\mymedian, \n     every box/.style={solid,fill,opacity=0.5}, \n     every whisker/.style={solid }, \n     every median/.style={solid}, \n     }, \n]coordinates {};} \n\\temp \n}\n\\addplot [only marks, mark=o,mark size = 1pt] coordinates{"
         for (i,p) in enumerate(points)
@@ -228,14 +228,14 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
 
     if (out_format in ["standalone","input"])
         tex *= "\\begin{tikzpicture}\n\\pgfplotsset{colormap/Set2}\n"
-        tex *= "\\begin{axis}[xmin = 0, xmax = $(length(merged_data[1])+1), enlarge x limits ={0},ymin = $ymin, ymax = $ymax, boxplot/draw direction=y,\nxticklabels={"
+        tex *= "\\begin{axis}[xmin = 0, xmax = $(length(merged_data[!,1])+1), enlarge x limits ={0},ymin = $ymin, ymax = $ymax, boxplot/draw direction=y,\nxticklabels={"
         #get row names (from column one). IMPORTANTLY, latex cant handle underscores in name. Plots also present better with short labels, so we initialise each typed graphlet
-        for a in merged_data[1]
+        for a in merged_data[!,1]
             tex *= replace(replace(replace(chop(split(a,"-")[1],tail=2),"_"=>"-"),"oding"=>""),"on"=>"")*","
         end
         tex = chop(tex,tail=1)
         tex *= "},\nxtick={"
-        for a in 1:length(merged_data[1])
+        for a in 1:length(merged_data[!,1])
             tex *= string(a)*","
         end
         tex = chop(tex,tail=1)
@@ -250,7 +250,7 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
             #define data for these boxplots
             tex *= "\\pgfplotstableread{%\nx min q25 median q75 max\n"
             for row in eachrow(box_data)
-                arr = vec(convert(Array,row))
+                arr = collect(row)
                 for a in arr
                     tex *= string(a)*" "
                 end
@@ -259,9 +259,9 @@ function tex_merged_boxplot(data_array::Array{DataFrame,1},out_file::String,out_
             tex *= "}\\datatable\n"
             ##define grey box area every second graphlet
             if ((grey_flag == 1) && (hom_count+1 == length(data_array)))
-                tex *= "\\addplot [draw=gray,fill=gray,opacity=0.1] coordinates {($(tal+0.5),$(ymin-1)) ($(tal+0.5),$(ymax+1)) ($(tal+length(data[1])+1),$(ymax+1)) ($(tal+length(data[1])+1),$(ymin-1))};\n"
+                tex *= "\\addplot [draw=gray,fill=gray,opacity=0.1] coordinates {($(tal+0.5),$(ymin-1)) ($(tal+0.5),$(ymax+1)) ($(tal+length(data[!,1])+1),$(ymax+1)) ($(tal+length(data[!,1])+1),$(ymin-1))};\n"
             elseif (grey_flag == 1)
-                tex *= "\\addplot [draw=gray,fill=gray,opacity=0.1] coordinates {($(tal+0.5),$(ymin-1)) ($(tal+0.5),$(ymax+1)) ($(tal+length(data[1])+0.5),$(ymax+1)) ($(tal+length(data[1])+0.5),$(ymin-1))};\n"
+                tex *= "\\addplot [draw=gray,fill=gray,opacity=0.1] coordinates {($(tal+0.5),$(ymin-1)) ($(tal+0.5),$(ymax+1)) ($(tal+length(data[!,1])+0.5),$(ymax+1)) ($(tal+length(data[!,1])+0.5),$(ymin-1))};\n"
                 grey_flag = 0
             else
                 grey_flag = 1
