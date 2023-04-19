@@ -257,7 +257,9 @@ function get_network_construction()
        throw(ArgumentError("No cached files exist at either $adj_file or $samp_file, please provide processed counts input data."))
     end
     #Trim nodes with degree zero
-    network_counts = sample_counts[components[1],:][vec(sum(pre_adj_matrix,dims=2).!=0),:]
+
+    largest = findmax(length.(components))[2]
+    network_counts = sample_counts[components[largest],:]    
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
@@ -633,8 +635,22 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     #save in output cache
     #NetworkConstruction.html_table_maker(sig_graphlets,"$rep_dir/sig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
     #NetworkConstruction.html_table_maker(insig_graphlets,"$rep_dir/insig_type_representations.html",imgs=sig_graphlets.Graphlet,figpath = "$cwd/website/figs")                          
+    #
+    ##For paper 
+    #TODO(shift these to proper place (Visualisation?)
+    #Over and underpresented graphlets table
     NetworkConstruction.tex_table_maker(sig_graphlets,"output/share/overrepresented_graphlets.tex")
     NetworkConstruction.tex_table_maker(insig_graphlets,"output/share/underrepresented_graphlets.tex")
+    ##boxplots
+    
+
+    for s in merged_summaries
+        ##get homogeneous graphlet from summary
+        hog = split(s.variable[1],"_")[end]
+        NetworkConstruction.tex_boxplot(s[!,Not(:values)],s.values,"output/share/$(hog)_boxplot.tex","input",ylabel="")
+    end
+    #merged boxplots
+    NetworkConstruction.tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","input",ylabel = "log value")
 
 
     if (params["website"]["website"] == true)
