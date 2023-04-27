@@ -13,7 +13,7 @@ cache:
     norm_dir: false 
     sampling_dir: false 
     similarity_dir: false 
-    adjacency_dir: true  
+    adjacency_dir: false  
     anal_dir: false 
     community_dir: false 
     graphlet_counting_dir: false
