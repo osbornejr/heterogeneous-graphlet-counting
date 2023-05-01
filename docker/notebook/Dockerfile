@@ -18,7 +18,7 @@ RUN adduser --disabled-password \
     $USER
 
 #add config files
-COPY environment.yml Project.toml Manifest.toml workspace.json /tmp/
+COPY environment.yml Project.toml Manifest.toml /tmp/
 RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml
 #COPY postBuild /usr/local/bin/postBuild.sh
 #RUN chown $UID:$GID /usr/local/bin/postBuild.sh && \
@@ -89,7 +89,7 @@ RUN conda init bash
 # create a project directory inside user home
 ENV PROJECT_DIR $HOME/app
 RUN mkdir $PROJECT_DIR
-RUN cp /tmp/environment.yml /tmp/Manifest.toml /tmp/Project.toml /tmp/workspace.json $PROJECT_DIR
+RUN cp /tmp/environment.yml /tmp/Manifest.toml /tmp/Project.toml $PROJECT_DIR
 WORKDIR $PROJECT_DIR
 
 # build the conda environment
