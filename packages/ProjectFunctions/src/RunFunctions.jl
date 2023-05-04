@@ -29,22 +29,28 @@ function run_all(config_file::String)
     #
     anal_flag = 0
     while (anal_flag == 0)  
-            
-        #@info "Finding communities"
-        #com_anal = community_analysis(network_counts,adj_matrix)
-        
-        @info "Counting graphlets"
-        graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
+        if (params["analysis"]["community_detection"] == true)
+            @info "Finding communities"
+            com_anal = community_analysis(network_counts,adj_matrix)
+        end
 
-        @info "Comparing typed graphlet representations"
-        typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
-        
-        #@info "Conducting coincident graphlet analysis"
-        #coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
-        
-        
+        if (params["analysis"]["graphlet_counting"] == true)
+            @info "Counting graphlets"
+            graphlet_counts,timer = graphlet_counting(vertexlist,edgelist)
+        end
 
-
+        if (params["analysis"]["typed_representation"] == true)
+            @info "Comparing typed graphlet representations"
+            typed_anal = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+        end
+        
+        #note that coincident analysis only makes sense on real data TODO split out enumeration and coincident analysis to allow synthetic enumeration
+        if (params["analysis"]["coincident_graphlets"] * params["network_construction"]["synthetic"] == true  )
+            @info "Conducting coincident graphlet analysis"
+            coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
+        end
+        
+        o
         ##reload analysis if necessary
         if (params["network_construction"]["synthetic"] == true)
             #synthetic run complete, update cache directories for real network

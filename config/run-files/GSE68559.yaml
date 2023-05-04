@@ -41,10 +41,13 @@ network_construction:
   synthetic: false
 
 analysis:    
+  community_detection: false
+  wgcna: false
+  func_annotate: false
   graphlet_counting: true
   graphlet_size: 4
   recursive: true #count lower graphlets as well
+  typed_representation: true
   null_model_size: 1000
-  wgcna: false
-  func_annotate: false
-
+  coincident_graphlets: false
+  
