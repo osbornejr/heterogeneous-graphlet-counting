@@ -45,7 +45,7 @@ function run_all(config_file::String)
         end
         
         #note that coincident analysis only makes sense on real data TODO split out enumeration and coincident analysis to allow synthetic enumeration
-        if (params["analysis"]["coincident_graphlets"] * params["network_construction"]["synthetic"] == true  )
+        if (params["analysis"]["coincident_graphlets"] * params["network_construction"]["synthetic"] == false  )
             @info "Conducting coincident graphlet analysis"
             coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
         end
