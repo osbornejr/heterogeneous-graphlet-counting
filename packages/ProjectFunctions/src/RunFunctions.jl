@@ -29,10 +29,19 @@ function run_all(config_file::String)
     #
     anal_flag = 0
     while (anal_flag == 0)  
+        
+        #only do bio val on real network 
+        if (params["analysis"]["biological_validation"] * !params["network_construction"]["synthetic"] == true  )
+            @info "Conducting baseline network validation"
+            entrez_id_vector, candidates,top_terms = biological_validation(network_counts)
+        end
+
+
         if (params["analysis"]["community_detection"] == true)
             @info "Finding communities"
             com_anal = community_analysis(network_counts,adj_matrix)
         end
+    
 
         if (params["analysis"]["graphlet_counting"] == true)
             @info "Counting graphlets"
@@ -45,12 +54,11 @@ function run_all(config_file::String)
         end
         
         #note that coincident analysis only makes sense on real data TODO split out enumeration and coincident analysis to allow synthetic enumeration
-        if (params["analysis"]["coincident_graphlets"] * params["network_construction"]["synthetic"] == false  )
+        if (params["analysis"]["coincident_graphlets"] * !params["network_construction"]["synthetic"] == true  )
             @info "Conducting coincident graphlet analysis"
             coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
         end
         
-        o
         ##reload analysis if necessary
         if (params["network_construction"]["synthetic"] == true)
             #synthetic run complete, update cache directories for real network
@@ -115,6 +123,7 @@ function cache_setup()
         make_cache(dir_name="anal_dir",params["cache"]["adjacency_dir"],"analysis","real")
     end
 
+    make_cache(dir_name="bio_dir",params["cache"]["anal_dir"],"biological_validation")
     make_cache(dir_name="community_dir",params["cache"]["anal_dir"],"communities")
     make_cache(dir_name="graphlet_counting_dir",params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting")
     make_cache(dir_name="rep_dir",params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations")
@@ -342,12 +351,14 @@ function network_construction(sample_counts::DataFrame)
     end 
 
 
-    #Trim nodes with degree zero (and TODO HACK remove component 2 as well!
     
 
+    #get largest component
+    largest = findmax(length.(components))[2]
 
     network_counts = sample_counts[components[largest],:]
     #or to just get all non-zero components
+    #Trim nodes with degree zero (and TODO HACK remove component 2 as well!
     #network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
@@ -734,13 +745,12 @@ function load_relationships(file_path)
  end
 export load_relationships
 
-function coincident_graphlets(network_counts,vertexlist,edgelist)
+
+function biological_validation(network_counts)
     vertex_names = network_counts[!,:transcript_id]
-    #Coincident analysis
-    coinc_dir = params["cache"]["coinc_dir"]
-    run(`mkdir -p $(coinc_dir)`)
     #get baseline entrez and kegg info about transcripts
-    kegg_file = "$(coinc_dir)/kegg_info.jld2"
+    bio_dir = params["cache"]["bio_dir"]
+    kegg_file = "$(bio_dir)/kegg_info.jld2"
     if (isfile(kegg_file))
         @info "Loading KEGG info from $kegg_file..."
         entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
@@ -751,6 +761,32 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcripts")
         cache_save(kegg_file,["entrez_id_vector"=>entrez_id_vector, "candidates"=>candidates,"top_terms"=>top_terms ])
     end
+    return [entrez_id_vector, candidates,top_terms]
+end
+
+function biological_validation()
+    #TODO make these empty methods consistent with multiple dispatch or different naming convention
+    #get baseline entrez and kegg info about transcripts
+    bio_dir = params["cache"]["bio_dir"]
+    kegg_file = "$(bio_dir)/kegg_info.jld2"
+    if (isfile(kegg_file))
+        @info "Loading KEGG info from $kegg_file..."
+        entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
+        candidates = cache_load(kegg_file,"candidates")
+        top_terms = cache_load(kegg_file,"top_terms")
+    else
+            throw(ArgumentError("No cached file exists at $kegg_file, please ensure biological validation has been run on network."))
+    end
+    return [entrez_id_vector, candidates,top_terms]
+end
+
+function coincident_graphlets(vertexlist,edgelist)
+    #Coincident analysis
+    coinc_dir = params["cache"]["coinc_dir"]
+    run(`mkdir -p $(coinc_dir)`)
+        
+    ##get baseline network info about biological function (should be done at previous step now)
+    entrez_id_vector, candidates,top_terms = biological_validation()
     candidate_pathways = collect(keys(candidates))
 
 
