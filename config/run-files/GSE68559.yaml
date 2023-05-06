@@ -15,6 +15,7 @@ cache:
     similarity_dir: false 
     adjacency_dir: false  
     anal_dir: false 
+    bio_dir: false
     community_dir: false 
     graphlet_counting_dir: false
     rep_dir: false 
@@ -41,6 +42,7 @@ network_construction:
   synthetic: false
 
 analysis:    
+  biological_validation: true
   community_detection: false
   wgcna: false
   func_annotate: false
