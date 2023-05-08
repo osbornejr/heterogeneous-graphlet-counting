@@ -746,10 +746,12 @@ function load_relationships(file_path)
 export load_relationships
 
 
-function biological_validation(network_counts)
+function kegg_information(network_counts)
+
     vertex_names = network_counts[!,:transcript_id]
     #get baseline entrez and kegg info about transcripts
     bio_dir = params["cache"]["bio_dir"]
+    kegg_file = "$(bio_dir)/kegg_info.jld2"
     kegg_file = "$(bio_dir)/kegg_info.jld2"
     if (isfile(kegg_file))
         @info "Loading KEGG info from $kegg_file..."
@@ -762,6 +764,32 @@ function biological_validation(network_counts)
         cache_save(kegg_file,["entrez_id_vector"=>entrez_id_vector, "candidates"=>candidates,"top_terms"=>top_terms ])
     end
     return [entrez_id_vector, candidates,top_terms]
+
+end
+function go_information(network_counts)
+
+    vertex_names = network_counts[!,:transcript_id]
+    #get baseline entrez and kegg info about transcripts
+    bio_dir = params["cache"]["bio_dir"]
+    go_file = "$(bio_dir)/go_info.jld2"
+    go_file = "$(bio_dir)/go_info.jld2"
+    if (isfile(kegg_file))
+        @info "Loading GO info from $go_file..."
+
+        entrez_id_vector = cache_load(go_file,"entrez_id_vector")
+        candidates = cache_load(go_file,"candidates")
+        top_terms = cache_load(go_file,"top_terms")
+    else
+        @info "getting GO info..."
+        entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_GO_terms(vertex_names,"transcripts")
+        cache_save(go_file,["entrez_id_vector"=>entrez_id_vector, "candidates"=>candidates,"top_terms"=>top_terms ])
+    end
+    return [entrez_id_vector, candidates,top_terms]
+
+end
+
+function biological_validation(network_counts)
+    return kegg_information(network_counts)
 end
 
 function biological_validation()
