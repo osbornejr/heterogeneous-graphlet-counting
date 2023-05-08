@@ -216,7 +216,7 @@ function get_functional_annotations(comm_vertices::DataFrame;ensembl_version::St
     if (ensembl_version=="current")
         {
         ##mirrors to try: "useast" "uswest" "asia"
-        ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="uswest", dataset = "hsapiens_gene_ensembl") 
+        ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="useast", dataset = "hsapiens_gene_ensembl") 
         go_ids = lapply(comm_ids, function(x) getBM(attributes = c("ensembl_gene_id_version","go_id"),"ensembl_gene_id_version",x,mart = ensembl,useCache = FALSE))
         go_names = vertex_names
         } else
