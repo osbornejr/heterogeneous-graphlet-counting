@@ -9,6 +9,7 @@ top_terms.Pathway = replace.(top_terms.Pathway," - Homo sapiens (human)"=>"")
 #rekmove other longwinded subcats
 top_terms.Pathway = replace.(top_terms.Pathway," - multiple diseases"=>"")
 top_terms.Pathway = replace.(top_terms.Pathway," - reactive oxygen species"=>"")
+top_terms.Pathway = replace.(top_terms.Pathway," and "=>"/")
 
 tex = "\\begin{tikzpicture}
         \\begin{axis}[
@@ -25,7 +26,7 @@ tex*= join(sort(top_terms,:enrichment_score).Pathway,",")*"},\n"
 tex*="ytick=data]\n"
 ##add coordinates for bars
 tex*= "\\addplot coordinates {"
-for i in eachrow(sort(top_terms,:enrichment_score))
+for i in eachrow(top_terms)
     global tex*="($(i.enrichment_score),$(i.Pathway)) "
 end
 tex*="};\n\\end{axis}\n\\end{tikzpicture}"
