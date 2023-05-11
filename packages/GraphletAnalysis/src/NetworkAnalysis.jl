@@ -364,7 +364,6 @@ function biomaRt_connect()
     R"""
         library(biomaRt)
         library(httr)
-        library(tidyverse)
 #       ## connect to biomart
         set_config(config(ssl_verifypeer = 0L))
         ensembl_version = "current" 
@@ -379,16 +378,15 @@ function biomaRt_connect()
         """
 end
 
+
+
 function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
     restart_R()
-    #use small sample for now
     @info "Getting KEGG matches..."
     @rput vertex_names
     biomaRt_connect()
     R"""
         library(edgeR)
-        library(tidyverse)
-        library(httr)
     """
 
     if(nametype == "transcripts")
@@ -409,7 +407,7 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
             pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
             names(pathway_links) <- c("GeneID","PathwayID")
             ##need to convert gene ids to correct integer format
-            pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) str_remove(x,"hsa:")))
+            pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
             pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
             names(pathway_list) <- c("PathwayID","PathwayName")
             ## get top hits to select from
@@ -434,7 +432,7 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
             pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
             names(pathway_links) <- c("GeneID","PathwayID")
             ##need to convert gene ids to correct integer format
-            pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) str_remove(x,"hsa:")))
+            pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
             pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
             names(pathway_list) <- c("PathwayID","PathwayName")
             ## get top hits to select from
