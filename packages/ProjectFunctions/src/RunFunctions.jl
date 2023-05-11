@@ -457,7 +457,8 @@ function community_analysis(network_counts,adj_matrix)
             functional_annotations = cache_load(func_file,"functional annotations")
         else
             #functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75",write_csv = true, csv_dir ="$(params["website"]["website_dir"])/_assets/$(params["website"]["page_name"])/tableinput/")       
-            functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75")       
+            #functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices,ensembl_version = "75")       
+            functional_annotations = GraphletAnalysis.get_functional_annotations(community_vertices)       
             cache_save(func_file,"functional annotations"=>functional_annotations)
         end 
         return [community_vertices,functional_annotations]
@@ -769,7 +770,7 @@ end
 function go_information(network_counts)
 
     vertex_names = network_counts[!,:transcript_id]
-    #get baseline entrez and kegg info about transcripts
+    #get baseline GO info about transcripts
     bio_dir = params["cache"]["bio_dir"]
     go_file = "$(bio_dir)/go_info.jld2"
     go_file = "$(bio_dir)/go_info.jld2"
