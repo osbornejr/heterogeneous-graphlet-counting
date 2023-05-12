@@ -378,8 +378,17 @@ function biomaRt_connect()
         """
 end
 
+"""
+    get_entrez_ids(names,nametype)
 
-function get_entrez_ids(vertex_names::Vector{<:AbstractString},nametype::String)
+Generate a map between `names` and the entrez gene ids associated with them. 
+Elements of `names` may be any string, but only ensembl names will generate a match. 
+"Name.x" will have ".x" automatically trimmed as biomaRt will not match to the sub id level.
+
+Matches be either at the "transcript" or "gene" level, which is given by `nametype`.
+
+"""
+function get_entrez_ids(names::Vector{<:AbstractString},nametype::String)
 
     restart_R()
     biomaRt_connect()
@@ -392,17 +401,17 @@ function get_entrez_ids(vertex_names::Vector{<:AbstractString},nametype::String)
         throw(ArgumentError("nametype must be either 'transcript' or 'gene'."))
     end
 
-    @rput vertex_names
+    @rput names
     @rput ensembl_search_term 
     R"""
 
     ## full list of entrez_ids mapped to names (either transcript or gene names, neither will be one-to-one, use whichever offers better coverage. Transcripts also preferred as a better reflection of the data rather than expanding to the gene level).
     
     ### we trim names to remove transcript specific reference (better for ensembl hits)
-    names_trimmed = sapply(vertex_names,tools::file_path_sans_ext)    
+    names_trimmed = sapply(names,tools::file_path_sans_ext)    
     ##create dataframe to store map between original names and entrez ids
     #(form dataframe with trimmed names)
-    name_map = data.frame(name =vertex_names,trimmed_name = names_trimmed)
+    name_map = data.frame(name =names,trimmed_name = names_trimmed)
     
     #this will map each name to an entrez id, IF the name exists in ensembl database 
     entrez_from_names = getBM(attributes=c("ensembl_transcript_id","ensembl_gene_id","entrezgene_id"),ensembl_search_term,names_trimmed, mart = ensembl,useCache=FALSE) 
@@ -424,17 +433,19 @@ function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String)
 
 end
 
-
 function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
     
     ##get name map to entrez ids for vertex names
+    ## note: R restart and biomaRt init happen in this function, so dont need to do again here
     name_map = get_entrez_ids(vertex_names,nametype)
     
-    entrez_ids =
-    restart_R()
+    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id
+    entrez_map = filter(:entrez_id=>!ismissing,name_map)
+    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+    #restart_R()
     @info "Getting KEGG matches..."
-    @rput vertex_names
-    biomaRt_connect()
+    @rput entrez_ids
+    #biomaRt_connect()
     R"""
         library(edgeR)
     """
@@ -442,16 +453,6 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
     if(nametype == "transcript")
         R"""
        
-        ##Alternative approach: select KEGG terms of interest from whole set of transcripts first, and then look for those in graphlets
-        ## full list of entrez_ids mapped to transcripts/genes (neither will be one-to-one, use whichever offers better coverage. Transcripts also preferred as a better reflection of the data rather than expanding to the gene level).
-        ##transcripts
-        #form transcript dataframe with trimmed names
-        transcripts_trimmed = sapply(vertex_names,tools::file_path_sans_ext)    
-        transcripts = data.frame(trimmed_names = transcripts_trimmed)
-        entrez_from_transcripts = getBM(attributes=c("ensembl_transcript_id","ensembl_gene_id","entrezgene_id"),"ensembl_transcript_id",transcripts_trimmed, mart = ensembl,useCache=FALSE) 
-        transcript_coverage = length(entrez_from_transcripts[[3]])-sum(is.na(entrez_from_transcripts[[3]]))
-        transcripts$entrez_id = entrez_from_transcripts[match(transcripts_trimmed,entrez_from_transcripts[[1]]),3]
-
         #get list of entrez ids mapped to KEGG pathways 
         ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
         #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
@@ -461,13 +462,13 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
         pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
         pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
         names(pathway_list) <- c("PathwayID","PathwayName")
+
         ## get top hits to select from
-        top_terms = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
+        top_terms = topKEGG(kegga(entrez_ids,n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
         ##get the network candidates for each pathway
         per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
-        in_network = lapply(per_pathway,function(x) transcripts$entrez_id %in% x)
+        in_network = lapply(per_pathway,function(x) entrez_ids %in% x)
         names(in_network) = top_terms$Pathway
-        entrez_id_vector = transcripts$entrez_id
         """ 
     elseif(nametype == "gene")
         R"""
@@ -495,18 +496,15 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
             entrez_id_vector = genes$entrez_id
         """
     end
-    @rget entrez_id_vector
     @rget top_terms
-    ##get rid of missing ids (sset to 0 --for now?)
-    replace!(entrez_id_vector,missing=>0)
-    entrez_id_vector = Int.(entrez_id_vector)
     @rget in_network
     @info "Finding candidates that match top KEGG pathways..."
     candidates = Dict{String,Array{Int,1}}()
     for e in in_network
         candidates[string(first(e))] = findall(.==(true),last(e))
     end
-    return (entrez_id_vector, candidates,top_terms)
+    #TODO separate pathway step from candidates finding?
+    return (entrez_map, candidates,top_terms)
 end
 
 function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
