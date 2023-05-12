@@ -19,6 +19,7 @@ dependencies:
         - bioconductor-biomaRt
         - bioconductor-go.db
         - bioconductor-topgo
+        - bioconductor-org.hs.eg.db
         
         
 
