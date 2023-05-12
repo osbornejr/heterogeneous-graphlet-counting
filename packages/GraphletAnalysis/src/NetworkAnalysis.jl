@@ -431,6 +431,27 @@ end
 
 function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String)
 
+    ##get name map to entrez ids for vertex names
+    ## note: R restart and biomaRt init happen in this function, so dont need to do again here
+    name_map = get_entrez_ids(vertex_names,nametype)
+    
+    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id
+    entrez_map = filter(:entrez_id=>!ismissing,name_map)
+    ## importantly, record which nodes in network ahve carried through
+    entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
+    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+    #restart_R()
+    @info "Getting GO matches..."
+    @rput entrez_ids
+    #biomaRt_connect()
+    R"""
+    library(edgeR)
+
+    ## get top hits to select from
+    top_terms = topGO(goana(entrez_ids))
+"""
+
+    return (entrez_map, top_terms)
 end
 
 function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
@@ -463,6 +484,7 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
 
     ## get top hits to select from
     top_terms = topKEGG(kegga(entrez_ids,n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
+
     ##get the network candidates for each pathway
     per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
     in_network = lapply(per_pathway,function(x) entrez_ids %in% x)
