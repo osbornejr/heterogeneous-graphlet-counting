@@ -26,8 +26,8 @@ WORKDIR $PROJECT_DIR
 
 # build the conda environment
 ENV ENV_PREFIX julia-workspace
-RUN conda update --name base --channel defaults conda && \
-    mamba env create --file $PROJECT_DIR/environment.yml --force && \
+RUN conda update --name base --channel defaults conda
+RUN conda env create --file $PROJECT_DIR/environment.yml --force && \
     conda clean --all --yes
 
 #build the julia environment TODO find out why RCall does not install properly
