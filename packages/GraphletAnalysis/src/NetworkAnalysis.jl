@@ -378,7 +378,47 @@ function biomaRt_connect()
         """
 end
 
+function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String)
 
+end
+
+
+function get_entrez_ids(vertex_names::Vector{<:AbstractString},nametype::String)
+
+    restart_R()
+    biomaRt_connect()
+    @info "Getting Entrez ids..."
+    if (nametype == "transcript")
+        ensembl_search_term = "ensembl_transcript_id"
+    elseif (nametype=="gene")
+        ensembl_search_term = "ensembl_gene_id"
+    else
+        throw(ArgumentError("nametype must be either 'transcript' or 'gene'."))
+    end
+
+    @rput vertex_names
+    @rput ensembl_search_term 
+    R"""
+
+    ## full list of entrez_ids mapped to names (either transcript or gene names, neither will be one-to-one, use whichever offers better coverage. Transcripts also preferred as a better reflection of the data rather than expanding to the gene level).
+    
+    ### we trim names to remove transcript specific reference (better for ensembl hits)
+    names_trimmed = sapply(vertex_names,tools::file_path_sans_ext)    
+    ##create dataframe to store map between original names and entrez ids
+    #(form dataframe with trimmed names)
+    name_map = data.frame(name =vertex_names,trimmed_name = names_trimmed)
+    
+    #this will map each name to an entrez id, IF the name exists in ensembl database 
+    entrez_from_names = getBM(attributes=c("ensembl_transcript_id","ensembl_gene_id","entrezgene_id"),ensembl_search_term,names_trimmed, mart = ensembl,useCache=FALSE) 
+    ##add column denoting if name was found in ensembl database
+    name_map$ensembl_match = !is.na(match(names_trimmed,entrez_from_names[[ensembl_search_term]]))
+    ## add FIRST entrez id match to map dataframe 
+    name_map$entrez_id = entrez_from_names[match(names_trimmed,entrez_from_names[[ensembl_search_term]]),3]
+    name_coverage = length(entrez_from_names[[3]])-sum(is.na(entrez_from_names[[3]]))
+    """
+    @rget name_map
+    return name_map
+end
 
 function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
     restart_R()
@@ -389,36 +429,37 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
         library(edgeR)
     """
 
-    if(nametype == "transcripts")
+    if(nametype == "transcript")
         R"""
        
-            ##Alternative approach: select KEGG terms of interest from whole set of transcripts first, and then look for those in graphlets
-            ## full list of entrez_ids mapped to transcripts/genes (neither will be one-to-one, use whichever offers better coverage. Transcripts also preferred as a better reflection of the data rather than expanding to the gene level).
-            ##transcripts
-            transcripts_trimmed = sapply(vertex_names,tools::file_path_sans_ext)    
-            transcripts = data.frame(trimmed_names = transcripts_trimmed)
-            entrez_from_transcripts = getBM(attributes=c("ensembl_transcript_id","ensembl_gene_id","entrezgene_id"),"ensembl_transcript_id",transcripts_trimmed, mart = ensembl,useCache=FALSE) 
-            transcript_coverage = length(entrez_from_transcripts[[3]])-sum(is.na(entrez_from_transcripts[[3]]))
-            transcripts$entrez_id = entrez_from_transcripts[match(transcripts_trimmed,entrez_from_transcripts[[1]]),3]
-            
-            #get list of entrez ids mapped to KEGG pathways 
-            ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
-            #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
-            pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
-            names(pathway_links) <- c("GeneID","PathwayID")
-            ##need to convert gene ids to correct integer format
-            pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
-            pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
-            names(pathway_list) <- c("PathwayID","PathwayName")
-            ## get top hits to select from
-            top_terms = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
-            ##get the network candidates for each pathway
-            per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
-            in_network = lapply(per_pathway,function(x) transcripts$entrez_id %in% x)
-            names(in_network) = top_terms$Pathway
-            entrez_id_vector = transcripts$entrez_id
+        ##Alternative approach: select KEGG terms of interest from whole set of transcripts first, and then look for those in graphlets
+        ## full list of entrez_ids mapped to transcripts/genes (neither will be one-to-one, use whichever offers better coverage. Transcripts also preferred as a better reflection of the data rather than expanding to the gene level).
+        ##transcripts
+        #form transcript dataframe with trimmed names
+        transcripts_trimmed = sapply(vertex_names,tools::file_path_sans_ext)    
+        transcripts = data.frame(trimmed_names = transcripts_trimmed)
+        entrez_from_transcripts = getBM(attributes=c("ensembl_transcript_id","ensembl_gene_id","entrezgene_id"),"ensembl_transcript_id",transcripts_trimmed, mart = ensembl,useCache=FALSE) 
+        transcript_coverage = length(entrez_from_transcripts[[3]])-sum(is.na(entrez_from_transcripts[[3]]))
+        transcripts$entrez_id = entrez_from_transcripts[match(transcripts_trimmed,entrez_from_transcripts[[1]]),3]
+
+        #get list of entrez ids mapped to KEGG pathways 
+        ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
+        #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+        pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
+        names(pathway_links) <- c("GeneID","PathwayID")
+        ##need to convert gene ids to correct integer format
+        pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
+        pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
+        names(pathway_list) <- c("PathwayID","PathwayName")
+        ## get top hits to select from
+        top_terms = topKEGG(kegga(entrez_from_transcripts[[3]],n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
+        ##get the network candidates for each pathway
+        per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
+        in_network = lapply(per_pathway,function(x) transcripts$entrez_id %in% x)
+        names(in_network) = top_terms$Pathway
+        entrez_id_vector = transcripts$entrez_id
         """ 
-    elseif(nametype == "genes")
+    elseif(nametype == "gene")
         R"""
             ##genes
             genes_trimmed = sapply(vertex_names,tools::file_path_sans_ext) 
