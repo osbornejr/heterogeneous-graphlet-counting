@@ -378,10 +378,6 @@ function biomaRt_connect()
         """
 end
 
-function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String)
-
-end
-
 
 function get_entrez_ids(vertex_names::Vector{<:AbstractString},nametype::String)
 
@@ -417,10 +413,24 @@ function get_entrez_ids(vertex_names::Vector{<:AbstractString},nametype::String)
     name_coverage = length(entrez_from_names[[3]])-sum(is.na(entrez_from_names[[3]]))
     """
     @rget name_map
+    ##append full set of associated entrez ids (name_map will only have FIRST match
+    @rget entrez_from_names
+    entrez_set(x) = unique(filter(ensembl_search_term => ==(x),entrez_from_names).entrezgene_id)
+    name_map.entrez_ids = map(x->entrez_set(x),name_map.trimmed_name)
     return name_map
 end
 
+function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String)
+
+end
+
+
 function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
+    
+    ##get name map to entrez ids for vertex names
+    name_map = get_entrez_ids(vertex_names,nametype)
+    
+    entrez_ids =
     restart_R()
     @info "Getting KEGG matches..."
     @rput vertex_names
