@@ -4,6 +4,7 @@ channels:
         - bioconda
         - defaults
 dependencies:
+        - libstdcxx-ng
         - r-base>=4.0
         - r-tidyverse 
         - r-data.table

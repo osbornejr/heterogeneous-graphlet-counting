@@ -41,9 +41,10 @@ RUN curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64
 ENV PATH=$CONDA_DIR/bin:$PATH
 RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
 # make conda activate command available from /bin/bash --interative shells
-RUN conda init bash \
-    && conda update conda \
-    && conda install -c conda-forge mamba
+RUN conda init bash
+RUN conda update --name base --channel defaults conda
+RUN conda --version
+RUN conda install -c conda-forge mamba
 
 USER root
 RUN apt-get clean
