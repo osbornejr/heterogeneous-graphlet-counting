@@ -2,7 +2,7 @@ FROM julia:latest
 
 USER root
 #add config files
-RUN apt-get update;apt-get install -y unzip ssh binutils
+RUN apt-get update;apt-get install -y unzip ssh binutils locate
 COPY environment.yml Project.toml Manifest.toml docker/env/startup.jl /tmp/
 RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml /tmp/startup.jl
 #COPY postBuild /usr/local/bin/postBuild.sh
@@ -11,8 +11,6 @@ RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml /t
 COPY docker/entrypoint.sh /usr/local/bin/
 RUN chown $UID:$GID /usr/local/bin/entrypoint.sh && \
     chmod u+x /usr/local/bin/entrypoint.sh
-## WORKAROUND AS PER https://discourse.julialang.org/t/glibcxx-3-4-26-not-found-in-rcall/29113/10: need to replace the libstdc++ library from the system (ie what conda uses to determine all other packages including the R dependencies)
-#RUN cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 $HOME/julia-${JULIA_VERSION}/lib/julia/
 
 USER $USER
 #setup startup file
@@ -32,8 +30,11 @@ RUN mamba env create --file $PROJECT_DIR/environment.yml --force && \
 
 #build the julia environment TODO find out why RCall does not install properly
 ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
-ENV LD_LIBRARY_PATH $HOME/conda/envs/$ENV_PREFIX/lib
+ENV R_LIBS_USER $CONDA_DIR/envs/$ENV_PREFIX/lib/
+#ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:$HOME/conda/envs/$ENV_PREFIX/lib
 #ENV LD_PRELOAD /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+## WORKAROUND AS PER https://discourse.julialang.org/t/glibcxx-3-4-26-not-found-in-rcall/29113/10: need to replace the libstdc++ library from the system (ie what conda uses to determine all other packages including the R dependencies)
+RUN cp $HOME/conda/envs/$ENV_PREFIX/lib/libstdc++.so.6 $HOME/julia-${JULIA_VERSION}/lib/julia/
 #set up MPI variables
 #ENV JULIA_MPI_BINARY system
 #ENV JULIA_MPI_PATH $CONDA_DIR/envs/$ENV_PREFIX
