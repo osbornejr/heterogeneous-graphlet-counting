@@ -486,10 +486,6 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
     ## get top hits to select from
     top_terms = topKEGG(kegga(entrez_ids,n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
 
-    ##get the network candidates for each pathway
-    per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
-    in_network = lapply(per_pathway,function(x) entrez_ids %in% x)
-    names(in_network) = top_terms$Pathway
     """ 
     @rget top_terms
     @rget in_network
@@ -500,7 +496,49 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
     end
     #TODO separate pathway step from candidates finding?
     #TODO check that reduction to only those transcripts with a entrez match here does not cause problems down the line (coincident analysis) 
-    return (entrez_map, candidates,top_terms)
+    return top_terms
+end
+
+function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::String)
+    ##get name map to entrez ids for vertex names
+    ## note: R restart and biomaRt init happen in this function, so dont need to do again here
+    name_map = get_entrez_ids(vertex_names,nametype)
+    
+    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id
+    entrez_map = filter(:entrez_id=>!ismissing,name_map)
+    ## importantly, record which nodes in network ahve carried through
+    entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
+    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+    #run this to get top_terms
+    top_terms = get_KEGG_pathways(vertex_names,nametype)
+
+    @rput entrez_ids
+    @rput top_terms 
+    R"""
+    #get list of entrez ids mapped to KEGG pathways 
+    ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
+    #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+    pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
+    names(pathway_links) <- c("GeneID","PathwayID")
+    ##need to convert gene ids to correct integer format
+    pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
+    pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
+    names(pathway_list) <- c("PathwayID","PathwayName")
+    
+    ##get the network candidates for each pathway
+    per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
+    in_network = lapply(per_pathway,function(x) entrez_ids %in% x)
+    names(in_network) = top_terms$Pathway
+    """
+    @rget in_network
+    @info "Finding candidates that match top KEGG pathways..."
+    candidates = Dict{String,Array{Int,1}}()
+    for e in in_network
+        candidates[string(first(e))] = findall(.==(true),last(e))
+    end
+    #TODO separate pathway step from candidates finding?
+    #TODO check that reduction to only those transcripts with a entrez match here does not cause problems down the line (coincident analysis) 
+    return (entrez_map,candidates,top_terms)
 end
 
 function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
