@@ -488,14 +488,6 @@ function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::Stri
 
     """ 
     @rget top_terms
-    @rget in_network
-    @info "Finding candidates that match top KEGG pathways..."
-    candidates = Dict{String,Array{Int,1}}()
-    for e in in_network
-        candidates[string(first(e))] = findall(.==(true),last(e))
-    end
-    #TODO separate pathway step from candidates finding?
-    #TODO check that reduction to only those transcripts with a entrez match here does not cause problems down the line (coincident analysis) 
     return top_terms
 end
 
