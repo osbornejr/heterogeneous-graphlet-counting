@@ -82,6 +82,8 @@ end
 export load_config
 export params
 
+
+
 function make_cache(dirs...;dir_name::String)
     #join args into dir path
     dir = join(dirs,"/") 
@@ -753,18 +755,15 @@ function kegg_information(network_counts)
     #get baseline entrez and kegg info about transcripts
     bio_dir = params["cache"]["bio_dir"]
     kegg_file = "$(bio_dir)/kegg_info.jld2"
-    kegg_file = "$(bio_dir)/kegg_info.jld2"
     if (isfile(kegg_file))
         @info "Loading KEGG info from $kegg_file..."
-        entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
-        candidates = cache_load(kegg_file,"candidates")
         top_terms = cache_load(kegg_file,"top_terms")
     else
         @info "getting KEGG info..."
-        entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcripts")
-        cache_save(kegg_file,["entrez_id_vector"=>entrez_id_vector, "candidates"=>candidates,"top_terms"=>top_terms ])
+        top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcript")
+        cache_save(kegg_file,["top_terms"=>top_terms ])
     end
-    return [entrez_id_vector, candidates,top_terms]
+    return top_terms
 
 end
 function go_information(network_counts)
@@ -773,24 +772,25 @@ function go_information(network_counts)
     #get baseline GO info about transcripts
     bio_dir = params["cache"]["bio_dir"]
     go_file = "$(bio_dir)/go_info.jld2"
-    go_file = "$(bio_dir)/go_info.jld2"
-    if (isfile(kegg_file))
+    if (isfile(go_file))
         @info "Loading GO info from $go_file..."
 
-        entrez_id_vector = cache_load(go_file,"entrez_id_vector")
-        candidates = cache_load(go_file,"candidates")
         top_terms = cache_load(go_file,"top_terms")
     else
         @info "getting GO info..."
-        entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_GO_terms(vertex_names,"transcripts")
-        cache_save(go_file,["entrez_id_vector"=>entrez_id_vector, "candidates"=>candidates,"top_terms"=>top_terms ])
+        top_terms = GraphletAnalysis.get_GO_terms(vertex_names,"transcript")
+        cache_save(go_file,["top_terms"=>top_terms ])
     end
-    return [entrez_id_vector, candidates,top_terms]
+    return top_terms
 
 end
 
 function biological_validation(network_counts)
-    return kegg_information(network_counts)
+    ##generate top terms for kegg and go
+    ktt = kegg_information(network_counts)
+    gtt = go_information(network_counts)
+    ##at the moment return nothing. could return all components?
+    return [ktt,gtt] 
 end
 
 function biological_validation()
@@ -800,13 +800,18 @@ function biological_validation()
     kegg_file = "$(bio_dir)/kegg_info.jld2"
     if (isfile(kegg_file))
         @info "Loading KEGG info from $kegg_file..."
-        entrez_id_vector = cache_load(kegg_file,"entrez_id_vector")
-        candidates = cache_load(kegg_file,"candidates")
-        top_terms = cache_load(kegg_file,"top_terms")
+        ktt = cache_load(kegg_file,"top_terms")
     else
             throw(ArgumentError("No cached file exists at $kegg_file, please ensure biological validation has been run on network."))
     end
-    return [entrez_id_vector, candidates,top_terms]
+    go_file = "$(bio_dir)/go_info.jld2"
+    if (isfile(go_file))
+        @info "Loading GO info from $go_file..."
+        gtt = cache_load(go_file,"top_terms")
+    else
+            throw(ArgumentError("No cached file exists at $go_file, please ensure biological validation has been run on network."))
+    end
+    return [ktt,gtt]
 end
 
 function coincident_graphlets(vertexlist,edgelist)
