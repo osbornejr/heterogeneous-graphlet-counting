@@ -449,9 +449,10 @@ function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String)
 
     ## get top hits to select from
     top_terms = topGO(goana(entrez_ids))
-"""
+    """
+    @rget top_terms 
 
-    return (entrez_map, top_terms)
+    return top_terms
 end
 
 function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
