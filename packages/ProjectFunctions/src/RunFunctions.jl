@@ -82,7 +82,9 @@ end
 export load_config
 export params
 
-
+function cache_remove(file::String)
+    run(`rm -rf $(file)`)
+end
 
 function make_cache(dirs...;dir_name::String)
     #join args into dir path
@@ -1092,5 +1094,6 @@ function webpage_construction()
         csv = csv*string(length(vertexlist))*","*string(length(edgelist))*","*string(length(components))*","*string(length(largest...))*","*string(max(degrees...))*"\n"
         write("$output_dir/tableinput/network_stats.csv",csv)
 end
+
 
 
