@@ -536,7 +536,6 @@ function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::St
     for e in in_network
         candidates[string(first(e))] = findall(.==(true),last(e))
     end
-    #TODO separate pathway step from candidates finding?
     #TODO check that reduction to only those transcripts with a entrez match here does not cause problems down the line (coincident analysis) 
     return (entrez_map,candidates,top_terms)
 end
