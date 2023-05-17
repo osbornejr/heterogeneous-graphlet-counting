@@ -3,7 +3,7 @@ using ProjectFunctions,CSV
 ##load in information
 kegg_top_terms,go_top_terms = ProjectFunctions.biological_validation()
 
-function tex_enrichment_bar(top_names::Vector{String},,enrichment_scores::Vector{Float},outfile::String)
+function tex_enrichment_bar(top_names::Vector{String},enrichment_scores::Vector{Float64},outfile::String)
 
         tex = "\\begin{tikzpicture}
         \\begin{axis}[
@@ -22,7 +22,7 @@ tex*="ytick=data]\n"
 ##add coordinates for bars
 tex*= "\\addplot coordinates {"
 for i in 1:length(top_names)
-    global tex*="($(enrichment_scores[i]),$(top_names[i])) "
+    tex*="($(enrichment_scores[i]),$(top_names[i])) "
 end
 tex*="};\n\\end{axis}\n\\end{tikzpicture}"
 write(outfile,tex)
@@ -41,7 +41,9 @@ kegg_top_terms.Pathway = replace.(kegg_top_terms.Pathway," and "=>"/")
 
 tex_enrichment_bar(kegg_top_terms.Pathway,kegg_top_terms.enrichment_score,"output/share/kegg_bar.tex")
 ### GO enrichment
-
+##add enrichment column
 go_top_terms.enrichment_score = broadcast(x->-log(x),go_top_terms.P_DE) 
+## remove any underscores from terms
+go_top_terms.Term = replace.(go_top_terms.Term,"_"=>" ")
 
-tex_enrichment_bar(go_top_terms.Pathway,go_top_terms.enrichment_score,"output/share/go_bar.tex")
+tex_enrichment_bar(go_top_terms.Term,go_top_terms.enrichment_score,"output/share/go_bar.tex")
