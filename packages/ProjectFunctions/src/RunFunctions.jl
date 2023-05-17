@@ -787,6 +787,21 @@ function go_information(network_counts)
 
 end
 
+function ensembl_coverage(network_counts)
+    names = network_counts.transcript_id
+    bio_dir = params["cache"]["bio_dir"]
+    entrez_file = "$(bio_dir)/entrez_map.jld2"
+    if (isfile(entrez_file))
+
+        entrez_map = cache_load(entrez_file,"entrez")
+    else
+        @info "getting entrez map..."
+        entrez_map = GraphletAnalysis.get_entrez_ids(names,"transcript")
+        cache_save(entrez_file,["entrez"=>entrez_map ])
+    end
+    return entrez_map
+end
+
 function biological_validation(network_counts)
     ##generate top terms for kegg and go
     ktt = kegg_information(network_counts)
@@ -801,14 +816,12 @@ function biological_validation()
     bio_dir = params["cache"]["bio_dir"]
     kegg_file = "$(bio_dir)/kegg_info.jld2"
     if (isfile(kegg_file))
-        @info "Loading KEGG info from $kegg_file..."
         ktt = cache_load(kegg_file,"top_terms")
     else
             throw(ArgumentError("No cached file exists at $kegg_file, please ensure biological validation has been run on network."))
     end
     go_file = "$(bio_dir)/go_info.jld2"
     if (isfile(go_file))
-        @info "Loading GO info from $go_file..."
         gtt = cache_load(go_file,"top_terms")
     else
             throw(ArgumentError("No cached file exists at $go_file, please ensure biological validation has been run on network."))
