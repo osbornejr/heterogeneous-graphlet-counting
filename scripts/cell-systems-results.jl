@@ -1,7 +1,5 @@
-using ProjectFunctions,CSV
+using ProjectFunctions,CSV,DataStructures,DataFrames
 
-##load in information
-kegg_top_terms,go_top_terms = ProjectFunctions.biological_validation()
 
 function tex_enrichment_bar(top_names::Vector{String},enrichment_scores::Vector{Float64},outfile::String)
 
@@ -28,6 +26,44 @@ tex*="};\n\\end{axis}\n\\end{tikzpicture}"
 write(outfile,tex)
 end
 
+function tex_degree_distribution(data::Vector{Int},outfile::String;title::String="")
+    tex= "\\begin{tikzpicture}
+    \\begin{axis}[title=$(title),xlabel=Degree,ylabel=Frequency]
+            \\addplot+ [
+                       hist={
+                             bins=50,
+                             handler/.style={sharp plot},
+                             intervals=false,
+                            },
+                            mark=none,
+                      ] table [row sep=\\\\,y index=0] {
+                                                      data\\\\"
+                                                      tex*=join(data,"\\\\")*"\\\\" 
+    tex*=                                                 "};
+        \\end{axis}
+    \\end{tikzpicture}"
+    write(outfile,tex)
+end
+
+
+
+#NETWORK STATS
+## load in info
+raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = ProjectFunctions.get_output_data()
+
+### Degree distributions
+dd = GraphletCounting.typed_degree_distribution(vertexlist,edgelist)
+plot_dd_data = DataFrame(coding = map(x->DefaultDict(0,x)["coding"],dd),noncoding = map(x->DefaultDict(0,x)["noncoding"],dd));
+
+##generate degree distribution plots for each edge type
+tex_degree_distribution(plot_dd_data[vertexlist.=="coding",:].coding,"output/share/degree-dist-coding-coding.tex",title="Coding degree distribution for coding nodes")
+tex_degree_distribution(plot_dd_data[vertexlist.=="coding",:].noncoding,"output/share/degree-dist-coding-noncoding.tex",title="Noncoding degree distribution for coding nodes")
+tex_degree_distribution(plot_dd_data[vertexlist.=="noncoding",:].coding,"output/share/degree-dist-noncoding-coding.tex",title="Coding degree distribution for noncoding nodes")
+tex_degree_distribution(plot_dd_data[vertexlist.=="noncoding",:].noncoding,"output/share/degree-dist-noncoding-noncoding.tex",title="Noncoding degree distribution for noncoding nodes")
+
+#BIOLOGICAL VALIDATION
+##load in information
+kegg_top_terms,go_top_terms = ProjectFunctions.biological_validation()
 ### KEGG enrichment
 ##bio validation table of top kegg terms associated with network
 ## calculate enrichment score (invert p-values on log scale)
@@ -47,3 +83,4 @@ go_top_terms.enrichment_score = broadcast(x->-log(x),go_top_terms.P_DE)
 go_top_terms.Term = replace.(go_top_terms.Term,"_"=>" ")
 
 tex_enrichment_bar(go_top_terms.Term,go_top_terms.enrichment_score,"output/share/go_bar.tex")
+
