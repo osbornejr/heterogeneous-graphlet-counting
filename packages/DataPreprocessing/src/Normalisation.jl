@@ -149,6 +149,17 @@ function boxplot(dataframe::DataFrame,filename::String)
     draw(SVG(filename),p)
 end
 
+#Another boxplot method that defaults to colouring based on sample and outputs plot object
+function boxplot(dataframe::DataFrame)
+    longform = stack(dataframe,variable_name = "sample")
+    longform = longform[longform[!,:value].!=0,:]
+    insertcols!(longform,"log_value"=>log2.(longform[!,:value]))
+    longform = longform[longform[!,:log_value].>-10,:]
+    longform = longform[longform[!,:log_value].<10,:]
+    #Add column for color group
+    p = plot(longform, x = "sample", y = "log_value", Geom.boxplot(suppress_outliers = true),Guide.xticks(label=false),Theme(key_position= :none),color=:sample);
+    return p
+end
 
 function histogram(data::Vector,filepath;title::String="",xaxis::String="",yaxis::String="frequency")
     p = plot(x = log2.(data), Geom.histogram(bincount = 100,density = false),Guide.xlabel(xaxis),Guide.ylabel(yaxis),Guide.title(title));
@@ -157,4 +168,9 @@ end
 function histogram(data::DataFrame,plotcol::Symbol,colourcol::Symbol,filepath;title::String="",xaxis::String="",yaxis::String="frequency")
     p = plot(data,x = plotcol, Geom.histogram(bincount = 100,density = false),Guide.xlabel(xaxis),Guide.ylabel(yaxis),Guide.title(title),color=colourcol);
     draw(SVG(filepath),p)
+end
+
+function histogram(data::DataFrame,plotcol::Symbol,colourcol::Symbol;title::String="",xaxis::String="",yaxis::String="frequency")
+    p = plot(data,x = plotcol, Geom.histogram(bincount = 100,density = false),Guide.xlabel(xaxis),Guide.ylabel(yaxis),Guide.title(title),color=colourcol);
+    return p
 end
