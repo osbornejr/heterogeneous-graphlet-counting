@@ -39,7 +39,7 @@ cwd = ENV["PWD"];
 	using StatsBase
 	using Gadfly
 	using Portinari
-	using HypertextLiteral
+	using HypertextLiteral: JavaScript,@htl,@htl_str
 	## load dev packages last
 	dev = Pkg.develop
 	dev(path=cwd*"/packages/DataPreprocessing")
@@ -61,9 +61,6 @@ load_config(cwd*"/config/run-files/GSE68559.yaml")
 # ╠═╡ show_logs = false
 raw_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
 
-# ╔═╡ 5bdd00c5-b1bb-4b43-a98f-2af49e3ec88f
-Bars(raw_counts)
-
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
 
@@ -77,169 +74,156 @@ DataPreprocessing.boxplot(clean_counts)
 DataPreprocessing.boxplot(norm_counts)
 
 
-# ╔═╡ 1982c9cf-ed6e-4ea9-bbc7-ab14e20347d6
+# ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
+@bind tick Clock()
+
+# ╔═╡ 266067df-934c-4db4-9d00-d74619311729
+## NEW CLEANING STEP
+begin
+	##turn raw counts into data matrix
+	raw_data = DataPreprocessing.data_from_dataframe(raw_counts,"data")
+	##need to get a threshold to measure across a feature
+	raw_vec = sort(vec(raw_data))
+	# get top 10% cut off of ALL raw values
+	cut = raw_vec[end-Int(round(length(raw_vec)*.1))]
+	## get transcripts that have at least 10% of values above cut
+	new_clean_counts = raw_counts[vec(sum(raw_data.>cut,dims=2).>98*0.1),:]
+end
+
+# ╔═╡ ce65df48-0185-41ac-852e-75d77c267347
+DataPreprocessing.boxplot(new_clean_counts)
+
+# ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
+begin
+	set = [raw_counts,new_clean_counts,norm_counts]
+	index = mod(tick,length(set))+1
+	input = set[index]
+	width = 1600
+	height = 400
+	text = "// set the dimensions and margins of the graph 
+var margin = {top: 10, right: 30, bottom: 30, left: 40}, 
+  width = $(width) - margin.left - margin.right, 
+  height =$(height) - margin.top - margin.bottom; 
+ 
+// append the svg object to the body of the page 
+var svg = d3.select(\"#my_dataviz\") 
+.append(\"svg\") 
+  .attr(\"width\", width + margin.left + margin.right) 
+  .attr(\"height\", height + margin.top + margin.bottom) 
+.append(\"g\") 
+  .attr(\"transform\", 
+        \"translate(\" + margin.left + \",\" + margin.top + \")\"); 
+ "
+	
+	for (i,name) in enumerate(filter(x->occursin("data",x),names(input)))
+		#i = 1
+		#name = names(raw_counts)[5]
+		#sample data (in FPKM)
+		data = input[:,name]
+		# log transform (log2(FPKM+pseudocount))
+		pseudocount = 1
+		logdata = log2.(data.+pseudocount)
+		stats = summarystats(data)
+	
+		text*="
+// create dummy data 
+// var data = [12,3,4,4] 
+  
+// Compute summary statistics used for the box: 
+var q1 = $(stats.q25) 
+var median = $(stats.median) 
+var q3 = $(stats.q75) 
+var interQuantileRange = q3 - q1 
+var min = $(max(stats.min,stats.q25-1.5*(stats.q75-stats.q25))) 
+var max = $(min(stats.max,stats.q75+1.5*(stats.q75-stats.q25)))  
+ 
+// Show the Y scale 
+var y = d3.scaleLinear() 
+  .domain([$(stats.min),10]) 
+  .range([height, 0]); 
+var axis = svg.call(d3.axisLeft(y)) 
+ 
+  
+  axis.selectAll(\"line\") 
+    .style(\"stroke\", \"grey\"); 
+ 
+  axis.selectAll(\"path\") 
+    .style(\"stroke\", \"grey\"); 
+ 
+  axis.selectAll(\"text\") 
+    .style(\"stroke\", \"grey\"); 
+	 
+// a few features for the box 
+var center = $(i*(width-70)/100) 
+var width = $((width-70)/100-0.2*(width-70)/100) 
+ 
+// Show the main vertical line 
+svg 
+.append(\"line\") 
+  .attr(\"x1\", center) 
+  .attr(\"x2\", center) 
+  .attr(\"y1\", y(min) ) 
+  .attr(\"y2\", y(max) ) 
+  .attr(\"stroke\", \"grey\") 
+ 
+// Show the box 
+svg 
+.append(\"rect\") 
+  .attr(\"x\", center - width/2) 
+  .attr(\"y\", y(q3) ) 
+  .attr(\"height\", (y(q1)-y(q3)) ) 
+  .attr(\"width\", width ) 
+.style(\"fill\", \"#69e3a2\") 
+ 
+ 
+// show median, min and max horizontal lines 
+svg 
+.selectAll(\"toto\") 
+.data([min, median, max]) 
+.enter() 
+.append(\"line\") 
+  .attr(\"x1\", center-width/2) 
+  .attr(\"x2\", center+width/2) 
+  .attr(\"y1\", function(d){ return(y(d))} ) 
+  .attr(\"y2\", function(d){ return(y(d))} ) 
+  .attr(\"stroke\", \"grey\") 
+"
+	end
+end
+
+# ╔═╡ 45a849a3-f029-4b21-9718-cbc081c132eb
+input
+
+# ╔═╡ b1fba899-0ca7-48ba-bbe0-f30a146536a1
 @htl(
 	"""
 <meta charset="utf-8">
 
 <!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
-
+ 
 <!-- Create a div where the graph will take place -->
 <div id="my_dataviz"></div>
-	""")
+<script> 
+$(JavaScript(text)) 
+</script>	
+""" 
+)
 
-# ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
-begin
-	#for i in filter(x->occursin("data",x),names(raw_counts))
-		i = names(raw_counts)[5]
-		#sample data (in FPKM)
-		data = raw_counts[:,i]
-		# log transform (log2(FPKM+pseudocount))
-		pseudocount = 1
-		logdata = log2.(data.+pseudocount)
-		stats = summarystats(logdata)	
-	#end
-end
+# ╔═╡ b0e1937c-b854-4b20-b30f-c1d1f0bd5176
+raw_stats = summarystats(raw_data[:,1])
 
-# ╔═╡ 266067df-934c-4db4-9d00-d74619311729
-## CLEANING STEP
-begin
-	##turn raw counts into data matrix
-	raw_data = DataPreprocessing.data_from_dataframe(raw_counts,"data")
-	##need to get a threshold to measure across a feature
-end
+# ╔═╡ 137453d8-898e-432b-b2be-199bd7e5d50f
+max(raw_stats.min,raw_stats.q25-1.5*(raw_stats.q75-raw_stats.q25))
 
-# ╔═╡ db0c9b6a-3b27-4b0a-8e7f-497bb3dca428
-sum(sum(raw_data.>cut,dims=2).>98*0.1)
-
-# ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
-@bind tick Clock()
-
-# ╔═╡ 9b7b27eb-17ec-49a9-9d1c-d66d0b4d1a53
-boxtest = rand(20).*((mod(tick,3)*10)+20)
-
-# ╔═╡ 9c9ea7c4-ecc4-4b27-aa47-8e0fd273b22b
-@htl(
-	"""
-<script>
-
-// set the dimensions and margins of the graph
-var margin = {top: 10, right: 30, bottom: 30, left: 40},
-  width = 600 - margin.left - margin.right,
-  height = 400 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-var svg = d3.select("#my_dataviz")
-.append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-.append("g")
-  .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
-
-// create dummy data
-var data = $(boxtest)
-
-// Compute summary statistics used for the box:
-var data_sorted = data.sort(d3.ascending)
-var q1 = d3.quantile(data_sorted, .25)
-var median = d3.quantile(data_sorted, .5)
-var q3 = d3.quantile(data_sorted, .75)
-var interQuantileRange = q3 - q1
-var min = q1 - 1.5 * interQuantileRange
-var max = q3 + 1.5 * interQuantileRange
-
-// Show the Y scale
-var y = d3.scaleLinear()
-  .domain([-50,50])
-  .range([height, 0]);
-var axis = svg.call(d3.axisLeft(y))
-
-
-  axis.selectAll("line")
-    .style("stroke", "grey");
-
-  axis.selectAll("path")
-    .style("stroke", "grey");
-
-  axis.selectAll("text")
-    .style("stroke", "grey");
-	
-
-
-// a few features for the box
-var center = 6
-var width = 3
-
-// Show the main vertical line
-svg
-.append("line")
-  .attr("x1", center)
-  .attr("x2", center)
-  .attr("y1", y(min) )
-  .attr("y2", y(max) )
-  .attr("stroke", "grey")
-
-// Show the box
-svg
-.append("rect")
-  .attr("x", center - width/2)
-  .attr("y", y(q3) )
-  .attr("height", (y(q1)-y(q3)) )
-  .attr("width", width )
-.style("fill", "#69e3a2")
-
-
-// show median, min and max horizontal lines
-svg
-.selectAll("toto")
-.data([min, median, max])
-.enter()
-.append("line")
-  .attr("x1", center-width/2)
-  .attr("x2", center+width/2)
-  .attr("y1", function(d){ return(y(d))} )
-  .attr("y2", function(d){ return(y(d))} )
-  .attr("stroke", "grey")
-
-// a few features for the box
-var center = 12
-var width = 3
-
-// Show the main vertical line
-svg
-.append("line")
-  .attr("x1", center)
-  .attr("x2", center)
-  .attr("y1", y(min) )
-  .attr("y2", y(max) )
-  .attr("stroke", "grey")
-
-// Show the box
-svg
-.append("rect")
-  .attr("x", center - width/2)
-  .attr("y", y(q3) )
-  .attr("height", (y(q1)-y(q3)) )
-  .attr("width", width )
-.style("fill", "#69e3a2")
-
-
-// show median, min and max horizontal lines
-svg
-.selectAll("toto")
-.data([min, median, max])
-.enter()
-.append("line")
-  .attr("x1", center-width/2)
-  .attr("x2", center+width/2)
-  .attr("y1", function(d){ return(y(d))} )
-  .attr("y2", function(d){ return(y(d))} )
-  .attr("stroke", "grey")
-
-</script>
-""")
+# ╔═╡ 46085b1f-a043-45ad-96db-ae1a8e7dceea
+md"""
+## Clean expression data
+Our first task is to remove any transcripts that have a low expression profile across samples.
+To do this, we select a cut off point that represents the expression value that the top 10% across ALL entries in all samples.
+We then compare each transcript's expression profile to this cutoff value.
+If at least 10% of its expression values are greater than the cutoff value, we keep the transcript, but otherwise we discard.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1556,19 +1540,20 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
-# ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
-# ╠═46cc3358-f270-4f3a-80a7-77263fa255bc
-# ╠═5bdd00c5-b1bb-4b43-a98f-2af49e3ec88f
+# ╟─4aecc101-7800-40c0-a8b0-8e0f67e98cb3
+# ╟─46cc3358-f270-4f3a-80a7-77263fa255bc
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
+# ╠═ce65df48-0185-41ac-852e-75d77c267347
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
 # ╠═f8c20e2e-252c-4796-8dd6-c910eb6f7820
-# ╠═1982c9cf-ed6e-4ea9-bbc7-ab14e20347d6
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
-# ╠═266067df-934c-4db4-9d00-d74619311729
-# ╠═db0c9b6a-3b27-4b0a-8e7f-497bb3dca428
-# ╠═9c9ea7c4-ecc4-4b27-aa47-8e0fd273b22b
-# ╠═9b7b27eb-17ec-49a9-9d1c-d66d0b4d1a53
+# ╠═45a849a3-f029-4b21-9718-cbc081c132eb
+# ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
+# ╠═b0e1937c-b854-4b20-b30f-c1d1f0bd5176
+# ╠═137453d8-898e-432b-b2be-199bd7e5d50f
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
+# ╠═266067df-934c-4db4-9d00-d74619311729
+# ╟─46085b1f-a043-45ad-96db-ae1a8e7dceea
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
