@@ -157,7 +157,7 @@ function boxplot(dataframe::DataFrame)
     longform = longform[longform[!,:log_value].>-10,:]
     longform = longform[longform[!,:log_value].<10,:]
     #Add column for color group
-    p = plot(longform, x = "sample", y = "log_value", Geom.boxplot(suppress_outliers = true),Guide.xticks(label=false),Theme(key_position= :none),color=:sample);
+    p = plot(longform, x = "sample", y = "log_value", Geom.boxplot(suppress_outliers = true),Guide.xticks(label=false),Theme(key_position= :none,grid_line_width=0mm),color=:sample);
     return p
 end
 
@@ -174,3 +174,5 @@ function histogram(data::DataFrame,plotcol::Symbol,colourcol::Symbol;title::Stri
     p = plot(data,x = plotcol, Geom.histogram(bincount = 100,density = false),Guide.xlabel(xaxis),Guide.ylabel(yaxis),Guide.title(title),color=colourcol);
     return p
 end
+
+  
