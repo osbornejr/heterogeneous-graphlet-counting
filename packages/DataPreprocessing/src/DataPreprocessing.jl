@@ -17,8 +17,23 @@ function round_raw_counts(raw_counts::DataFrame,sig::Int)
     return round_counts
 end
 
-function clean_raw_counts(raw_counts::DataFrame,expression_cutoff::Int)
+function clean_round_counts(round_counts::DataFrame,cut_percent::Float64,minreq::Float64)
+    ##Global cut method
+    round_data = data_from_dataframe(round_counts,"data")
+    n,m = size(round_data)
+    ##need to get a global threshold to measure across a feature
+    round_vec = sort(vec(round_data))
+    ##remove zeros to determine cut
+    nonzero_vec = filter(>(0),round_vec)
+    # get bound on top cut_percent of ALL nonzero raw values
+    cut = nonzero_vec[end-Int(round(length(nonzero_vec)*cut_percent))]
+    ## get transcripts that have at least minreq of values above cut
+    clean_counts = round_counts[vec(sum(round_data.>cut,dims=2).>m*minreq),:]
+end
 
+
+function clean_raw_counts(raw_counts::DataFrame,expression_cutoff::Int)
+    @warning "This method is depreceated; cleaning should now happen on rounded counts using clean_round_counts"
     ##Deduplicate-- there may be multiple entries for the same transcript, we need to select only one of these
 
     ## Clean - remove transcripts with total counts across all samples less than Cut
