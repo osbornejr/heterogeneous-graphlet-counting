@@ -17,7 +17,7 @@ function round_raw_counts(raw_counts::DataFrame,sig::Int)
     return round_counts
 end
 
-function clean_round_counts(round_counts::DataFrame,cut_percent::Float64,minreq::Float64;method::String="global")
+function clean_round_counts(round_counts::DataFrame,cut_percent::Float64,minreq::Float64;method::String="global",output_cut::Bool=false)
     
     if (method == "global")
         ##Global cut method
@@ -52,7 +52,12 @@ function clean_round_counts(round_counts::DataFrame,cut_percent::Float64,minreq:
     else
         throw(ArgumentError("method must be either 'global' or 'per-sample'"))
     end
-    return clean_counts
+    #option to output cut or cut vector that was used to clean
+    if (output_cut == true)
+        return [clean_counts,cut]
+    else
+        return clean_counts
+    end
 end
 
 
