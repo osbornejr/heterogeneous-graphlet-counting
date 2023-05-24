@@ -105,8 +105,9 @@ function cache_setup()
     make_cache(dir_name="test_dir",cwd,params["cache"]["base_dir"],params["test_name"])
     ##switching to new method where each path is declared explicitly here (avoids run overlaps making a mess, and is easier with pluto load ins etc)
     ##data preprocessing dirs:
-    make_cache(dir_name="cutoff_dir",params["cache"]["test_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]))
-    make_cache(dir_name="norm_dir",params["cache"]["cutoff_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
+    make_cache(dir_name="round_dir",params["cache"]["test_dir"],"roundsig",string(params["data_preprocessing"]["roundsig"]))
+    make_cache(dir_name="clean_dir",params["cache"]["round_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"],"minreq",string(params["data_preprocessing"]["minreq"],"clean_method",string(params["data_preprocessing"]["clean_method"]))
+    make_cache(dir_name="norm_dir",params["cache"]["clean_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
     make_cache(dir_name="sampling_dir",params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
     #network construction dirs:
     ##at present we want to trial different bin sizes for the information measures, so we add the extra split here if "coexpression" is either MI or PID.
@@ -202,7 +203,7 @@ export get_output_data
 function get_preprocessed_data()
     ##method to get preprocessed dataframes before any network construction
     raw_counts =  get_input_data()
-    clean_file = "$(params["cache"]["cutoff_dir"])/clean_counts.jld2"
+    clean_file = "$(params["cache"]["clean_dir"])/clean_counts.jld2"
     norm_file = "$(params["cache"]["norm_dir"])/norm_counts.jld2"
     samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
     if ((isfile(clean_file)) && (isfile(norm_file)) && (isfile(samp_file)))
@@ -218,17 +219,31 @@ export get_preprocessed_data
 
 function data_preprocessing(raw_counts::DataFrame)
     
-    #TODO need to add some kind of deduplication step!
+    #TODO may need to add some kind of deduplication step!
+    
+    ##Round: round reads to significant figures (TODO only applicable for FPKM/expected counts? Maybe need a switch in config for this)
+
+    file = "$(params["cache"]["round_dir"])/round_counts.jld2"
+
+    
+    if(isfile(file))
+        round_counts = cache_load(file,"round counts")
+    else
+
+        round_counts = DataPreprocessing.round_raw_counts(raw_counts,params["data_preprocessing"]["roundsig"])
+        @info "Saving round counts to $file"
+        cache_save(file,"round counts"=>round_counts)
+    end
 
     ## Clean - remove transcripts with total counts across all samples less than Cut
-    file = "$(params["cache"]["cutoff_dir"])/clean_counts.jld2"
+    file = "$(params["cache"]["clean_dir"])/clean_counts.jld2"
 
     
     if(isfile(file))
         clean_counts = cache_load(file,"clean counts")
     else
 
-        clean_counts = DataPreprocessing.clean_raw_counts(raw_counts,params["data_preprocessing"]["expression_cutoff"])
+        clean_counts = DataPreprocessing.clean_round_counts(round_counts,params["data_preprocessing"]["expression_cutoff"],params["data_preprocessing"]["minreq"],method=params["data_preprocessing"]["clean_method"])
         @info "Saving clean counts to $file"
         cache_save(file,"clean counts"=>clean_counts)
     end
@@ -1041,7 +1056,7 @@ function webpage_construction()
         
         #load in data
         raw_counts = get_input_data()
-        clean_counts = cache_load("$(params["cache"]["cutoff_dir"])/clean_counts.jld2","clean counts")
+        clean_counts = cache_load("$(params["cache"]["clean_dir"])/clean_counts.jld2","clean counts")
         norm_counts = cache_load("$(params["cache"]["norm_dir"])/norm_counts.jld2","norm counts")
         sample_counts = cache_load("$(params["cache"]["sampling_dir"])/sample_counts.jld2","sample counts")
     
