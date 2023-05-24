@@ -9,6 +9,14 @@ function data_from_dataframe(df::DataFrame,identifier::String)
     data = Array(select(df,filter(x->occursin(identifier,x),names(df))))
 end
 
+function round_raw_counts(raw_counts::DataFrame,sig::Int)
+    raw_data = data_from_dataframe(raw_counts,"data")
+    round_data = round.(raw_data,digits=5)
+    round_counts = copy(raw_counts)
+    round_counts[:,findall(x->occursin("data",x),names(round_counts))] = round_data
+    return round_counts
+end
+
 function clean_raw_counts(raw_counts::DataFrame,expression_cutoff::Int)
 
     ##Deduplicate-- there may be multiple entries for the same transcript, we need to select only one of these
