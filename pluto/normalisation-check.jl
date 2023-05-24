@@ -77,41 +77,12 @@ DataPreprocessing.boxplot(norm_counts)
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 @bind tick Clock()
 
-# ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
-begin
-	data = filter(>(0.1),raw_counts."GSM1675513_MB011_1 data")
-	h = fit(Histogram,data,nbins=100)
-end
-
-# ╔═╡ 7a2168ad-61a0-4132-90ea-69574f0040fc
-Bars(round.(collect(first(h.edges))[2:end],digits = 3).|>string,h.weights,"histogram";attributes=D3Attr(attr=(;fill="rgba(200, 200, 155, 0.4)")))
-
-# ╔═╡ f3c67606-8468-464e-8da3-6d3b46af68a5
-round.(collect(first(h.edges))[2:end],digits = 3)
-
-# ╔═╡ 05f4384c-ee06-4e6a-9347-3cf194cf1a69
-h.weights
-
-# ╔═╡ 10b482d6-8db2-452c-b2a3-03bc1a5a4d69
-Bars([1,2,3,4,5],h.weights[1:5],"histogram";attributes=D3Attr(attr=(;fill="rgba(2, 100, 255, 0.4)", stroke="black")))
-
 # ╔═╡ 266067df-934c-4db4-9d00-d74619311729
 ## NEW CLEANING STEP
-### Blanket method: find cutoff for top 10% across ALL nonzero entries:w
-### TODO add method that finds cutoff bound for EACH sample and then compares each transcripts expression profile
 begin
-	##turn raw counts into data matrix
-	raw_data = DataPreprocessing.data_from_dataframe(raw_counts,"data")
-	
-	##need to get a threshold to measure across a feature
-	
-	raw_vec = sort(vec(raw_data))
-	round_raw_vec =round.(raw_vec,digits=5)
-	nonzero_raw_vec = filter(>(0),round_raw_vec)
-	# get top 10% cut off of ALL nonzero raw values
-	cut = nonzero_raw_vec[end-Int(round(length(nonzero_raw_vec)*.1))]
-	## get transcripts that have at least 10% of values above cut
-	new_clean_counts = raw_counts[vec(sum(raw_data.>cut,dims=2).>98*0.1),:]
+	sig=5
+	round_counts = DataPreprocessing.round_raw_counts(raw_counts,sig)
+	new_clean_counts,cut = DataPreprocessing.clean_round_counts(round_counts,0.10,0.05,method="per-sample",output_cut=true)
 end
 
 # ╔═╡ ce65df48-0185-41ac-852e-75d77c267347
@@ -234,11 +205,23 @@ $(JavaScript(text))
 """ 
 )
 
+# ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
+begin
+	data = filter(>(0),round_counts."GSM1675513_MB011_1 data")
+	h = fit(Histogram,data,nbins=100)
+end
+
+# ╔═╡ 7a2168ad-61a0-4132-90ea-69574f0040fc
+Bars(round.(collect(first(h.edges))[2:end],digits = 3).|>string,h.weights,"histogram";attributes=D3Attr(attr=(;fill="rgba(200, 200, 155, 0.4)")))
+
+# ╔═╡ 823e5800-7aa8-49da-9484-f40d1b0ee549
+cut
+
 # ╔═╡ 46085b1f-a043-45ad-96db-ae1a8e7dceea
 md"""
 ## Rounding raw data
-To increase clarity and avoid skewing towards variance of lowly expressed transcripts, we round the raw FPKM values to 5 significant figures.
-The main impact of this rounding at this stage is to define which expression entries are considered nonzero i.e. any expression reading greater than 0.00001 is considered nonzero.  
+To increase clarity and avoid skewing towards variance of lowly expressed transcripts, we round the raw FPKM values to $(sig) significant figures.
+The main impact of this rounding at this stage is to define which expression entries are considered nonzero i.e. any expression reading ``\geq`` $(10.0^(-1*sig)) is considered nonzero.  
 
 
 ## Clean expression data
@@ -1579,10 +1562,8 @@ version = "3.5.0+0"
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 # ╠═048bb985-d7b8-4ace-8606-8ddfddc51ba1
 # ╠═7a2168ad-61a0-4132-90ea-69574f0040fc
-# ╠═f3c67606-8468-464e-8da3-6d3b46af68a5
-# ╠═05f4384c-ee06-4e6a-9347-3cf194cf1a69
-# ╠═10b482d6-8db2-452c-b2a3-03bc1a5a4d69
 # ╠═266067df-934c-4db4-9d00-d74619311729
+# ╠═823e5800-7aa8-49da-9484-f40d1b0ee549
 # ╠═46085b1f-a043-45ad-96db-ae1a8e7dceea
 # ╠═3d55ece3-b8da-4443-91c9-98b9b983a04e
 # ╟─00000000-0000-0000-0000-000000000001
