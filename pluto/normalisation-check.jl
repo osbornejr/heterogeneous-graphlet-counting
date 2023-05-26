@@ -107,9 +107,9 @@ var svg = d3.select(\"#my_dataviz\")
   .attr(\"height\", height + margin.top + margin.bottom) 
 .append(\"g\") 
   .attr(\"transform\", 
-        \"translate(\" + margin.left + \",\" + margin.top + \")\"); 
+        
+	\"translate(\" + margin.left + \",\" + margin.top + \")\"); 
  "
-	
 	for (i,name) in enumerate(filter(x->occursin("data",x),names(input)))
 		#i = 1
 		#name = names(raw_counts)[5]
@@ -186,9 +186,6 @@ svg
 	end
 end
 
-# ╔═╡ 45a849a3-f029-4b21-9718-cbc081c132eb
-input
-
 # ╔═╡ b1fba899-0ca7-48ba-bbe0-f30a146536a1
 @htl(
 	"""
@@ -207,12 +204,16 @@ $(JavaScript(text))
 
 # ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
 begin
-	data = filter(>(0),round_counts."GSM1675513_MB011_1 data")
+	test = DataPreprocessing.clean_raw_counts(new_clean_counts,1)
+	data = log2.(filter(>(0),input."GSM1675513_MB011_1 data").+1)
 	h = fit(Histogram,data,nbins=100)
 end
 
+# ╔═╡ cfe7529a-ca49-4329-846d-9e4cfcd43e8b
+h.edges
+
 # ╔═╡ 7a2168ad-61a0-4132-90ea-69574f0040fc
-Bars(round.(collect(first(h.edges))[2:end],digits = 3).|>string,h.weights,"histogram";attributes=D3Attr(attr=(;fill="rgba(200, 200, 155, 0.4)")))
+Bars(round.(collect(first(h.edges))[2:end],digits = 3).|>string,h.weights,"histogram";attributes=D3Attr(attr=(;fill="rgba(10, 200, 100, 0.6)")))
 
 # ╔═╡ 823e5800-7aa8-49da-9484-f40d1b0ee549
 cut
@@ -257,16 +258,11 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 [compat]
 CommonMark = "~0.8.12"
 DataFrames = "~1.5.0"
-DataPreprocessing = "~0.1.0"
 DataStructures = "~0.18.13"
 Gadfly = "~1.3.4"
-GraphletAnalysis = "~0.1.0"
-GraphletCounting = "~0.1.0"
 HypertextLiteral = "~0.9.4"
-NetworkConstruction = "~0.1.0"
 PlutoUI = "~0.7.51"
 Portinari = "~0.1.2"
-ProjectFunctions = "~0.1.0"
 Revise = "~3.5.2"
 StatsBase = "~0.33.21"
 """
@@ -277,7 +273,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "19e5678401291673adb2312c219715864dc617e1"
+project_hash = "a456576f1a9701aff2aacdb0e096952354a64faa"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1557,10 +1553,10 @@ version = "3.5.0+0"
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
 # ╠═f8c20e2e-252c-4796-8dd6-c910eb6f7820
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
-# ╠═45a849a3-f029-4b21-9718-cbc081c132eb
 # ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 # ╠═048bb985-d7b8-4ace-8606-8ddfddc51ba1
+# ╠═cfe7529a-ca49-4329-846d-9e4cfcd43e8b
 # ╠═7a2168ad-61a0-4132-90ea-69574f0040fc
 # ╠═266067df-934c-4db4-9d00-d74619311729
 # ╠═823e5800-7aa8-49da-9484-f40d1b0ee549
