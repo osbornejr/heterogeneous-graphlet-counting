@@ -106,7 +106,7 @@ function cache_setup()
     ##switching to new method where each path is declared explicitly here (avoids run overlaps making a mess, and is easier with pluto load ins etc)
     ##data preprocessing dirs:
     make_cache(dir_name="round_dir",params["cache"]["test_dir"],"roundsig",string(params["data_preprocessing"]["roundsig"]))
-    make_cache(dir_name="clean_dir",params["cache"]["round_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"],"minreq",string(params["data_preprocessing"]["minreq"],"clean_method",string(params["data_preprocessing"]["clean_method"]))
+    make_cache(dir_name="clean_dir",params["cache"]["round_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]),"minreq",string(params["data_preprocessing"]["minreq"]),"clean_method",string(params["data_preprocessing"]["clean_method"]))
     make_cache(dir_name="norm_dir",params["cache"]["clean_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
     make_cache(dir_name="sampling_dir",params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
     #network construction dirs:
