@@ -20,7 +20,7 @@ begin
 cwd = ENV["PWD"];	
 	import Pkg
 	#Pkg.activate(mktempdir())
-    #Pkg.add([
+    #Pkg.add([ 
     #    Pkg.PackageSpec(name="DataFrames",version'"1.3"),
 	#	Pkg.PackageSpec(name="Revise"),
 	#	Pkg.PackageSpec(name="CommonMark"),
@@ -55,11 +55,11 @@ cwd = ENV["PWD"];
 end
 
 # ╔═╡ 4aecc101-7800-40c0-a8b0-8e0f67e98cb3
-load_config(cwd*"/config/run-files/GSE68559.yaml") 
+load_config(cwd*"/config/run-files/GSE68559.yaml")
 
 # ╔═╡ 46cc3358-f270-4f3a-80a7-77263fa255bc
 # ╠═╡ show_logs = false
-raw_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
+raw_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data(); 
 
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
@@ -116,7 +116,7 @@ var svg = d3.select(\"#my_dataviz\")
 		#sample data (in FPKM)
 		data = input[:,name]
 		# log transform (log2(FPKM+pseudocount))
-		pseudocount = 1
+		pseudocount = 0
 		logdata = log2.(data.+pseudocount)
 		stats = summarystats(data)
 	
@@ -182,7 +182,7 @@ svg
   .attr(\"y1\", function(d){ return(y(d))} ) 
   .attr(\"y2\", function(d){ return(y(d))} ) 
   .attr(\"stroke\", \"grey\") 
-"
+" 
 	end
 end
 
@@ -1546,7 +1546,7 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
 # ╟─4aecc101-7800-40c0-a8b0-8e0f67e98cb3
-# ╟─46cc3358-f270-4f3a-80a7-77263fa255bc
+# ╠═46cc3358-f270-4f3a-80a7-77263fa255bc
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
 # ╠═ce65df48-0185-41ac-852e-75d77c267347
