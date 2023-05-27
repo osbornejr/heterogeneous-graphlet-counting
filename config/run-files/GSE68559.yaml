@@ -10,6 +10,7 @@ cache:
   clear:
     archive: false
     test_dir: false
+    round_dir: false
     clean_dir: false 
     norm_dir: false 
     sampling_dir: false 
@@ -53,7 +54,7 @@ analysis:
   graphlet_counting: true
   graphlet_size: 4
   recursive: true #count lower graphlets as well
-  typed_representation: true
+  typed_representation: false
   null_model_size: 1000
   coincident_graphlets: false
   
