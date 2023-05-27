@@ -33,7 +33,7 @@ function run_all(config_file::String)
         #only do bio val on real network 
         if (params["analysis"]["biological_validation"] * !params["network_construction"]["synthetic"] == true  )
             @info "Conducting baseline network validation"
-            entrez_id_vector, candidates,top_terms = biological_validation(network_counts)
+            kegg_terms,go_terms = biological_validation(network_counts)
         end
 
 
