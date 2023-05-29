@@ -1,8 +1,9 @@
 name: julia-workspace
+
 channels:
         - conda-forge
         - bioconda
-        - defaults
+
 dependencies:
         - libstdcxx-ng
         - icu<=60

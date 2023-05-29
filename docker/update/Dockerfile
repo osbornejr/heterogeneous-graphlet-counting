@@ -20,13 +20,14 @@ WORKDIR $PROJECT_DIR
 
 # build the conda environment
 ENV ENV_PREFIX julia-workspace
-RUN conda update --name base --channel defaults conda
-RUN conda update -n base -c defaults conda
+#RUN conda update --name base --channel defaults conda
+#RUN conda update -n base -c defaults conda
 RUN mamba env update --file $PROJECT_DIR/environment.yml && \
     conda clean --all --yes
 
 #build the julia environment TODO find out why RCall does not install properly
 ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
+ENV R_LIBS_USER $CONDA_DIR/envs/$ENV_PREFIX/lib/
 
 
 #RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"

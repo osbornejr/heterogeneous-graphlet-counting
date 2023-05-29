@@ -22,9 +22,9 @@ RUN mkdir $PROJECT_DIR
 RUN cp /tmp/environment.yml /tmp/Manifest.toml /tmp/Project.toml $PROJECT_DIR
 WORKDIR $PROJECT_DIR
 
-# build the conda environment
+# build the conda environment (turning off mamba for now)
 ENV ENV_PREFIX julia-workspace
-RUN conda update --name base --channel defaults conda
+#RUN conda update --name base --channel defaults conda=23.3.1
 RUN mamba env create --file $PROJECT_DIR/environment.yml --force && \
     conda clean --all --yes
 
