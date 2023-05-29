@@ -17,6 +17,13 @@ function round_raw_counts(raw_counts::DataFrame,sig::Int)
     return round_counts
 end
 
+function log_counts(counts::DataFrame,pseudocount::Float64=1.0)
+    data = data_from_dataframe(counts,"data")
+    log_data = log2.(data.+pseudocount)
+    log_counts = copy(counts)
+    log_counts[:,findall(x->occursin("data",x),names(log_counts))] = log_data
+    return log_counts
+end
 function clean_round_counts(round_counts::DataFrame,cut_percent::Float64,minreq::Float64;method::String="global",output_cut::Bool=false)
     
     if (method == "global")
