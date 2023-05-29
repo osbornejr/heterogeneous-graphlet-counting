@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.25
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -59,7 +59,7 @@ load_config(cwd*"/config/run-files/GSE68559.yaml")
 
 # ╔═╡ 46cc3358-f270-4f3a-80a7-77263fa255bc
 # ╠═╡ show_logs = false
-raw_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data(); 
+raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
 
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
@@ -77,20 +77,9 @@ DataPreprocessing.boxplot(norm_counts);
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 @bind tick Clock()
 
-# ╔═╡ 266067df-934c-4db4-9d00-d74619311729
-## NEW CLEANING STEP
-begin
-	sig=5
-	round_counts = DataPreprocessing.log_counts(DataPreprocessing.round_raw_counts(raw_counts,sig))
-	new_clean_counts,cut = DataPreprocessing.clean_round_counts(round_counts,0.10,0.05,method="per-sample",output_cut=true)
-end
-
-# ╔═╡ ce65df48-0185-41ac-852e-75d77c267347
-DataPreprocessing.boxplot(new_clean_counts);
-
 # ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
 begin
-	set = [raw_counts,round_counts,new_clean_counts,norm_counts]
+	set = [raw_counts,round_counts,clean_counts,norm_counts]
 	index = mod(tick,length(set))+1
 	input = set[index]
 	width = 1600
@@ -202,8 +191,11 @@ $(JavaScript(text))
 # ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
 index
 
+# ╔═╡ 06e5c077-ae64-42b5-bcea-56641f01680d
+clean_counts
+
 # ╔═╡ ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
-sum(input.transcript_type.=="coding")
+sum(input.transcript_type.=="coding")/size(input)[1]
 
 # ╔═╡ 1ca33a55-85ab-47ef-9966-64fcc963c0be
 input_data = data_from_dataframe(input,"data");
@@ -217,7 +209,7 @@ sum(input_data.==0.0)/length(input_data)
 # ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
 begin
 	#test = DataPreprocessing.clean_raw_counts(new_clean_counts,1)
-	data = input."GSM1675513_MB011_1 data"
+	data = filter(>(0),input."GSM1675513_MB011_1 data")
 	h = fit(Histogram,data,nbins=100)
 end
 
@@ -227,8 +219,8 @@ h.edges
 # ╔═╡ 7a2168ad-61a0-4132-90ea-69574f0040fc
 Bars(round.(collect(first(h.edges))[2:end],digits = 3).|>string,h.weights,"histogram";attributes=D3Attr(attr=(;fill="rgba(10, 200, 100, 0.6)")))
 
-# ╔═╡ 823e5800-7aa8-49da-9484-f40d1b0ee549
-cut
+# ╔═╡ 9863d522-bb4f-4287-8c7b-06461be85369
+sig = params["data_preprocessing"]["roundsig"]
 
 # ╔═╡ 46085b1f-a043-45ad-96db-ae1a8e7dceea
 md"""
@@ -462,7 +454,7 @@ version = "1.5.0"
 
 [[deps.DataPreprocessing]]
 deps = ["CSV", "Cairo", "Compose", "DataFrames", "Gadfly", "LinearAlgebra", "RCall", "Statistics"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/DataPreprocessing"
+path = "/home/osbornejr/app/packages/DataPreprocessing"
 uuid = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
 version = "0.1.0"
 
@@ -486,10 +478,10 @@ deps = ["Mmap"]
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[deps.Deno_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "64cb698de672b627f887ced4b2a722d217e73c10"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "cd6756e833c377e0ce9cd63fb97689a255f12323"
 uuid = "04572ae6-984a-583e-9378-9577a1c2574d"
-version = "1.28.1+0"
+version = "1.33.4+0"
 
 [[deps.DensityInterface]]
 deps = ["InverseFunctions", "Test"]
@@ -515,9 +507,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "5eeb2bd01e5065090ad591a205d8cad432ae6cb6"
+git-tree-sha1 = "c72970914c8a21b36bbc244e9df0ed1834a0360b"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.93"
+version = "0.25.95"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -583,9 +575,9 @@ uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
-git-tree-sha1 = "3cce72ec679a5e8e6a84ff09dd03b721de420cfe"
+git-tree-sha1 = "ed569cb9e7e3590d5ba884da7edc50216aac5811"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "1.0.1"
+version = "1.1.0"
 
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
@@ -659,13 +651,13 @@ version = "1.3.14+0"
 
 [[deps.GraphletAnalysis]]
 deps = ["DataFrames", "DataPreprocessing", "GraphletCounting", "Graphs", "NetworkConstruction", "RCall"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/GraphletAnalysis"
+path = "/home/osbornejr/app/packages/GraphletAnalysis"
 uuid = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 version = "0.1.0"
 
 [[deps.GraphletCounting]]
 deps = ["CSV", "DataFrames", "DataStructures", "Distributed", "Graphs", "LinearAlgebra", "ProgressMeter", "StatsBase"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/GraphletCounting"
+path = "/home/osbornejr/app/packages/GraphletCounting"
 uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 version = "0.1.0"
 
@@ -712,9 +704,9 @@ version = "0.9.4"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
-git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
+git-tree-sha1 = "d75853a0bdbfb1ac815478bacd89cd27b550ace6"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.2"
+version = "0.2.3"
 
 [[deps.IndirectArrays]]
 git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
@@ -1008,7 +1000,7 @@ version = "1.0.2"
 
 [[deps.NetworkConstruction]]
 deps = ["Colors", "DataFrames", "DataPreprocessing", "Distributed", "Graphs", "InformationMeasures", "LinearAlgebra", "Luxor", "Printf", "ProgressMeter", "RCall", "SharedArrays", "Statistics", "StatsBase"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/NetworkConstruction"
+path = "/home/osbornejr/app/packages/NetworkConstruction"
 uuid = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 version = "0.1.0"
 
@@ -1159,7 +1151,7 @@ version = "1.7.2"
 
 [[deps.ProjectFunctions]]
 deps = ["CSV", "CategoricalArrays", "Colors", "Compose", "DataFrames", "DataPreprocessing", "DataStructures", "Dates", "Distributed", "Gadfly", "GraphPlot", "GraphletAnalysis", "GraphletCounting", "Graphs", "JLD2", "NetworkConstruction", "Pkg", "ProgressMeter", "Random", "StatsBase", "YAML"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/ProjectFunctions"
+path = "/home/osbornejr/app/packages/ProjectFunctions"
 uuid = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 version = "0.1.0"
 
@@ -1561,17 +1553,17 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
-# ╟─4aecc101-7800-40c0-a8b0-8e0f67e98cb3
+# ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═46cc3358-f270-4f3a-80a7-77263fa255bc
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
-# ╠═ce65df48-0185-41ac-852e-75d77c267347
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
 # ╠═f8c20e2e-252c-4796-8dd6-c910eb6f7820
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
 # ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 # ╠═757bb449-28ec-4545-b1b5-d3f84217ab81
+# ╠═06e5c077-ae64-42b5-bcea-56641f01680d
 # ╠═ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
 # ╠═1ca33a55-85ab-47ef-9966-64fcc963c0be
 # ╠═3cf3bb31-d697-4295-bebd-02cc7d412eba
@@ -1579,8 +1571,7 @@ version = "3.5.0+0"
 # ╠═048bb985-d7b8-4ace-8606-8ddfddc51ba1
 # ╠═cfe7529a-ca49-4329-846d-9e4cfcd43e8b
 # ╠═7a2168ad-61a0-4132-90ea-69574f0040fc
-# ╠═266067df-934c-4db4-9d00-d74619311729
-# ╠═823e5800-7aa8-49da-9484-f40d1b0ee549
+# ╠═9863d522-bb4f-4287-8c7b-06461be85369
 # ╟─46085b1f-a043-45ad-96db-ae1a8e7dceea
 # ╠═3d55ece3-b8da-4443-91c9-98b9b983a04e
 # ╟─00000000-0000-0000-0000-000000000001
