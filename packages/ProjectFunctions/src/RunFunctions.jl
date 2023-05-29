@@ -106,7 +106,8 @@ function cache_setup()
     ##switching to new method where each path is declared explicitly here (avoids run overlaps making a mess, and is easier with pluto load ins etc)
     ##data preprocessing dirs:
     make_cache(dir_name="round_dir",params["cache"]["test_dir"],"roundsig",string(params["data_preprocessing"]["roundsig"]))
-    make_cache(dir_name="clean_dir",params["cache"]["round_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]),"minreq",string(params["data_preprocessing"]["minreq"]),"clean_method",string(params["data_preprocessing"]["clean_method"]))
+    make_cache(dir_name="vst_dir",params["cache"]["round_dir"],"vst",string(params["data_preprocessing"]["vst"]))
+    make_cache(dir_name="clean_dir",params["cache"]["vst_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]),"minreq",string(params["data_preprocessing"]["minreq"]),"clean_method",string(params["data_preprocessing"]["clean_method"]))
     make_cache(dir_name="norm_dir",params["cache"]["clean_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
     make_cache(dir_name="sampling_dir",params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
     #network construction dirs:
@@ -203,17 +204,21 @@ export get_output_data
 function get_preprocessed_data()
     ##method to get preprocessed dataframes before any network construction
     raw_counts =  get_input_data()
+    round_file = "$(params["cache"]["round_dir"])/round_counts.jld2"
+    vst_file = "$(params["cache"]["vst_dir"])/vst_counts.jld2"
     clean_file = "$(params["cache"]["clean_dir"])/clean_counts.jld2"
     norm_file = "$(params["cache"]["norm_dir"])/norm_counts.jld2"
     samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
-    if ((isfile(clean_file)) && (isfile(norm_file)) && (isfile(samp_file)))
+    if ( (isfile(round_file)) && (isfile(vst_file)) && (isfile(clean_file)) && (isfile(norm_file)) && (isfile(samp_file)) )
+        round_counts = cache_load(round_file,"round counts")
+        vst_counts = cache_load(vst_file,"vst counts")
         clean_counts = cache_load(clean_file,"clean counts")
         norm_counts = cache_load(norm_file,"norm counts")
         sample_counts = cache_load(samp_file,"sample counts")
     else
-        throw(ArgumentError("No cached files exist at least one of $clean_file, $norm_file or $samp_file, please run from scratch using run_all method."))
+        throw(ArgumentError("No cached files exist at least one of $round_file, $vst_file, $clean_file, $norm_file or $samp_file, please run from scratch using run_all method."))
     end
-    return [raw_counts,clean_counts,norm_counts,sample_counts]
+    return [raw_counts,round_counts,vst_counts,clean_counts,norm_counts,sample_counts]
 end
 export get_preprocessed_data
 
@@ -225,7 +230,7 @@ function data_preprocessing(raw_counts::DataFrame)
 
     file = "$(params["cache"]["round_dir"])/round_counts.jld2"
 
-    
+        
     if(isfile(file))
         round_counts = cache_load(file,"round counts")
     else
@@ -233,6 +238,24 @@ function data_preprocessing(raw_counts::DataFrame)
         round_counts = DataPreprocessing.round_raw_counts(raw_counts,params["data_preprocessing"]["roundsig"])
         @info "Saving round counts to $file"
         cache_save(file,"round counts"=>round_counts)
+    end
+
+    ### VST- log transform data before applying any other processing.
+
+    file = "$(params["cache"]["vst_dir"])/vst_counts.jld2"
+
+        
+    if(isfile(file))
+        vst_counts = cache_load(file,"vst counts")
+    else
+        if (params["data_preprocessing"]["vst"] == true) 
+            vst_counts = DataPreprocessing.log_counts(round_counts)
+        else
+            vst_counts = round_counts
+        end
+
+        @info "Saving vst counts to $file"
+        cache_save(file,"vst counts"=>vst_counts)
     end
 
     ## Clean - remove transcripts with total counts across all samples less than Cut
