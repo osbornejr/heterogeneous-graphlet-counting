@@ -92,6 +92,8 @@ function normalise_clean_counts(clean_counts::DataFrame,norm_method::String)
     clean_data = data_from_dataframe(clean_counts,"data")
     norm_data = library_size_normalisation(clean_data,norm_method)
     norm_counts = copy(clean_counts)
+    
+
     norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
     return norm_counts
 end

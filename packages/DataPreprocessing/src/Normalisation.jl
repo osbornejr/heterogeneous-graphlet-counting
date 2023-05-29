@@ -55,7 +55,7 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
     {
       ## Median method:
       # simple, rough method that uses the EBSeq package
-      norm_counts=GetNormalizedMat(raw_counts,MedianNorm(raw_counts))
+      norm_counts=GetNormalizedMat(raw_counts,MedianNorm(raw_counts,alternative=TRUE))
     }
 
     if(method %in% c("TMM","TMMwsp","upperquartile","RLE")) ##uses edgeR?
