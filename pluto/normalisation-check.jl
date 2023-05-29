@@ -65,13 +65,13 @@ raw_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
 summarystats(raw_counts."GSM1675513_MB011_1 data")
 
 # ╔═╡ 8c563073-fb2d-40e5-9113-829f63594205
-DataPreprocessing.boxplot(raw_counts)
+DataPreprocessing.boxplot(raw_counts);
 
 # ╔═╡ 739173a4-5f67-416b-b276-774c21aae4f9
-DataPreprocessing.boxplot(clean_counts)
+DataPreprocessing.boxplot(clean_counts);
 
 # ╔═╡ f8c20e2e-252c-4796-8dd6-c910eb6f7820
-DataPreprocessing.boxplot(norm_counts)
+DataPreprocessing.boxplot(norm_counts);
 
 
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
@@ -81,16 +81,16 @@ DataPreprocessing.boxplot(norm_counts)
 ## NEW CLEANING STEP
 begin
 	sig=5
-	round_counts = DataPreprocessing.round_raw_counts(raw_counts,sig)
+	round_counts = DataPreprocessing.log_counts(DataPreprocessing.round_raw_counts(raw_counts,sig))
 	new_clean_counts,cut = DataPreprocessing.clean_round_counts(round_counts,0.10,0.05,method="per-sample",output_cut=true)
 end
 
 # ╔═╡ ce65df48-0185-41ac-852e-75d77c267347
-DataPreprocessing.boxplot(new_clean_counts)
+DataPreprocessing.boxplot(new_clean_counts);
 
 # ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
 begin
-	set = [raw_counts,new_clean_counts,norm_counts]
+	set = [raw_counts,round_counts,new_clean_counts,norm_counts]
 	index = mod(tick,length(set))+1
 	input = set[index]
 	width = 1600
@@ -115,9 +115,6 @@ var svg = d3.select(\"#my_dataviz\")
 		#name = names(raw_counts)[5]
 		#sample data (in FPKM)
 		data = input[:,name]
-		# log transform (log2(FPKM+pseudocount))
-		pseudocount = 0
-		logdata = log2.(data.+pseudocount)
 		stats = summarystats(data)
 	
 		text*="
@@ -202,10 +199,25 @@ $(JavaScript(text))
 """ 
 )
 
+# ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
+index
+
+# ╔═╡ ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
+sum(input.transcript_type.=="coding")
+
+# ╔═╡ 1ca33a55-85ab-47ef-9966-64fcc963c0be
+input_data = data_from_dataframe(input,"data");
+
+# ╔═╡ 3cf3bb31-d697-4295-bebd-02cc7d412eba
+length(input_data)
+
+# ╔═╡ 3557b169-6656-49a5-b9eb-4f3d0ced356a
+sum(input_data.==0.0)/length(input_data)
+
 # ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
 begin
-	test = DataPreprocessing.clean_raw_counts(new_clean_counts,1)
-	data = log2.(filter(>(0),input."GSM1675513_MB011_1 data").+1)
+	#test = DataPreprocessing.clean_raw_counts(new_clean_counts,1)
+	data = input."GSM1675513_MB011_1 data"
 	h = fit(Histogram,data,nbins=100)
 end
 
@@ -233,7 +245,11 @@ If at least 10% of its expression values are greater than the cutoff value, we k
 """
 
 # ╔═╡ 3d55ece3-b8da-4443-91c9-98b9b983a04e
-
+md"""
+## Variance stabilising transformation
+We apply a variance stabilising transformation. 
+In this case this is a simple log-transform $$\log_2(x+1)$$.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1555,12 +1571,17 @@ version = "3.5.0+0"
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
 # ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
+# ╠═757bb449-28ec-4545-b1b5-d3f84217ab81
+# ╠═ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
+# ╠═1ca33a55-85ab-47ef-9966-64fcc963c0be
+# ╠═3cf3bb31-d697-4295-bebd-02cc7d412eba
+# ╠═3557b169-6656-49a5-b9eb-4f3d0ced356a
 # ╠═048bb985-d7b8-4ace-8606-8ddfddc51ba1
 # ╠═cfe7529a-ca49-4329-846d-9e4cfcd43e8b
 # ╠═7a2168ad-61a0-4132-90ea-69574f0040fc
 # ╠═266067df-934c-4db4-9d00-d74619311729
 # ╠═823e5800-7aa8-49da-9484-f40d1b0ee549
-# ╠═46085b1f-a043-45ad-96db-ae1a8e7dceea
+# ╟─46085b1f-a043-45ad-96db-ae1a8e7dceea
 # ╠═3d55ece3-b8da-4443-91c9-98b9b983a04e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
