@@ -55,31 +55,37 @@ cwd = ENV["PWD"];
 end
 
 # ╔═╡ 4aecc101-7800-40c0-a8b0-8e0f67e98cb3
-load_config(cwd*"/config/run-files/GSE68559.yaml")
-
-# ╔═╡ 46cc3358-f270-4f3a-80a7-77263fa255bc
 # ╠═╡ show_logs = false
-raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
+begin
+	load_config(cwd*"/config/run-files/GSE68559.yaml")
+	raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
+end;
 
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
 
 # ╔═╡ 8c563073-fb2d-40e5-9113-829f63594205
-DataPreprocessing.boxplot(raw_counts);
+DataPreprocessing.boxplot(raw_counts)
 
 # ╔═╡ 739173a4-5f67-416b-b276-774c21aae4f9
-DataPreprocessing.boxplot(clean_counts);
+DataPreprocessing.boxplot(clean_counts)
 
 # ╔═╡ f8c20e2e-252c-4796-8dd6-c910eb6f7820
-DataPreprocessing.boxplot(norm_counts);
+DataPreprocessing.boxplot(norm_counts)
 
+# ╔═╡ 2f4b42e8-ff5d-43cf-823b-e439a1b896c8
+@htl("""
+		<style>	.plutoui-rangeslider { width: 50em } </style>
+		<h3 class="dash">Options</h3>
+		<div style="display: flex; justify-content: center; align-items: center; gap: 2em">yep</div>
+	""")
 
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 @bind tick Clock()
 
 # ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
 begin
-	set = [raw_counts,round_counts,clean_counts,norm_counts]
+	set = [raw_counts,round_counts,vst_counts,clean_counts,norm_counts]
 	index = mod(tick,length(set))+1
 	input = set[index]
 	width = 1600
@@ -155,6 +161,7 @@ svg
   .attr(\"height\", (y(q1)-y(q3)) ) 
   .attr(\"width\", width ) 
 .style(\"fill\", \"#69e3a2\") 
+
  
  
 // show median, min and max horizontal lines 
@@ -191,9 +198,6 @@ $(JavaScript(text))
 # ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
 index
 
-# ╔═╡ 06e5c077-ae64-42b5-bcea-56641f01680d
-clean_counts
-
 # ╔═╡ ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
 sum(input.transcript_type.=="coding")/size(input)[1]
 
@@ -209,7 +213,7 @@ sum(input_data.==0.0)/length(input_data)
 # ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
 begin
 	#test = DataPreprocessing.clean_raw_counts(new_clean_counts,1)
-	data = filter(>(0),input."GSM1675513_MB011_1 data")
+	data = filter(>(0.5),input."GSM1675510_MB160_10 data")
 	h = fit(Histogram,data,nbins=100)
 end
 
@@ -1554,16 +1558,15 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
-# ╠═46cc3358-f270-4f3a-80a7-77263fa255bc
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
 # ╠═f8c20e2e-252c-4796-8dd6-c910eb6f7820
+# ╠═2f4b42e8-ff5d-43cf-823b-e439a1b896c8
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
 # ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 # ╠═757bb449-28ec-4545-b1b5-d3f84217ab81
-# ╠═06e5c077-ae64-42b5-bcea-56641f01680d
 # ╠═ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
 # ╠═1ca33a55-85ab-47ef-9966-64fcc963c0be
 # ╠═3cf3bb31-d697-4295-bebd-02cc7d412eba
