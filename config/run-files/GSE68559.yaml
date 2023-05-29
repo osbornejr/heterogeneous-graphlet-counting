@@ -37,7 +37,7 @@ data_preprocessing:
   expression_cutoff: 0.1
   minreq: 0.1
   clean_method: "per-sample"
-  norm_method: "upper_quartile"
+  norm_method: "median"
   variance_percent: 0.025
     
 network_construction:
