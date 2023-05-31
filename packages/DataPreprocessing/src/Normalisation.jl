@@ -13,10 +13,15 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
     if(method=="upper_quartile")
         method="upperquartile"
     end
+    if(method=="total_count")
+        #in edgeR this will set norm factors to 1, i.e. allow just to noramlise by straight library size
+        method="none"
+    end
     #ensure input method to R is valid!
-    avail = ["quantile","median","upperquartile","TMM","TMMswp","RLE"]
+    avail = ["quantile","median","upperquartile","TMM","TMMwsp","none"]
+    avail_print = ["quantile","median","upper_quartile","TMM","TMMwsp","total_count"]
     if (!(method in avail) )
-        @error "specified normalisation method is not available. Choose from $(avail)"
+        @error "specified normalisation method is not available. Choose from $(avail_print)"
         return Nothing
     end
     
@@ -58,10 +63,10 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
       norm_counts=GetNormalizedMat(raw_counts,MedianNorm(raw_counts,alternative=TRUE))
     }
 
-    if(method %in% c("TMM","TMMwsp","upperquartile","RLE")) ##uses edgeR?
+    if(method %in% c("TMM","TMMwsp","upperquartile","none")) ##uses edgeR?
     {
         list=calcNormFactors(DGEList(raw_counts),method=method)
-        for (i in 1:nrow(list$samples)){list$counts[,i]=1e6*list$counts[,i]/(list$samples[i,2]*list$samples[i,3])}
+        for (i in 1:nrow(list$samples)){list$counts[,i]=list$counts[,i]/(list$samples[i,2]*list$samples[i,3])}
         norm_counts=list$counts
     }
     """
