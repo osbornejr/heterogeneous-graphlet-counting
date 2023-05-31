@@ -13,7 +13,7 @@ cache:
     round_dir: false
     vst_dir: false
     clean_dir: false 
-    norm_dir: false 
+    norm_dir: false
     sampling_dir: false 
     similarity_dir: false 
     adjacency_dir: false  
@@ -37,10 +37,11 @@ data_preprocessing:
   expression_cutoff: 0.1
   minreq: 0.1
   clean_method: "per-sample"
-  norm_method: "median"
+  norm_method: "total_count"
   variance_percent: 0.025
     
 network_construction:
+  construct: false
   coexpression: "pidc"
   nbins: "sqrt_n"  
   threshold: 0.95
