@@ -19,15 +19,20 @@ function run_all(config_file::String)
     raw_counts = get_input_data()
     @info "Preprocessing raw counts"
     processed_counts = data_preprocessing(raw_counts)
-    @info "Constructing network"
-    adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
+    if (params["network_construction"]["construct"] == true)
+        @info "Constructing network"
+        adj_matrix,network_counts,vertexlist,edgelist = network_construction(processed_counts)
+        anal_flag = 0
+    else
+        #do not analyse if no network constructed
+        anal_flag = 1
+    end
 
     ## For analysis step, we need to run for both real and synthetic networks
     #this means we will need to reload the cache dirs for each run
     #run first on synthetic network, as that is what will be loaded in if "synthetic" parameter is true
     # we then reload network_construction with "synthetic" updated to false
     #
-    anal_flag = 0
     while (anal_flag == 0)  
         
         #only do bio val on real network 
