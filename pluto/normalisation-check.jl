@@ -54,24 +54,14 @@ cwd = ENV["PWD"];
 	using ProjectFunctions
 end
 
-# ╔═╡ 4aecc101-7800-40c0-a8b0-8e0f67e98cb3
-# ╠═╡ show_logs = false
-begin
-	load_config(cwd*"/config/run-files/GSE68559.yaml")
-	raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
-end;
+# ╔═╡ 351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
+load_config(cwd*"/config/run-files/GSE68559.yaml")
 
-# ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
-summarystats(raw_counts."GSM1675513_MB011_1 data")
+# ╔═╡ 325326d0-3854-4518-b248-2c975087f4e7
 
-# ╔═╡ 8c563073-fb2d-40e5-9113-829f63594205
-DataPreprocessing.boxplot(raw_counts)
 
-# ╔═╡ 739173a4-5f67-416b-b276-774c21aae4f9
-DataPreprocessing.boxplot(clean_counts)
+# ╔═╡ 63bc70ab-5996-4c5a-96d6-c4d4c6af9177
 
-# ╔═╡ f8c20e2e-252c-4796-8dd6-c910eb6f7820
-DataPreprocessing.boxplot(norm_counts)
 
 # ╔═╡ 2f4b42e8-ff5d-43cf-823b-e439a1b896c8
 @htl("""
@@ -82,6 +72,32 @@ DataPreprocessing.boxplot(norm_counts)
 
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 @bind tick Clock()
+
+# ╔═╡ 26122b7c-b6b0-48b3-a2b0-714e2e7f3717
+@bind norm_meth Select(["median","upper_quartile","quantile","TMM","TMMwsp"])
+
+# ╔═╡ 4aecc101-7800-40c0-a8b0-8e0f67e98cb3
+# ╠═╡ show_logs = false
+begin
+	params["data_preprocessing"]["norm_method"] = norm_meth
+	ProjectFunctions.cache_setup()
+	raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
+end;
+
+# ╔═╡ d35e77d8-80e5-40e6-871c-03ef1d0cadea
+norm_counts
+
+# ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
+summarystats(raw_counts."GSM1675513_MB011_1 data")
+
+# ╔═╡ 8c563073-fb2d-40e5-9113-829f63594205
+DataPreprocessing.boxplot(raw_counts);
+
+# ╔═╡ 739173a4-5f67-416b-b276-774c21aae4f9
+DataPreprocessing.boxplot(clean_counts);
+
+# ╔═╡ f8c20e2e-252c-4796-8dd6-c910eb6f7820
+DataPreprocessing.boxplot(norm_counts);
 
 # ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
 begin
@@ -126,7 +142,7 @@ var max = $(min(stats.max,stats.q75+1.5*(stats.q75-stats.q25)))
  
 // Show the Y scale 
 var y = d3.scaleLinear() 
-  .domain([$(stats.min),10]) 
+  .domain([$(stats.min),$(stats.max)]) 
   .range([height, 0]); 
 var axis = svg.call(d3.axisLeft(y)) 
  
@@ -195,6 +211,9 @@ $(JavaScript(text))
 """ 
 )
 
+# ╔═╡ f6bf6b9f-9a5c-4acc-b32e-9b5f733f947a
+norm_meth
+
 # ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
 index
 
@@ -213,7 +232,7 @@ sum(input_data.==0.0)/length(input_data)
 # ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
 begin
 	#test = DataPreprocessing.clean_raw_counts(new_clean_counts,1)
-	data = filter(>(0.5),input."GSM1675510_MB160_10 data")
+	data = filter(>(0),input."GSM1675513_MB011_1 data")
 	h = fit(Histogram,data,nbins=100)
 end
 
@@ -230,21 +249,37 @@ sig = params["data_preprocessing"]["roundsig"]
 md"""
 ## Rounding raw data
 To increase clarity and avoid skewing towards variance of lowly expressed transcripts, we round the raw FPKM values to $(sig) significant figures.
-The main impact of this rounding at this stage is to define which expression entries are considered nonzero i.e. any expression reading ``\geq`` $(10.0^(-1*sig)) is considered nonzero.  
-
-
-## Clean expression data
-Our first task is to remove any transcripts that have a low expression profile across samples.
-To do this, we select a cut off point that represents the expression value that is the lower bound for the top 10% expression values across ALL non-zero entries in all samples.
-We then compare each transcript's expression profile to this cutoff value.
-If at least 10% of its expression values are greater than the cutoff value, we keep the transcript, but otherwise we discard.
+The main impact of this rounding at this stage is to define which expression entries are considered nonzero i.e. any expression reading ``\geq`` $(10.0^(-1*sig)) is considered nonzero. 
 """
+
+
+
 
 # ╔═╡ 3d55ece3-b8da-4443-91c9-98b9b983a04e
 md"""
 ## Variance stabilising transformation
 We apply a variance stabilising transformation. 
 In this case this is a simple log-transform $$\log_2(x+1)$$.
+"""
+
+# ╔═╡ 692edabc-3542-49fa-b532-c5172f039951
+md"""
+## Clean expression data
+Our next task is to remove any transcripts that have a low expression profile across samples.
+To do this, we select a cut off point that represents the expression value that is the lower bound for the top 10% expression values across ALL non-zero entries in all samples.
+We then compare each transcript's expression profile to this cutoff value.
+If at least 10% of its expression values are greater than the cutoff value, we keep the transcript, but otherwise we discard.
+"""
+
+# ╔═╡ e2c4ec1b-bd5f-4d49-a6cc-b9366cfdc9c5
+md"""
+## Normalising data
+
+One question here is whether it matters if we are normalising VST or non VST data here.
+
+Will the difference matter?
+
+Following the basic model used in `edgeR` normalisation
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1557,7 +1592,11 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
+# ╠═351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
+# ╠═d35e77d8-80e5-40e6-871c-03ef1d0cadea
+# ╠═325326d0-3854-4518-b248-2c975087f4e7
+# ╠═63bc70ab-5996-4c5a-96d6-c4d4c6af9177
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
@@ -1566,6 +1605,8 @@ version = "3.5.0+0"
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
 # ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
+# ╠═26122b7c-b6b0-48b3-a2b0-714e2e7f3717
+# ╠═f6bf6b9f-9a5c-4acc-b32e-9b5f733f947a
 # ╠═757bb449-28ec-4545-b1b5-d3f84217ab81
 # ╠═ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
 # ╠═1ca33a55-85ab-47ef-9966-64fcc963c0be
@@ -1575,7 +1616,9 @@ version = "3.5.0+0"
 # ╠═cfe7529a-ca49-4329-846d-9e4cfcd43e8b
 # ╠═7a2168ad-61a0-4132-90ea-69574f0040fc
 # ╠═9863d522-bb4f-4287-8c7b-06461be85369
-# ╟─46085b1f-a043-45ad-96db-ae1a8e7dceea
-# ╠═3d55ece3-b8da-4443-91c9-98b9b983a04e
+# ╠═46085b1f-a043-45ad-96db-ae1a8e7dceea
+# ╟─3d55ece3-b8da-4443-91c9-98b9b983a04e
+# ╟─692edabc-3542-49fa-b532-c5172f039951
+# ╠═e2c4ec1b-bd5f-4d49-a6cc-b9366cfdc9c5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
