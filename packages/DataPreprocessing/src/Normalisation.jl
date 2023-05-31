@@ -37,18 +37,7 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
     R"""
     library(edgeR,quietly=T)
     library(EBSeq,quietly = T)
-
-    if(method=="DESeq2")
-    {  
-    ##DESeq2 method (NOT WORKING; is this necessary in any case, considering assumptions of DESeq2 methods?):
-     #compute geometric mean for each gene across samples. Doesn't handle zero values well (unclear how they are handled in package)
-      geo_mean_total_homo_sap <- total_homo_sap %>%
-        data_matrix() %>% 
-        .^(1/length(.)) %>% 
-        rowProds() %>%
-        as_tibble()
-    }
-    
+ 
     if(method=="quantile")
     {
       ## Quantile method:
@@ -157,12 +146,8 @@ end
 #Another boxplot method that defaults to colouring based on sample and outputs plot object
 function boxplot(dataframe::DataFrame)
     longform = stack(dataframe,variable_name = "sample")
-    longform = longform[longform[!,:value].!=0,:]
-    insertcols!(longform,"log_value"=>log2.(longform[!,:value]))
-    longform = longform[longform[!,:log_value].>-10,:]
-    longform = longform[longform[!,:log_value].<10,:]
     #Add column for color group
-    p = plot(longform, x = "sample", y = "log_value", Geom.boxplot(suppress_outliers = true),Guide.xticks(label=false),Theme(key_position= :none,grid_line_width=0mm),color=:sample);
+    p = plot(longform, x = "sample", y = "value", Geom.boxplot(suppress_outliers = true),Guide.xticks(label=false),Theme(key_position= :none,grid_line_width=0mm),color=:sample);
     return p
 end
 
