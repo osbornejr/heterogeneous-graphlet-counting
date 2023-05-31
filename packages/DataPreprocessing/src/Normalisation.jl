@@ -55,7 +55,9 @@ function library_size_normalisation(raw_counts::Union{DataFrame,Array},method::S
     if(method %in% c("TMM","TMMwsp","upperquartile","none")) ##uses edgeR?
     {
         list=calcNormFactors(DGEList(raw_counts),method=method)
-        for (i in 1:nrow(list$samples)){list$counts[,i]=list$counts[,i]/(list$samples[i,2]*list$samples[i,3])}
+        ##scale factor to keep numbers within bounds of original data (mean of lib_size)
+        scale_factor = mean(list$samples[,2])
+        for (i in 1:nrow(list$samples)){list$counts[,i]=scale_factor*list$counts[,i]/(list$samples[i,2]*list$samples[i,3])}
         norm_counts=list$counts
     }
     """
