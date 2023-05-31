@@ -57,12 +57,6 @@ end
 # ╔═╡ 351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
 load_config(cwd*"/config/run-files/GSE68559.yaml")
 
-# ╔═╡ 325326d0-3854-4518-b248-2c975087f4e7
-
-
-# ╔═╡ 63bc70ab-5996-4c5a-96d6-c4d4c6af9177
-
-
 # ╔═╡ 2f4b42e8-ff5d-43cf-823b-e439a1b896c8
 @htl("""
 		<style>	.plutoui-rangeslider { width: 50em } </style>
@@ -74,7 +68,7 @@ load_config(cwd*"/config/run-files/GSE68559.yaml")
 @bind tick Clock()
 
 # ╔═╡ 26122b7c-b6b0-48b3-a2b0-714e2e7f3717
-@bind norm_meth Select(["median","upper_quartile","quantile","TMM","TMMwsp"])
+@bind norm_meth Select(["median","upper_quartile","quantile","TMM","TMMwsp","total_count"])
 
 # ╔═╡ 4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═╡ show_logs = false
@@ -82,10 +76,7 @@ begin
 	params["data_preprocessing"]["norm_method"] = norm_meth
 	ProjectFunctions.cache_setup()
 	raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
-end;
-
-# ╔═╡ d35e77d8-80e5-40e6-871c-03ef1d0cadea
-norm_counts
+end
 
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
@@ -101,7 +92,8 @@ DataPreprocessing.boxplot(norm_counts);
 
 # ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
 begin
-	set = [raw_counts,round_counts,vst_counts,clean_counts,norm_counts]
+	set = [clean_counts,norm_counts]
+	#set = [raw_counts,round_counts,vst_counts,clean_counts,norm_counts]
 	index = mod(tick,length(set))+1
 	input = set[index]
 	width = 1600
@@ -142,7 +134,7 @@ var max = $(min(stats.max,stats.q75+1.5*(stats.q75-stats.q25)))
  
 // Show the Y scale 
 var y = d3.scaleLinear() 
-  .domain([$(stats.min),$(stats.max)]) 
+  .domain([$(stats.min),10]) 
   .range([height, 0]); 
 var axis = svg.call(d3.axisLeft(y)) 
  
@@ -194,6 +186,54 @@ svg
 " 
 	end
 end
+
+# ╔═╡ b4373d9d-e7da-4fee-a487-1c5ceae54c61
+    regions= [
+      filter(x->occursin("_1 ",x),names(input))=>"BA10",
+	filter(x->occursin("_2 ",x),names(input))=>"BA22",
+	filter(x->occursin("_3 ",x),names(input))=>"BA24",
+	filter(x->occursin("_4 ",x),names(input))=>"insula",
+	filter(x->occursin("_5 ",x),names(input))=>"amygdala",
+	filter(x->occursin("_6 ",x),names(input))=>"hippocampus",
+	filter(x->occursin("_7 ",x),names(input))=>"posterior putamen",
+	filter(x->occursin("_8 ",x),names(input))=>"cerebellum",
+	filter(x->occursin("_9 ",x),names(input))=>"raphae nuclei",
+	filter(x->occursin("_10 ",x),names(input))=>"BA46"];
+
+
+# ╔═╡ c7fadafb-45c5-4168-8310-4d6dd5fcdd38
+region_dict = Dict(Pair.(last.(regions),first.(regions)));
+	
+
+# ╔═╡ 3e05e27d-0445-4773-b242-bb3e7a4853ca
+@bind REG Select(regions)
+
+# ╔═╡ 2beaf388-3d97-41da-ba16-41154906155d
+REG
+
+# ╔═╡ 2b050ca8-3050-4e8a-bd00-8ab9b40001ed
+    patients = [
+	 filter(x->occursin("MB011",x),names(input))=>"smoker MB011" ,
+	 filter(x->occursin("MB059",x),names(input))=>"smoker MB059" ,
+	 filter(x->occursin("MB100",x),names(input))=>"smoker MB100" ,
+	 filter(x->occursin("MB148",x),names(input))=>"smoker MB148" ,
+	 filter(x->occursin("MB160",x),names(input))=>"smoker MB160" ,
+	 filter(x->occursin("MB052",x),names(input))=>"nonsmoker MB052" ,
+	 filter(x->occursin("MB147",x),names(input))=>"nonsmoker MB147" ,
+	 filter(x->occursin("MB151",x),names(input))=>"nonsmoker MB151" ,
+	 filter(x->occursin("MB197",x),names(input))=>"nonsmoker MB197" ,
+	 filter(x->occursin("MB202",x),names(input))=>"nonsmoker MB202"];
+
+	
+
+# ╔═╡ 6dcf8d2a-1f96-46a8-bf2c-57feea99dad3
+patient_dict = Dict(Pair.(last.(patients),first.(patients)));
+
+# ╔═╡ ded8aa8b-db1a-4f2a-abe0-b3a8d3cc7ca1
+@bind PAT Select(patients)
+
+# ╔═╡ e5043e1d-8be5-4de2-ae66-298ab6c8573e
+filter(x->occursin("MB202",x),names(input))
 
 # ╔═╡ b1fba899-0ca7-48ba-bbe0-f30a146536a1
 @htl(
@@ -279,7 +319,7 @@ One question here is whether it matters if we are normalising VST or non VST dat
 
 Will the difference matter?
 
-Following the basic model used in `edgeR` normalisation
+Following the basic model used in `edgeR` normalisation, we normalise using library size 
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1594,13 +1634,18 @@ version = "3.5.0+0"
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
 # ╠═351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
-# ╠═d35e77d8-80e5-40e6-871c-03ef1d0cadea
-# ╠═325326d0-3854-4518-b248-2c975087f4e7
-# ╠═63bc70ab-5996-4c5a-96d6-c4d4c6af9177
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
 # ╠═f8c20e2e-252c-4796-8dd6-c910eb6f7820
+# ╠═c7fadafb-45c5-4168-8310-4d6dd5fcdd38
+# ╠═b4373d9d-e7da-4fee-a487-1c5ceae54c61
+# ╠═2b050ca8-3050-4e8a-bd00-8ab9b40001ed
+# ╠═6dcf8d2a-1f96-46a8-bf2c-57feea99dad3
+# ╠═3e05e27d-0445-4773-b242-bb3e7a4853ca
+# ╠═ded8aa8b-db1a-4f2a-abe0-b3a8d3cc7ca1
+# ╠═2beaf388-3d97-41da-ba16-41154906155d
+# ╠═e5043e1d-8be5-4de2-ae66-298ab6c8573e
 # ╠═2f4b42e8-ff5d-43cf-823b-e439a1b896c8
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
 # ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
