@@ -266,7 +266,7 @@ function data_preprocessing(raw_counts::DataFrame)
         clean_counts = cache_load(file,"clean counts")
     else
 
-        clean_counts = DataPreprocessing.clean_round_counts(round_counts,params["data_preprocessing"]["expression_cutoff"],params["data_preprocessing"]["minreq"],method=params["data_preprocessing"]["clean_method"])
+        clean_counts = DataPreprocessing.clean_round_counts(vst_counts,params["data_preprocessing"]["expression_cutoff"],params["data_preprocessing"]["minreq"],method=params["data_preprocessing"]["clean_method"])
         @info "Saving clean counts to $file"
         cache_save(file,"clean counts"=>clean_counts)
     end
