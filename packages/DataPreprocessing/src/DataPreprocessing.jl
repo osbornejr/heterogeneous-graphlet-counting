@@ -4,7 +4,7 @@ export data_from_dataframe
 include("Normalisation.jl")
 include("ReadExpressionData.jl")
 
-function data_from_dataframe(df::DataFrame,identifier::String)
+function data_from_dataframe(df::DataFrame,identifier::String="data")
     #transform the numerical data columns of a DataFrame into an array. The identifier is a string that is common and uniquely contained in the names of the desired columns 
     data = Array(select(df,filter(x->occursin(identifier,x),names(df))))
 end
