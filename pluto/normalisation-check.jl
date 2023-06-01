@@ -57,12 +57,8 @@ end
 # ╔═╡ 351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
 load_config(cwd*"/config/run-files/GSE68559.yaml")
 
-# ╔═╡ 2f4b42e8-ff5d-43cf-823b-e439a1b896c8
-@htl("""
-		<style>	.plutoui-rangeslider { width: 50em } </style>
-		<h3 class="dash">Options</h3>
-		<div style="display: flex; justify-content: center; align-items: center; gap: 2em">yep</div>
-	""")
+# ╔═╡ abf62448-9498-46f6-9f09-c91156c7c64e
+
 
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 @bind tick Clock()
@@ -76,7 +72,7 @@ begin
 	params["data_preprocessing"]["norm_method"] = norm_meth
 	ProjectFunctions.cache_setup()
 	raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
-end
+end;
 
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
@@ -90,13 +86,59 @@ DataPreprocessing.boxplot(clean_counts);
 # ╔═╡ f8c20e2e-252c-4796-8dd6-c910eb6f7820
 DataPreprocessing.boxplot(norm_counts);
 
+# ╔═╡ b4373d9d-e7da-4fee-a487-1c5ceae54c61
+    regions= [
+		  filter(x->occursin("data",x),names(raw_counts))=>"All",
+      filter(x->occursin("_1 ",x),names(raw_counts))=>"BA10",
+	filter(x->occursin("_2 ",x),names(raw_counts))=>"BA22",
+	filter(x->occursin("_3 ",x),names(raw_counts))=>"BA24",
+	filter(x->occursin("_4 ",x),names(raw_counts))=>"insula",
+	filter(x->occursin("_5 ",x),names(raw_counts))=>"amygdala",
+	filter(x->occursin("_6 ",x),names(raw_counts))=>"hippocampus",
+	filter(x->occursin("_7 ",x),names(raw_counts))=>"posterior putamen",
+	filter(x->occursin("_8 ",x),names(raw_counts))=>"cerebellum",
+	filter(x->occursin("_9 ",x),names(raw_counts))=>"raphae nuclei",
+	filter(x->occursin("_10 ",x),names(raw_counts))=>"BA46"];
+
+
+# ╔═╡ c7fadafb-45c5-4168-8310-4d6dd5fcdd38
+region_dict = Dict(Pair.(last.(regions),first.(regions)));
+	
+
+# ╔═╡ 3e05e27d-0445-4773-b242-bb3e7a4853ca
+@bind REG Select(regions)
+
+# ╔═╡ 2b050ca8-3050-4e8a-bd00-8ab9b40001ed
+    patients = [
+		filter(x->occursin("data",x),names(raw_counts))=>"All",
+	 filter(x->occursin("MB011",x),names(raw_counts))=>"smoker MB011" ,
+	 filter(x->occursin("MB059",x),names(raw_counts))=>"smoker MB059" ,
+	 filter(x->occursin("MB100",x),names(raw_counts))=>"smoker MB100" ,
+	 filter(x->occursin("MB148",x),names(raw_counts))=>"smoker MB148" ,
+	 filter(x->occursin("MB160",x),names(raw_counts))=>"smoker MB160" ,
+	 filter(x->occursin("MB052",x),names(raw_counts))=>"nonsmoker MB052" ,
+	 filter(x->occursin("MB147",x),names(raw_counts))=>"nonsmoker MB147" ,
+	 filter(x->occursin("MB151",x),names(raw_counts))=>"nonsmoker MB151" ,
+	 filter(x->occursin("MB197",x),names(raw_counts))=>"nonsmoker MB197" ,
+	 filter(x->occursin("MB202",x),names(raw_counts))=>"nonsmoker MB202"];
+	
+
+# ╔═╡ 6dcf8d2a-1f96-46a8-bf2c-57feea99dad3
+patient_dict = Dict(Pair.(last.(patients),first.(patients)));
+
+# ╔═╡ ded8aa8b-db1a-4f2a-abe0-b3a8d3cc7ca1
+@bind PAT Select(patients)
+
+# ╔═╡ 2beaf388-3d97-41da-ba16-41154906155d
+selected_names = intersect(REG,PAT)
+
 # ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
 begin
-	set = [clean_counts,norm_counts]
+	set = [vst_counts,clean_counts,norm_counts]
 	#set = [raw_counts,round_counts,vst_counts,clean_counts,norm_counts]
 	index = mod(tick,length(set))+1
 	input = set[index]
-	width = 1600
+	width = min(1600,400*length(selected_names))
 	height = 400
 	text = "// set the dimensions and margins of the graph 
 var margin = {top: 10, right: 30, bottom: 30, left: 40}, 
@@ -113,7 +155,7 @@ var svg = d3.select(\"#my_dataviz\")
         
 	\"translate(\" + margin.left + \",\" + margin.top + \")\"); 
  "
-	for (i,name) in enumerate(filter(x->occursin("data",x),names(input)))
+	for (i,name) in enumerate(selected_names)
 		#i = 1
 		#name = names(raw_counts)[5]
 		#sample data (in FPKM)
@@ -134,7 +176,7 @@ var max = $(min(stats.max,stats.q75+1.5*(stats.q75-stats.q25)))
  
 // Show the Y scale 
 var y = d3.scaleLinear() 
-  .domain([$(stats.min),10]) 
+  .domain([$(stats.min),2]) 
   .range([height, 0]); 
 var axis = svg.call(d3.axisLeft(y)) 
  
@@ -149,8 +191,8 @@ var axis = svg.call(d3.axisLeft(y))
     .style(\"stroke\", \"grey\"); 
 	 
 // a few features for the box 
-var center = $(i*(width-70)/100) 
-var width = $((width-70)/100-0.2*(width-70)/100) 
+var center = $(i*(width-70)/length(selected_names)) 
+var width = $((width-70)/length(selected_names)-0.2*(width-70)/length(selected_names)) 
  
 // Show the main vertical line 
 svg 
@@ -187,54 +229,6 @@ svg
 	end
 end
 
-# ╔═╡ b4373d9d-e7da-4fee-a487-1c5ceae54c61
-    regions= [
-      filter(x->occursin("_1 ",x),names(input))=>"BA10",
-	filter(x->occursin("_2 ",x),names(input))=>"BA22",
-	filter(x->occursin("_3 ",x),names(input))=>"BA24",
-	filter(x->occursin("_4 ",x),names(input))=>"insula",
-	filter(x->occursin("_5 ",x),names(input))=>"amygdala",
-	filter(x->occursin("_6 ",x),names(input))=>"hippocampus",
-	filter(x->occursin("_7 ",x),names(input))=>"posterior putamen",
-	filter(x->occursin("_8 ",x),names(input))=>"cerebellum",
-	filter(x->occursin("_9 ",x),names(input))=>"raphae nuclei",
-	filter(x->occursin("_10 ",x),names(input))=>"BA46"];
-
-
-# ╔═╡ c7fadafb-45c5-4168-8310-4d6dd5fcdd38
-region_dict = Dict(Pair.(last.(regions),first.(regions)));
-	
-
-# ╔═╡ 3e05e27d-0445-4773-b242-bb3e7a4853ca
-@bind REG Select(regions)
-
-# ╔═╡ 2beaf388-3d97-41da-ba16-41154906155d
-REG
-
-# ╔═╡ 2b050ca8-3050-4e8a-bd00-8ab9b40001ed
-    patients = [
-	 filter(x->occursin("MB011",x),names(input))=>"smoker MB011" ,
-	 filter(x->occursin("MB059",x),names(input))=>"smoker MB059" ,
-	 filter(x->occursin("MB100",x),names(input))=>"smoker MB100" ,
-	 filter(x->occursin("MB148",x),names(input))=>"smoker MB148" ,
-	 filter(x->occursin("MB160",x),names(input))=>"smoker MB160" ,
-	 filter(x->occursin("MB052",x),names(input))=>"nonsmoker MB052" ,
-	 filter(x->occursin("MB147",x),names(input))=>"nonsmoker MB147" ,
-	 filter(x->occursin("MB151",x),names(input))=>"nonsmoker MB151" ,
-	 filter(x->occursin("MB197",x),names(input))=>"nonsmoker MB197" ,
-	 filter(x->occursin("MB202",x),names(input))=>"nonsmoker MB202"];
-
-	
-
-# ╔═╡ 6dcf8d2a-1f96-46a8-bf2c-57feea99dad3
-patient_dict = Dict(Pair.(last.(patients),first.(patients)));
-
-# ╔═╡ ded8aa8b-db1a-4f2a-abe0-b3a8d3cc7ca1
-@bind PAT Select(patients)
-
-# ╔═╡ e5043e1d-8be5-4de2-ae66-298ab6c8573e
-filter(x->occursin("MB202",x),names(input))
-
 # ╔═╡ b1fba899-0ca7-48ba-bbe0-f30a146536a1
 @htl(
 	"""
@@ -251,11 +245,21 @@ $(JavaScript(text))
 """ 
 )
 
-# ╔═╡ f6bf6b9f-9a5c-4acc-b32e-9b5f733f947a
-norm_meth
+# ╔═╡ 5e7acfb3-4566-4a65-9798-85bf0584b439
+titles = ["VST counts","Cleaned counts", "Normalised counts ($norm_meth)"]
+
+# ╔═╡ d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
+@htl("""
+		<style>	.plutoui-rangeslider { width: 50em } </style>
+		<h3 class="dash">$(titles[index])</h3>
+		<div style="display: flex; justify-content: center; align-items: center; gap: 2em"></div>
+	""")
 
 # ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
 index
+
+# ╔═╡ 92c7a3a4-ebc1-4166-a106-9b781f546f60
+vec(sum(DataPreprocessing.data_from_dataframe(norm_counts).==0,dims=1))
 
 # ╔═╡ ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
 sum(input.transcript_type.=="coding")/size(input)[1]
@@ -272,7 +276,7 @@ sum(input_data.==0.0)/length(input_data)
 # ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
 begin
 	#test = DataPreprocessing.clean_raw_counts(new_clean_counts,1)
-	data = filter(>(0),input."GSM1675513_MB011_1 data")
+	data = filter(>(0),input."GSM1675510_MB160_10 data")
 	h = fit(Histogram,data,nbins=100)
 end
 
@@ -320,6 +324,69 @@ One question here is whether it matters if we are normalising VST or non VST dat
 Will the difference matter?
 
 Following the basic model used in `edgeR` normalisation, we normalise using library size 
+"""
+
+# ╔═╡ c8cedcba-6d09-40c7-905c-a6a47596798d
+md"""
+## PCA check
+
+"""
+
+# ╔═╡ 704d588e-cffd-4239-b5c9-2760d8afdb6f
+PCs,D,per_sample=DataPreprocessing.pca(data_from_dataframe(norm_counts));
+
+# ╔═╡ 87b0e404-4118-4abc-9f2e-4a963bd4496d
+sample_names = filter(x->occursin("data",x),names(raw_counts))
+
+
+# ╔═╡ 818cadda-b311-4aae-9c33-2d85a18899f5
+a = 1
+
+# ╔═╡ 97235b4e-93fc-4ed4-a3a2-c6541cb9ef68
+b = 3
+
+# ╔═╡ 4e3eadbe-7960-42e9-b399-3a44297d70f0
+nx = collect(min(per_sample[:,b]...)-5:max(per_sample[:,b]...)+5)
+
+# ╔═╡ 1c0643d0-332f-45d5-b7e8-0b9b6b6b680b
+ny = collect(min(per_sample[:,a]...)-5:max(per_sample[:,a]...)+5)
+
+# ╔═╡ 2ffc3d13-ab1b-4b03-864a-66a0896dbdff
+colour = ["114,245,51","64,165,245","245,223,38","245,93,239","245,159,27","245,154,51","245,250,64","245,40,82","71,195,245","101,27,245"]
+
+# ╔═╡ c211987a-bc3f-4ade-a5a0-e19563cf9ddd
+findall(x->x==min(per_sample[:,3]...),per_sample[:,3])
+
+# ╔═╡ 75641449-1801-4f22-a90b-5947f6c34b8a
+sample_names[7]
+
+# ╔═╡ 317602a3-d0b3-435f-af6d-112be42617d4
+patient_vec =replace.(collect(keys(patient_dict))[2:end],"smoker "=>"","nonsmoker "=>"")
+
+# ╔═╡ 21aa68b4-6257-41e6-a540-1f4bf92ef96c
+Context(
+	(;domain=([extrema(nx)...]), range=[0, 730]),
+	(;domain=([extrema(ny)...]), range=[0, 400]),
+[
+Portinari.Shape(per_sample[findall(y->occursin("_$(patient_vec[i])",y),sample_names),b],per_sample[findall(y->occursin("_$(patient_vec[i])",y),sample_names),a],repeat([100],length(findall(y->occursin("_$(patient_vec[i])",y),sample_names))),"PC";
+attributes=D3Attr(style=(;fill="rgba($(colour[i]), 0.8)"))
+) for i in 1:10],
+	"together"
+)
+	
+
+
+# ╔═╡ 86e018ba-a78c-4644-af9e-63c6fec86e40
+Portinari.Shape(per_sample[:,3],per_sample[:,1],repeat([100],length(sample_names)),"PC";
+attributes=D3Attr(style=(;fill="rgba(255, 0, 0, 0.3)"))
+)
+
+# ╔═╡ d082290c-4412-42b5-aa15-e35e01923e5e
+p_1=DataPreprocessing.pca_plot(per_sample,3)
+
+# ╔═╡ 50958e94-9de4-4b76-8d79-3b7f65b94729
+md"""
+## Select for variation
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1644,15 +1711,16 @@ version = "3.5.0+0"
 # ╠═6dcf8d2a-1f96-46a8-bf2c-57feea99dad3
 # ╠═3e05e27d-0445-4773-b242-bb3e7a4853ca
 # ╠═ded8aa8b-db1a-4f2a-abe0-b3a8d3cc7ca1
+# ╠═abf62448-9498-46f6-9f09-c91156c7c64e
 # ╠═2beaf388-3d97-41da-ba16-41154906155d
-# ╠═e5043e1d-8be5-4de2-ae66-298ab6c8573e
-# ╠═2f4b42e8-ff5d-43cf-823b-e439a1b896c8
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
+# ╠═5e7acfb3-4566-4a65-9798-85bf0584b439
+# ╟─d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
 # ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 # ╠═26122b7c-b6b0-48b3-a2b0-714e2e7f3717
-# ╠═f6bf6b9f-9a5c-4acc-b32e-9b5f733f947a
 # ╠═757bb449-28ec-4545-b1b5-d3f84217ab81
+# ╠═92c7a3a4-ebc1-4166-a106-9b781f546f60
 # ╠═ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
 # ╠═1ca33a55-85ab-47ef-9966-64fcc963c0be
 # ╠═3cf3bb31-d697-4295-bebd-02cc7d412eba
@@ -1665,5 +1733,20 @@ version = "3.5.0+0"
 # ╟─3d55ece3-b8da-4443-91c9-98b9b983a04e
 # ╟─692edabc-3542-49fa-b532-c5172f039951
 # ╠═e2c4ec1b-bd5f-4d49-a6cc-b9366cfdc9c5
+# ╠═c8cedcba-6d09-40c7-905c-a6a47596798d
+# ╠═704d588e-cffd-4239-b5c9-2760d8afdb6f
+# ╠═87b0e404-4118-4abc-9f2e-4a963bd4496d
+# ╠═4e3eadbe-7960-42e9-b399-3a44297d70f0
+# ╠═818cadda-b311-4aae-9c33-2d85a18899f5
+# ╠═97235b4e-93fc-4ed4-a3a2-c6541cb9ef68
+# ╠═1c0643d0-332f-45d5-b7e8-0b9b6b6b680b
+# ╠═21aa68b4-6257-41e6-a540-1f4bf92ef96c
+# ╠═2ffc3d13-ab1b-4b03-864a-66a0896dbdff
+# ╠═c211987a-bc3f-4ade-a5a0-e19563cf9ddd
+# ╠═75641449-1801-4f22-a90b-5947f6c34b8a
+# ╠═317602a3-d0b3-435f-af6d-112be42617d4
+# ╠═86e018ba-a78c-4644-af9e-63c6fec86e40
+# ╠═d082290c-4412-42b5-aa15-e35e01923e5e
+# ╠═50958e94-9de4-4b76-8d79-3b7f65b94729
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
