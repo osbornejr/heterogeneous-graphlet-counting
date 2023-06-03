@@ -55,7 +55,10 @@ cwd = ENV["PWD"];
 end
 
 # ╔═╡ 351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
-load_config(cwd*"/config/run-files/GSE68559.yaml")
+load_config(cwd*"/config/run-files/GSE68559_sub.yaml")
+
+# ╔═╡ 8f4358ea-454c-417d-bcda-18dd0510a712
+params
 
 # ╔═╡ abf62448-9498-46f6-9f09-c91156c7c64e
 
@@ -76,6 +79,9 @@ end;
 
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
+
+# ╔═╡ 104f6b63-70e0-424f-b549-84c4d8334acb
+processed_counts
 
 # ╔═╡ 8c563073-fb2d-40e5-9113-829f63594205
 DataPreprocessing.boxplot(raw_counts);
@@ -276,7 +282,7 @@ sum(input_data.==0.0)/length(input_data)
 # ╔═╡ 048bb985-d7b8-4ace-8606-8ddfddc51ba1
 begin
 	#test = DataPreprocessing.clean_raw_counts(new_clean_counts,1)
-	data = filter(>(0),input."GSM1675510_MB160_10 data")
+	data = filter(>(0),input[:,2])
 	h = fit(Histogram,data,nbins=100)
 end
 
@@ -333,11 +339,14 @@ md"""
 """
 
 # ╔═╡ 704d588e-cffd-4239-b5c9-2760d8afdb6f
-PCs,D,per_sample=DataPreprocessing.pca(data_from_dataframe(norm_counts));
+PCs,D,per_sample=DataPreprocessing.pca(data_from_dataframe(processed_counts));
 
 # ╔═╡ 87b0e404-4118-4abc-9f2e-4a963bd4496d
 sample_names = filter(x->occursin("data",x),names(raw_counts))
 
+
+# ╔═╡ 5bd9c340-4d63-4a54-be4e-8c121bebabd5
+marg = 10
 
 # ╔═╡ 818cadda-b311-4aae-9c33-2d85a18899f5
 a = 1
@@ -346,10 +355,10 @@ a = 1
 b = 3
 
 # ╔═╡ 4e3eadbe-7960-42e9-b399-3a44297d70f0
-nx = collect(min(per_sample[:,b]...)-5:max(per_sample[:,b]...)+5)
+nx = collect(min(per_sample[:,b]...)-marg:max(per_sample[:,b]...)+marg);
 
 # ╔═╡ 1c0643d0-332f-45d5-b7e8-0b9b6b6b680b
-ny = collect(min(per_sample[:,a]...)-5:max(per_sample[:,a]...)+5)
+ny = collect(min(per_sample[:,a]...)-marg:max(per_sample[:,a]...)+marg)
 
 # ╔═╡ 2ffc3d13-ab1b-4b03-864a-66a0896dbdff
 colour = ["114,245,51","64,165,245","245,223,38","245,93,239","245,159,27","245,154,51","245,250,64","245,40,82","71,195,245","101,27,245"]
@@ -359,6 +368,25 @@ findall(x->x==min(per_sample[:,3]...),per_sample[:,3])
 
 # ╔═╡ 75641449-1801-4f22-a90b-5947f6c34b8a
 sample_names[7]
+
+# ╔═╡ 967ffab4-8abf-4447-8f09-cd0e5d624767
+norm_counts
+
+# ╔═╡ 01ff1c3e-6eaa-4863-bb1d-7f6f7037fafe
+begin
+	var_data = vec(var(data_from_dataframe(norm_counts),dims =2 ))
+	v = fit(Histogram,var_data,nbins=100)
+	Bars(round.(collect(first(v.edges))[2:end],digits = 3).|>string,v.weights,"histogram";attributes=D3Attr(attr=(;fill="rgba(10, 200, 100, 0.6)")))
+end
+
+# ╔═╡ 1414f977-cb37-4592-a104-217822a42ae2
+v.edges
+
+# ╔═╡ 07f12515-a320-434c-b1e3-73a305491f94
+v.weights
+
+# ╔═╡ e5e63932-1f89-4858-ae76-72fefa2d0139
+norm_counts[var_data.>1.0,:]
 
 # ╔═╡ 317602a3-d0b3-435f-af6d-112be42617d4
 patient_vec =replace.(collect(keys(patient_dict))[2:end],"smoker "=>"","nonsmoker "=>"")
@@ -380,6 +408,9 @@ attributes=D3Attr(style=(;fill="rgba($(colour[i]), 0.8)"))
 Portinari.Shape(per_sample[:,3],per_sample[:,1],repeat([100],length(sample_names)),"PC";
 attributes=D3Attr(style=(;fill="rgba(255, 0, 0, 0.3)"))
 )
+
+# ╔═╡ 6ed8dedd-55be-4328-a084-55db292f6315
+processed_counts
 
 # ╔═╡ d082290c-4412-42b5-aa15-e35e01923e5e
 p_1=DataPreprocessing.pca_plot(per_sample,3)
@@ -1700,8 +1731,10 @@ version = "3.5.0+0"
 # ╔═╡ Cell order:
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
 # ╠═351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
+# ╠═8f4358ea-454c-417d-bcda-18dd0510a712
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
+# ╠═104f6b63-70e0-424f-b549-84c4d8334acb
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
 # ╠═f8c20e2e-252c-4796-8dd6-c910eb6f7820
@@ -1736,6 +1769,7 @@ version = "3.5.0+0"
 # ╠═c8cedcba-6d09-40c7-905c-a6a47596798d
 # ╠═704d588e-cffd-4239-b5c9-2760d8afdb6f
 # ╠═87b0e404-4118-4abc-9f2e-4a963bd4496d
+# ╠═5bd9c340-4d63-4a54-be4e-8c121bebabd5
 # ╠═4e3eadbe-7960-42e9-b399-3a44297d70f0
 # ╠═818cadda-b311-4aae-9c33-2d85a18899f5
 # ╠═97235b4e-93fc-4ed4-a3a2-c6541cb9ef68
@@ -1744,8 +1778,14 @@ version = "3.5.0+0"
 # ╠═2ffc3d13-ab1b-4b03-864a-66a0896dbdff
 # ╠═c211987a-bc3f-4ade-a5a0-e19563cf9ddd
 # ╠═75641449-1801-4f22-a90b-5947f6c34b8a
+# ╠═967ffab4-8abf-4447-8f09-cd0e5d624767
+# ╠═01ff1c3e-6eaa-4863-bb1d-7f6f7037fafe
+# ╠═1414f977-cb37-4592-a104-217822a42ae2
+# ╠═07f12515-a320-434c-b1e3-73a305491f94
+# ╠═e5e63932-1f89-4858-ae76-72fefa2d0139
 # ╠═317602a3-d0b3-435f-af6d-112be42617d4
 # ╠═86e018ba-a78c-4644-af9e-63c6fec86e40
+# ╠═6ed8dedd-55be-4328-a084-55db292f6315
 # ╠═d082290c-4412-42b5-aa15-e35e01923e5e
 # ╠═50958e94-9de4-4b76-8d79-3b7f65b94729
 # ╟─00000000-0000-0000-0000-000000000001
