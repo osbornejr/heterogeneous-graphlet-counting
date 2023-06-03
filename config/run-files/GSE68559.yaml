@@ -34,10 +34,10 @@ website:
 data_preprocessing: 
   roundsig: 5 
   vst: true
-  expression_cutoff: 0.1
-  minreq: 0.1
+  expression_cutoff: 0.05
+  minreq: 0.05
   clean_method: "per-sample"
-  norm_method: "total_count"
+  norm_method: "median"
   variance_percent: 0.025
     
 network_construction:
