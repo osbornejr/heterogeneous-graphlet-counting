@@ -8,6 +8,7 @@ function data_from_dataframe(df::DataFrame,identifier::String="data")
     #transform the numerical data columns of a DataFrame into an array. The identifier is a string that is common and uniquely contained in the names of the desired columns 
     data = Array(select(df,filter(x->occursin(identifier,x),names(df))))
 end
+export data_from_dataframe
 
 function round_raw_counts(raw_counts::DataFrame,sig::Int)
     raw_data = data_from_dataframe(raw_counts,"data")
@@ -98,20 +99,19 @@ function normalise_clean_counts(clean_counts::DataFrame,norm_method::String)
     return norm_counts
 end
 
-function sample_norm_counts(norm_counts::DataFrame,variance_percent::Float64)
+function sample_norm_counts(norm_counts::DataFrame,variance_cutoff::Float64)
 ##Sampling for most variable transcripts
 #add variance column to normalised data
     norm_data = data_from_dataframe(norm_counts,"data")
     variance = vec(var(norm_data, dims=2))
-    norm_counts.variance = variance
-    sample_counts_noncoding = sort(norm_counts[norm_counts[!,:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
-    sample_counts_coding = sort(norm_counts[norm_counts[!,:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
-    sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
+   # norm_counts.variance = variance
+   # sample_counts_noncoding = sort(norm_counts[norm_counts[!,:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+   # sample_counts_coding = sort(norm_counts[norm_counts[!,:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+   # sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
+   # new, simpler method just setting variance cutoff
+
+    sample_counts = norm_counts[variance.>variance_cutoff,:]
     return sample_counts
 end
 
-function preprocess_raw_counts(raw_counts::DataFrame,expression_cutoff::Int,norm_method::String,variance_percent::Float64)
-    #all in one function to get data processed for network construction
-    return sample_norm_counts(normalise_clean_counts(clean_raw_counts(raw_counts,expression_cutoff),norm_method),variance_percent)
-end
 end # module
