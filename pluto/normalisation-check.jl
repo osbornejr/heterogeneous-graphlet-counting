@@ -52,19 +52,23 @@ cwd = ENV["PWD"];
 	using GraphletCounting
 	using GraphletAnalysis
 	using ProjectFunctions
+	
 end
 
 # ╔═╡ 351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
-load_config(cwd*"/config/run-files/GSE68559_sub.yaml")
+load_config(cwd*"/config/run-files/GSE68559.yaml")
 
 # ╔═╡ 8f4358ea-454c-417d-bcda-18dd0510a712
 params
 
-# ╔═╡ abf62448-9498-46f6-9f09-c91156c7c64e
-
-
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 @bind tick Clock()
+
+# ╔═╡ 8e7533fa-4914-44f9-b470-fea060af8fe1
+@bind step Select([1=>"raw counts",2=>"round counts",3=>"vst counts",4=>"clean counts",5=>"norm counts",6=>"processed counts"])
+
+# ╔═╡ d4ab62e9-de6e-42fa-a655-d2c8231b15c6
+@bind index_switch Select([0=>"select",1=>"clock"])
 
 # ╔═╡ 26122b7c-b6b0-48b3-a2b0-714e2e7f3717
 @bind norm_meth Select(["median","upper_quartile","quantile","TMM","TMMwsp","total_count"])
@@ -79,6 +83,9 @@ end;
 
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
+
+# ╔═╡ 0686222b-0955-4421-b727-e9c57b9a352d
+names(raw_counts)
 
 # ╔═╡ 104f6b63-70e0-424f-b549-84c4d8334acb
 processed_counts
@@ -140,11 +147,11 @@ selected_names = intersect(REG,PAT)
 
 # ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
 begin
-	set = [vst_counts,clean_counts,norm_counts]
-	#set = [raw_counts,round_counts,vst_counts,clean_counts,norm_counts]
-	index = mod(tick,length(set))+1
+	#set = [vst_counts,clean_counts,norm_counts]
+	set = [raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts]
+	index = index_switch*(mod(tick,length(set))+1) + (-1*index_switch+1)*(step)
 	input = set[index]
-	width = min(1600,400*length(selected_names))
+	width = min(700,400*length(selected_names))
 	height = 400
 	text = "// set the dimensions and margins of the graph 
 var margin = {top: 10, right: 30, bottom: 30, left: 40}, 
@@ -182,7 +189,7 @@ var max = $(min(stats.max,stats.q75+1.5*(stats.q75-stats.q25)))
  
 // Show the Y scale 
 var y = d3.scaleLinear() 
-  .domain([$(stats.min),2]) 
+  .domain([$(stats.min),$(max(data_from_dataframe(input)...))]) 
   .range([height, 0]); 
 var axis = svg.call(d3.axisLeft(y)) 
  
@@ -252,7 +259,14 @@ $(JavaScript(text))
 )
 
 # ╔═╡ 5e7acfb3-4566-4a65-9798-85bf0584b439
-titles = ["VST counts","Cleaned counts", "Normalised counts ($norm_meth)"]
+#titles = ["VST counts","Cleaned counts", "Normalised counts ($norm_meth)"]
+titles = ["Raw counts","Rounded counts","VST counts","Cleaned counts", "Normalised counts ($norm_meth)","Sampled counts"]
+
+
+# ╔═╡ 332cf792-e053-41d3-a1f0-cb0ff90311b7
+md"""
+## $(titles[index])
+"""
 
 # ╔═╡ d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
 @htl("""
@@ -262,7 +276,10 @@ titles = ["VST counts","Cleaned counts", "Normalised counts ($norm_meth)"]
 	""")
 
 # ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
-index
+begin
+	index
+	TableOfContents()
+end
 
 # ╔═╡ 92c7a3a4-ebc1-4166-a106-9b781f546f60
 vec(sum(DataPreprocessing.data_from_dataframe(norm_counts).==0,dims=1))
@@ -272,9 +289,6 @@ sum(input.transcript_type.=="coding")/size(input)[1]
 
 # ╔═╡ 1ca33a55-85ab-47ef-9966-64fcc963c0be
 input_data = data_from_dataframe(input,"data");
-
-# ╔═╡ 3cf3bb31-d697-4295-bebd-02cc7d412eba
-length(input_data)
 
 # ╔═╡ 3557b169-6656-49a5-b9eb-4f3d0ced356a
 sum(input_data.==0.0)/length(input_data)
@@ -339,7 +353,7 @@ md"""
 """
 
 # ╔═╡ 704d588e-cffd-4239-b5c9-2760d8afdb6f
-PCs,D,per_sample=DataPreprocessing.pca(data_from_dataframe(processed_counts));
+PCs,D,per_sample=DataPreprocessing.pca(data_from_dataframe(input));
 
 # ╔═╡ 87b0e404-4118-4abc-9f2e-4a963bd4496d
 sample_names = filter(x->occursin("data",x),names(raw_counts))
@@ -352,7 +366,7 @@ marg = 10
 a = 1
 
 # ╔═╡ 97235b4e-93fc-4ed4-a3a2-c6541cb9ef68
-b = 3
+b = 2
 
 # ╔═╡ 4e3eadbe-7960-42e9-b399-3a44297d70f0
 nx = collect(min(per_sample[:,b]...)-marg:max(per_sample[:,b]...)+marg);
@@ -1734,6 +1748,7 @@ version = "3.5.0+0"
 # ╠═8f4358ea-454c-417d-bcda-18dd0510a712
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
+# ╠═0686222b-0955-4421-b727-e9c57b9a352d
 # ╠═104f6b63-70e0-424f-b549-84c4d8334acb
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
@@ -1744,19 +1759,20 @@ version = "3.5.0+0"
 # ╠═6dcf8d2a-1f96-46a8-bf2c-57feea99dad3
 # ╠═3e05e27d-0445-4773-b242-bb3e7a4853ca
 # ╠═ded8aa8b-db1a-4f2a-abe0-b3a8d3cc7ca1
-# ╠═abf62448-9498-46f6-9f09-c91156c7c64e
 # ╠═2beaf388-3d97-41da-ba16-41154906155d
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
 # ╠═5e7acfb3-4566-4a65-9798-85bf0584b439
+# ╠═332cf792-e053-41d3-a1f0-cb0ff90311b7
 # ╟─d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
 # ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
+# ╠═8e7533fa-4914-44f9-b470-fea060af8fe1
+# ╠═d4ab62e9-de6e-42fa-a655-d2c8231b15c6
 # ╠═26122b7c-b6b0-48b3-a2b0-714e2e7f3717
 # ╠═757bb449-28ec-4545-b1b5-d3f84217ab81
 # ╠═92c7a3a4-ebc1-4166-a106-9b781f546f60
 # ╠═ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
 # ╠═1ca33a55-85ab-47ef-9966-64fcc963c0be
-# ╠═3cf3bb31-d697-4295-bebd-02cc7d412eba
 # ╠═3557b169-6656-49a5-b9eb-4f3d0ced356a
 # ╠═048bb985-d7b8-4ace-8606-8ddfddc51ba1
 # ╠═cfe7529a-ca49-4329-846d-9e4cfcd43e8b
