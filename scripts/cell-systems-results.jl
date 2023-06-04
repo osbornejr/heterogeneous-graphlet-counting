@@ -1,6 +1,35 @@
 using ProjectFunctions,CSV,DataStructures,DataFrames
 
 
+function tex_typed_results_bar(data::DataFrame,outfile::String)
+        n_graphlet_types = size(data)[1]
+        n_graphlets = sum(data.Observed)
+        tex = "\\begin{tikzpicture}
+        \\begin{axis}[
+        ybar=0pt,% space of 0pt between adjacent bars
+        bar width=2,
+        width=7cm,
+        height=12cm,
+        minor x tick num=4,
+        xtick=data,
+        enlargelimits=0.15,
+        ]
+        "
+        ##add coordinates for bars
+        tex*= "\\addplot coordinates {"
+        for i in 1:n_graphlet_types
+            tex*="($(i),$(data[i,2]/n_graphlets)) "
+        end
+        tex*="};\n"
+        tex*= "\\addplot coordinates {"
+        for i in 1:n_graphlet_types
+            tex*="($(i),$(data[i,3]/n_graphlets)) "
+        end
+        tex*="};\n\\end{axis}\n\\end{tikzpicture}"
+        write(outfile,tex)
+end
+
+
 function tex_enrichment_bar(top_names::Vector{String},enrichment_scores::Vector{Float64},outfile::String)
 
         tex = "\\begin{tikzpicture}
