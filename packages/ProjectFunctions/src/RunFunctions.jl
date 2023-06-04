@@ -612,6 +612,9 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     hog_array_under = Array{DataFrame,1}(undef,length(hom_graphlets)) 
     ##array to store all homgoenous summaries
     merged_summaries= Array{DataFrame,1}(undef,length(hom_graphlets))       
+    ##get all null model network values individually
+    #null_model_arrays = Array{Array}(undef,length(hom_graphlets))
+
     for (i,hog) in enumerate(hom_graphlets)
         hog_df= DataFrame()
         hog_df_under= DataFrame()
@@ -627,10 +630,13 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         end
         #store summaries (for TikZ plot)
         summaries = DataFrame()
+        
+        #null_model_array = Matrix{N,length(het_graphlets)}
+
         for heg in het_graphlets
             rand_fil_fil = filter(:graphlet=>x->x==heg*"_"*hog,rand_df)
             transform!(rand_fil_fil,:value =>ByRow(x-> log(x))=>:log_value)
-
+            
             ##get summary (for tikZ plot)
             summary = describe(rand_fil_fil[:,3:3],:min,:q25,:median,:q75,:max)
             summary.variable = [heg*"_"*hog]
@@ -657,6 +663,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
             end
             p_value = (r+1)/(N+1)
             p_value_under = (r_under+1)/(N+1)                       
+            
             ##Z-score method (assumes either normal or lognormal distribution of counts in sims)
             #using real values
             #       z_score = (abs(real_obs) - rand_exp)/std(rand_vals)
@@ -691,6 +698,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     #tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","input",ylabel = "log value")
 
     ## find significant graphlets
+
     sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array)...)
     insig_graphlets = vcat(filter.(:p_value=>x->x<0.05,hog_array_under)...)
 
@@ -738,7 +746,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
    # end
 
     #pretty_table(random_edges,backend=:html,standalone = false)
-    return [sig_graphlets,insig_graphlets]
+    return hog_array
 end 
 export typed_representations
                 #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
