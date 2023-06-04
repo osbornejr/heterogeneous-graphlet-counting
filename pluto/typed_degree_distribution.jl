@@ -54,7 +54,7 @@ end
 
 # ╔═╡ 5de6c623-1c96-41ba-9bda-534bfbeb8928
 # ╠═╡ show_logs = false
-load_config(cwd*"/config/run-files/GSE68559.yaml") 
+load_config(cwd*"/config/run-files/GSE68559_sub.yaml") 
 
 # ╔═╡ c6151388-6787-43a5-a594-0bb3102bf9e4
 params["data_preprocessing"]
@@ -88,17 +88,34 @@ p = plot(
 	Guide.ylabel("frequency"),
 	Theme(grid_line_width = 0mm))
 
-# ╔═╡ d3cc83d0-e322-416d-b1c2-29551f17ee9c
-
-
 # ╔═╡ 0ed6a565-9abc-428b-bf0f-81be4a0b1f9c
 components = NetworkConstruction.network_components(adj_matrix) 
 
 # ╔═╡ 392062f3-e17f-4532-9337-692c229944a1
  processed_data = DataPreprocessing.data_from_dataframe(processed_counts,"data")
 
+# ╔═╡ b913d967-5f6c-4389-b0fd-82d56bb1ee87
+comp_of_interest = length(components)
+
+# ╔═╡ 0c73acf6-b953-41fd-9f55-b554ac0b4515
+map(x->x["coding"],dd)
+
+# ╔═╡ 74cd20ba-0fba-4b5e-a37d-e74669aff215
+degrees = vec(sum(adj_matrix,dims=2))
+
+
+# ╔═╡ a0b33d0b-f433-4885-bda8-bde1d716da0f
+plot(
+	layer(degrees,x = degrees,Geom.bar,Stat.histogram(bincount=bc)),Guide.title("Typed degree distribution"),
+	Guide.xlabel("degree"),
+	Guide.ylabel("frequency"),
+	Theme(grid_line_width = 0mm))
+
+# ╔═╡ e1656b5e-75c1-4877-9606-5b3e4f350af3
+sum(degrees.==max(degrees...))
+
 # ╔═╡ 96e7e7aa-ec6a-44fd-8914-70c3f44c771f
-dodgy_component_data = processed_data[components[2],:]
+dodgy_component_data = processed_data[components[comp_of_interest],:]
 
 # ╔═╡ df684d90-6453-41f8-b0b2-7ca47a4f9ce3
 #create binned counts to compare in plot (only for component 2)
@@ -119,7 +136,7 @@ Gadfly.plot(binned_long_data,x=:var,y=:val,group=:names,Geom.line,Guide.xticks(l
 end
 
 # ╔═╡ 05cec146-5a7b-4bc6-8797-d7f89f5b8b8b
-comp_col = string.(in.(1:2582,Ref(components[2])).+1);
+comp_col = string.(in.(1:size(network_counts)[1],Ref(components[comp_of_interest])).+1);
 
 # ╔═╡ 7882c063-a58f-4747-a3b0-54c4a756bcf4
 top_count = findall(processed_data.==max(processed_data...))[1][1]
@@ -129,10 +146,10 @@ comp_col[top_count] = "782";
 
 # ╔═╡ 7e828b37-d757-4c23-bf21-aa821e776291
 processed_long_data = DataFrame(
-	names = repeat(processed_counts.transcript_id,length(2:99)),
-	component = repeat(comp_col,length(2:99)),
-	var = stack(processed_counts[:,2:99])[:,1],
-	val = stack(processed_counts[:,2:99])[:,2]
+	names = repeat(processed_counts.transcript_id,length(2:98)),
+	component = repeat(comp_col,length(2:98)),
+	var = stack(processed_counts[:,2:98])[:,1],
+	val = stack(processed_counts[:,2:98])[:,2]
 );
 
 # ╔═╡ f179209c-cb71-437c-95c6-ba39513ee394
@@ -144,11 +161,14 @@ Gadfly.plot(processed_long_data,x=:var,y=:val,group=:names,color= :component,Geo
 	Theme(grid_line_width=0mm))
 
 
+# ╔═╡ 2bf5241f-778e-4c3a-8a2e-2e3dbce57cb3
+
+
 # ╔═╡ 69a0ad82-e6e7-4832-b393-95ff5561722e
 processed_long_data_comp_2 = DataFrame(
-	names = repeat(processed_counts.transcript_id[components[2]],length(2:99)),
-	var = stack(processed_counts[components[2],2:99])[:,1],
-	val = stack(processed_counts[components[2],2:99])[:,2]
+	names = repeat(processed_counts.transcript_id[components[comp_of_interest]],length(2:98)),
+	var = stack(processed_counts[components[comp_of_interest],2:98])[:,1],
+	val = stack(processed_counts[components[comp_of_interest],2:98])[:,2]
 );
 
 # ╔═╡ c97ea9f4-c179-4b8e-9abe-d180b75e1abb
@@ -160,13 +180,13 @@ Gadfly.plot(processed_long_data_comp_2,x=:var,y=:val,group=:names,Geom.line,Guid
 	Theme(key_position = :none,grid_line_width=0mm));
 
 # ╔═╡ d651be50-9d95-49fc-bc70-dfc119947a6c
-map_component_back_to_raw = findall(x->x in processed_counts.transcript_id[components[2]],raw_counts.transcript_id);
+map_component_back_to_raw = findall(x->x in processed_counts.transcript_id[components[comp_of_interest]],raw_counts.transcript_id);
 
 # ╔═╡ a854f969-4a58-4ef6-bfb5-0156650932e7
 raw_long_data_comp_2 = DataFrame(
-	names = repeat(raw_counts.transcript_id[map_component_back_to_raw],length(2:99)),
-	var = stack(raw_counts[map_component_back_to_raw,2:99])[:,1],
-	val = stack(raw_counts[map_component_back_to_raw,2:99])[:,2]
+	names = repeat(raw_counts.transcript_id[map_component_back_to_raw],length(2:98)),
+	var = stack(raw_counts[map_component_back_to_raw,2:98])[:,1],
+	val = stack(raw_counts[map_component_back_to_raw,2:98])[:,2]
 );
 
 # ╔═╡ 6112be32-1cff-4eda-8a9c-b2bf350e1e0e
@@ -174,22 +194,22 @@ map_processed_back_to_raw = findall(x->x in processed_counts.transcript_id,raw_c
 
 # ╔═╡ 67bd2eef-b716-41f0-89b0-4edc07c88948
 raw_long_data = DataFrame(
-	names = repeat(raw_counts.transcript_id[map_processed_back_to_raw],length(2:99)),
-	var = stack(raw_counts[map_processed_back_to_raw,:][:,2:99])[:,1],
-	val = stack(raw_counts[map_processed_back_to_raw,:][:,2:99])[:,2]
+	names = repeat(raw_counts.transcript_id[map_processed_back_to_raw],length(2:98)),
+	var = stack(raw_counts[map_processed_back_to_raw,:][:,2:98])[:,1],
+	val = stack(raw_counts[map_processed_back_to_raw,:][:,2:98])[:,2]
 );
 
 # ╔═╡ e6670e4e-e11a-4603-a4cb-fea6bc603933
 begin
 	test = zeros(Int,140)
 	for i in 1:140 
-		test[i] = length(filter(x->x == processed_counts.transcript_id[components[2]][i],raw_counts.transcript_id))
+		test[i] = length(filter(x->x == processed_counts.transcript_id[components[comp_of_interest]][i],raw_counts.transcript_id))
 	end
 end
 
 # ╔═╡ 72849afd-0f69-4b1b-ba2f-5d7567a6b682
 ##node that is repeated in network!
-prob = processed_counts.transcript_id[components[2]][86]
+prob = processed_counts.transcript_id[components[comp_of_interest]][86]
 
 # ╔═╡ 0c47136e-c65c-421c-bdec-318c61a75282
 raw_counts[findall(raw_counts.transcript_id .== prob),:]
@@ -223,9 +243,9 @@ end
 
 # ╔═╡ 3f3d92fc-7ae3-49e4-9d47-0984bd79b1cc
 duplicates_long_data = DataFrame(
-	names = repeat(duplicate_test.transcript_id,length(2:99)),
-	var = stack(duplicate_test[:,2:99])[:,1],
-	val = stack(duplicate_test[:,2:99])[:,2]
+	names = repeat(duplicate_test.transcript_id,length(2:98)),
+	var = stack(duplicate_test[:,2:98])[:,1],
+	val = stack(duplicate_test[:,2:98])[:,2]
 );
 
 # ╔═╡ c2e33cda-5d64-4796-9bbb-9e1f484726e5
@@ -1528,9 +1548,13 @@ version = "3.5.0+0"
 # ╠═5e6beb8d-47fc-4a1b-926e-ae17a51b2ee4
 # ╠═db25a7ae-26b0-40da-97d3-06edb70c70d9
 # ╠═53770902-0cee-4880-b480-e475e158a369
-# ╠═d3cc83d0-e322-416d-b1c2-29551f17ee9c
+# ╠═a0b33d0b-f433-4885-bda8-bde1d716da0f
 # ╠═0ed6a565-9abc-428b-bf0f-81be4a0b1f9c
 # ╠═392062f3-e17f-4532-9337-692c229944a1
+# ╠═b913d967-5f6c-4389-b0fd-82d56bb1ee87
+# ╠═0c73acf6-b953-41fd-9f55-b554ac0b4515
+# ╠═74cd20ba-0fba-4b5e-a37d-e74669aff215
+# ╠═e1656b5e-75c1-4877-9606-5b3e4f350af3
 # ╠═96e7e7aa-ec6a-44fd-8914-70c3f44c771f
 # ╠═f179209c-cb71-437c-95c6-ba39513ee394
 # ╠═ae6aa8fa-bf23-4496-a63d-0f2511720591
@@ -1544,6 +1568,7 @@ version = "3.5.0+0"
 # ╠═02d67238-533e-4c36-85c4-f828f130e340
 # ╠═7882c063-a58f-4747-a3b0-54c4a756bcf4
 # ╠═7e828b37-d757-4c23-bf21-aa821e776291
+# ╠═2bf5241f-778e-4c3a-8a2e-2e3dbce57cb3
 # ╠═69a0ad82-e6e7-4832-b393-95ff5561722e
 # ╠═67bd2eef-b716-41f0-89b0-4edc07c88948
 # ╠═3f3d92fc-7ae3-49e4-9d47-0984bd79b1cc
