@@ -12,7 +12,7 @@ parBCA = (S[<span class=hljs-number >2</span>,<span class=hljs-number >3</span>]
 <span class=hljs-meta >@show</span> parBCA
 <span class=hljs-comment >## partial correlation of B and A when we exclude the influence of C:</span>
 parBAC = (S[<span class=hljs-number >1</span>,<span class=hljs-number >2</span>]-S[<span class=hljs-number >2</span>,<span class=hljs-number >3</span>]*S[<span class=hljs-number >1</span>,<span class=hljs-number >3</span>])/(sqrt(<span class=hljs-number >1</span>-(S[<span class=hljs-number >2</span>,<span class=hljs-number >3</span>])^<span class=hljs-number >2</span>)*sqrt(<span class=hljs-number >1</span>-(S[<span class=hljs-number >1</span>,<span class=hljs-number >3</span>])^<span class=hljs-number >2</span>))
-<span class=hljs-meta >@show</span> parBAC</code></pre> <pre><code class="plaintext hljs">S = [1.0 0.9551907886777825 0.9369461190929785; 0.9551907886777825 1.0 0.8949669790419845; 0.9369461190929785 0.8949669790419845 1.0]
-parBCA = 4.5210263897545664e-5
-parBAC = 0.7482121265352851
-</code></pre> <div class=page-foot > <div class=copyright > &copy; Joel Robertson. Last modified: April 07, 2023. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>. </div> </div> </div> </div> </div>
+<span class=hljs-meta >@show</span> parBAC</code></pre> <pre><code class="plaintext hljs">S = [1.0 0.9431163570582587 0.9526532181813613; 0.9431163570582587 1.0 0.9028056822934505; 0.9526532181813613 0.9028056822934505 1.0]
+parBCA = 0.042960951693456616
+parBAC = 0.635175247432031
+</code></pre> <div class=page-foot > <div class=copyright > &copy; Joel Robertson. Last modified: June 04, 2023. Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>. </div> </div> </div> </div> </div>
