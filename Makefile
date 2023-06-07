@@ -54,9 +54,11 @@ unison: ##use this to sync repo with a remote host. (this command just installs 
 	wget --no-check-certificate --content-disposition -P ./bin/unison/ "https://github.com/bcpierce00/unison/releases/download/v2.51.4/$(unison_file)"
 	##extract and tidy
 	tar -xvzf bin/unison/$(unison_file) -C bin/unison
-	mv bin/unison/bin/unison bin/unison_ex
+	mkdir bin/temp
+	mv bin/unison/bin/unison* bin/temp/
 	rm -r bin/unison
-	mv bin/unison_ex bin/unison
+	mv bin/temp/unison* bin/
+	rm -r bin/temp
 	#make sure config file is in right place
 	mkdir -p $HOME/.unison
 	cp config/unison/heterogeneous-graphlet-counting.prf $HOME/.unison/
