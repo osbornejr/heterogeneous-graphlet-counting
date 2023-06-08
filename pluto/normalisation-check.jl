@@ -393,6 +393,9 @@ begin
 	Bars(round.(collect(first(v.edges))[2:end],digits = 3).|>string,v.weights,"histogram";attributes=D3Attr(attr=(;fill="rgba(10, 200, 100, 0.6)")))
 end
 
+# ╔═╡ d3762b94-02d7-466c-be63-a534d6a75894
+processed_counts
+
 # ╔═╡ 1414f977-cb37-4592-a104-217822a42ae2
 v.edges
 
@@ -424,7 +427,7 @@ attributes=D3Attr(style=(;fill="rgba(255, 0, 0, 0.3)"))
 )
 
 # ╔═╡ 6ed8dedd-55be-4328-a084-55db292f6315
-processed_counts
+
 
 # ╔═╡ d082290c-4412-42b5-aa15-e35e01923e5e
 p_1=DataPreprocessing.pca_plot(per_sample,3)
@@ -1796,6 +1799,7 @@ version = "3.5.0+0"
 # ╠═75641449-1801-4f22-a90b-5947f6c34b8a
 # ╠═967ffab4-8abf-4447-8f09-cd0e5d624767
 # ╠═01ff1c3e-6eaa-4863-bb1d-7f6f7037fafe
+# ╠═d3762b94-02d7-466c-be63-a534d6a75894
 # ╠═1414f977-cb37-4592-a104-217822a42ae2
 # ╠═07f12515-a320-434c-b1e3-73a305491f94
 # ╠═e5e63932-1f89-4858-ae76-72fefa2d0139
