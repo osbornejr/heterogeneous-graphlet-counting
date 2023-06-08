@@ -371,7 +371,7 @@ function network_construction(sample_counts::DataFrame)
         elseif (params["network_construction"]["threshold_method"]=="hard")
             pre_adj_matrix = NetworkConstruction.adjacency(similarity_matrix,params["network_construction"]["threshold"])
         elseif (params["network_construction"]["threshold_method"]=="top")
-            ##T ODO setting top x value here for now; should be a parameter, but as an Int rather than Float as threshold param is for other methods
+            ##TODO setting top x value here for now; should be a parameter, but as an Int rather than Float as threshold param is for other methods
             pre_adj_matrix = NetworkConstruction.top_adjacency(similarity_matrix,10)
         else
             throw(ArgumentError("Threshold method $(params["network_construction"]["threshold_method"]) is not recognised."))
