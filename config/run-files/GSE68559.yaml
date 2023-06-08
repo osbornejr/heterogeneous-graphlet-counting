@@ -38,10 +38,10 @@ data_preprocessing:
   minreq: 0.10
   clean_method: "per-sample"
   norm_method: "median"
-  variance_percent: 1.0
+  variance_percent: 2.0
     
 network_construction:
-  construct: true
+  construct: false
   coexpression: "pidc"
   nbins: "sqrt_n"  
   threshold: 0.95
