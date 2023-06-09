@@ -325,7 +325,7 @@ function get_network_construction()
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-    return [adj_matrix, network_counts,vertexlist,edgelist]       
+    return [adj_matrix,network_counts,vertexlist,edgelist]       
 end
 
 function network_construction(sample_counts::DataFrame)
@@ -622,12 +622,19 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         real_fil = filter(:graphlet=>x->occursin(hog,x),real_df)
         rand_fil = filter(:graphlet=>x->occursin(hog,x),rand_df)
 
+
         #get hetero subgraphlets within homogonous type (problem: might not be complete set present in real/rand outputs?)
         if (occursin("4",hog))
             het_graphlets = union(first.(split.(real_fil[!,:graphlet],"_4")),first.(split.(rand_fil[!,:graphlet],"_4")))
         elseif (occursin("3",hog))
             het_graphlets = union(first.(split.(real_fil[!,:graphlet],"_3")),first.(split.(real_fil[!,:graphlet],"_3")))
         end
+        ##if a het graphlet does not occur in real network, add it with a 0 count
+        for l in setdiff(het_graphlets,replace.(real_fil.graphlet,"_$hog"=>""))
+            append!(real_fil,DataFrame(graphlet=l,value=0))  
+        end
+        
+
         #store summaries (for TikZ plot)
         summaries = DataFrame()
         
@@ -685,6 +692,8 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         end
         #TeX plot (via PGFPlots) 
         #add real log values to summaries, order from lowest to highest)
+        Main.@infiltrate
+
         summaries.values = log_real_fil.value
         sort!(summaries,:values)
         #tex_boxplot(summaries[!,Not(:values)],summaries.values,"output/share/$(hog)_boxplot.tex","input",ylabel="")
