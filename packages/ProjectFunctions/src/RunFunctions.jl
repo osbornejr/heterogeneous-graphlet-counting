@@ -422,6 +422,11 @@ function network_construction(sample_counts::DataFrame)
 end
 export network_construction
 
+
+
+
+
+
 ##catch all function to call desired coexpression_measure 
 function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
     ## wrapper for all possible different coexpression measure methods
@@ -721,18 +726,18 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     ##For paper 
     #TODO(shift these to proper place (Visualisation?)
     #Over and underpresented graphlets table
-    NetworkConstruction.tex_table_maker(sig_graphlets,"output/share/overrepresented_graphlets.tex")
-    NetworkConstruction.tex_table_maker(insig_graphlets,"output/share/underrepresented_graphlets.tex")
+    #NetworkConstruction.tex_table_maker(sig_graphlets,"output/share/overrepresented_graphlets.tex")
+    #NetworkConstruction.tex_table_maker(insig_graphlets,"output/share/underrepresented_graphlets.tex")
     ##boxplots
     
 
-    for s in merged_summaries
-        ##get homogeneous graphlet from summary
-        hog = split(s.variable[1],"_")[end]
-        NetworkConstruction.tex_boxplot(s[!,Not(:values)],s.values,"output/share/$(hog)_boxplot.tex","input",ylabel="")
-    end
-    #merged boxplots
-    NetworkConstruction.tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","input",ylabel = "log value")
+ #   for s in merged_summaries
+ #       ##get homogeneous graphlet from summary
+ #       hog = split(s.variable[1],"_")[end]
+ #       NetworkConstruction.tex_boxplot(s[!,Not(:values)],s.values,"output/share/$(hog)_boxplot.tex","input",ylabel="")
+ #   end
+ #   #merged boxplots
+ #   NetworkConstruction.tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","input",ylabel = "log value")
 
 
     if (params["website"]["website"] == true)
