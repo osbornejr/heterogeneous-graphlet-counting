@@ -59,7 +59,7 @@ end
 load_config(cwd*"/config/run-files/GSE68559.yaml")
 
 # ╔═╡ 8f4358ea-454c-417d-bcda-18dd0510a712
-params
+params["data_preprocessing"]
 
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 @bind tick Clock()
@@ -77,6 +77,7 @@ params
 # ╠═╡ show_logs = false
 begin
 	params["data_preprocessing"]["norm_method"] = norm_meth
+	params["data_preprocessing"]["variance_percent"] = 2.0 
 	ProjectFunctions.cache_setup()
 	raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
 end;

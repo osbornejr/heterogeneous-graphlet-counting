@@ -19,6 +19,13 @@ begin
 	using CommonMark
 	using PlutoUI
 	using LinearAlgebra
+	using Portinari
+	using HypertextLiteral: JavaScript,@htl,@htl_str
+	using WGLMakie
+	using Graphs
+	using GraphMakie
+	using NetworkLayout
+	using JSServe
 	## load dev packages last
 	using DataPreprocessing
 	using NetworkConstruction
@@ -26,20 +33,25 @@ begin
 	using GraphletAnalysis
 	using ProjectFunctions
 
-	using WGLMakie
-	using Graphs
-	using GraphMakie
-	using NetworkLayout
-	using JSServe
-	#Page()
+
+	Page()
 end
 
 # ╔═╡ 7c2b062c-cfa5-4f88-91cf-c776f91f1d44
-load_config(cwd*"/config/run-files/GSE68559_sub.yaml") 
+load_config(cwd*"/config/run-files/GSE68559.yaml") 
 
 # ╔═╡ af6b4890-0db9-4a4d-9ff2-c9fdfa0a72cc
 # ╠═╡ show_logs = false
 raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = get_output_data();
+
+
+# ╔═╡ b169ade7-94a0-4f4c-98b5-2a8d3f02d323
+# ╠═╡ show_logs = false
+components,a,n,v,e = get_network_construction();
+
+
+# ╔═╡ 6e36b98c-bfd9-435e-90cf-d0ed21e94606
+components[1]
 
 # ╔═╡ dbb99ec2-4774-4993-a4b8-dda027dda19f
 g = Graph(adj_matrix)
@@ -54,8 +66,8 @@ begin
 	fig,scene,p = graphplot(g;
 		layout=Spring(dim=3,C=1.0),
 		node_color = vertex_colors,
-		node_size = 5,
-		edge_color = :grey,
+		node_size = 10,
+		edge_color = :white,
 		edge_width = 0.1,
 		figure = (resolution = (1500, 800),)
 							
@@ -63,6 +75,22 @@ begin
 	scene.show_axis =false
 	fig
 end
+
+# ╔═╡ dac4e6fe-26b9-4291-a98f-a43ba756a184
+# ╠═╡ show_logs = false
+kegg_terms,go_terms = ProjectFunctions.biological_validation(network_counts)
+
+
+# ╔═╡ 0d7c3525-2be4-462b-acf6-c067f74587bb
+kegg_terms.enrichment_score = broadcast(x->-log(x),kegg_terms.P_DE)
+
+# ╔═╡ c6511442-5810-4028-ae0b-d901cd1a7d23
+begin
+	Bars(kegg_terms.enrichment_score,kegg_terms.Pathway.|>string,"histogram";attributes=D3Attr(attr=(;fill="rgba(10, 200, 100, 0.6)")))
+end
+
+# ╔═╡ f68fb4b4-d774-4f12-ae51-d42532c75e40
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -73,24 +101,27 @@ GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
 GraphletAnalysis = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 JSServe = "824d6782-a2ef-11e9-3a09-e5662e0c26f9"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 NetworkLayout = "46757867-2c16-5918-afeb-47bfcb05e46a"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Portinari = "72ee7ba2-92b2-4971-a97d-28f521fe8910"
 ProjectFunctions = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 
 [compat]
 CommonMark = "~0.8.12"
-DataPreprocessing = "~0.1.0"
 GraphMakie = "~0.5.4"
 Graphs = "~1.8.0"
+HypertextLiteral = "~0.9.4"
 JSServe = "~2.2.5"
 NetworkLayout = "~0.4.5"
 PlutoUI = "~0.7.51"
+Portinari = "~0.1.2"
 Revise = "~3.5.2"
 WGLMakie = "~0.8.9"
 """
@@ -101,7 +132,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "5d9bc255a08811aa84ae5de6a8ed333579292350"
+project_hash = "b90a380fa683c73d86a494d59939054f534222c8"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1191,6 +1222,12 @@ git-tree-sha1 = "84a314e3926ba9ec66ac097e3635e270986b0f10"
 uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
 version = "1.50.9+0"
 
+[[deps.Parameters]]
+deps = ["OrderedCollections", "UnPack"]
+git-tree-sha1 = "34c0e9ad262e5f7fc75b10a9952ca7692cfc5fbe"
+uuid = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+version = "0.12.3"
+
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
 git-tree-sha1 = "a5aef8d4a6e8d81f171b2bd4be5265b01384c74c"
@@ -1220,6 +1257,12 @@ git-tree-sha1 = "f92e1315dadf8c46561fb9396e525f7200cdc227"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.3.5"
 
+[[deps.PlutoDevMacros]]
+deps = ["HypertextLiteral", "InteractiveUtils", "MacroTools", "Markdown", "Random", "Requires"]
+git-tree-sha1 = "b4b23b981704ac3e2c771a389c2899e69306c091"
+uuid = "a0499f29-c39b-4c5c-807c-88074221b949"
+version = "0.4.8"
+
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
 git-tree-sha1 = "b478a748be27bd2f2c73a7690da219d0844db305"
@@ -1241,6 +1284,12 @@ deps = ["DataAPI", "Future"]
 git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
 uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
 version = "1.4.2"
+
+[[deps.Portinari]]
+deps = ["AbstractPlutoDingetjes", "Deno_jll", "HypertextLiteral", "InteractiveUtils", "Markdown", "Parameters", "PlutoDevMacros"]
+git-tree-sha1 = "f2c25f678001ea2e0063786d2b183d9410826ed9"
+uuid = "72ee7ba2-92b2-4971-a97d-28f521fe8910"
+version = "0.1.2"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
@@ -1628,6 +1677,11 @@ version = "1.4.2"
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
+[[deps.UnPack]]
+git-tree-sha1 = "387c1f73762231e86e0c9c5443ce3b4a0a9a0c2b"
+uuid = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
+version = "1.0.2"
+
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
@@ -1833,8 +1887,14 @@ version = "3.5.0+0"
 # ╠═ca75971e-d54a-11ed-20fe-c374d41bc379
 # ╠═7c2b062c-cfa5-4f88-91cf-c776f91f1d44
 # ╠═af6b4890-0db9-4a4d-9ff2-c9fdfa0a72cc
+# ╠═b169ade7-94a0-4f4c-98b5-2a8d3f02d323
+# ╠═6e36b98c-bfd9-435e-90cf-d0ed21e94606
 # ╠═dbb99ec2-4774-4993-a4b8-dda027dda19f
 # ╠═a007f64f-e40d-4db3-8e02-25502ea41c51
 # ╠═86ca01a5-ffd3-4b91-838d-01c465346593
+# ╠═dac4e6fe-26b9-4291-a98f-a43ba756a184
+# ╠═0d7c3525-2be4-462b-acf6-c067f74587bb
+# ╠═c6511442-5810-4028-ae0b-d901cd1a7d23
+# ╠═f68fb4b4-d774-4f12-ae51-d42532c75e40
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
