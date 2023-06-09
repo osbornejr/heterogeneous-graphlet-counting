@@ -27,7 +27,7 @@ cache:
     orbit_dir: false 
 
 website:
-  website: true
+  website: false
   page_name: "menu1"
   website_dir: "website"
 
@@ -38,7 +38,7 @@ data_preprocessing:
   minreq: 0.10
   clean_method: "per-sample"
   norm_method: "median"
-  variance_percent: 2.0
+  variance_percent: 1.0
     
 network_construction:
   construct: true

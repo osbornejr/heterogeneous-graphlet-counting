@@ -27,15 +27,15 @@ cache:
     orbit_dir: false 
 
 website:
-  website: true
+  website: false
   page_name: "menu1"
   website_dir: "website"
 
 data_preprocessing: 
   roundsig: 5 
   vst: true
-  expression_cutoff: 0.10
-  minreq: 0.10
+  expression_cutoff: 0.05
+  minreq: 0.05
   clean_method: "per-sample"
   norm_method: "median"
   variance_percent: 1.0
