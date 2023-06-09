@@ -201,7 +201,7 @@ function get_output_data()
     else
         throw(ArgumentError("No cached files exist at either $sim_file or $samp_file, please run from scratch using run_all method."))
     end
-    adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
+    components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
     return [raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist]
 end
 export get_output_data
@@ -325,8 +325,9 @@ function get_network_construction()
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-    return [adj_matrix,network_counts,vertexlist,edgelist]       
+    return [components,adj_matrix,network_counts,vertexlist,edgelist]       
 end
+export get_network_construction
 
 function network_construction(sample_counts::DataFrame)
 
@@ -692,7 +693,6 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
         end
         #TeX plot (via PGFPlots) 
         #add real log values to summaries, order from lowest to highest)
-        Main.@infiltrate
 
         summaries.values = log_real_fil.value
         sort!(summaries,:values)
@@ -1082,7 +1082,7 @@ function webpage_construction()
         CSV.write("$output_dir/tableinput/run_parameters.csv",run_parameter_df)
 
         #load network (assumes is in cache)
-        adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
+        components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
         g = SimpleGraph(adj_matrix)
         #Network visualisation
         @info "Visualising network..."
