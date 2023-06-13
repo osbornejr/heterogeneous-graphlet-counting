@@ -61,7 +61,7 @@ function run_all(config_file::String)
         #note that coincident analysis only makes sense on real data TODO split out enumeration and coincident analysis to allow synthetic enumeration
         if (params["analysis"]["coincident_graphlets"] * !params["network_construction"]["synthetic"] == true  )
             @info "Conducting coincident graphlet analysis"
-            coinc_graphlets = coincident_graphlets(vertexlist,edgelist)
+            coinc_graphlets = coincident_graphlets(network_counts,vertexlist,edgelist)
         end
         
         ##reload analysis if necessary
@@ -894,13 +894,15 @@ function biological_validation()
     return [ktt,gtt]
 end
 
-function coincident_graphlets(vertexlist,edgelist)
+function coincident_graphlets(network_counts,vertexlist,edgelist)
     #Coincident analysis
     coinc_dir = params["cache"]["coinc_dir"]
     run(`mkdir -p $(coinc_dir)`)
         
-    ##get baseline network info about biological function (should be done at previous step now)
-    entrez_id_vector, candidates,top_terms = biological_validation()
+    ##get baseline network info about biological function, with candidate info.
+    ###TODO put this in separate project function with cache (ideally coincident_graphlets can just take network_counts as input?)
+    vertex_names = network_counts[!,:transcript_id]
+    entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_KEGG_candidates(vertex_names,"transcript")   
     candidate_pathways = collect(keys(candidates))
 
 
