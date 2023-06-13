@@ -46,7 +46,7 @@ begin
 	#redirect_stdout(devnull) do
 		#logger = ConsoleLogger(stdout)
 		#with_logger(logger) do
-			config_file = "$cwd/config/run-files/pluto.yaml"
+			config_file = "$cwd/config/run-files/GSE68559.yaml"
 			ProjectFunctions.load_config(config_file)
 			##move params values to specific variables for now (easier)
 			params_test_name = ProjectFunctions.params["test_name"]
@@ -527,11 +527,45 @@ length(sig_nodes_dict)
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
+Colors = "5ae59095-9a9b-59fe-a467-6f913c188581"
+CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
+Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataPreprocessing = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
+Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 GraphletAnalysis = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
+Infiltrator = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 ProjectFunctions = "a8586eae-54f0-4952-9436-ba92c8ab3181"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[compat]
+CSV = "~0.10.10"
+CategoricalArrays = "~0.10.8"
+Colors = "~0.12.10"
+CommonMark = "~0.8.12"
+Compose = "~0.9.5"
+DataFrames = "~1.5.0"
+DataPreprocessing = "~0.1.0"
+Gadfly = "~1.3.4"
+GraphletAnalysis = "~0.1.0"
+GraphletCounting = "~0.1.0"
+Infiltrator = "~1.6.3"
+JLD2 = "~0.4.31"
+NetworkConstruction = "~0.1.0"
+PlutoUI = "~0.7.51"
+ProjectFunctions = "~0.1.0"
+Revise = "~3.5.2"
+StatsBase = "~0.33.21"
+YAML = "~0.4.8"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -540,13 +574,19 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "163a1cf03640596b05b45fcd13eea95315672944"
+project_hash = "ebb68d307910bf27a61d2a9dbc5d776982b97b69"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
 git-tree-sha1 = "16b6dbc4cf7caee4e1e75c49485ec67b667098a0"
 uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "1.3.1"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.1.4"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
@@ -624,6 +664,12 @@ git-tree-sha1 = "f84967c4497e0e1955f9a582c232b02847c5f589"
 uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
 version = "0.1.7"
 
+[[deps.CodeTracking]]
+deps = ["InteractiveUtils", "UUIDs"]
+git-tree-sha1 = "d730914ef30a06732bdd9f763f6cc32e92ffbff1"
+uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
+version = "1.3.1"
+
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
 git-tree-sha1 = "9c209fb7536406834aa938fb149964b985de6c83"
@@ -641,6 +687,12 @@ deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
 git-tree-sha1 = "fc08e5930ee9a4e03f84bfb5211cb54e7769758a"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.10"
+
+[[deps.CommonMark]]
+deps = ["Crayons", "JSON", "PrecompileTools", "URIs"]
+git-tree-sha1 = "532c4185d3c9037c0237546d817858b23cf9e071"
+uuid = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
+version = "0.8.12"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
@@ -925,10 +977,34 @@ git-tree-sha1 = "84204eae2dd237500835990bcade263e27674a93"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.16"
 
+[[deps.Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.4"
+
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.4"
+
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "d75853a0bdbfb1ac815478bacd89cd27b550ace6"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.3"
+
 [[deps.IndirectArrays]]
 git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
 uuid = "9b13fd28-a010-5f03-acff-a1bbcff69959"
 version = "1.0.0"
+
+[[deps.Infiltrator]]
+deps = ["InteractiveUtils", "Markdown", "REPL", "UUIDs"]
+git-tree-sha1 = "6e48065ac352c8c9616013faa419b0ea65bb6455"
+uuid = "5903a43b-9cc3-4c30-8d17-598619ec4e9b"
+version = "1.6.3"
 
 [[deps.Inflate]]
 git-tree-sha1 = "5cd07aab533df5170988219191dfad0519391428"
@@ -1012,6 +1088,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "6f2675ef130a300a112286de91973805fcc5ffbc"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "2.1.91+0"
+
+[[deps.JuliaInterpreter]]
+deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
+git-tree-sha1 = "6a125e6a4cb391e0b9adbd1afa9e771c2179f8ef"
+uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
+version = "0.9.23"
 
 [[deps.Juno]]
 deps = ["Base64", "Logging", "Media", "Profile"]
@@ -1141,11 +1223,22 @@ version = "0.3.24"
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
+[[deps.LoweredCodeUtils]]
+deps = ["JuliaInterpreter"]
+git-tree-sha1 = "60168780555f3e663c536500aa790b6368adc02a"
+uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
+version = "2.3.0"
+
 [[deps.Luxor]]
 deps = ["Base64", "Cairo", "Colors", "Dates", "FFMPEG", "FileIO", "Juno", "LaTeXStrings", "Random", "Requires", "Rsvg", "SnoopPrecompile"]
 git-tree-sha1 = "909a67c53fddd216d5e986d804b26b1e3c82d66d"
 uuid = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
 version = "3.7.0"
+
+[[deps.MIMEs]]
+git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
+uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
+version = "0.1.4"
 
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg"]
@@ -1287,6 +1380,12 @@ deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markd
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.8.0"
 
+[[deps.PlutoUI]]
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
+git-tree-sha1 = "b478a748be27bd2f2c73a7690da219d0844db305"
+uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+version = "0.7.51"
+
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
 git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
@@ -1367,6 +1466,12 @@ deps = ["UUIDs"]
 git-tree-sha1 = "838a3a4188e2ded87a4f9f184b4b0d78a1e91cb7"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.0"
+
+[[deps.Revise]]
+deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Requires", "UUIDs", "Unicode"]
+git-tree-sha1 = "feafdc70b2e6684314e188d95fe66d116de834a7"
+uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
+version = "3.5.2"
 
 [[deps.Rmath]]
 deps = ["Random", "Rmath_jll"]
@@ -1530,6 +1635,16 @@ deps = ["Random", "Test"]
 git-tree-sha1 = "9a6ae7ed916312b41236fcef7e0af564ef934769"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.13"
+
+[[deps.Tricks]]
+git-tree-sha1 = "aadb748be58b492045b4f56166b5188aa63ce549"
+uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+version = "0.1.7"
+
+[[deps.URIs]]
+git-tree-sha1 = "074f993b0ca030848b897beff716d93aca60f06a"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.4.2"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]

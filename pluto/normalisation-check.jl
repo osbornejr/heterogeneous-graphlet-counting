@@ -55,11 +55,20 @@ cwd = ENV["PWD"];
 	
 end
 
-# ╔═╡ 351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
-load_config(cwd*"/config/run-files/GSE68559.yaml")
+# ╔═╡ 32668349-8283-40c6-bf0e-1afc5ee960ea
+@bind experiment Select(["GSE68559","GSE68559_sub"])
 
-# ╔═╡ 8f4358ea-454c-417d-bcda-18dd0510a712
-params["data_preprocessing"]
+# ╔═╡ 351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
+load_config(cwd*"/config/run-files/$experiment.yaml")
+
+# ╔═╡ 07904d8d-2e38-4207-aa94-0dd835708854
+@bind expression_cut Select([0.05,0.10])
+
+# ╔═╡ d9a4d419-ed7e-4dc9-aa50-d91c166a77d8
+@bind minreq Select([0.05,0.10])
+
+# ╔═╡ 57477b4e-2a67-4817-8ef3-247c6ba2f8e9
+@bind variance_cut Select([1.0,2.0])
 
 # ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 @bind tick Clock()
@@ -76,8 +85,10 @@ params["data_preprocessing"]
 # ╔═╡ 4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═╡ show_logs = false
 begin
+	params["data_preprocessing"]["expression_cutoff"] = expression_cut
+	params["data_preprocessing"]["minreq"] = minreq
 	params["data_preprocessing"]["norm_method"] = norm_meth
-	params["data_preprocessing"]["variance_percent"] = 2.0 
+	params["data_preprocessing"]["variance_percent"] = variance_cut 
 	ProjectFunctions.cache_setup()
 	raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
 end;
@@ -85,8 +96,11 @@ end;
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
 
+# ╔═╡ 84bc738a-4e89-4811-88b6-ec12b81bed1f
+raw_counts
+
 # ╔═╡ 0686222b-0955-4421-b727-e9c57b9a352d
-names(raw_counts)
+sum(raw_counts.transcript_type.=="noncoding")
 
 # ╔═╡ 104f6b63-70e0-424f-b549-84c4d8334acb
 processed_counts
@@ -426,9 +440,6 @@ attributes=D3Attr(style=(;fill="rgba($(colour[i]), 0.8)"))
 Portinari.Shape(per_sample[:,3],per_sample[:,1],repeat([100],length(sample_names)),"PC";
 attributes=D3Attr(style=(;fill="rgba(255, 0, 0, 0.3)"))
 )
-
-# ╔═╡ 6ed8dedd-55be-4328-a084-55db292f6315
-
 
 # ╔═╡ d082290c-4412-42b5-aa15-e35e01923e5e
 p_1=DataPreprocessing.pca_plot(per_sample,3)
@@ -1747,11 +1758,15 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
+# ╟─d4f1c85c-f854-11ed-09a1-af06379be62d
+# ╠═32668349-8283-40c6-bf0e-1afc5ee960ea
 # ╠═351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
-# ╠═8f4358ea-454c-417d-bcda-18dd0510a712
+# ╠═07904d8d-2e38-4207-aa94-0dd835708854
+# ╠═d9a4d419-ed7e-4dc9-aa50-d91c166a77d8
+# ╠═57477b4e-2a67-4817-8ef3-247c6ba2f8e9
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
+# ╠═84bc738a-4e89-4811-88b6-ec12b81bed1f
 # ╠═0686222b-0955-4421-b727-e9c57b9a352d
 # ╠═104f6b63-70e0-424f-b549-84c4d8334acb
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
@@ -1806,7 +1821,6 @@ version = "3.5.0+0"
 # ╠═e5e63932-1f89-4858-ae76-72fefa2d0139
 # ╠═317602a3-d0b3-435f-af6d-112be42617d4
 # ╠═86e018ba-a78c-4644-af9e-63c6fec86e40
-# ╠═6ed8dedd-55be-4328-a084-55db292f6315
 # ╠═d082290c-4412-42b5-aa15-e35e01923e5e
 # ╠═50958e94-9de4-4b76-8d79-3b7f65b94729
 # ╟─00000000-0000-0000-0000-000000000001
