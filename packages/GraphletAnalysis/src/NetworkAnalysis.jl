@@ -496,9 +496,9 @@ function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::St
     ## note: R restart and biomaRt init happen in this function, so dont need to do again here
     name_map = get_entrez_ids(vertex_names,nametype)
     
-    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id
+    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id TODO how is this chosen?
     entrez_map = filter(:entrez_id=>!ismissing,name_map)
-    ## importantly, record which nodes in network ahve carried through
+    ## importantly, record which nodes in network ahve carried through TODO expose this properly?
     entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
     entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
     #run this to get top_terms
@@ -518,7 +518,8 @@ function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::St
     names(pathway_list) <- c("PathwayID","PathwayName")
     
     ##get the network candidates for each pathway
-    per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == row.names(top_terms)[x]])
+    per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == pathway_list$PathwayID[pathway_list$PathwayName == top_terms$Pathway[x]]
+])
     in_network = lapply(per_pathway,function(x) entrez_ids %in% x)
     names(in_network) = top_terms$Pathway
     """
