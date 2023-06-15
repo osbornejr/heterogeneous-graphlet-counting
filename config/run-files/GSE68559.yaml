@@ -34,8 +34,8 @@ website:
 data_preprocessing: 
   roundsig: 5 
   vst: true
-  expression_cutoff: 0.05
-  minreq: 0.05
+  expression_cutoff: 0.10
+  minreq: 0.10
   clean_method: "per-sample"
   norm_method: "median"
   variance_percent: 1.0
