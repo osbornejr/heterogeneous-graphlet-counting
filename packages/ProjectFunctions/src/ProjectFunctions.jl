@@ -2,6 +2,7 @@ module ProjectFunctions
 using DataPreprocessing, NetworkConstruction,GraphletCounting ,GraphletAnalysis
 
 include("RunFunctions.jl")
+include("WebFunctions.jl")
 
 cwd = ENV["PWD"]
 #define structure for run_parameters (nb... at this stage has to be rerun if values change). Also needs to be defined before including any package that depends on it
