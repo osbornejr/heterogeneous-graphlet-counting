@@ -529,7 +529,7 @@ function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::St
         candidates[string(first(e))] = findall(.==(true),last(e))
     end
     #TODO check that reduction to only those transcripts with a entrez match here does not cause problems down the line (coincident analysis) 
-    return (entrez_map,candidates,top_terms)
+    return (entrez_ids,candidates,top_terms)
 end
 
 function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
