@@ -899,19 +899,13 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     coinc_dir = params["cache"]["coinc_dir"]
     run(`mkdir -p $(coinc_dir)`)
         
-    ##get baseline network info about biological function, with candidate info.
-    ###TODO put this in separate project function with cache (ideally coincident_graphlets can just take network_counts as input?)
-    vertex_names = network_counts[!,:transcript_id]
-    entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_KEGG_candidates(vertex_names,"transcript")   
-    candidate_pathways = collect(keys(candidates))
-
-
 
     #coincidents
     #TODO for smaller networks/lower order graphlets, it may take longer to load CSV than to just run
     #coincident analysis (set switch to turn on/off caching? detect automatically?)
     coincidents_file ="$coinc_dir/coincidents.csv"
-    if (isfile(coincidents_file))
+    candidates_file = "$coinc_dir/candidates.jld2"
+    if (isfile(coincidents_file) & isfile(candidates_file))
         @info "Loading coincidents dataframe from $coinc_dir..."
         Coincidents = CSV.read(coincidents_file,DataFrame)
         #because CSV converts the array columns to strings, we have to convert back (cost of using the easy/dirty CSV option!)
@@ -925,6 +919,11 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         Coincidents.Transcript_type = fix.(Coincidents.Transcript_type)
         Coincidents.Transcript_type = map(x->string.(x),Coincidents.Transcript_type)
         Coincidents.Inclusion = fix_bool.(Coincidents.Inclusion)
+
+        ##load in matching candidate info
+        @info "Loading candidate info from $coinc_dir..."
+        entrez_id_vector = cache_load(candidates_file,"entrez_id_vector")
+        candidates = cache_load(candidates_file,"candidates")
     else
         ##relationships 
         #Here we only load relationships file (which is huge!) if absolutely required i.e. the smaller resultant coincidents file does not exist
@@ -959,12 +958,20 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         if (size(rel)[2] > graphlet_size)
             rel = rel[:,(1+size(rel)[2]-graphlet_size):end]
         end
+    
+        ##get candidate information from kegg
+        ##get baseline network info about biological function, with candidate info.
+        @info "Getting candidate pathway info from KEGG..."
+        vertex_names = network_counts[!,:transcript_id]
+        entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_KEGG_candidates(vertex_names,"transcript")   
         @info "Conducting per graphlet pathway coincidence analysis..."
         Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,entrez_id_vector,candidates)
-        @info "Saving coincidents at $coinc_dir..."
+        @info "Saving coincidents and candidates at $coinc_dir..."
         CSV.write(coincidents_file,Coincidents)
+        cache_save(candidates_file,["entrez_id_vector"=>entrez_id_vector,"candidates"=>candidates ])
     end
-
+    ##get pathways as separate vector
+    candidate_pathways = collect(keys(candidates))
     #orbit statistics
     #orbitsigs_file ="$val_dir/orbitsigs.jld"
     #if (isfile(orbitsigs_file))
