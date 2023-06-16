@@ -41,7 +41,7 @@ data_preprocessing:
   variance_percent: 1.0
     
 network_construction:
-  construct: true
+  construct: false
   coexpression: "pidc"
   nbins: "sqrt_n"  
   threshold: 0.95

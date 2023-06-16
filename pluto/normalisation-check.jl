@@ -55,32 +55,53 @@ cwd = ENV["PWD"];
 	
 end
 
+# ╔═╡ 9752572a-cc9b-421d-ba41-05a1a8b6def6
+md"""
+## Parameters
+"""
+
+# ╔═╡ ee05e4b5-13f4-433a-9076-ba304c5c8807
+md"""
+### Experiment
+"""
+
 # ╔═╡ 32668349-8283-40c6-bf0e-1afc5ee960ea
 @bind experiment Select(["GSE68559","GSE68559_sub"])
 
 # ╔═╡ 351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
 load_config(cwd*"/config/run-files/$experiment.yaml")
 
+# ╔═╡ aecb1084-001e-4b0d-a3f0-740de58e5753
+md"""
+### Threshold on per sample significance
+"""
+
 # ╔═╡ 07904d8d-2e38-4207-aa94-0dd835708854
 @bind expression_cut Select([0.05,0.10])
+
+# ╔═╡ 52ca87b1-8796-4c0c-9d8c-95532d226e52
+md"""
+### Minimum samples required
+"""
 
 # ╔═╡ d9a4d419-ed7e-4dc9-aa50-d91c166a77d8
 @bind minreq Select([0.05,0.10])
 
+# ╔═╡ b6c9b8a2-3b94-4570-adff-c3ae0962683d
+md"""
+### Normalisation method
+"""
+
+# ╔═╡ 98c53468-1da4-4515-a135-5445eba725b5
+@bind norm_meth Select(["median","upper_quartile","quantile","TMM","TMMwsp","total_count"])
+
+# ╔═╡ 4ea93937-05ac-4f2e-bd66-b6898489c24d
+md"""
+### Variance cut off
+"""
+
 # ╔═╡ 57477b4e-2a67-4817-8ef3-247c6ba2f8e9
 @bind variance_cut Select([1.0,2.0])
-
-# ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
-@bind tick Clock()
-
-# ╔═╡ 8e7533fa-4914-44f9-b470-fea060af8fe1
-@bind step Select([1=>"raw counts",2=>"round counts",3=>"vst counts",4=>"clean counts",5=>"norm counts",6=>"processed counts"])
-
-# ╔═╡ d4ab62e9-de6e-42fa-a655-d2c8231b15c6
-@bind index_switch Select([0=>"select",1=>"clock"])
-
-# ╔═╡ 26122b7c-b6b0-48b3-a2b0-714e2e7f3717
-@bind norm_meth Select(["median","upper_quartile","quantile","TMM","TMMwsp","total_count"])
 
 # ╔═╡ 4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═╡ show_logs = false
@@ -133,9 +154,6 @@ DataPreprocessing.boxplot(norm_counts);
 region_dict = Dict(Pair.(last.(regions),first.(regions)));
 	
 
-# ╔═╡ 3e05e27d-0445-4773-b242-bb3e7a4853ca
-@bind REG Select(regions)
-
 # ╔═╡ 2b050ca8-3050-4e8a-bd00-8ab9b40001ed
     patients = [
 		filter(x->occursin("data",x),names(raw_counts))=>"All",
@@ -154,11 +172,28 @@ region_dict = Dict(Pair.(last.(regions),first.(regions)));
 # ╔═╡ 6dcf8d2a-1f96-46a8-bf2c-57feea99dad3
 patient_dict = Dict(Pair.(last.(patients),first.(patients)));
 
+# ╔═╡ 3e05e27d-0445-4773-b242-bb3e7a4853ca
+@bind REG Select(regions)
+
 # ╔═╡ ded8aa8b-db1a-4f2a-abe0-b3a8d3cc7ca1
 @bind PAT Select(patients)
 
 # ╔═╡ 2beaf388-3d97-41da-ba16-41154906155d
 selected_names = intersect(REG,PAT)
+
+# ╔═╡ 5e7acfb3-4566-4a65-9798-85bf0584b439
+#titles = ["VST counts","Cleaned counts", "Normalised counts ($norm_meth)"]
+titles = ["Raw counts","Rounded counts","VST counts","Cleaned counts", "Normalised counts ($norm_meth)","Sampled counts"]
+
+
+# ╔═╡ fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
+@bind tick Clock()
+
+# ╔═╡ 8e7533fa-4914-44f9-b470-fea060af8fe1
+@bind step Select([1=>"raw counts",2=>"round counts",3=>"vst counts",4=>"clean counts",5=>"norm counts",6=>"processed counts"])
+
+# ╔═╡ d4ab62e9-de6e-42fa-a655-d2c8231b15c6
+@bind index_switch Select([0=>"select",1=>"clock"])
 
 # ╔═╡ f2eb27c9-e0e1-4687-aed8-927df4d5decc
 begin
@@ -257,6 +292,18 @@ svg
 	end
 end
 
+# ╔═╡ 332cf792-e053-41d3-a1f0-cb0ff90311b7
+md"""
+## $(titles[index])
+"""
+
+# ╔═╡ d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
+@htl("""
+		<style>	.plutoui-rangeslider { width: 50em } </style>
+		<h3 class="dash">$(titles[index])</h3>
+		<div style="display: flex; justify-content: center; align-items: center; gap: 2em"></div>
+	""")
+
 # ╔═╡ b1fba899-0ca7-48ba-bbe0-f30a146536a1
 @htl(
 	"""
@@ -273,22 +320,11 @@ $(JavaScript(text))
 """ 
 )
 
-# ╔═╡ 5e7acfb3-4566-4a65-9798-85bf0584b439
-#titles = ["VST counts","Cleaned counts", "Normalised counts ($norm_meth)"]
-titles = ["Raw counts","Rounded counts","VST counts","Cleaned counts", "Normalised counts ($norm_meth)","Sampled counts"]
+# ╔═╡ 26122b7c-b6b0-48b3-a2b0-714e2e7f3717
+# ╠═╡ disabled = true
+#=╠═╡
 
-
-# ╔═╡ 332cf792-e053-41d3-a1f0-cb0ff90311b7
-md"""
-## $(titles[index])
-"""
-
-# ╔═╡ d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
-@htl("""
-		<style>	.plutoui-rangeslider { width: 50em } </style>
-		<h3 class="dash">$(titles[index])</h3>
-		<div style="display: flex; justify-content: center; align-items: center; gap: 2em"></div>
-	""")
+  ╠═╡ =#
 
 # ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
 begin
@@ -440,6 +476,12 @@ attributes=D3Attr(style=(;fill="rgba($(colour[i]), 0.8)"))
 Portinari.Shape(per_sample[:,3],per_sample[:,1],repeat([100],length(sample_names)),"PC";
 attributes=D3Attr(style=(;fill="rgba(255, 0, 0, 0.3)"))
 )
+
+# ╔═╡ a51fc8b8-e2d3-4962-abd9-54a5f07d517f
+findall(x->x==max(abs.(per_sample[:,3])...),abs.(per_sample[:,3]))
+
+# ╔═╡ c05fca81-7f29-4576-99d6-fc35210e25b7
+
 
 # ╔═╡ d082290c-4412-42b5-aa15-e35e01923e5e
 p_1=DataPreprocessing.pca_plot(per_sample,3)
@@ -1759,10 +1801,17 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╟─d4f1c85c-f854-11ed-09a1-af06379be62d
+# ╠═9752572a-cc9b-421d-ba41-05a1a8b6def6
+# ╠═ee05e4b5-13f4-433a-9076-ba304c5c8807
 # ╟─32668349-8283-40c6-bf0e-1afc5ee960ea
 # ╠═351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
+# ╠═aecb1084-001e-4b0d-a3f0-740de58e5753
 # ╟─07904d8d-2e38-4207-aa94-0dd835708854
+# ╠═52ca87b1-8796-4c0c-9d8c-95532d226e52
 # ╟─d9a4d419-ed7e-4dc9-aa50-d91c166a77d8
+# ╠═b6c9b8a2-3b94-4570-adff-c3ae0962683d
+# ╠═98c53468-1da4-4515-a135-5445eba725b5
+# ╠═4ea93937-05ac-4f2e-bd66-b6898489c24d
 # ╟─57477b4e-2a67-4817-8ef3-247c6ba2f8e9
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
@@ -1821,6 +1870,8 @@ version = "3.5.0+0"
 # ╠═e5e63932-1f89-4858-ae76-72fefa2d0139
 # ╠═317602a3-d0b3-435f-af6d-112be42617d4
 # ╠═86e018ba-a78c-4644-af9e-63c6fec86e40
+# ╠═a51fc8b8-e2d3-4962-abd9-54a5f07d517f
+# ╠═c05fca81-7f29-4576-99d6-fc35210e25b7
 # ╠═d082290c-4412-42b5-aa15-e35e01923e5e
 # ╠═50958e94-9de4-4b76-8d79-3b7f65b94729
 # ╟─00000000-0000-0000-0000-000000000001
