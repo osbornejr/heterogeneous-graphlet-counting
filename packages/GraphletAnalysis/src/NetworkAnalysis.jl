@@ -530,7 +530,9 @@ function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::St
         candidates[string(first(e))] = findall(.==(true),last(e))
     end
     #TODO check that reduction to only those transcripts with a entrez match here does not cause problems down the line (coincident analysis) 
-    return (entrez_ids,candidates,top_terms)
+    #addressing this (in some way) by giving full vector here, with 0 for nodes with no entrez id. May need to pass full dataframe with multiple entrez match info in future if we want to account for that (and handle dataframe downstream for coincident analysis).
+    entrez_ids_preserved = coalesce.(name_map.entrez_id,0)
+    return (entrez_ids_preserved,candidates,top_terms)
 end
 
 function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
