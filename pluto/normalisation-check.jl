@@ -320,12 +320,6 @@ $(JavaScript(text))
 """ 
 )
 
-# ╔═╡ 26122b7c-b6b0-48b3-a2b0-714e2e7f3717
-# ╠═╡ disabled = true
-#=╠═╡
-
-  ╠═╡ =#
-
 # ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
 begin
 	index

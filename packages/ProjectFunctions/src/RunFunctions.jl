@@ -967,6 +967,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         @info "Conducting per graphlet pathway coincidence analysis..."
         Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,entrez_id_vector,candidates)
         @info "Saving coincidents and candidates at $coinc_dir..."
+
         CSV.write(coincidents_file,Coincidents)
         cache_save(candidates_file,["entrez_id_vector"=>entrez_id_vector,"candidates"=>candidates ])
     end

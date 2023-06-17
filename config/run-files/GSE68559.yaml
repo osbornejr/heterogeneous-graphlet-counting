@@ -34,14 +34,14 @@ website:
 data_preprocessing: 
   roundsig: 5 
   vst: true
-  expression_cutoff: 0.10
-  minreq: 0.10
+  expression_cutoff: 0.05
+  minreq: 0.05
   clean_method: "per-sample"
   norm_method: "median"
-  variance_percent: 1.0
+  variance_percent: 2.0
     
 network_construction:
-  construct: false
+  construct: true
   coexpression: "pidc"
   nbins: "sqrt_n"  
   threshold: 0.95
