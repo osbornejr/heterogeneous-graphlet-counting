@@ -299,7 +299,8 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
             for (i,r) in enumerate(eachrow(rel))
 
                 if(sum(map(x->x in cands,r))==1)         
-                    push!(one_coincidents,tuple(r,rel_types[i]))                
+                    #TODO switch to choose which coincidents to include at this step.
+                    #push!(one_coincidents,tuple(r,rel_types[i]))                
                 elseif(sum(map(x->x in cands,r))==2)         
                     push!(two_coincidents,tuple(r,rel_types[i]))                
                 
@@ -330,6 +331,7 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
             Coincidents[first(ent)] = Dict(1=>one_coincidents,2=>two_coincidents,3=>three_coincidents,4=>four_coincidents) 
         end
 
+        
         #Get data into wide form dataframe, with info on transcript type, ensembl code, entrez id etc...
         Coincidents_df = DataFrame(Pathway=String[],Coincident_nodes = Int[], Hom_graphlet = String[],Vertices = Array{Int64,1}[],Ensembl = Array{String,1}[],Entrez = Array{Int64,1}[],Transcript_type = Array{String,1}[])
         for e in Coincidents
