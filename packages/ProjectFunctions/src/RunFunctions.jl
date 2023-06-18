@@ -971,6 +971,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         CSV.write(coincidents_file,Coincidents)
         cache_save(candidates_file,["entrez_id_vector"=>entrez_id_vector,"candidates"=>candidates ])
     end
+    
     ##get pathways as separate vector
     candidate_pathways = collect(keys(candidates))
     #orbit statistics
