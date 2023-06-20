@@ -135,6 +135,9 @@ NetworkConstruction.draw_graphlet.(sig_graphlets.Graphlet,node_colours=["purple"
 # ╔═╡ 459f8803-9420-4b30-8c01-596f2a82c633
 sig_graphlets.Graphlet
 
+# ╔═╡ 493d0cc3-be57-4f4c-b258-49e16c4cd9c7
+network_counts.transcript_id[[60,904,70,170,69,68,1375,728,10]]
+
 # ╔═╡ b033ec5e-f93a-4851-b365-826d82e22d0e
 typed_anal[4]
 
@@ -1950,6 +1953,7 @@ version = "3.5.0+0"
 # ╠═d2e31c4f-7c60-4fb8-aae6-6d5d4732c293
 # ╟─a5191da1-935a-4672-8340-8daaec1fe08c
 # ╠═459f8803-9420-4b30-8c01-596f2a82c633
+# ╠═493d0cc3-be57-4f4c-b258-49e16c4cd9c7
 # ╠═b033ec5e-f93a-4851-b365-826d82e22d0e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -114,6 +114,9 @@ begin
 	raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data();
 end;
 
+# ╔═╡ 20215a75-b329-48fa-9024-bd6aab7f8247
+params
+
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
 
@@ -239,7 +242,7 @@ var max = $(min(stats.max,stats.q75+1.5*(stats.q75-stats.q25)))
  
 // Show the Y scale 
 var y = d3.scaleLinear() 
-  .domain([$(stats.min),$(max(data_from_dataframe(input)...))]) 
+		.domain([$(stats.min),$(max(data_from_dataframe(input)...))]) 
   .range([height, 0]); 
 var axis = svg.call(d3.axisLeft(y)) 
  
@@ -411,7 +414,7 @@ marg = 10
 a = 1
 
 # ╔═╡ 97235b4e-93fc-4ed4-a3a2-c6541cb9ef68
-b = 2
+b = 3
 
 # ╔═╡ 4e3eadbe-7960-42e9-b399-3a44297d70f0
 nx = collect(min(per_sample[:,b]...)-marg:max(per_sample[:,b]...)+marg);
@@ -1794,20 +1797,21 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─d4f1c85c-f854-11ed-09a1-af06379be62d
-# ╠═9752572a-cc9b-421d-ba41-05a1a8b6def6
-# ╠═ee05e4b5-13f4-433a-9076-ba304c5c8807
+# ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
+# ╟─9752572a-cc9b-421d-ba41-05a1a8b6def6
+# ╟─ee05e4b5-13f4-433a-9076-ba304c5c8807
 # ╟─32668349-8283-40c6-bf0e-1afc5ee960ea
-# ╠═351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
-# ╠═aecb1084-001e-4b0d-a3f0-740de58e5753
+# ╟─351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
+# ╟─aecb1084-001e-4b0d-a3f0-740de58e5753
 # ╟─07904d8d-2e38-4207-aa94-0dd835708854
-# ╠═52ca87b1-8796-4c0c-9d8c-95532d226e52
+# ╟─52ca87b1-8796-4c0c-9d8c-95532d226e52
 # ╟─d9a4d419-ed7e-4dc9-aa50-d91c166a77d8
-# ╠═b6c9b8a2-3b94-4570-adff-c3ae0962683d
-# ╠═98c53468-1da4-4515-a135-5445eba725b5
-# ╠═4ea93937-05ac-4f2e-bd66-b6898489c24d
+# ╟─b6c9b8a2-3b94-4570-adff-c3ae0962683d
+# ╟─98c53468-1da4-4515-a135-5445eba725b5
+# ╟─4ea93937-05ac-4f2e-bd66-b6898489c24d
 # ╟─57477b4e-2a67-4817-8ef3-247c6ba2f8e9
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
+# ╠═20215a75-b329-48fa-9024-bd6aab7f8247
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
 # ╠═84bc738a-4e89-4811-88b6-ec12b81bed1f
 # ╠═0686222b-0955-4421-b727-e9c57b9a352d
@@ -1826,11 +1830,10 @@ version = "3.5.0+0"
 # ╠═5e7acfb3-4566-4a65-9798-85bf0584b439
 # ╠═332cf792-e053-41d3-a1f0-cb0ff90311b7
 # ╟─d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
-# ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
+# ╟─b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 # ╠═8e7533fa-4914-44f9-b470-fea060af8fe1
 # ╠═d4ab62e9-de6e-42fa-a655-d2c8231b15c6
-# ╠═26122b7c-b6b0-48b3-a2b0-714e2e7f3717
 # ╠═757bb449-28ec-4545-b1b5-d3f84217ab81
 # ╠═92c7a3a4-ebc1-4166-a106-9b781f546f60
 # ╠═ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
