@@ -121,13 +121,19 @@ params
 summarystats(raw_counts."GSM1675513_MB011_1 data")
 
 # ╔═╡ 84bc738a-4e89-4811-88b6-ec12b81bed1f
-raw_counts
+test = processed_counts
 
 # ╔═╡ 0686222b-0955-4421-b727-e9c57b9a352d
 sum(raw_counts.transcript_type.=="noncoding")
 
 # ╔═╡ 104f6b63-70e0-424f-b549-84c4d8334acb
-processed_counts
+cod = sum(test.transcript_type.=="coding")
+
+# ╔═╡ b1984144-dbbc-4a00-9273-c4ffa76d2f53
+nod = sum(test.transcript_type.=="noncoding")
+
+# ╔═╡ 3b942054-f8ca-4449-a21d-a0d2e984b0ad
+nod/(nod+cod)
 
 # ╔═╡ 8c563073-fb2d-40e5-9113-829f63594205
 DataPreprocessing.boxplot(raw_counts);
@@ -204,8 +210,9 @@ begin
 	set = [raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts]
 	index = index_switch*(mod(tick,length(set))+1) + (-1*index_switch+1)*(step)
 	input = set[index]
-	width = min(700,400*length(selected_names))
+	width = min(1600,400*length(selected_names))
 	height = 400
+	range = max(data_from_dataframe(input)...)	
 	text = "// set the dimensions and margins of the graph 
 var margin = {top: 10, right: 30, bottom: 30, left: 40}, 
   width = $(width) - margin.left - margin.right, 
@@ -221,13 +228,14 @@ var svg = d3.select(\"#my_dataviz\")
         
 	\"translate(\" + margin.left + \",\" + margin.top + \")\"); 
  "
+	
 	for (i,name) in enumerate(selected_names)
 		#i = 1
 		#name = names(raw_counts)[5]
 		#sample data (in FPKM)
 		data = input[:,name]
 		stats = summarystats(data)
-	
+		
 		text*="
 // create dummy data 
 // var data = [12,3,4,4] 
@@ -242,7 +250,7 @@ var max = $(min(stats.max,stats.q75+1.5*(stats.q75-stats.q25)))
  
 // Show the Y scale 
 var y = d3.scaleLinear() 
-		.domain([$(stats.min),$(max(data_from_dataframe(input)...))]) 
+		.domain([$(stats.min),4]) 
   .range([height, 0]); 
 var axis = svg.call(d3.axisLeft(y)) 
  
@@ -414,7 +422,7 @@ marg = 10
 a = 1
 
 # ╔═╡ 97235b4e-93fc-4ed4-a3a2-c6541cb9ef68
-b = 3
+b = 2
 
 # ╔═╡ 4e3eadbe-7960-42e9-b399-3a44297d70f0
 nx = collect(min(per_sample[:,b]...)-marg:max(per_sample[:,b]...)+marg);
@@ -458,8 +466,8 @@ patient_vec =replace.(collect(keys(patient_dict))[2:end],"smoker "=>"","nonsmoke
 
 # ╔═╡ 21aa68b4-6257-41e6-a540-1f4bf92ef96c
 Context(
-	(;domain=([extrema(nx)...]), range=[0, 730]),
-	(;domain=([extrema(ny)...]), range=[0, 400]),
+	(;domain=([extrema(nx)...]), range=[0, 300]),
+	(;domain=([extrema(ny)...]), range=[0, 300]),
 [
 Portinari.Shape(per_sample[findall(y->occursin("_$(patient_vec[i])",y),sample_names),b],per_sample[findall(y->occursin("_$(patient_vec[i])",y),sample_names),a],repeat([100],length(findall(y->occursin("_$(patient_vec[i])",y),sample_names))),"PC";
 attributes=D3Attr(style=(;fill="rgba($(colour[i]), 0.8)"))
@@ -469,8 +477,11 @@ attributes=D3Attr(style=(;fill="rgba($(colour[i]), 0.8)"))
 	
 
 
+# ╔═╡ a7ee49b3-3096-4818-8137-39ddc1d8195e
+region_vec = collect(keys(region_dict))
+
 # ╔═╡ 86e018ba-a78c-4644-af9e-63c6fec86e40
-Portinari.Shape(per_sample[:,3],per_sample[:,1],repeat([100],length(sample_names)),"PC";
+Portinari.Shape(per_sample[:,1],per_sample[:,3],repeat([100],length(sample_names)),"PC";
 attributes=D3Attr(style=(;fill="rgba(255, 0, 0, 0.3)"))
 )
 
@@ -1798,24 +1809,26 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
-# ╟─9752572a-cc9b-421d-ba41-05a1a8b6def6
-# ╟─ee05e4b5-13f4-433a-9076-ba304c5c8807
-# ╟─32668349-8283-40c6-bf0e-1afc5ee960ea
-# ╟─351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
-# ╟─aecb1084-001e-4b0d-a3f0-740de58e5753
-# ╟─07904d8d-2e38-4207-aa94-0dd835708854
-# ╟─52ca87b1-8796-4c0c-9d8c-95532d226e52
-# ╟─d9a4d419-ed7e-4dc9-aa50-d91c166a77d8
-# ╟─b6c9b8a2-3b94-4570-adff-c3ae0962683d
-# ╟─98c53468-1da4-4515-a135-5445eba725b5
-# ╟─4ea93937-05ac-4f2e-bd66-b6898489c24d
-# ╟─57477b4e-2a67-4817-8ef3-247c6ba2f8e9
+# ╠═9752572a-cc9b-421d-ba41-05a1a8b6def6
+# ╠═ee05e4b5-13f4-433a-9076-ba304c5c8807
+# ╠═32668349-8283-40c6-bf0e-1afc5ee960ea
+# ╠═351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
+# ╠═aecb1084-001e-4b0d-a3f0-740de58e5753
+# ╠═07904d8d-2e38-4207-aa94-0dd835708854
+# ╠═52ca87b1-8796-4c0c-9d8c-95532d226e52
+# ╠═d9a4d419-ed7e-4dc9-aa50-d91c166a77d8
+# ╠═b6c9b8a2-3b94-4570-adff-c3ae0962683d
+# ╠═98c53468-1da4-4515-a135-5445eba725b5
+# ╠═4ea93937-05ac-4f2e-bd66-b6898489c24d
+# ╠═57477b4e-2a67-4817-8ef3-247c6ba2f8e9
 # ╠═4aecc101-7800-40c0-a8b0-8e0f67e98cb3
 # ╠═20215a75-b329-48fa-9024-bd6aab7f8247
 # ╠═ee390e38-f48f-4ab9-9947-87de4224ca94
 # ╠═84bc738a-4e89-4811-88b6-ec12b81bed1f
 # ╠═0686222b-0955-4421-b727-e9c57b9a352d
 # ╠═104f6b63-70e0-424f-b549-84c4d8334acb
+# ╠═b1984144-dbbc-4a00-9273-c4ffa76d2f53
+# ╠═3b942054-f8ca-4449-a21d-a0d2e984b0ad
 # ╠═8c563073-fb2d-40e5-9113-829f63594205
 # ╠═739173a4-5f67-416b-b276-774c21aae4f9
 # ╠═f8c20e2e-252c-4796-8dd6-c910eb6f7820
@@ -1829,8 +1842,8 @@ version = "3.5.0+0"
 # ╠═f2eb27c9-e0e1-4687-aed8-927df4d5decc
 # ╠═5e7acfb3-4566-4a65-9798-85bf0584b439
 # ╠═332cf792-e053-41d3-a1f0-cb0ff90311b7
-# ╟─d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
-# ╟─b1fba899-0ca7-48ba-bbe0-f30a146536a1
+# ╠═d9c0a312-4b19-49c7-8f0f-2d1fcfa13b31
+# ╠═b1fba899-0ca7-48ba-bbe0-f30a146536a1
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 # ╠═8e7533fa-4914-44f9-b470-fea060af8fe1
 # ╠═d4ab62e9-de6e-42fa-a655-d2c8231b15c6
@@ -1844,8 +1857,8 @@ version = "3.5.0+0"
 # ╠═7a2168ad-61a0-4132-90ea-69574f0040fc
 # ╠═9863d522-bb4f-4287-8c7b-06461be85369
 # ╠═46085b1f-a043-45ad-96db-ae1a8e7dceea
-# ╟─3d55ece3-b8da-4443-91c9-98b9b983a04e
-# ╟─692edabc-3542-49fa-b532-c5172f039951
+# ╠═3d55ece3-b8da-4443-91c9-98b9b983a04e
+# ╠═692edabc-3542-49fa-b532-c5172f039951
 # ╠═e2c4ec1b-bd5f-4d49-a6cc-b9366cfdc9c5
 # ╠═c8cedcba-6d09-40c7-905c-a6a47596798d
 # ╠═704d588e-cffd-4239-b5c9-2760d8afdb6f
@@ -1866,6 +1879,7 @@ version = "3.5.0+0"
 # ╠═07f12515-a320-434c-b1e3-73a305491f94
 # ╠═e5e63932-1f89-4858-ae76-72fefa2d0139
 # ╠═317602a3-d0b3-435f-af6d-112be42617d4
+# ╠═a7ee49b3-3096-4818-8137-39ddc1d8195e
 # ╠═86e018ba-a78c-4644-af9e-63c6fec86e40
 # ╠═a51fc8b8-e2d3-4962-abd9-54a5f07d517f
 # ╠═c05fca81-7f29-4576-99d6-fc35210e25b7
