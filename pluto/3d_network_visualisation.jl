@@ -50,9 +50,6 @@ end
 # ╔═╡ 149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
 @bind experiment Select(["GSE68559","GSE68559_sub"])
 
-# ╔═╡ bab7329a-5529-4dc7-ac05-9d2ceb119f42
-load_config(cwd*"/config/run-files/$experiment.yaml")
-
 # ╔═╡ 94900112-a962-462d-a5ab-715b42af0ce7
 @bind expression_cut Select([0.05,0.10])
 
@@ -67,28 +64,37 @@ load_config(cwd*"/config/run-files/$experiment.yaml")
 
 # ╔═╡ af6b4890-0db9-4a4d-9ff2-c9fdfa0a72cc
 # ╠═╡ show_logs = false
-begin	
+begin
+	load_config(cwd*"/config/run-files/$experiment.yaml")
 	params["data_preprocessing"]["expression_cutoff"] = expression_cut
 	params["data_preprocessing"]["minreq"] = minreq
 	params["data_preprocessing"]["norm_method"] = norm_meth
 	params["data_preprocessing"]["variance_percent"] = variance_cut 
 	ProjectFunctions.cache_setup()
-	counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = get_output_data();
-	components,a,n,v,e = get_network_construction();
+raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = get_output_data();
 end;
+
+# ╔═╡ 8bc060ea-1b07-4a9b-9a17-f6fd8c470c6c
+# ╠═╡ show_logs = false
+comm_df = ProjectFunctions.community_analysis(network_counts,adj_matrix);
+
+# ╔═╡ b169ade7-94a0-4f4c-98b5-2a8d3f02d323
+# ╠═╡ show_logs = false
+components,a,n,v,e = get_network_construction();
 
 # ╔═╡ dbb99ec2-4774-4993-a4b8-dda027dda19f
 g = Graph(adj_matrix)
 
 # ╔═╡ 86ca01a5-ffd3-4b91-838d-01c465346593
- vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple);
+vertex_colors =string.(comm_df.color);
+ #vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple);
 
 # ╔═╡ a007f64f-e40d-4db3-8e02-25502ea41c51
 # ╠═╡ show_logs = false
 begin
 	set_theme!(backgroundcolor="#121212")
 	fig,scene,p = graphplot(g;
-		layout=Spring(dim=3,C=1.0),
+		layout=Spectral(dim=3),
 		node_color = vertex_colors,
 		node_size = 10,
 		edge_color = :white,
@@ -99,6 +105,9 @@ begin
 	scene.show_axis =false
 	fig
 end
+
+# ╔═╡ 371961c1-36dd-4aef-8df7-6b54ed93c5cd
+1+1
 
 # ╔═╡ dac4e6fe-26b9-4291-a98f-a43ba756a184
 # ╠═╡ show_logs = false
@@ -133,13 +142,7 @@ sig_graphlets = vcat(filter.(:p_value=>x->x<0.05,typed_anal)...);
 NetworkConstruction.draw_graphlet.(sig_graphlets.Graphlet,node_colours=["purple","blue"])
 
 # ╔═╡ 459f8803-9420-4b30-8c01-596f2a82c633
-sig_graphlets.Graphlet
-
-# ╔═╡ 493d0cc3-be57-4f4c-b258-49e16c4cd9c7
-network_counts.transcript_id[[60,904,70,170,69,68,1375,728,10]]
-
-# ╔═╡ b033ec5e-f93a-4851-b365-826d82e22d0e
-typed_anal[4]
+sig_graphlets;
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1933,27 +1936,27 @@ version = "3.5.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─ca75971e-d54a-11ed-20fe-c374d41bc379
-# ╠═149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
-# ╠═bab7329a-5529-4dc7-ac05-9d2ceb119f42
-# ╠═94900112-a962-462d-a5ab-715b42af0ce7
-# ╠═61f86902-79c0-44b2-9108-242c8064a92d
-# ╠═c68738af-2d47-418d-8c50-b6d6c5cceb27
-# ╠═45852339-5530-49b6-b1f2-a95b6452b431
+# ╠═ca75971e-d54a-11ed-20fe-c374d41bc379
+# ╟─149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
+# ╟─94900112-a962-462d-a5ab-715b42af0ce7
+# ╟─61f86902-79c0-44b2-9108-242c8064a92d
+# ╟─c68738af-2d47-418d-8c50-b6d6c5cceb27
+# ╟─45852339-5530-49b6-b1f2-a95b6452b431
 # ╠═af6b4890-0db9-4a4d-9ff2-c9fdfa0a72cc
-# ╠═dbb99ec2-4774-4993-a4b8-dda027dda19f
-# ╟─a007f64f-e40d-4db3-8e02-25502ea41c51
-# ╟─86ca01a5-ffd3-4b91-838d-01c465346593
+# ╠═8bc060ea-1b07-4a9b-9a17-f6fd8c470c6c
+# ╟─b169ade7-94a0-4f4c-98b5-2a8d3f02d323
+# ╟─dbb99ec2-4774-4993-a4b8-dda027dda19f
+# ╠═a007f64f-e40d-4db3-8e02-25502ea41c51
+# ╠═86ca01a5-ffd3-4b91-838d-01c465346593
+# ╠═371961c1-36dd-4aef-8df7-6b54ed93c5cd
 # ╟─dac4e6fe-26b9-4291-a98f-a43ba756a184
 # ╟─0d7c3525-2be4-462b-acf6-c067f74587bb
 # ╟─c6511442-5810-4028-ae0b-d901cd1a7d23
 # ╟─f68fb4b4-d774-4f12-ae51-d42532c75e40
 # ╟─3227be34-9983-4ae5-af40-d9276695a079
-# ╠═be6b0e15-8ec2-4937-ba43-29b2e4b2ae8f
-# ╠═d2e31c4f-7c60-4fb8-aae6-6d5d4732c293
+# ╟─be6b0e15-8ec2-4937-ba43-29b2e4b2ae8f
+# ╟─d2e31c4f-7c60-4fb8-aae6-6d5d4732c293
 # ╟─a5191da1-935a-4672-8340-8daaec1fe08c
 # ╠═459f8803-9420-4b30-8c01-596f2a82c633
-# ╠═493d0cc3-be57-4f4c-b258-49e16c4cd9c7
-# ╠═b033ec5e-f93a-4851-b365-826d82e22d0e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
