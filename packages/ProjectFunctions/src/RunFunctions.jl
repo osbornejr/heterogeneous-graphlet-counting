@@ -325,7 +325,7 @@ function get_network_construction()
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-    return [components,adj_matrix,network_counts,vertexlist,edgelist]       
+    return components,adj_matrix,network_counts,vertexlist,edgelist       
 end
 export get_network_construction
 
@@ -490,7 +490,6 @@ end
        
 function community_analysis(network_counts,adj_matrix)
     #Network Analysis
-    #Type representations 
     ## Community structure
     ##update cache
     anal_dir = params["cache"]["community_dir"]    
