@@ -75,6 +75,9 @@ function tex_degree_distribution(data::Vector{Int},outfile::String;title::String
 end
 
 
+## RESULTS TABLES
+
+
 
 #NETWORK STATS
 ## load in info
