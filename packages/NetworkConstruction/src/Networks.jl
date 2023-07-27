@@ -96,7 +96,6 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     library(WGCNA)  
     library(dendextend)
     library(ggdendro)
-    library(tidyverse)
     plot_ggdendro <- function(hcdata,
         direction   = c("lr", "rl", "tb", "bt"),
         fan         = FALSE,
@@ -172,7 +171,8 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
                         p    <- p + expand_limits(y = ylim)
                     p
         }
-    set_labels_params <- function(  nbLabels,
+    
+        set_labels_params <- function(  nbLabels,
                     direction = c("tb", "bt", "lr", "rl"),
                     fan       = FALSE) {
         if (fan) {
@@ -211,30 +211,44 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
         hcdata$labels$clust    <-  labclust
         hcdata
     }
+    
     noLabel <- function(x) {
           if (stats::is.leaf(x)) {
             attr(x, "label") <- NULL }
         return(x)
     }
+    
     ##save as one pdf
-    pdf('wgcna.pdf')
+    #pdf('wgcna.pdf')
+
     # Choose a set of soft-thresholding powers 
-    powers = c(c(1:10), seq(from = 12, to=20, by=2))
+    powers = c(c(1:10), seq(from = 12, to=40, by=2))
     # Call the network topology analysis function 
-    sft = pickSoftThreshold(data, powerVector = powers, verbose = 5) 
+    R_sq_cutoff = 0.9
+    net_type ="signed"
+    correlation = "cor"
+    sft = pickSoftThreshold(data, powerVector = powers, networkType = net_type,corFnc=correlation, RsquaredCut = R_sq_cutoff,verbose = 5) 
     # Scale-free topology fit index as a function of the soft-thresholding power 
-    #pdf('powers.pdf')
+    pdf('powers.pdf')
     plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2], xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit, signed R^2",type="n", main = paste("Scale independence")) 
     text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2], labels=powers,col="red") 
     # this line corresponds to using an R^2 cut-off of h 
-    abline(h=0.90,col="red") 
+    abline(h=R_sq_cutoff,col="red") 
     # Mean connectivity as a function of the soft-thresholding power 
-    plot(sft$fitIndices[,1], sft$fitIndices[,5], xlab="Soft Threshold (power) for ICC283",ylab="Mean Connectivity", type="n", main = paste("Mean connectivity")) 
+    plot(sft$fitIndices[,1], sft$fitIndices[,5], xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n", main = paste("Mean connectivity")) 
     text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers,col="red") 
-    #dev.off()
-    softPower = 9; 
-    adjacency = adjacency(data, power = softPower) 
-    TOM=TOMsimilarity(adjacency) 
+    # Median connectivity as a function of the soft-thresholding power 
+    plot(sft$fitIndices[,1], sft$fitIndices[,6], xlab="Soft Threshold (power)",ylab="Median Connectivity", type="n", main = paste("Median connectivity")) 
+    text(sft$fitIndices[,1], sft$fitIndices[,6], labels=powers,col="red") 
+    # Max connectivity as a function of the soft-thresholding power 
+    plot(sft$fitIndices[,1], sft$fitIndices[,7], xlab="Soft Threshold (power)",ylab="Max Connectivity", type="n", main = paste("Max connectivity")) 
+    text(sft$fitIndices[,1], sft$fitIndices[,7], labels=powers,col="red") 
+    dev.off()
+   
+    ##construct network
+    softPower = sft$powerEstimate; 
+    adjacency = adjacency(data, power = softPower,networkType = net_type,corFnc=correlation) 
+    TOM=TOMsimilarity(adjacency,TOMType=net_type,) 
     dissTOM=1-TOM 
     
     ##auto-option
@@ -249,11 +263,11 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     label_colours = ifelse(labels(genedend)%in%(1:length(transcript_types))[transcript_types=="coding"],"red","blue")
     genedend<- assign_values_to_leaves_edgePar(genedend, value = label_colours, edgePar = "col") 
     # Plot the resulting clustering tree (dendrogram)  
-    #pdf('dendro.pdf')
-    #plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity",labels = FALSE, hang = 0.04);  
+    pdf('dendro.pdf')
+    plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity",labels = FALSE, hang = 0.04);  
     plot(dendrapply(genedend,noLabel))
-    #p<- plot_ggdendro(hcdata, direction="tb",expand.y = 0.2)
-    #dev.off()
+    p<- plot_ggdendro(hcdata, direction="tb",expand.y = 0.2)
+    dev.off()
 
     ## Modules
     minModuleSize = 30;  
@@ -264,9 +278,9 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     dynamicColors = labels2colors(dynamicMods)  
     table(dynamicColors)  
     # Plot the dendrogram and colors underneath  
-    #pdf('colours.pdf')
+    pdf('colours.pdf')
     plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut",  dendroLabels = FALSE, hang = 0.03,addGuide = TRUE, guideHang = 0.05,main = "Gene dendrogram and module colors")  
-    #dev.off()
+    dev.off()
     
     # Calculate eigengenes  
     MEList = moduleEigengenes(data, colors = dynamicColors)  
@@ -288,9 +302,9 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     mergedColors = merge$colors;  
     # Eigengenes of the new merged modules:  
     mergedMEs = merge$newMEs;  
-    #pdf(file = "eigen-merged-dendro.pdf", wi = 9, he = 6)  
+    pdf(file = "eigen-merged-dendro.pdf", wi = 9, he = 6)  
     plotDendroAndColors(geneTree, cbind(dynamicColors, mergedColors),  c("Dynamic Tree Cut", "Merged dynamic"),  dendroLabels = FALSE, hang = 0.03, addGuide = TRUE, guideHang = 0.05)  
-    #dev.off()  
+    dev.off()  
     str(mergedMEs)  
     
     
@@ -300,7 +314,7 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     # Set diagonal to NA for a nicer plot 
     diag(plotTOM) = NA; 
     # Call the plot function 
-    #pdf('heatmap.pdf') 
+    pdf('heatmap.pdf') 
     TOMplot(plotTOM, geneTree, dynamicColors, main = "Network heatmap plot, all genes") 
     dev.off()    
      
