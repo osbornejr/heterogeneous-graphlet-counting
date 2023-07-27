@@ -106,6 +106,9 @@ begin
 	fig
 end
 
+# ╔═╡ 7e7919a9-8dc3-4d78-9090-4ff8512193f8
+unique(vertex_colors)
+
 # ╔═╡ 371961c1-36dd-4aef-8df7-6b54ed93c5cd
 1+1
 
@@ -1948,6 +1951,7 @@ version = "3.5.0+0"
 # ╟─dbb99ec2-4774-4993-a4b8-dda027dda19f
 # ╠═a007f64f-e40d-4db3-8e02-25502ea41c51
 # ╠═86ca01a5-ffd3-4b91-838d-01c465346593
+# ╠═7e7919a9-8dc3-4d78-9090-4ff8512193f8
 # ╠═371961c1-36dd-4aef-8df7-6b54ed93c5cd
 # ╟─dac4e6fe-26b9-4291-a98f-a43ba756a184
 # ╟─0d7c3525-2be4-462b-acf6-c067f74587bb
