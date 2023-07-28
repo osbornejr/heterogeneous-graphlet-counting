@@ -246,7 +246,8 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     dev.off()
    
     ##construct network
-    softPower = sft$powerEstimate; 
+    #softPower = sft$powerEstimate; 
+    softPower = 3 
     adjacency = adjacency(data, power = softPower,networkType = net_type,corFnc=correlation) 
     TOM=TOMsimilarity(adjacency,TOMType=net_type,) 
     dissTOM=1-TOM 
@@ -310,7 +311,7 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     
     ##Heat map
     # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap 
-    plotTOM = dissTOM^7; 
+    plotTOM = TOM^1; 
     # Set diagonal to NA for a nicer plot 
     diag(plotTOM) = NA; 
     # Call the plot function 
