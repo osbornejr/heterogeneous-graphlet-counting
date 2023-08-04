@@ -311,7 +311,7 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     
     ##Heat map
     # Transform dissTOM with a power to make moderately strong connections more visible in the heatmap 
-    plotTOM = TOM^1; 
+    plotTOM = dissTOM^7; 
     # Set diagonal to NA for a nicer plot 
     diag(plotTOM) = NA; 
     # Call the plot function 
