@@ -52,7 +52,7 @@ network_construction:
 analysis:    
   biological_validation: true
   community_detection: true
-  wgcna: false
+  wgcna: true
   func_annotate: false
   graphlet_counting: true
   graphlet_size: 4
