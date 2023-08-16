@@ -2,6 +2,7 @@ module ProjectFunctions
 using DataPreprocessing, NetworkConstruction,GraphletCounting ,GraphletAnalysis
 
 include("RunFunctions.jl")
+include("FetchFunctions.jl")
 include("WebFunctions.jl")
 
 cwd = ENV["PWD"]

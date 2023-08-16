@@ -87,145 +87,6 @@ end
 export load_config
 export params
 
-function cache_remove(file::String)
-    run(`rm -rf $(file)`)
-end
-
-function make_cache(dirs...;dir_name::String)
-    #join args into dir path
-    dir = join(dirs,"/") 
-    #make dir if does not exist
-    run(`mkdir -p $(dir)`)
-    #store dir path in cache params
-    params["cache"][dir_name] = dir
-    ##remove contents if cache clear is set
-    #TODO setup user input warning at start of run if any data is to be cleared.
-    if(params["cache"]["clear"][dir_name])
-        @info "Removing cached $(dir_name) data (and all dependent cached data) from $(dir)"
-run(`rm -r $(dir)/`)
-    end 
-end
-function cache_setup()
-    ##create directory for run
-    make_cache(dir_name="test_dir",cwd,params["cache"]["base_dir"],params["test_name"])
-    ##switching to new method where each path is declared explicitly here (avoids run overlaps making a mess, and is easier with pluto load ins etc)
-    ##data preprocessing dirs:
-    make_cache(dir_name="round_dir",params["cache"]["test_dir"],"roundsig",string(params["data_preprocessing"]["roundsig"]))
-    make_cache(dir_name="vst_dir",params["cache"]["round_dir"],"vst",string(params["data_preprocessing"]["vst"]))
-    make_cache(dir_name="clean_dir",params["cache"]["vst_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]),"minreq",string(params["data_preprocessing"]["minreq"]),"clean_method",string(params["data_preprocessing"]["clean_method"]))
-    make_cache(dir_name="norm_dir",params["cache"]["clean_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
-    make_cache(dir_name="sampling_dir",params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
-    #network construction dirs:
-    ##at present we want to trial different bin sizes for the information measures, so we add the extra split here if "coexpression" is either MI or PID.
-    if params["network_construction"]["coexpression"] in ["pidc","mutual_information"]
-        
-        make_cache(dir_name="similarity_dir",params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"],params["network_construction"]["nbins"])
-    else
-        make_cache(dir_name="similarity_dir",params["cache"]["sampling_dir"],"similarity",params["network_construction"]["coexpression"])
-    end
-    
-
-    make_cache(dir_name="adjacency_dir",params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"])
-
-    #analyis dirs :
-    if (params["network_construction"]["synthetic"] == true)
-        make_cache(dir_name="anal_dir",params["cache"]["adjacency_dir"],"analysis","synthetic")
-    else
-        make_cache(dir_name="anal_dir",params["cache"]["adjacency_dir"],"analysis","real")
-    end
-
-    make_cache(dir_name="bio_dir",params["cache"]["anal_dir"],"biological_validation")
-    make_cache(dir_name="community_dir",params["cache"]["anal_dir"],"communities")
-    make_cache(dir_name="graphlet_counting_dir",params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting")
-    make_cache(dir_name="rep_dir",params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations")
-    make_cache(dir_name="graphlet_enum_dir",params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-enumeration")
-    make_cache(dir_name="coinc_dir",params["cache"]["graphlet_enum_dir"],"coincidents")
-    make_cache(dir_name="orbit_dir",params["cache"]["coinc_dir"],"orbit-significance")
-    #TODO setup archive method under new cache system
-end
-
-function cache_update(general::String,specific::Any)
-    return cache_update(general,string(specific))
-end
-export cache_update
-
-function cache_update(general::String,specific::String="",side_dir::String="")
-    ##depreceated currently, as we prefer explicit directory creation at beginning of run
-    ##method to update or add cache path
-    ##update current dir, possibly with specific subdir
-    if (side_dir=="")
-        cache_dir = params["cache"]["cur_dir"]*"/"*general  
-        params["cache"]["cur_dir"] = cache_dir
-        run(`mkdir -p $(cache_dir)`)
-        if(specific!="")
-            cache_dir = params["cache"]["cur_dir"]*"/"*specific
-            params["cache"]["cur_dir"] = cache_dir 
-            run(`mkdir -p $(cache_dir)`)
-        end
-    else
-        ##create side dir, possiblly with specific subdir
-        cache_dir = params["cache"]["cur_dir"]*"/"*general
-        params["cache"][side_dir] = cache_dir
-        run(`mkdir -p $(cache_dir)`)
-        if(specific!="")
-            cache_dir = params["cache"][sid_dir]*"/"*specific
-            params["cache"][side_dir] = cache_dir
-            run(`mkdir -p $(cache_dir)`)
-        end
-    end
-end
-
-function get_input_data()
-    file = join([params["cache"]["test_dir"],"raw_counts.jld2"],"/")
-    #cache_check(file)
-    if isfile(file) 
-        raw_counts = cache_load(file,"raw counts")  
-    else 
-        ##run external julia script provided in paramaters to create raw_counts cache. This is a bit messy as the script must match the file location here (and JLD2 file name)
-        #but is best solution for now.
-        run(`julia --project=$cwd/Project.toml $(params["raw_counts_script"])`)
-        raw_counts = cache_load(file,"raw counts")  
-     end
-    return raw_counts  
-end 
-export get_input_data
-
-function get_output_data()
-    ##method to get all outputs at once
-    raw_counts =  get_input_data()
-    samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
-    sim_file = "$(params["cache"]["similarity_dir"])/similarity_matrix.jld2"
-    if ((isfile(sim_file)) && (isfile(samp_file)))
-        similarity_matrix = cache_load(sim_file,"similarity_matrix")
-        processed_counts = cache_load(samp_file,"sample counts")
-    else
-        throw(ArgumentError("No cached files exist at either $sim_file or $samp_file, please run from scratch using run_all method."))
-    end
-    components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
-    return [raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist]
-end
-export get_output_data
-
-function get_preprocessed_data()
-    ##method to get preprocessed dataframes before any network construction
-    raw_counts =  get_input_data()
-    round_file = "$(params["cache"]["round_dir"])/round_counts.jld2"
-    vst_file = "$(params["cache"]["vst_dir"])/vst_counts.jld2"
-    clean_file = "$(params["cache"]["clean_dir"])/clean_counts.jld2"
-    norm_file = "$(params["cache"]["norm_dir"])/norm_counts.jld2"
-    samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
-    if ( (isfile(round_file)) && (isfile(vst_file)) && (isfile(clean_file)) && (isfile(norm_file)) && (isfile(samp_file)) )
-        round_counts = cache_load(round_file,"round counts")
-        vst_counts = cache_load(vst_file,"vst counts")
-        clean_counts = cache_load(clean_file,"clean counts")
-        norm_counts = cache_load(norm_file,"norm counts")
-        sample_counts = cache_load(samp_file,"sample counts")
-    else
-        throw(ArgumentError("No cached files exist at least one of $round_file, $vst_file, $clean_file, $norm_file or $samp_file, please run from scratch using run_all method."))
-    end
-    return [raw_counts,round_counts,vst_counts,clean_counts,norm_counts,sample_counts]
-end
-export get_preprocessed_data
 
 function data_preprocessing(raw_counts::DataFrame)
     
@@ -306,28 +167,6 @@ end
 export data_preprocessing
 
 
-function get_network_construction()
-    ##alt method that allows loading of cache if output exists, and gives an error otherwise.
-    samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
-    adj_file = "$(params["cache"]["adjacency_dir"])/adjacency_matrix.jld2"
-    if ((isfile(adj_file)) && (isfile(samp_file)))
-        pre_adj_matrix = cache_load(adj_file,"pre-adj_matrix")
-        adj_matrix = cache_load(adj_file,"adjacency_matrix")
-        components = cache_load(adj_file,"components")
-        sample_counts = cache_load(samp_file,"sample counts")
-   else
-       throw(ArgumentError("No cached files exist at either $adj_file or $samp_file, please provide processed counts input data."))
-    end
-    #Trim nodes with degree zero
-
-    largest = findmax(length.(components))[2]
-    network_counts = sample_counts[components[largest],:]    
-    #maintain list of vertices in graph
-    vertexlist = copy(network_counts[!,:transcript_type])     
-    edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-    return components,adj_matrix,network_counts,vertexlist,edgelist       
-end
-export get_network_construction
 
 function network_construction(sample_counts::DataFrame)
 
@@ -872,25 +711,6 @@ function biological_validation(network_counts)
     gtt = go_information(network_counts)
     ##at the moment return nothing. could return all components?
     return [ktt,gtt] 
-end
-
-function biological_validation()
-    #TODO make these empty methods consistent with multiple dispatch or different naming convention
-    #get baseline entrez and kegg info about transcripts
-    bio_dir = params["cache"]["bio_dir"]
-    kegg_file = "$(bio_dir)/kegg_info.jld2"
-    if (isfile(kegg_file))
-        ktt = cache_load(kegg_file,"top_terms")
-    else
-            throw(ArgumentError("No cached file exists at $kegg_file, please ensure biological validation has been run on network."))
-    end
-    go_file = "$(bio_dir)/go_info.jld2"
-    if (isfile(go_file))
-        gtt = cache_load(go_file,"top_terms")
-    else
-            throw(ArgumentError("No cached file exists at $go_file, please ensure biological validation has been run on network."))
-    end
-    return [ktt,gtt]
 end
 
 function coincident_graphlets(network_counts,vertexlist,edgelist)
