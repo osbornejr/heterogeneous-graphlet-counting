@@ -248,13 +248,12 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     ##construct network
     #softPower = sft$powerEstimate; 
     softPower = 3 
-    adjacency = adjacency(data, power = softPower,networkType = net_type,corFnc=correlation) 
+    adjacency = adjacency(data, power = softPower,type = net_type,corFnc=correlation) 
     TOM=TOMsimilarity(adjacency,TOMType=net_type,) 
     dissTOM=1-TOM 
     
     ##auto-option
-    #bwnet = blockwiseModules(data, maxBlockSize = 4000, power = 8, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25, numericLabels = TRUE, saveTOMs = TRUE, saveTOMFileBase = "data-TOM-blockwise", verbose = 3) 
-    
+    #bwnet = blockwiseModules(data, maxBlockSize = 4000, power = 8, TOMType = "unsigned", minModuleSize = 30, reassignThreshold = 0, mergeCutHeight = 0.25, numericLabels = TRUE, saveTOMs = TRUE, saveTOMFileBase = "data-TOM-blockwise", verbosty
     ## Dendro
     geneTree = hclust(as.dist(dissTOM), method = "average");  
     #dend object (for dendextend etc)
@@ -267,7 +266,7 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
     pdf('dendro.pdf')
     plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity",labels = FALSE, hang = 0.04);  
     plot(dendrapply(genedend,noLabel))
-    p<- plot_ggdendro(hcdata, direction="tb",expand.y = 0.2)
+    p<- plot_ggdendro(geneTree, direction="tb",expand.y = 0.2)
     dev.off()
 
     ## Modules
