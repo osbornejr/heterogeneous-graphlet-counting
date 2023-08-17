@@ -78,6 +78,9 @@ end;
 # ╠═╡ show_logs = false
 comm_df = ProjectFunctions.community_analysis(network_counts,adj_matrix);
 
+# ╔═╡ 1a59fc8c-a2dc-47ca-84f4-f8bce3ec3751
+wgcna_df = ProjectFunctions.wgcna_analysis(processed_counts)
+
 # ╔═╡ b169ade7-94a0-4f4c-98b5-2a8d3f02d323
 # ╠═╡ show_logs = false
 components,a,n,v,e = get_network_construction();
@@ -110,7 +113,7 @@ end
 unique(vertex_colors)
 
 # ╔═╡ 371961c1-36dd-4aef-8df7-6b54ed93c5cd
-1+1
+comm_df
 
 # ╔═╡ dac4e6fe-26b9-4291-a98f-a43ba756a184
 # ╠═╡ show_logs = false
@@ -1159,7 +1162,7 @@ uuid = "f09324ee-3d7c-5217-9330-fc30815ba969"
 version = "1.1.0"
 
 [[deps.NetworkConstruction]]
-deps = ["Colors", "DataFrames", "DataPreprocessing", "Distributed", "Graphs", "InformationMeasures", "LinearAlgebra", "Luxor", "Printf", "ProgressMeter", "RCall", "SharedArrays", "Statistics", "StatsBase"]
+deps = ["ColorSchemes", "Colors", "DataFrames", "DataPreprocessing", "Distributed", "Graphs", "InformationMeasures", "LinearAlgebra", "Luxor", "Printf", "ProgressMeter", "RCall", "SharedArrays", "Statistics", "StatsBase"]
 path = "/home/osbornejr/app/packages/NetworkConstruction"
 uuid = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 version = "0.1.0"
@@ -1947,6 +1950,7 @@ version = "3.5.0+0"
 # ╟─45852339-5530-49b6-b1f2-a95b6452b431
 # ╠═af6b4890-0db9-4a4d-9ff2-c9fdfa0a72cc
 # ╠═8bc060ea-1b07-4a9b-9a17-f6fd8c470c6c
+# ╠═1a59fc8c-a2dc-47ca-84f4-f8bce3ec3751
 # ╟─b169ade7-94a0-4f4c-98b5-2a8d3f02d323
 # ╟─dbb99ec2-4774-4993-a4b8-dda027dda19f
 # ╠═a007f64f-e40d-4db3-8e02-25502ea41c51
