@@ -79,17 +79,20 @@ end;
 comm_df = ProjectFunctions.community_analysis(network_counts,adj_matrix);
 
 # ╔═╡ 1a59fc8c-a2dc-47ca-84f4-f8bce3ec3751
-wgcna_df = ProjectFunctions.wgcna_analysis(processed_counts)
+wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna()
 
 # ╔═╡ b169ade7-94a0-4f4c-98b5-2a8d3f02d323
 # ╠═╡ show_logs = false
 components,a,n,v,e = get_network_construction();
 
 # ╔═╡ dbb99ec2-4774-4993-a4b8-dda027dda19f
-g = Graph(adj_matrix)
+g = Graph(wgcna_network.>0.2)
+
+# ╔═╡ 713bddda-5830-4f75-9867-19f60bdf5816
+wgcna_network.>0.3
 
 # ╔═╡ 86ca01a5-ffd3-4b91-838d-01c465346593
-vertex_colors =string.(comm_df.color);
+vertex_colors =string.(wgcna_comm.color);
  #vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple);
 
 # ╔═╡ a007f64f-e40d-4db3-8e02-25502ea41c51
@@ -107,6 +110,7 @@ begin
 	)
 	scene.show_axis =false
 	fig
+	
 end
 
 # ╔═╡ 7e7919a9-8dc3-4d78-9090-4ff8512193f8
@@ -1952,7 +1956,8 @@ version = "3.5.0+0"
 # ╠═8bc060ea-1b07-4a9b-9a17-f6fd8c470c6c
 # ╠═1a59fc8c-a2dc-47ca-84f4-f8bce3ec3751
 # ╟─b169ade7-94a0-4f4c-98b5-2a8d3f02d323
-# ╟─dbb99ec2-4774-4993-a4b8-dda027dda19f
+# ╠═dbb99ec2-4774-4993-a4b8-dda027dda19f
+# ╠═713bddda-5830-4f75-9867-19f60bdf5816
 # ╠═a007f64f-e40d-4db3-8e02-25502ea41c51
 # ╠═86ca01a5-ffd3-4b91-838d-01c465346593
 # ╠═7e7919a9-8dc3-4d78-9090-4ff8512193f8
