@@ -73,6 +73,20 @@ function get_network_construction()
 end
 export get_network_construction
 
+
+function get_wgcna()
+
+    wgcna_file = "$(params["cache"]["community_dir"])/wgcna/wgcna.jld2"
+    if (isfile(wgcna_file))
+        wgcna_network = cache_load(wgcna_file,"adjacency")
+        wgcna_comm = cache_load(wgcna_file,"communities")
+    else
+       throw(ArgumentError("No cached file exists at $wgcna_file, please run wgcna analysis."))
+    end
+    return [wgcna_network,wgcna_comm]
+end
+export get_wgcna
+
 function get_biological_validation()
     #get baseline entrez and kegg info about transcripts
     bio_dir = params["cache"]["bio_dir"]

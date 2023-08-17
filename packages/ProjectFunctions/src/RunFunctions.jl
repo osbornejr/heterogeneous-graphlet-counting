@@ -367,21 +367,31 @@ export community_analysis
 
 function wgcna_analysis(processed_counts)
     ##WGCNA needs to set up its own network (on the same processed counts) so we output both the network and the derived community structure here
+    #TODO integrate into community step somehow? subset or separate?
     
     anal_dir = params["cache"]["community_dir"]    
-    ##TODO does this need a cache step?
     wgcna_dir = "$anal_dir/wgcna"
     run(`mkdir -p $(wgcna_dir)`)
-    
-    wgcna_network,groups,colours = NetworkConstruction.wgcna(data_from_dataframe(processed_counts),processed_counts.transcript_type)
-    wgcna_comm = DataFrame(label = processed_counts.transcript_id,
-                           group = groups,
-                           color = "#".*(colours)
-                          )
+    wgcna_file = "$wgcna_dir/wgcna.jld2"
+    if (isfile(wgcna_file))
+        @info "Loading WGCNA information from $wgcna_file..."
+        wgcna_network = cache_load(wgcna_file,"adjacency")
+        wgcna_comm = cache_load(wgcna_file,"communities")
+    else
+        @info "Running WGCNA..." 
+        wgcna_network,groups,colours = NetworkConstruction.wgcna(data_from_dataframe(processed_counts),processed_counts.transcript_type)
+        wgcna_comm = DataFrame(label = processed_counts.transcript_id,
+                               group = groups,
+                               color = "#".*(colours)
+                              )
 
+        cache_save(wgcna_file,["adjacency"=>wgcna_network,"communities"=>wgcna_comm])
+    end
     return [wgcna_network,wgcna_comm]
 end
 export wgcna_analysis
+
+
 
 function graphlet_counting(vertexlist,edgelist)
 
