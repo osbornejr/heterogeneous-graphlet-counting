@@ -47,6 +47,10 @@ function run_all(config_file::String)
             com_anal = community_analysis(network_counts,adj_matrix)
         end
     
+        if (params["analysis"]["wgcna"] == true)
+            @info "Finding WGCNA comparison network"
+            wgcna_anal = wgcna_analysis(processed_counts)
+        end
 
         if (params["analysis"]["graphlet_counting"] == true)
             @info "Counting graphlets"
@@ -167,7 +171,6 @@ end
 export data_preprocessing
 
 
-
 function network_construction(sample_counts::DataFrame)
 
     ##Network construction
@@ -260,11 +263,6 @@ function network_construction(sample_counts::DataFrame)
     return [adj_matrix, network_counts,vertexlist,edgelist]       
 end
 export network_construction
-
-
-
-
-
 
 ##catch all function to call desired coexpression_measure 
 function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
@@ -365,6 +363,17 @@ function community_analysis(network_counts,adj_matrix)
         return community_vertices
     end
 end
+export community_analysis
+
+function wgcna_analysis(processed_counts)
+
+    anal_dir = params["cache"]["community_dir"]    
+    ##TODO does this need a cache step?
+    wgcna_dir = anal_dir*"/wgcna"
+    run(`mkdir -p $(wgcna_dir)`)
+
+end
+export wgcna_analysis
 
 function graphlet_counting(vertexlist,edgelist)
 
@@ -601,16 +610,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     return hog_array
 end 
 export typed_representations
-                #@time motif_counts = find_motifs(edgelist,"hetero_rewire",100, typed = true, typelist = vec(vertexlist),plotfile="$cache_dir/motif_detection.svg",graphlet_size = 4)
 
-
-
-#               ### Validation steps
-                #val_dir = "$anal_dir/validation"
-                #run(`mkdir -p $(val_dir)`)
-#               # looking at identified significant graphlets and seeing if they check out biologically
-#               # the most taxing step is to identify the graphlets that are coincident in some way to KEGG pathways. We cache these coincidents as a dataframe (using CSV instead of JLD)  
-                #
 function load_relationships(file_path)  
     rel_dir = dirname(file_path)
     ## first divide csv into the node ids (integers) and the graphlet ids (string)
@@ -652,7 +652,6 @@ function load_relationships(file_path)
     return [nodes, graphlets]
  end
 export load_relationships
-
 
 function kegg_information(network_counts)
 
