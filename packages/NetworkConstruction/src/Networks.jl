@@ -1,4 +1,4 @@
-using LinearAlgebra,RCall,StatsBase
+using LinearAlgebra,RCall,StatsBase,Colors,ColorSchemes
 function adjacency(data::AbstractArray,threshold::Float64)
     sim_matrix = copy(data)
     sim_matrix[diagind(sim_matrix)].= 0
@@ -319,6 +319,25 @@ function wgcna(data::AbstractArray,transcript_types::Array{String})
     dev.off()    
      
     """
+    @rget dissTOM
+    @rget dynamicColors
+    
+    #set up community df with colours matched
+    groups = unique(dynamicColors)
+    #map to hex code (using Colors.jl)
+    hex_hash = Dict(Pair.(groups,hex.(parse.(Colorant,groups))))
+    ##alternatively set colorscheme here rather than use WGCNAs #TODO set in config
+    #hex_hash = Dict(Pair.(groups,hex.(ColorSchemes.tableau_20[1:length(groups)])))
+    #function to get dictmatch in place
+    function dict_match(dict::AbstractDict,key::Any)
+        get(dict,key,"ERROR")
+    end
+    colours = dict_match.(Ref(hex_hash),dynamicColors)
+    #now do same to switch group names to numbers
+    number_hash = Dict(Pair.(groups,1:12))
 
     ##network and community outputs in julian form
+    
+    ## option for WGCNA readout pdf (option to set dir (deafult cache) as well?) 
+    return [adjacency,dynamicColors]
 end
