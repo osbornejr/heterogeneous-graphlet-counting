@@ -366,12 +366,17 @@ end
 export community_analysis
 
 function wgcna_analysis(processed_counts)
-
+    ##WGCNA needs to set up its own network (on the same processed counts) so we output both the network and the derived community structure here
+    
     anal_dir = params["cache"]["community_dir"]    
     ##TODO does this need a cache step?
-    wgcna_dir = anal_dir*"/wgcna"
+    wgcna_dir = "$anal_dir/wgcna"
     run(`mkdir -p $(wgcna_dir)`)
+    
+    wgcna_network,wgcna_communities = NetworkConstruction.wgcna(data_from_dataframe(processed_counts),processed_counts.transcript_type)
 
+
+    return [wgcna_network,wgcna_communities]
 end
 export wgcna_analysis
 
