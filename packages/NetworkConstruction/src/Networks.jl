@@ -87,7 +87,7 @@ function synthetic_network(vertexlist, edgelist)
     return [edgelist,vertexlist]
 end
 
-function wgcna_network(data::AbstractArray,transcript_types::Array{String})
+function wgcna(data::AbstractArray,transcript_types::Array{String})
     #transpose for WGCNA
     data = data'
     @rput data  
@@ -320,4 +320,5 @@ function wgcna_network(data::AbstractArray,transcript_types::Array{String})
      
     """
 
+    ##network and community outputs in julian form
 end
