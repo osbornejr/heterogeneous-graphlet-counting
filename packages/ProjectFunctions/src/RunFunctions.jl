@@ -373,10 +373,13 @@ function wgcna_analysis(processed_counts)
     wgcna_dir = "$anal_dir/wgcna"
     run(`mkdir -p $(wgcna_dir)`)
     
-    wgcna_network,wgcna_communities = NetworkConstruction.wgcna(data_from_dataframe(processed_counts),processed_counts.transcript_type)
+    wgcna_network,groups,colours = NetworkConstruction.wgcna(data_from_dataframe(processed_counts),processed_counts.transcript_type)
+    wgcna_comm = DataFrame(label = processed_counts.transcript_id,
+                           group = groups,
+                           color = "#".*(colours)
+                          )
 
-
-    return [wgcna_network,wgcna_communities]
+    return [wgcna_network,wgcna_comm]
 end
 export wgcna_analysis
 
