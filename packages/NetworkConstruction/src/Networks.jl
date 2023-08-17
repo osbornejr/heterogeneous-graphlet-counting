@@ -319,7 +319,7 @@ function wgcna(data::AbstractArray,transcript_types::Array{String})
     dev.off()    
      
     """
-    @rget dissTOM
+    @rget adjacency
     @rget dynamicColors
     
     #set up community df with colours matched
@@ -335,9 +335,14 @@ function wgcna(data::AbstractArray,transcript_types::Array{String})
     colours = dict_match.(Ref(hex_hash),dynamicColors)
     #now do same to switch group names to numbers
     number_hash = Dict(Pair.(groups,1:12))
-
-    ##network and community outputs in julian form
+    numbers = dict_match.(Ref(number_hash),dynamicColors)
     
-    ## option for WGCNA readout pdf (option to set dir (deafult cache) as well?) 
-    return [adjacency,dynamicColors]
+    ##set adjacency diag to 0
+    n,m = size(adjacency)
+    for i in 1:n
+        adjacency[i,i] = 0
+    end
+   
+    ##TODO option for WGCNA readout pdf (option to set dir (deafult cache) as well?) 
+    return [adjacency,numbers,colours]
 end
