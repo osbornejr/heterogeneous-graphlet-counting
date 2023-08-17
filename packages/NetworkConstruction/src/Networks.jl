@@ -325,9 +325,9 @@ function wgcna(data::AbstractArray,transcript_types::Array{String})
     #set up community df with colours matched
     groups = unique(dynamicColors)
     #map to hex code (using Colors.jl)
-    hex_hash = Dict(Pair.(groups,hex.(parse.(Colorant,groups))))
+    #hex_hash = Dict(Pair.(groups,hex.(parse.(Colorant,groups))))
     ##alternatively set colorscheme here rather than use WGCNAs #TODO set in config
-    #hex_hash = Dict(Pair.(groups,hex.(ColorSchemes.tableau_20[1:length(groups)])))
+    hex_hash = Dict(Pair.(groups,hex.(ColorSchemes.tableau_20[1:length(groups)])))
     #function to get dictmatch in place
     function dict_match(dict::AbstractDict,key::Any)
         get(dict,key,"ERROR")
