@@ -86,13 +86,14 @@ wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna()
 components,a,n,v,e = get_network_construction();
 
 # ╔═╡ dbb99ec2-4774-4993-a4b8-dda027dda19f
-g = Graph(wgcna_network.>0.2)
+#g = Graph(wgcna_network.>0.2)
+g = Graph(adj_matrix)
 
 # ╔═╡ 713bddda-5830-4f75-9867-19f60bdf5816
 wgcna_network.>0.3
 
 # ╔═╡ 86ca01a5-ffd3-4b91-838d-01c465346593
-vertex_colors =string.(wgcna_comm.color);
+vertex_colors =string.(comm_df.color);
  #vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple);
 
 # ╔═╡ a007f64f-e40d-4db3-8e02-25502ea41c51
