@@ -10,4 +10,4 @@ output/
 node_modules
 cytoscape/*
 bin/
-Manifest.toml
+*Manifest.toml
