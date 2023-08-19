@@ -1,3 +1,12 @@
+"""
+    get_input_data()
+
+
+Retrieve the raw input data associated with the curent experiment parameters.
+
+Output is in form: [`raw_counts`]
+
+"""
 function get_input_data()
     file = join([params["cache"]["test_dir"],"raw_counts.jld2"],"/")
     #cache_check(file)
@@ -13,6 +22,17 @@ function get_input_data()
 end 
 export get_input_data
 
+
+"""
+    get_output_data()
+
+
+Retrieve all output data associated with the curent experiment parameters.
+
+Output is in form: 
+
+`raw_counts`,`processed_counts`,`similarity_matrix`,`adj_matrix`,`network_counts`,`vertexlist`,`edgelist`
+"""
 function get_output_data()
     ##method to get all outputs at once
     raw_counts =  get_input_data()
@@ -29,6 +49,14 @@ function get_output_data()
 end
 export get_output_data
 
+"""
+    get_preprocessed_data()
+
+
+Retrieve all preprocessing data associated with the curent experiment parameters.
+
+Output is in form: [`raw_counts`,`round_counts`,`vst_counts`,`clean_counts`,`norm_counts`,`sample_counts`]
+"""
 function get_preprocessed_data()
     ##method to get preprocessed dataframes before any network construction
     raw_counts =  get_input_data()
@@ -50,6 +78,14 @@ function get_preprocessed_data()
 end
 export get_preprocessed_data
 
+"""
+    get_network_construction()
+
+
+Retrieve all network information associated with the curent experiment parameters.
+
+Output is in form: [`components`,`adj_matrix`,`network_counts`,`vertexlist`,`edgelist`]
+"""
 function get_network_construction()
     ##alt method that allows loading of cache if output exists, and gives an error otherwise.
     samp_file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
@@ -74,9 +110,16 @@ end
 export get_network_construction
 
 
+"""
+    get_wgcna()
+
+Retrieve WGCNA network and community information associated with the curent experiment parameters.
+
+Output is in form: [`wgcna_network`,`wgcna_comm`]
+"""
 function get_wgcna()
 
-    wgcna_file = "$(params["cache"]["community_dir"])/wgcna/wgcna.jld2"
+    wgcna_file = "$(params["cache"]["wgcna_dir"])/wgcna.jld2"
     if (isfile(wgcna_file))
         wgcna_network = cache_load(wgcna_file,"adjacency")
         wgcna_comm = cache_load(wgcna_file,"communities")
@@ -87,6 +130,13 @@ function get_wgcna()
 end
 export get_wgcna
 
+"""
+    get_biological_validation()
+
+Retrieve basic biological validation information associated with the curent experiment parameters.
+
+Output is in form: [`kegg_top_terms`,`go_top_terms`]
+"""
 function get_biological_validation()
     #get baseline entrez and kegg info about transcripts
     bio_dir = params["cache"]["bio_dir"]

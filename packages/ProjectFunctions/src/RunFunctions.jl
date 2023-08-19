@@ -369,8 +369,7 @@ function wgcna_analysis(processed_counts)
     ##WGCNA needs to set up its own network (on the same processed counts) so we output both the network and the derived community structure here
     #TODO integrate into community step somehow? subset or separate?
     
-    anal_dir = params["cache"]["community_dir"]    
-    wgcna_dir = "$anal_dir/wgcna"
+    wgcna_dir = params["cache"]["wgcna_dir"]    
     run(`mkdir -p $(wgcna_dir)`)
     wgcna_file = "$wgcna_dir/wgcna.jld2"
     if (isfile(wgcna_file))

@@ -17,6 +17,7 @@ function make_cache(dirs...;dir_name::String)
 run(`rm -r $(dir)/`)
     end 
 end
+
 function cache_setup()
     ##create directory for run
     make_cache(dir_name="test_dir",cwd,params["cache"]["base_dir"],params["test_name"])
@@ -48,6 +49,7 @@ function cache_setup()
 
     make_cache(dir_name="bio_dir",params["cache"]["anal_dir"],"biological_validation")
     make_cache(dir_name="community_dir",params["cache"]["anal_dir"],"communities")
+    make_cache(dir_name="wgcna_dir",params["cache"]["community_dir"],"wgcna")
     make_cache(dir_name="graphlet_counting_dir",params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-counting")
     make_cache(dir_name="rep_dir",params["cache"]["graphlet_counting_dir"],"typed_representations","nullmodel",string(params["analysis"]["null_model_size"])*"_simulations")
     make_cache(dir_name="graphlet_enum_dir",params["cache"]["anal_dir"],"graphlets",string(params["analysis"]["graphlet_size"]),"graphlet-enumeration")
