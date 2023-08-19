@@ -96,6 +96,7 @@ function wgcna(data::AbstractArray,transcript_types::Array{String})
     library(WGCNA)  
     library(dendextend)
     library(ggdendro)
+    library(tidyverse)
     plot_ggdendro <- function(hcdata,
         direction   = c("lr", "rl", "tb", "bt"),
         fan         = FALSE,
