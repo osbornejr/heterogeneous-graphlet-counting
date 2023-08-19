@@ -79,21 +79,18 @@ end;
 comm_df = ProjectFunctions.community_analysis(network_counts,adj_matrix);
 
 # ╔═╡ 1a59fc8c-a2dc-47ca-84f4-f8bce3ec3751
-wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna()
+wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna();
 
 # ╔═╡ b169ade7-94a0-4f4c-98b5-2a8d3f02d323
 # ╠═╡ show_logs = false
 components,a,n,v,e = get_network_construction();
 
 # ╔═╡ dbb99ec2-4774-4993-a4b8-dda027dda19f
-#g = Graph(wgcna_network.>0.2)
-g = Graph(adj_matrix)
-
-# ╔═╡ 713bddda-5830-4f75-9867-19f60bdf5816
-wgcna_network.>0.3
+g = Graph(wgcna_network.>0.2)
+#g = Graph(adj_matrix)
 
 # ╔═╡ 86ca01a5-ffd3-4b91-838d-01c465346593
-vertex_colors =string.(comm_df.color);
+vertex_colors =string.(wgcna_comm.color);
  #vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple);
 
 # ╔═╡ a007f64f-e40d-4db3-8e02-25502ea41c51
@@ -103,7 +100,7 @@ begin
 	fig,scene,p = graphplot(g;
 		layout=Spectral(dim=3),
 		node_color = vertex_colors,
-		node_size = 10,
+		node_size = 20,
 		edge_color = :white,
 		edge_width = 0.1,
 		figure = (resolution = (1500, 800),)
@@ -1958,7 +1955,6 @@ version = "3.5.0+0"
 # ╠═1a59fc8c-a2dc-47ca-84f4-f8bce3ec3751
 # ╟─b169ade7-94a0-4f4c-98b5-2a8d3f02d323
 # ╠═dbb99ec2-4774-4993-a4b8-dda027dda19f
-# ╠═713bddda-5830-4f75-9867-19f60bdf5816
 # ╠═a007f64f-e40d-4db3-8e02-25502ea41c51
 # ╠═86ca01a5-ffd3-4b91-838d-01c465346593
 # ╠═7e7919a9-8dc3-4d78-9090-4ff8512193f8
