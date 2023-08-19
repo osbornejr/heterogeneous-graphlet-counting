@@ -27,12 +27,12 @@ nos term ./bin/unison heterogeneous-graphlet-counting
 wincmd c
 
 "setup terminal with port connection 
-nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -t julia-server'"
+nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia-server'"
 file julia-port
 wincmd c
 
 "open REPL terminal vertically on right
-nos vert term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -t julia'"
+nos vert term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia'"
 file repl
 wincmd p
 
