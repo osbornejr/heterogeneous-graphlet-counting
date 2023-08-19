@@ -20,6 +20,7 @@ cache:
     anal_dir: false 
     bio_dir: false
     community_dir: false 
+    wgcna_dir: false
     graphlet_counting_dir: false
     rep_dir: false 
     graphlet_enum_dir: false 
