@@ -15,7 +15,6 @@ macro bind(def, element)
 end
 
 # ╔═╡ ca75971e-d54a-11ed-20fe-c374d41bc379
-# ╠═╡ show_logs = false
 begin
 	cwd = ENV["PWD"];	
 	import Pkg
@@ -35,6 +34,10 @@ begin
 	using Graphs
 	using GraphMakie
 	using NetworkLayout
+	using DataStructures
+	using Gadfly
+	using StatsBase
+	using DataFrames
 	using JSServe
 	## load dev packages last
 	using DataPreprocessing
@@ -46,6 +49,9 @@ begin
 
 	Page()
 end
+
+# ╔═╡ 80a28651-5bc7-451c-883b-826d810624c3
+
 
 # ╔═╡ 149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
 @bind experiment Select(["GSE68559","GSE68559_sub"])
@@ -85,12 +91,80 @@ wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna();
 # ╠═╡ show_logs = false
 components,a,n,v,e = get_network_construction();
 
+# ╔═╡ de2b61b7-e30a-4bcc-a3ac-ff42f97a6e90
+begin
+		unweighted_wgcna= (wgcna_network.>0.2)
+		wgcna_components = NetworkConstruction.network_components(unweighted_wgcna)
+		largest = findmax(length.(wgcna_components))[2]
+        wgcna_adj = 		unweighted_wgcna[wgcna_components[largest],wgcna_components[largest]]
+end
+
+# ╔═╡ 7cb8287e-e94a-43c2-8296-b71862c27a25
+wgcna_vertexlist = network_counts[wgcna_components[largest],:].transcript_type
+
+# ╔═╡ df553213-1094-46aa-87ec-e48e3591f632
+sum(sum(unweighted_wgcna,dims=1).>2)
+
+# ╔═╡ 5bb40b87-5435-4eb2-836c-af959d22edbf
+dd = GraphletCounting.typed_degree_distribution(wgcna_vertexlist,NetworkConstruction.edgelist_from_adj(wgcna_adj))
+
+# ╔═╡ bc881e1f-cd97-4ae1-af80-66fea1beab9d
+plot_dd_data = DataFrame(coding = map(x->DefaultDict(0,x)["coding"],dd),noncoding = map(x->DefaultDict(0,x)["noncoding"],dd));
+
+
+# ╔═╡ 2eeb972b-fad8-4612-8556-9ebf98cd748b
+@bind net Select([1=>"Our network",2=>"WGCNA network"])
+
+# ╔═╡ ec3ebcf0-ab41-464e-be91-f47f4db075cc
+bc = 50
+
+# ╔═╡ 47ce3620-71d2-46b9-9884-c47182c42cc0
+deg_p = Gadfly.plot(
+	layer(plot_dd_data[wgcna_vertexlist.=="coding",:],x = "coding",Geom.line,Stat.histogram(bincount=bc),color=["coding->coding"]),
+	layer(plot_dd_data[wgcna_vertexlist.=="coding",:],x = "noncoding",Geom.line,Stat.histogram(bincount=bc),color=["coding->noncoding"]),
+	layer(plot_dd_data[wgcna_vertexlist.=="noncoding",:],x = "coding",Geom.line,Stat.histogram(bincount=bc),color=["noncoding->coding"]),
+	layer(plot_dd_data[wgcna_vertexlist.=="noncoding",:],x = "noncoding",Geom.line,Stat.histogram(bincount=bc),color=["noncoding->noncoding"]),
+	Guide.title("Typed degree distribution: WGCNA"),
+	Guide.xlabel("degree"),
+	Guide.ylabel("frequency"),
+	Gadfly.Theme(grid_line_width = 0mm))
+
+# ╔═╡ bb7c349f-87fc-4689-85ba-477ef41cb028
+Gadfly.plot(x=vec(wgcna_network),Stat.histogram)
+
+# ╔═╡ 9cb5ac9c-6f1a-4fad-b617-ae01dc386299
+wgcna_network
+
+# ╔═╡ 12ce382b-432f-429c-bf04-2c1f4789916d
+raw_counts
+
+# ╔═╡ 9ff6470c-4919-4d77-9e89-7400c989c0fc
+vec(wgcna_network)
+
+# ╔═╡ 6bc3a497-dba7-48db-bfc9-07fabac73539
+comm_df
+
+# ╔═╡ 55549395-add5-46a1-8b27-4f2aa18de335
+wgcna_comm
+
+# ╔═╡ f7529721-50cc-42e4-ab90-0624d8ceac00
+wgcna_comp_comms = wgcna_comm[wgcna_components[largest],:]
+
+# ╔═╡ d0d0e4c8-5d0c-4942-bacb-9565923c3c89
+network_selector = [[adj_matrix,comm_df],[adj_matrix,wgcna_comp_comms]];
+
+# ╔═╡ 044aaaa7-c0d8-42f4-b436-5c85b369c92b
+A = network_selector[net][1];
+
 # ╔═╡ dbb99ec2-4774-4993-a4b8-dda027dda19f
-g = Graph(wgcna_network.>0.2)
+g = Graph(A)
 #g = Graph(adj_matrix)
 
+# ╔═╡ f688c943-e57b-4631-9edb-72cf18322968
+C= network_selector[net][2];
+
 # ╔═╡ 86ca01a5-ffd3-4b91-838d-01c465346593
-vertex_colors =string.(wgcna_comm.color);
+vertex_colors =string.(C.color);
  #vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple);
 
 # ╔═╡ a007f64f-e40d-4db3-8e02-25502ea41c51
@@ -156,7 +230,10 @@ sig_graphlets;
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataPreprocessing = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
 GraphletAnalysis = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
@@ -171,18 +248,28 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Portinari = "72ee7ba2-92b2-4971-a97d-28f521fe8910"
 ProjectFunctions = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 
 [compat]
 CommonMark = "~0.8.12"
+DataFrames = "~1.6.1"
+DataPreprocessing = "~0.1.0"
+DataStructures = "~0.18.15"
+Gadfly = "~1.4.0"
 GraphMakie = "~0.5.4"
+GraphletAnalysis = "~0.1.0"
+GraphletCounting = "~0.1.0"
 Graphs = "~1.8.0"
 HypertextLiteral = "~0.9.4"
 JSServe = "~2.2.5"
+NetworkConstruction = "~0.1.0"
 NetworkLayout = "~0.4.5"
 PlutoUI = "~0.7.51"
 Portinari = "~0.1.2"
+ProjectFunctions = "~0.1.0"
 Revise = "~3.5.2"
+StatsBase = "~0.33.21"
 WGLMakie = "~0.8.9"
 """
 
@@ -192,7 +279,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "b90a380fa683c73d86a494d59939054f534222c8"
+project_hash = "1621b54e66bf234dc9ae28660a101025b3f3aeb6"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -424,10 +511,10 @@ uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.15.0"
 
 [[deps.DataFrames]]
-deps = ["Compat", "DataAPI", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SentinelArrays", "SnoopPrecompile", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "aa51303df86f8626a962fccb878430cdb0a97eee"
+deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
+git-tree-sha1 = "04c738083f29f86e62c8afc341f0967d8717bdb8"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "1.5.0"
+version = "1.6.1"
 
 [[deps.DataPreprocessing]]
 deps = ["CSV", "Cairo", "Compose", "DataFrames", "Gadfly", "LinearAlgebra", "RCall", "Statistics"]
@@ -437,9 +524,9 @@ version = "0.1.0"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "d1fff3a548102f48987a52a2e0d114fa97d730f0"
+git-tree-sha1 = "3dbd312d370723b6bb43ba9d02fc36abade4518d"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.18.13"
+version = "0.18.15"
 
 [[deps.DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -621,9 +708,9 @@ version = "0.1.5"
 
 [[deps.Gadfly]]
 deps = ["Base64", "CategoricalArrays", "Colors", "Compose", "Contour", "CoupledFields", "DataAPI", "DataStructures", "Dates", "Distributions", "DocStringExtensions", "Hexagons", "IndirectArrays", "IterTools", "JSON", "Juno", "KernelDensity", "LinearAlgebra", "Loess", "Measures", "Printf", "REPL", "Random", "Requires", "Showoff", "Statistics"]
-git-tree-sha1 = "13b402ae74c0558a83c02daa2f3314ddb2d515d3"
+git-tree-sha1 = "d546e18920e28505e9856e1dfc36cff066907c71"
 uuid = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
-version = "1.3.4"
+version = "1.4.0"
 
 [[deps.GeoInterface]]
 deps = ["Extents"]
@@ -1945,17 +2032,36 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═ca75971e-d54a-11ed-20fe-c374d41bc379
-# ╟─149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
-# ╟─94900112-a962-462d-a5ab-715b42af0ce7
-# ╟─61f86902-79c0-44b2-9108-242c8064a92d
-# ╟─c68738af-2d47-418d-8c50-b6d6c5cceb27
-# ╟─45852339-5530-49b6-b1f2-a95b6452b431
+# ╠═80a28651-5bc7-451c-883b-826d810624c3
+# ╠═149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
+# ╠═94900112-a962-462d-a5ab-715b42af0ce7
+# ╠═61f86902-79c0-44b2-9108-242c8064a92d
+# ╠═c68738af-2d47-418d-8c50-b6d6c5cceb27
+# ╠═45852339-5530-49b6-b1f2-a95b6452b431
 # ╠═af6b4890-0db9-4a4d-9ff2-c9fdfa0a72cc
 # ╠═8bc060ea-1b07-4a9b-9a17-f6fd8c470c6c
 # ╠═1a59fc8c-a2dc-47ca-84f4-f8bce3ec3751
 # ╟─b169ade7-94a0-4f4c-98b5-2a8d3f02d323
+# ╠═de2b61b7-e30a-4bcc-a3ac-ff42f97a6e90
+# ╠═7cb8287e-e94a-43c2-8296-b71862c27a25
 # ╠═dbb99ec2-4774-4993-a4b8-dda027dda19f
+# ╠═df553213-1094-46aa-87ec-e48e3591f632
+# ╠═5bb40b87-5435-4eb2-836c-af959d22edbf
+# ╠═bc881e1f-cd97-4ae1-af80-66fea1beab9d
+# ╠═d0d0e4c8-5d0c-4942-bacb-9565923c3c89
+# ╠═2eeb972b-fad8-4612-8556-9ebf98cd748b
+# ╠═044aaaa7-c0d8-42f4-b436-5c85b369c92b
+# ╠═f688c943-e57b-4631-9edb-72cf18322968
+# ╠═ec3ebcf0-ab41-464e-be91-f47f4db075cc
+# ╠═47ce3620-71d2-46b9-9884-c47182c42cc0
+# ╠═bb7c349f-87fc-4689-85ba-477ef41cb028
+# ╠═9cb5ac9c-6f1a-4fad-b617-ae01dc386299
+# ╠═12ce382b-432f-429c-bf04-2c1f4789916d
+# ╠═9ff6470c-4919-4d77-9e89-7400c989c0fc
 # ╠═a007f64f-e40d-4db3-8e02-25502ea41c51
+# ╠═6bc3a497-dba7-48db-bfc9-07fabac73539
+# ╠═55549395-add5-46a1-8b27-4f2aa18de335
+# ╠═f7529721-50cc-42e4-ab90-0624d8ceac00
 # ╠═86ca01a5-ffd3-4b91-838d-01c465346593
 # ╠═7e7919a9-8dc3-4d78-9090-4ff8512193f8
 # ╠═371961c1-36dd-4aef-8df7-6b54ed93c5cd
