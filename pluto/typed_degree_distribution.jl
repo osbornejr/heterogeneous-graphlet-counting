@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.22
+# v0.19.27
 
 using Markdown
 using InteractiveUtils
@@ -402,11 +402,23 @@ git-tree-sha1 = "9c209fb7536406834aa938fb149964b985de6c83"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
 version = "0.7.1"
 
+[[deps.ColorSchemes]]
+deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
+git-tree-sha1 = "d9a8f86737b665e15a9641ecbac64deef9ce6724"
+uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
+version = "3.23.0"
+
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
 git-tree-sha1 = "eb7f0f8307f71fac7c606984ea5fb2817275d6e4"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
 version = "0.11.4"
+
+[[deps.ColorVectorSpace]]
+deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "Requires", "Statistics", "TensorCore"]
+git-tree-sha1 = "a1f44953f2382ebb937d60dafbe2deea4bd23249"
+uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
+version = "0.10.0"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
@@ -1012,7 +1024,7 @@ uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
 version = "1.0.2"
 
 [[deps.NetworkConstruction]]
-deps = ["Colors", "DataFrames", "DataPreprocessing", "Distributed", "Graphs", "InformationMeasures", "LinearAlgebra", "Luxor", "Printf", "ProgressMeter", "RCall", "SharedArrays", "Statistics", "StatsBase"]
+deps = ["ColorSchemes", "Colors", "DataFrames", "DataPreprocessing", "Distributed", "Graphs", "InformationMeasures", "LinearAlgebra", "Luxor", "Printf", "ProgressMeter", "RCall", "SharedArrays", "Statistics", "StatsBase"]
 path = "/home/osbornejr/app/packages/NetworkConstruction"
 uuid = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 version = "0.1.0"
@@ -1345,6 +1357,12 @@ version = "1.10.1"
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 version = "1.10.1"
+
+[[deps.TensorCore]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
+uuid = "62fd8b95-f654-4bbd-a8a5-9c27f68ccd50"
+version = "0.1.1"
 
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
