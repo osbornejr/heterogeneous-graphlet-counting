@@ -109,7 +109,6 @@ function get_network_construction()
 end
 export get_network_construction
 
-
 """
     get_wgcna()
 
