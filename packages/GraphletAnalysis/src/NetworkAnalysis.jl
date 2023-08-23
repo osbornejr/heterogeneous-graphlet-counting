@@ -65,6 +65,43 @@ th.rowNumber, td.rowNumber {
     close(io)
 end
 
+"""
+    rand_index
+
+calculate the Rand index of two graph partitions.
+
+## Example
+A = [1,1,2,3]
+B = ["a,"b,"a","c"]
+rand_index(A,B) = 
+"""
+function rand_index(A::AbstractArray,B::AbstractArray)
+    if (length(A)!=length(B))
+        throw(ArgumentError("Each partition must have the same number of elements"))
+    end
+    ##determine which elements are in same group for each partition
+    n = length(A)
+    mat_A = zeros(Bool,n,n)
+    mat_B = zeros(Bool,n,n)
+    for i in 1:n
+        for j in i:n ##only fill upper triangle to avoid double counting
+            mat_A[i,j] = A[i] == A[j]
+            mat_B[i,j] = B[i] == B[j]
+        end
+    end
+    ## Compare each match matrix to see where the two partitions agree
+    agree = mat_A + mat_B
+    
+    #find cases where both partitions have element pairs in same group (subtract n, because diag of each match matrix needs to be discounted)
+    both = sum(agree.=2)-n
+
+    #find case where neither have element pair in same group (subtract (n 2) to allow for unfilled lower triangle of match matrices)
+    n_2 = (n*(n-1)/2)
+    neither = sum(agree.=0)- n_2
+
+    ##calculate rand score based on the above
+    Rand = (both + neither)/n_2
+end
 
 function get_community_structure(adj_matrix::AbstractArray,vertex_names::Vector{<:AbstractString},detection_method::String;plot_prefix::String = "", threejs_plot::Bool = false)
     ## Get community structure of a network using r-igraph package 
@@ -197,7 +234,7 @@ function get_functional_annotations(comm_vertices::DataFrame;ensembl_version::St
     library(httr)
     library(topGO)
     library(tidyverse)
-    
+   
     ## Functional annotation of communities
     vertices = tibble(comm_vertices)
     vertex_names = vertices["label"]
