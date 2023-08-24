@@ -135,7 +135,7 @@ export get_wgcna
 Retrieve basic biological validation information associated with the curent experiment parameters.
 
 Output is in form: `kegg_top_terms`,`go_top_terms`
-"""
+ """
 function get_biological_validation()
     #get baseline entrez and kegg info about transcripts
     bio_dir = params["cache"]["bio_dir"]
@@ -154,3 +154,22 @@ function get_biological_validation()
     return [ktt,gtt]
 end
 export get_biological_validation
+
+"""
+    get_graphlet_counts()
+
+Retrieve graphlet counts associated with the network under curent experiment parameters.
+
+Output is in form: `graphlet_counts`
+ """
+function get_graphlet_counts()
+
+    anal_dir = params["cache"]["graphlet_counting_dir"]    
+    graphlet_file = "$anal_dir/graphlet-counting.jld2" 
+    if (isfile(graphlet_file))
+        graphlet_counts = cache_load(graphlet_file,"graphlets")
+    else
+            throw(ArgumentError("No cached file exists at $graphlet_file, please ensure graphlet counting has been run on network."))
+    end
+end
+export get_graphlet_counts
