@@ -4,7 +4,7 @@
 
 Retrieve the raw input data associated with the curent experiment parameters.
 
-Output is in form: [`raw_counts`]
+Output is in form: `raw_counts`
 
 """
 function get_input_data()
@@ -55,7 +55,7 @@ export get_output_data
 
 Retrieve all preprocessing data associated with the curent experiment parameters.
 
-Output is in form: [`raw_counts`,`round_counts`,`vst_counts`,`clean_counts`,`norm_counts`,`sample_counts`]
+Output is in form: `raw_counts`,`round_counts`,`vst_counts`,`clean_counts`,`norm_counts`,`sample_counts`
 """
 function get_preprocessed_data()
     ##method to get preprocessed dataframes before any network construction
@@ -84,7 +84,7 @@ export get_preprocessed_data
 
 Retrieve all network information associated with the curent experiment parameters.
 
-Output is in form: [`components`,`adj_matrix`,`network_counts`,`vertexlist`,`edgelist`]
+Output is in form: `components`,`adj_matrix`,`network_counts`,`vertexlist`,`edgelist`
 """
 function get_network_construction()
     ##alt method that allows loading of cache if output exists, and gives an error otherwise.
@@ -115,7 +115,7 @@ export get_network_construction
 
 Retrieve WGCNA network and community information associated with the curent experiment parameters.
 
-Output is in form: [`wgcna_network`,`wgcna_comm`]
+Output is in form: `wgcna_network`,`wgcna_comm`
 """
 function get_wgcna()
 
@@ -135,7 +135,7 @@ export get_wgcna
 
 Retrieve basic biological validation information associated with the curent experiment parameters.
 
-Output is in form: [`kegg_top_terms`,`go_top_terms`]
+Output is in form: `kegg_top_terms`,`go_top_terms`
 """
 function get_biological_validation()
     #get baseline entrez and kegg info about transcripts
