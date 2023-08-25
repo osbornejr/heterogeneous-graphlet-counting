@@ -331,6 +331,12 @@ $(JavaScript(text))
 """ 
 )
 
+# ╔═╡ b4262a92-7bc8-44a3-acaf-3dbcc235f688
+sum(data_from_dataframe(raw_counts),dims=1)
+
+# ╔═╡ 4b63bfcf-d192-4826-ab41-84b0cc1b6489
+raw_counts
+
 # ╔═╡ 757bb449-28ec-4545-b1b5-d3f84217ab81
 begin
 	index
@@ -454,6 +460,9 @@ processed_counts
 
 # ╔═╡ 1414f977-cb37-4592-a104-217822a42ae2
 v.edges
+
+# ╔═╡ c0213d48-97da-47e3-a32c-9bf87c465c09
+1600*1599/2
 
 # ╔═╡ 07f12515-a320-434c-b1e3-73a305491f94
 v.weights
@@ -1865,6 +1874,8 @@ version = "3.5.0+0"
 # ╠═fbdd59ff-9b6c-4498-bdb7-b36682b45ed5
 # ╠═8e7533fa-4914-44f9-b470-fea060af8fe1
 # ╠═d4ab62e9-de6e-42fa-a655-d2c8231b15c6
+# ╠═b4262a92-7bc8-44a3-acaf-3dbcc235f688
+# ╠═4b63bfcf-d192-4826-ab41-84b0cc1b6489
 # ╠═757bb449-28ec-4545-b1b5-d3f84217ab81
 # ╠═92c7a3a4-ebc1-4166-a106-9b781f546f60
 # ╠═ffe2cd5b-4be6-40c7-aa97-72db54fd9d3a
@@ -1894,6 +1905,7 @@ version = "3.5.0+0"
 # ╠═01ff1c3e-6eaa-4863-bb1d-7f6f7037fafe
 # ╠═d3762b94-02d7-466c-be63-a534d6a75894
 # ╠═1414f977-cb37-4592-a104-217822a42ae2
+# ╠═c0213d48-97da-47e3-a32c-9bf87c465c09
 # ╠═07f12515-a320-434c-b1e3-73a305491f94
 # ╠═e5e63932-1f89-4858-ae76-72fefa2d0139
 # ╠═317602a3-d0b3-435f-af6d-112be42617d4
