@@ -50,9 +50,6 @@ begin
 	Page()
 end
 
-# ╔═╡ 80a28651-5bc7-451c-883b-826d810624c3
-
-
 # ╔═╡ 149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
 @bind experiment Select(["GSE68559","GSE68559_sub"])
 
@@ -93,7 +90,7 @@ components,a,n,v,e = get_network_construction();
 
 # ╔═╡ de2b61b7-e30a-4bcc-a3ac-ff42f97a6e90
 begin
-		unweighted_wgcna= (wgcna_network.>0.2)
+		unweighted_wgcna= (wgcna_network.>0.5)
 		wgcna_components = NetworkConstruction.network_components(unweighted_wgcna)
 		largest = findmax(length.(wgcna_components))[2]
         wgcna_adj = 		unweighted_wgcna[wgcna_components[largest],wgcna_components[largest]]
@@ -151,7 +148,7 @@ wgcna_comm
 wgcna_comp_comms = wgcna_comm[wgcna_components[largest],:]
 
 # ╔═╡ d0d0e4c8-5d0c-4942-bacb-9565923c3c89
-network_selector = [[adj_matrix,comm_df],[adj_matrix,wgcna_comp_comms]];
+network_selector = [[adj_matrix,comm_df],[wgcna_adj,wgcna_comp_comms]];
 
 # ╔═╡ 044aaaa7-c0d8-42f4-b436-5c85b369c92b
 A = network_selector[net][1];
@@ -176,7 +173,7 @@ begin
 		node_color = vertex_colors,
 		node_size = 20,
 		edge_color = :white,
-		edge_width = 0.1,
+		edge_width = 1,
 		figure = (resolution = (1500, 800),)
 							
 	)
@@ -2032,7 +2029,6 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═ca75971e-d54a-11ed-20fe-c374d41bc379
-# ╠═80a28651-5bc7-451c-883b-826d810624c3
 # ╠═149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
 # ╠═94900112-a962-462d-a5ab-715b42af0ce7
 # ╠═61f86902-79c0-44b2-9108-242c8064a92d
