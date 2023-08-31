@@ -191,6 +191,8 @@ function get_community_structure(adj_matrix::AbstractArray,vertex_names::Vector{
     
     @rget vertices
     
+    ## fix group column to match expected output of community
+    vertices.group = parse.(Int,String.(vertices.group))
     return vertices
 end
 
