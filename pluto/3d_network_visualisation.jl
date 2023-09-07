@@ -90,7 +90,7 @@ components,a,n,v,e = get_network_construction();
 
 # ╔═╡ de2b61b7-e30a-4bcc-a3ac-ff42f97a6e90
 begin
-		unweighted_wgcna= (wgcna_network.>0.5)
+		unweighted_wgcna= (wgcna_network.>0.2)
 		wgcna_components = NetworkConstruction.network_components(unweighted_wgcna)
 		largest = findmax(length.(wgcna_components))[2]
         wgcna_adj = 		unweighted_wgcna[wgcna_components[largest],wgcna_components[largest]]
@@ -173,7 +173,7 @@ begin
 		node_color = vertex_colors,
 		node_size = 20,
 		edge_color = :white,
-		edge_width = 1,
+		edge_width = .1,
 		figure = (resolution = (1500, 800),)
 							
 	)
