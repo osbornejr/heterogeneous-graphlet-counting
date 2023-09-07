@@ -7,13 +7,17 @@ Find graphlet counts for each community subgraph in network.
 
 """
 function graphlet_counts_per_community(vertexlist::Vector{<:AbstractString},edgelist::Union{Array{Pair{Int,Int},1},Array{Pair,1}},community_groups::Vector{Int},graphlet_size::Int=3;run_method::String="serial",progress::Bool=false,recursive::Bool=true)
-  
+    
+    comms = unique(community_groups)
+    for c in comms 
+ GraphletCounting.count_graphlets(vertexlist,edgelist,graphlet_size,run_method="distributed-old")           
 
+
+    end
 end
 
 
 """
-
     types_per_community
 
 Find type distribution for each community subgraph in network.
