@@ -13,14 +13,17 @@ function graphlet_counts_per_community(vertexlist::Vector{<:AbstractString},edge
     end
     
     comms = unique(community_groups)
+    ##store counts for each comm here
+    Comm_arr = Dict{String,Int}[]
     for c in comms 
         ##get sub vertexlist (using index as ref)
         c_v = findall(.==(c),community_groups)
         ##get sub edgelist
-        GraphletCounting.count_graphlets(vertexlist,edgelist,graphlet_size,run_method=run_method)           
-
-
+        c_e = edgelist[findall(.==(2),sum.(is_community_edge.(edgelist,Ref(c_v))))]
+        c_g = GraphletCounting.count_graphlets(vertexlist,c_e,graphlet_size,run_method=run_method,progress=progress)           
+        push!(Comm_arr,c_g)
     end
+    return Comm_arr
 end
 
 """
