@@ -16,12 +16,21 @@ function graphlet_counts_per_community(vertexlist::Vector{<:AbstractString},edge
     for c in comms 
         ##get sub vertexlist (using index as ref)
         c_v = findall(.==(c),community_groups)
+        ##get sub edgelist
         GraphletCounting.count_graphlets(vertexlist,edgelist,graphlet_size,run_method=run_method)           
 
 
     end
 end
 
+"""
+    is_community_edge
+Determine whether the vertices of an edge pair are both within, partially within or without the community. 
+
+"""
+function is_community_edge(edge::Pair,vertexlist::Vector{Int})
+    return (in(first(edge),vertexlist),in(last(edge),vertexlist))
+end
 
 """
     types_per_community
