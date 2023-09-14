@@ -99,6 +99,9 @@ end
 # ╔═╡ 7cb8287e-e94a-43c2-8296-b71862c27a25
 wgcna_vertexlist = network_counts[wgcna_components[largest],:].transcript_type
 
+# ╔═╡ 9eb00fbb-a39e-4c49-acb5-f1728fd41d5e
+length(edgelist)
+
 # ╔═╡ df553213-1094-46aa-87ec-e48e3591f632
 sum(sum(unweighted_wgcna,dims=1).>2)
 
@@ -2041,6 +2044,7 @@ version = "3.5.0+0"
 # ╠═de2b61b7-e30a-4bcc-a3ac-ff42f97a6e90
 # ╠═7cb8287e-e94a-43c2-8296-b71862c27a25
 # ╠═dbb99ec2-4774-4993-a4b8-dda027dda19f
+# ╠═9eb00fbb-a39e-4c49-acb5-f1728fd41d5e
 # ╠═df553213-1094-46aa-87ec-e48e3591f632
 # ╠═5bb40b87-5435-4eb2-836c-af959d22edbf
 # ╠═bc881e1f-cd97-4ae1-af80-66fea1beab9d
