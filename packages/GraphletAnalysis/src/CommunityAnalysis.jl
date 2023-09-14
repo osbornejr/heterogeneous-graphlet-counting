@@ -27,13 +27,44 @@ function graphlet_counts_per_community(vertexlist::Vector{<:AbstractString},edge
 end
 
 """
+    
     is_community_edge
-Determine whether the vertices of an edge pair are both within, partially within or without the community. 
+
+Determine whether the vertices of an edge pair are both within, partially within or without the community vertexlist. 
 
 """
 function is_community_edge(edge::Pair,vertexlist::Vector{Int})
     return (in(first(edge),vertexlist),in(last(edge),vertexlist))
 end
+
+"""
+    
+    cross_community_edges
+
+Find all edges that exist between communities for a given commmunity partition.  
+
+"""
+function cross_community_edges(edgelist::Vector{Pair},community_partition::Vector{Int})
+    
+    ##get all unique communities
+    comms = unique(community_partition)
+    ##store edge status for each community
+    edge_arr = Vector{Int}[]
+    for c in comms 
+        ##get sub vertexlist (using index as ref)
+        c_v = findall(.==(c),community_partition)
+        ##get edge status for this community
+        c_e = sum.(is_community_edge.(edgelist,Ref(c_v)))
+        #store
+        push!(edge_arr,c_e)
+    end
+    ## check status of each edge over all communities
+    comb = hcat(edge_arr...)
+    edge_cat = [max(comb[x,:]...) for x in 1:length(edgelist)]
+    edge_bool = (edge_cat.-2).*-1
+    return BitVector(edge_bool)
+end
+
 
 """
     types_per_community
