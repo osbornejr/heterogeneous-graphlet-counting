@@ -4,7 +4,18 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
 # ╔═╡ 2411cca4-5386-11ee-0714-a5b2fa50031f
+# ╠═╡ show_logs = false
 begin
 	cwd = ENV["PWD"];	
 	import Pkg
@@ -40,6 +51,39 @@ begin
 	Page()
 end
 
+# ╔═╡ 7b114d58-d116-4879-b2dd-8a77ac2e0c72
+md"""
+## Define a community partition on the network
+"""
+
+# ╔═╡ 149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
+@bind experiment Select(["GSE68559","GSE68559_sub"])
+
+# ╔═╡ 61f86902-79c0-44b2-9108-242c8064a92d
+@bind minreq Select([0.05,0.10])
+
+# ╔═╡ 45852339-5530-49b6-b1f2-a95b6452b431
+@bind variance_cut Select([1.0,2.0])
+
+# ╔═╡ c68738af-2d47-418d-8c50-b6d6c5cceb27
+@bind norm_meth Select(["median","upper_quartile","quantile","TMM","TMMwsp","total_count"])
+
+# ╔═╡ 94900112-a962-462d-a5ab-715b42af0ce7
+@bind expression_cut Select([0.05,0.10])
+
+
+# ╔═╡ 904be19d-a6db-40b2-b8d2-c9376789b3cb
+# ╠═╡ show_logs = false
+begin
+	load_config(cwd*"/config/run-files/$experiment.yaml")
+	params["data_preprocessing"]["expression_cutoff"] = expression_cut
+	params["data_preprocessing"]["minreq"] = minreq
+	params["data_preprocessing"]["norm_method"] = norm_meth
+	params["data_preprocessing"]["variance_percent"] = variance_cut 
+	ProjectFunctions.cache_setup()
+raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = get_output_data();
+end;
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -68,15 +112,20 @@ WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 [compat]
 CommonMark = "~0.8.12"
 DataFrames = "~1.6.1"
+DataPreprocessing = "~0.1.0"
 DataStructures = "~0.18.15"
 Gadfly = "~1.4.0"
 GraphMakie = "~0.5.6"
+GraphletAnalysis = "~0.1.0"
+GraphletCounting = "~0.1.0"
 Graphs = "~1.8.0"
 HypertextLiteral = "~0.9.4"
 JSServe = "~2.2.10"
+NetworkConstruction = "~0.1.0"
 NetworkLayout = "~0.4.5"
 PlutoUI = "~0.7.52"
 Portinari = "~0.1.2"
+ProjectFunctions = "~0.1.0"
 Revise = "~3.5.3"
 StatsBase = "~0.33.21"
 WGLMakie = "~0.8.12"
@@ -88,7 +137,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "486bd02c41ddfeb5b091c8b64b25d442b5a98e5d"
+project_hash = "90f47f91c9faa6c859624407fd208ebbf9a0c7df"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
@@ -2024,5 +2073,12 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═2411cca4-5386-11ee-0714-a5b2fa50031f
+# ╠═7b114d58-d116-4879-b2dd-8a77ac2e0c72
+# ╠═904be19d-a6db-40b2-b8d2-c9376789b3cb
+# ╠═149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
+# ╠═61f86902-79c0-44b2-9108-242c8064a92d
+# ╠═45852339-5530-49b6-b1f2-a95b6452b431
+# ╠═c68738af-2d47-418d-8c50-b6d6c5cceb27
+# ╠═94900112-a962-462d-a5ab-715b42af0ce7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
