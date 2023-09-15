@@ -15,6 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ ca75971e-d54a-11ed-20fe-c374d41bc379
+# ╠═╡ show_logs = false
 begin
 	cwd = ENV["PWD"];	
 	import Pkg
