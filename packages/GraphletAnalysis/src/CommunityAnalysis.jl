@@ -63,6 +63,7 @@ function cross_community_edges(edgelist::Vector{Pair},community_partition::Vecto
     edge_cat = [max(comb[x,:]...) for x in 1:length(edgelist)]
     edge_bool = (edge_cat.-2).*-1
     return BitVector(edge_bool)
+    #return comb
 end
 
 
