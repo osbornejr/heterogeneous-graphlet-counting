@@ -67,21 +67,35 @@ function cross_community_edges(edgelist::Vector{Pair},community_partition::Vecto
     comb = hcat(edge_arr...)
     edge_cat = [max(comb[x,:]...) for x in 1:length(edgelist)]
     edge_bool = (edge_cat.-2).*-1
-    #return BitVector(edge_bool)
+    return BitVector(edge_bool)
     ## get more detailed per community edge details      
     # first isolate in and cross community edge matrices  
-    in_comm =(comb.-1).>0
-    cross_comm = (comb.-1).==0
+    #in_comm =(comb.-1).>0
+    #cross_comm = (comb.-1).==0
     ##dummy matrix with repeated vector of comm ids 
-    comm_matrix = reshape(repeat(collect(1:n_comms),n_edges),n_comms,:)'
+    #comm_matrix = reshape(repeat(collect(1:n_comms),n_edges),n_comms,:)'
     ## vector corresponding to community of in community edges 
-    ins = sum(comm_matrix.*in_comm,dims=2) 
+    #ins = sum(comm_matrix.*in_comm,dims=2) 
     # next find communities associated with cross edges 
-    comm_matrix.*cross_comm
-    return ins
+    #comm_matrix.*cross_comm
+    #return ins
 end
 
+##make dictionaries callable/broadcastable
+(d::Dict)(k) = d[k]
 
+"""
+    edgelist_community_status
+
+Give status of each edge in terms of the given community partition.
+"""
+function edgelist_community_status(edgelist::Vector{Pair},community_partition::Vector{Int})
+   # dict to match vertex to its community
+   comm_dict = Dict(Pair.(1:length(community_partition),community_partition))
+   ##call dict to get community edgelist 
+   comm_edgelist = Pair.(comm_dict.(first.(edgelist)),comm_dict.(last.(edgelist)))
+   return comm_edgelist
+end
 
 
 """
