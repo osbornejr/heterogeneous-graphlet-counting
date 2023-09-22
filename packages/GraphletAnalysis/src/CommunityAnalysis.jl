@@ -48,6 +48,11 @@ function cross_community_edges(edgelist::Vector{Pair},community_partition::Vecto
     
     ##get all unique communities
     comms = unique(community_partition)
+    
+    ##variables
+    n_comms = length(comms)
+    n_edges = length(edgelist)
+
     ##store edge status for each community
     edge_arr = Vector{Int}[]
     for c in comms 
@@ -62,9 +67,21 @@ function cross_community_edges(edgelist::Vector{Pair},community_partition::Vecto
     comb = hcat(edge_arr...)
     edge_cat = [max(comb[x,:]...) for x in 1:length(edgelist)]
     edge_bool = (edge_cat.-2).*-1
-    return BitVector(edge_bool)
-    #return comb
+    #return BitVector(edge_bool)
+    ## get more detailed per community edge details      
+    # first isolate in and cross community edge matrices  
+    in_comm =(comb.-1).>0
+    cross_comm = (comb.-1).==0
+    ##dummy matrix with repeated vector of comm ids 
+    comm_matrix = reshape(repeat(collect(1:n_comms),n_edges),n_comms,:)'
+    ## vector corresponding to community of in community edges 
+    ins = sum(comm_matrix.*in_comm,dims=2) 
+    # next find communities associated with cross edges 
+    comm_matrix.*cross_comm
+    return ins
 end
+
+
 
 
 """
