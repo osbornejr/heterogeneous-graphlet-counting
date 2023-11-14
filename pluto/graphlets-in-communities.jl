@@ -71,7 +71,6 @@ md"""
 # ╔═╡ 94900112-a962-462d-a5ab-715b42af0ce7
 @bind expression_cut Select([0.05,0.10])
 
-
 # ╔═╡ 904be19d-a6db-40b2-b8d2-c9376789b3cb
 # ╠═╡ show_logs = false
 begin
@@ -83,6 +82,12 @@ begin
 	ProjectFunctions.cache_setup()
 raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = get_output_data();
 end;
+
+# ╔═╡ f2f7bf39-ddf3-46a1-8b05-69937220d0e9
+wgcna_network,wgcna_comms = get_wgcna()
+
+# ╔═╡ 53137352-921d-49a4-9ee8-58c61c2d169c
+wgcna_comms
 
 # ╔═╡ 64039b6a-76dc-4346-beb0-f90b128ae18b
 @htl(
@@ -2153,6 +2158,8 @@ version = "3.5.0+0"
 # ╠═45852339-5530-49b6-b1f2-a95b6452b431
 # ╠═c68738af-2d47-418d-8c50-b6d6c5cceb27
 # ╠═94900112-a962-462d-a5ab-715b42af0ce7
+# ╠═f2f7bf39-ddf3-46a1-8b05-69937220d0e9
+# ╠═53137352-921d-49a4-9ee8-58c61c2d169c
 # ╠═64039b6a-76dc-4346-beb0-f90b128ae18b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
