@@ -390,8 +390,6 @@ function wgcna_analysis(processed_counts)
 end
 export wgcna_analysis
 
-
-
 function graphlet_counting(vertexlist,edgelist)
 
     ##update cache
