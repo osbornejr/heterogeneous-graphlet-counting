@@ -51,12 +51,6 @@ begin
 	Page()
 end
 
-# ╔═╡ 8c7c2470-38d7-4440-9d43-abad63b7c2f3
-
-
-# ╔═╡ e9f4fd72-591c-492f-86e3-1979ec076266
-
-
 # ╔═╡ 7b114d58-d116-4879-b2dd-8a77ac2e0c72
 md"""
 ## Define a community partition on the network
@@ -90,103 +84,64 @@ raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexli
 end;
 
 # ╔═╡ f2f7bf39-ddf3-46a1-8b05-69937220d0e9
-wgcna_network,wgcna_comms = get_wgcna()
-
-# ╔═╡ f1b7eb0e-8840-4597-aaf7-842b99c9437e
-
+wgcna_network,wgcna_comms = get_wgcna();
 
 # ╔═╡ 8354abbb-68d1-4a71-b243-7748a3fd06c4
-test = GraphletAnalysis.graphlet_counts_per_community(vertexlist,edgelist,wgcna_comms.group)
-
-# ╔═╡ bf1636f4-f2de-4218-b0ff-49147844b603
-values(test[1])
+test = GraphletAnalysis.graphlet_counts_per_community(vertexlist,edgelist,wgcna_comms.group,4);
 
 # ╔═╡ 210dcb74-dc52-4213-ae81-40880ced9b45
-tbl = GraphletAnalysis.convert_graphlet_counts_per_community(test)
+tbl = GraphletAnalysis.convert_graphlet_counts_per_community(test);
 
-# ╔═╡ e6f46070-9cbc-485d-b856-df31fc17094c
-tbl.color
+# ╔═╡ 95dfc7ce-2dfe-4e12-b90e-834db9d2b034
+@bind hg Select(unique(last.(split.(tbl.graphlet,"_"))))
 
-# ╔═╡ d7bf99f1-fa46-4cc8-82b1-523bfdf4ecc3
-Makie.barplot(tbl.x,tbl.height,
-	color = tbl.color,
-	colormap = [:red,:green,:blue,:purple,:orange,:yellow,:grey,:brown,:pink,:black],
-	axis = (xticks = (1:12),
-                title = "Stacked bars"),
-)
+# ╔═╡ b4dbcb2c-915e-4cc9-a38a-75b0c16469e9
+function homo_selector(tbl::AbstractDataFrame,graphlet::AbstractString)
+	t = filter(:graphlet=>x->occursin(graphlet,x),tbl)
+	##transform function
+	t_funct(A,B) = A/sum(filter(:comm=>==(B),t).count)
+	##add norm column
+	transform!(t,[:count,:comm]=>ByRow(t_funct)=>:norm_count)
+	return t
+end
 
-# ╔═╡ 64039b6a-76dc-4346-beb0-f90b128ae18b
-@htl(
-	"""
-<meta charset="utf-8">
+# ╔═╡ c87b2c88-c32d-44c5-a654-c73384558be1
+t = homo_selector(tbl,hg);
 
-<!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
- 
-<!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
-<script>
+# ╔═╡ b8550bc1-219e-452f-bfb3-2ea287ec1fea
+begin
+	#colors
+	labels = unique(t.graphlet)
+	colors = cgrad(:viridis,length(labels),categorical=true)
+	
+	#figure
+	f= Figure(backgroundcolor="#212121")
+	#axis
+	ax = Makie.Axis(f[1, 1], xlabel = "x label", ylabel = "y label",
+    title = hg,backgroundcolor="#212121",titlecolor=:white)
+	
+	#plot
+	Makie.barplot!(ax,t.comm,t.norm_count,
+	stack=t.color,
+	color = t.color,
+	direction=:x
+	#axis = (xticks = (1:12),
+     #           title = "Stacked bars"),
+	)
+	#legend
 
-// set the dimensions and margins of the graph
-var margin = {top: 10, right: 10, bottom: 10, left: 10},
-  width = 445 - margin.left - margin.right,
-  height = 445 - margin.top - margin.bottom;
+	elements = [PolyElement(polycolor = colors[i]) for i in 1:length(labels)]
+	title = "Typed graphlets"
+	le = Legend(f[2,1], elements, labels, title,bgcolor="#212121",framevisible=false, labelcolor=:white,titlecolor=:white)
 
-// append the svg object to the body of the page
-var svg = d3.select("#my_dataviz")
-.append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-.append("g")
-  .attr("transform",
-        "translate(" + margin.left + "," + margin.top + ")");
 
-// Read data
-d3.csv('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_hierarchy_1level.csv', function(data) {
+	hidespines!(ax)
+	hidedecorations!(ax)
+	f
+end
 
-  // stratify the data: reformatting for d3.js
-  var root = d3.stratify()
-    .id(function(d) { return d.name; })   // Name of the entity (column name is name in csv)
-    .parentId(function(d) { return d.parent; })   // Name of the parent (column name is parent in csv)
-    (data);
-  root.sum(function(d) { return +d.value })   // Compute the numeric value for each entity
-
-  // Then d3.treemap computes the position of each element of the hierarchy
-  // The coordinates are added to the root object above
-  d3.treemap()
-    .size([width, height])
-    .padding(4)
-    (root)
-
-console.log(root.leaves())
-  // use this information to add rectangles:
-  svg
-    .selectAll("rect")
-    .data(root.leaves())
-    .enter()
-    .append("rect")
-      .attr('x', function (d) { return d.x0; })
-      .attr('y', function (d) { return d.y0; })
-      .attr('width', function (d) { return d.x1 - d.x0; })
-      .attr('height', function (d) { return d.y1 - d.y0; })
-      .style("stroke", "black")
-      .style("fill", "#69b3a2");
-
-  // and to add the text labels
-  svg
-    .selectAll("text")
-    .data(root.leaves())
-    .enter()
-    .append("text")
-      .attr("x", function(d){ return d.x0+10})    // +10 to adjust position (more right)
-      .attr("y", function(d){ return d.y0+20})    // +20 to adjust position (lower)
-      .text(function(d){ return d.data.name})
-      .attr("font-size", "15px")
-      .attr("fill", "white")
-})
-</script>
-""" 
-)
+# ╔═╡ ba825cbf-d81d-406c-a7f7-69fcaabc0858
+cgrad(:viridis,length(labels),categorical=true)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2177,8 +2132,6 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═2411cca4-5386-11ee-0714-a5b2fa50031f
-# ╠═8c7c2470-38d7-4440-9d43-abad63b7c2f3
-# ╠═e9f4fd72-591c-492f-86e3-1979ec076266
 # ╠═7b114d58-d116-4879-b2dd-8a77ac2e0c72
 # ╠═904be19d-a6db-40b2-b8d2-c9376789b3cb
 # ╠═149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
@@ -2187,12 +2140,12 @@ version = "3.5.0+0"
 # ╠═c68738af-2d47-418d-8c50-b6d6c5cceb27
 # ╠═94900112-a962-462d-a5ab-715b42af0ce7
 # ╠═f2f7bf39-ddf3-46a1-8b05-69937220d0e9
-# ╠═f1b7eb0e-8840-4597-aaf7-842b99c9437e
 # ╠═8354abbb-68d1-4a71-b243-7748a3fd06c4
-# ╠═bf1636f4-f2de-4218-b0ff-49147844b603
+# ╠═95dfc7ce-2dfe-4e12-b90e-834db9d2b034
 # ╠═210dcb74-dc52-4213-ae81-40880ced9b45
-# ╠═e6f46070-9cbc-485d-b856-df31fc17094c
-# ╠═d7bf99f1-fa46-4cc8-82b1-523bfdf4ecc3
-# ╟─64039b6a-76dc-4346-beb0-f90b128ae18b
+# ╠═b4dbcb2c-915e-4cc9-a38a-75b0c16469e9
+# ╠═c87b2c88-c32d-44c5-a654-c73384558be1
+# ╠═b8550bc1-219e-452f-bfb3-2ea287ec1fea
+# ╠═ba825cbf-d81d-406c-a7f7-69fcaabc0858
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
