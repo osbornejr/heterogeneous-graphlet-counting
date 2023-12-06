@@ -46,10 +46,29 @@ end
 
 
 function convert_graphlet_counts_per_community(test::Vector{Dict{String,Int}})
-    tbl = (x = vcat([repeat([x],length.(test)[x]) for x in 1:length(test)]...),
-           height = vcat(normalise.(collect.(values.(test)))...),
-           color = vcat(collect.([1:length.(test)[x] for x in 1:length(test)])...)
-)
+    
+    # first isolate count values column
+    h = vcat((collect.(values.(test)))...)
+
+    ## then need to match each graphlet to an integer
+    #first get all graphlet type labels
+    g = vcat(collect.(keys.(test))...) 
+    #map each appearing graphlet type to an integer
+    u = unique(g)
+    gDict = Dict(Pair.(u,1:length(u)))  
+    ##apply to get color vector
+    co = gDict.(g)
+
+    #df includes vectors:
+    #for community membership
+    tbl = DataFrame(comm = vcat([repeat([x],length.(test)[x]) for x in 1:length(test)]...),
+        # count value in community
+           count = h,
+           #graphlet type
+           graphlet = g,
+           ##integer matching to graphlets
+           color = co
+          )
 end
 
 """
