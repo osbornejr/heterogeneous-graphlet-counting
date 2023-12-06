@@ -44,6 +44,14 @@ function graphlet_counts_per_community(vertexlist::Vector{<:AbstractString},edge
     return Comm_arr
 end
 
+
+function convert_graphlet_counts_per_community(test::Vector{Dict{String,Int}})
+    tbl = (x = vcat([repeat([x],length.(test)[x]) for x in 1:length(test)]...),
+           height = vcat(normalise.(collect.(values.(test)))...),
+           color = vcat(collect.([1:length.(test)[x] for x in 1:length(test)])...)
+)
+end
+
 """
     is_community_edge
 
