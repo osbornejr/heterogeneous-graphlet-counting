@@ -51,6 +51,12 @@ begin
 	Page()
 end
 
+# ╔═╡ 8c7c2470-38d7-4440-9d43-abad63b7c2f3
+
+
+# ╔═╡ e9f4fd72-591c-492f-86e3-1979ec076266
+
+
 # ╔═╡ 7b114d58-d116-4879-b2dd-8a77ac2e0c72
 md"""
 ## Define a community partition on the network
@@ -86,8 +92,28 @@ end;
 # ╔═╡ f2f7bf39-ddf3-46a1-8b05-69937220d0e9
 wgcna_network,wgcna_comms = get_wgcna()
 
-# ╔═╡ 53137352-921d-49a4-9ee8-58c61c2d169c
-wgcna_comms
+# ╔═╡ f1b7eb0e-8840-4597-aaf7-842b99c9437e
+
+
+# ╔═╡ 8354abbb-68d1-4a71-b243-7748a3fd06c4
+test = GraphletAnalysis.graphlet_counts_per_community(vertexlist,edgelist,wgcna_comms.group)
+
+# ╔═╡ bf1636f4-f2de-4218-b0ff-49147844b603
+values(test[1])
+
+# ╔═╡ 210dcb74-dc52-4213-ae81-40880ced9b45
+tbl = GraphletAnalysis.convert_graphlet_counts_per_community(test)
+
+# ╔═╡ e6f46070-9cbc-485d-b856-df31fc17094c
+tbl.color
+
+# ╔═╡ d7bf99f1-fa46-4cc8-82b1-523bfdf4ecc3
+Makie.barplot(tbl.x,tbl.height,
+	color = tbl.color,
+	colormap = [:red,:green,:blue,:purple,:orange,:yellow,:grey,:brown,:pink,:black],
+	axis = (xticks = (1:12),
+                title = "Stacked bars"),
+)
 
 # ╔═╡ 64039b6a-76dc-4346-beb0-f90b128ae18b
 @htl(
@@ -2151,6 +2177,8 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═2411cca4-5386-11ee-0714-a5b2fa50031f
+# ╠═8c7c2470-38d7-4440-9d43-abad63b7c2f3
+# ╠═e9f4fd72-591c-492f-86e3-1979ec076266
 # ╠═7b114d58-d116-4879-b2dd-8a77ac2e0c72
 # ╠═904be19d-a6db-40b2-b8d2-c9376789b3cb
 # ╠═149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
@@ -2159,7 +2187,12 @@ version = "3.5.0+0"
 # ╠═c68738af-2d47-418d-8c50-b6d6c5cceb27
 # ╠═94900112-a962-462d-a5ab-715b42af0ce7
 # ╠═f2f7bf39-ddf3-46a1-8b05-69937220d0e9
-# ╠═53137352-921d-49a4-9ee8-58c61c2d169c
-# ╠═64039b6a-76dc-4346-beb0-f90b128ae18b
+# ╠═f1b7eb0e-8840-4597-aaf7-842b99c9437e
+# ╠═8354abbb-68d1-4a71-b243-7748a3fd06c4
+# ╠═bf1636f4-f2de-4218-b0ff-49147844b603
+# ╠═210dcb74-dc52-4213-ae81-40880ced9b45
+# ╠═e6f46070-9cbc-485d-b856-df31fc17094c
+# ╠═d7bf99f1-fa46-4cc8-82b1-523bfdf4ecc3
+# ╟─64039b6a-76dc-4346-beb0-f90b128ae18b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
