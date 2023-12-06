@@ -66,9 +66,9 @@ th.rowNumber, td.rowNumber {
 end
 
 """
-    rand_index
+    rand_index(A,B)
 
-calculate the Rand index of two graph partitions.
+calculate the Rand index of two graph partitions `A` and `B`.
 
 ## Example
     julia> A = [1,1,2,3];
