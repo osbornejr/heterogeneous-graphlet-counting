@@ -1,6 +1,24 @@
+""" 
+    normalise(X)
+
+Return the normalised vector of values in a vector `X`, i.e. divide each element by the sum of all elements in `X`.
+
+## Example
+```julia-repl
+julia> X = [1,2,3];
+
+julia> normalise(X)
+3-element Vector{Float64}:
+ 0.16666666666666666
+ 0.3333333333333333
+ 0.5
+```
+"""
+function normalise(X::AbstractVector{T} where T <: Real)
+    return X./(sum(X))
+end
 
 """
-
     graphlet_counts_per_community
 
 Find graphlet counts for each community subgraph in network.
@@ -27,7 +45,6 @@ function graphlet_counts_per_community(vertexlist::Vector{<:AbstractString},edge
 end
 
 """
-    
     is_community_edge
 
 Determine whether the vertices of an edge pair are both within, partially within or without the community vertexlist. 
