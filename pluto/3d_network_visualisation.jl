@@ -171,11 +171,11 @@ vertex_colors =string.(C.color);
 # ╔═╡ a007f64f-e40d-4db3-8e02-25502ea41c51
 # ╠═╡ show_logs = false
 begin
-	set_theme!(backgroundcolor="#121212")
+	set_theme!(backgroundcolor="#212121",textcolor=:white)
 	fig,scene,p = graphplot(g;
 		layout=Spectral(dim=3),
 		node_color = vertex_colors,
-		node_size = 20,
+		node_size = 5,
 		edge_color = :white,
 		edge_width = .1,
 		figure = (resolution = (1500, 800),)
