@@ -47,7 +47,8 @@ begin
 	using GraphletAnalysis
 	using ProjectFunctions
 
-
+	some_forwarded_port = 8080
+    #Page(listen_url="0.0.0.0", listen_port=some_forwarded_port)
 	Page()
 end
 
@@ -83,7 +84,7 @@ begin
 raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = get_output_data();
 end;
 
-# ╔═╡ f2f7bf39-ddf3-46a1-8b05-69937220d0e9
+# ╔═╡ a04f10eb-d116-4e02-9f6e-3f9b41079e8a
 wgcna_network,wgcna_comms = get_wgcna();
 
 # ╔═╡ 8354abbb-68d1-4a71-b243-7748a3fd06c4
@@ -96,7 +97,7 @@ tbl = GraphletAnalysis.convert_graphlet_counts_per_community(test);
 @bind hg Select(unique(last.(split.(tbl.graphlet,"_"))))
 
 # ╔═╡ b4dbcb2c-915e-4cc9-a38a-75b0c16469e9
-function homo_selector(tbl::AbstractDataFrame,graphlet::AbstractString)
+function hom_selector(tbl::AbstractDataFrame,graphlet::AbstractString)
 	t = filter(:graphlet=>x->occursin(graphlet,x),tbl)
 	##transform function
 	t_funct(A,B) = A/sum(filter(:comm=>==(B),t).count)
@@ -106,7 +107,7 @@ function homo_selector(tbl::AbstractDataFrame,graphlet::AbstractString)
 end
 
 # ╔═╡ c87b2c88-c32d-44c5-a654-c73384558be1
-t = homo_selector(tbl,hg);
+t = hom_selector(tbl,hg);
 
 # ╔═╡ b8550bc1-219e-452f-bfb3-2ea287ec1fea
 begin
@@ -114,8 +115,10 @@ begin
 	labels = unique(t.graphlet)
 	colors = cgrad(:viridis,length(labels),categorical=true)
 	
+	
 	#figure
 	f= Figure(backgroundcolor="#212121")
+	
 	#axis
 	ax = Makie.Axis(f[1, 1], xlabel = "x label", ylabel = "y label",
     title = hg,backgroundcolor="#212121",titlecolor=:white)
@@ -124,7 +127,8 @@ begin
 	Makie.barplot!(ax,t.comm,t.norm_count,
 	stack=t.color,
 	color = t.color,
-	direction=:x
+	direction=:x,
+	inspector_label = (self, i, p) -> lbls[self.color[][i]]
 	#axis = (xticks = (1:12),
      #           title = "Stacked bars"),
 	)
@@ -137,11 +141,10 @@ begin
 
 	hidespines!(ax)
 	hidedecorations!(ax)
+	DataInspector(f)
+	
 	f
 end
-
-# ╔═╡ ba825cbf-d81d-406c-a7f7-69fcaabc0858
-cgrad(:viridis,length(labels),categorical=true)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2139,13 +2142,12 @@ version = "3.5.0+0"
 # ╠═45852339-5530-49b6-b1f2-a95b6452b431
 # ╠═c68738af-2d47-418d-8c50-b6d6c5cceb27
 # ╠═94900112-a962-462d-a5ab-715b42af0ce7
-# ╠═f2f7bf39-ddf3-46a1-8b05-69937220d0e9
+# ╠═a04f10eb-d116-4e02-9f6e-3f9b41079e8a
 # ╠═8354abbb-68d1-4a71-b243-7748a3fd06c4
 # ╠═95dfc7ce-2dfe-4e12-b90e-834db9d2b034
 # ╠═210dcb74-dc52-4213-ae81-40880ced9b45
 # ╠═b4dbcb2c-915e-4cc9-a38a-75b0c16469e9
 # ╠═c87b2c88-c32d-44c5-a654-c73384558be1
 # ╠═b8550bc1-219e-452f-bfb3-2ea287ec1fea
-# ╠═ba825cbf-d81d-406c-a7f7-69fcaabc0858
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
