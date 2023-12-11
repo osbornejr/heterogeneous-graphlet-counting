@@ -87,14 +87,23 @@ end;
 # ╔═╡ a04f10eb-d116-4e02-9f6e-3f9b41079e8a
 wgcna_network,wgcna_comms = get_wgcna();
 
+# ╔═╡ 2ef7f9d9-ba18-4aae-8480-74ad70c1614c
+comms = ProjectFunctions.community_analysis(network_counts,adj_matrix)
+
+# ╔═╡ 32ef7795-9069-4afb-a59e-fcd39d0b9544
+@bind comm Select([comms => "Louvain", wgcna_comms => "WGCNA"])
+
 # ╔═╡ 8354abbb-68d1-4a71-b243-7748a3fd06c4
-test = GraphletAnalysis.graphlet_counts_per_community(vertexlist,edgelist,wgcna_comms.group,4);
+test = GraphletAnalysis.graphlet_counts_per_community(vertexlist,edgelist,comm.group,4);
 
 # ╔═╡ 210dcb74-dc52-4213-ae81-40880ced9b45
 tbl = GraphletAnalysis.convert_graphlet_counts_per_community(test);
 
 # ╔═╡ 95dfc7ce-2dfe-4e12-b90e-834db9d2b034
 @bind hg Select(unique(last.(split.(tbl.graphlet,"_"))))
+
+# ╔═╡ 425e0977-c670-4b28-8dce-9fd0d0dde26b
+(d::Dict)(k) = d[k] 
 
 # ╔═╡ b4dbcb2c-915e-4cc9-a38a-75b0c16469e9
 function hom_selector(tbl::AbstractDataFrame,graphlet::AbstractString)
@@ -103,17 +112,34 @@ function hom_selector(tbl::AbstractDataFrame,graphlet::AbstractString)
 	t_funct(A,B) = A/sum(filter(:comm=>==(B),t).count)
 	##add norm column
 	transform!(t,[:count,:comm]=>ByRow(t_funct)=>:norm_count)
+
+	##refactor color column with sorted het graphlets
+	##dict to resort 
+	n = Dict(Pair.(unique(sort(t,:graphlet).color),1:length(unique(t.graphlet))))
+	t2_funct(k) = n[k]
+	transform!(t,:color=>ByRow(t2_funct)=>:color)
 	return t
 end
 
 # ╔═╡ c87b2c88-c32d-44c5-a654-c73384558be1
 t = hom_selector(tbl,hg);
 
+# ╔═╡ b5dd4fae-64aa-4228-86d8-b774fb11703e
+sort(unique(t.graphlet))
+
+# ╔═╡ 47b3be16-4455-44ba-9cf5-1c793be056a7
+t.color
+
+# ╔═╡ 35bfd486-931e-41f7-a8d6-38989b866c65
+md"""
+## Percentage of typed graphlets in each community
+"""
+
 # ╔═╡ b8550bc1-219e-452f-bfb3-2ea287ec1fea
 begin
 	#colors
 	labels = unique(t.graphlet)
-	colors = cgrad(:viridis,length(labels),categorical=true)
+	colors =  cgrad(:cool,length(labels),categorical=true)
 	
 	
 	#figure
@@ -145,6 +171,9 @@ begin
 	
 	f
 end
+
+# ╔═╡ 00b0a5ac-f3b4-4e25-a871-b3263f9cfb4b
+cgrad(:cool,length(labels),categorical=true)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2143,11 +2172,18 @@ version = "3.5.0+0"
 # ╠═c68738af-2d47-418d-8c50-b6d6c5cceb27
 # ╠═94900112-a962-462d-a5ab-715b42af0ce7
 # ╠═a04f10eb-d116-4e02-9f6e-3f9b41079e8a
+# ╠═2ef7f9d9-ba18-4aae-8480-74ad70c1614c
+# ╠═32ef7795-9069-4afb-a59e-fcd39d0b9544
 # ╠═8354abbb-68d1-4a71-b243-7748a3fd06c4
 # ╠═95dfc7ce-2dfe-4e12-b90e-834db9d2b034
 # ╠═210dcb74-dc52-4213-ae81-40880ced9b45
 # ╠═b4dbcb2c-915e-4cc9-a38a-75b0c16469e9
+# ╠═425e0977-c670-4b28-8dce-9fd0d0dde26b
 # ╠═c87b2c88-c32d-44c5-a654-c73384558be1
+# ╠═b5dd4fae-64aa-4228-86d8-b774fb11703e
+# ╠═47b3be16-4455-44ba-9cf5-1c793be056a7
+# ╠═35bfd486-931e-41f7-a8d6-38989b866c65
 # ╠═b8550bc1-219e-452f-bfb3-2ea287ec1fea
+# ╠═00b0a5ac-f3b4-4e25-a871-b3263f9cfb4b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
