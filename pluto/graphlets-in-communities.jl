@@ -138,7 +138,7 @@ md"""
 # ╔═╡ b8550bc1-219e-452f-bfb3-2ea287ec1fea
 begin
 	#colors
-	labels = unique(t.graphlet)
+	labels = sort(unique(t.graphlet))
 	colors =  cgrad(:cool,length(labels),categorical=true)
 	
 	
@@ -152,7 +152,7 @@ begin
 	#plot
 	Makie.barplot!(ax,t.comm,t.norm_count,
 	stack=t.color,
-	color = t.color,
+	color = colors[t.color],
 	direction=:x,
 	inspector_label = (self, i, p) -> lbls[self.color[][i]]
 	#axis = (xticks = (1:12),
