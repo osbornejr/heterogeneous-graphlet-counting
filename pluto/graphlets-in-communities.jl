@@ -130,6 +130,9 @@ sort(unique(t.graphlet))
 # ╔═╡ 47b3be16-4455-44ba-9cf5-1c793be056a7
 t.color
 
+# ╔═╡ 7a42621b-a387-4f0d-a322-b95329e5f85b
+countmap(comm.group)
+
 # ╔═╡ 35bfd486-931e-41f7-a8d6-38989b866c65
 md"""
 ## Percentage of typed graphlets in each community
@@ -2182,6 +2185,7 @@ version = "3.5.0+0"
 # ╠═c87b2c88-c32d-44c5-a654-c73384558be1
 # ╠═b5dd4fae-64aa-4228-86d8-b774fb11703e
 # ╠═47b3be16-4455-44ba-9cf5-1c793be056a7
+# ╠═7a42621b-a387-4f0d-a322-b95329e5f85b
 # ╠═35bfd486-931e-41f7-a8d6-38989b866c65
 # ╠═b8550bc1-219e-452f-bfb3-2ea287ec1fea
 # ╠═00b0a5ac-f3b4-4e25-a871-b3263f9cfb4b
