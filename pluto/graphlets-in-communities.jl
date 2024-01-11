@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.27
+# v0.19.36
 
 using Markdown
 using InteractiveUtils
@@ -127,6 +127,9 @@ t = hom_selector(tbl,hg);
 # ╔═╡ b5dd4fae-64aa-4228-86d8-b774fb11703e
 sort(unique(t.graphlet))
 
+# ╔═╡ bae9d81f-afd1-4b58-98e0-6030c5d30b1b
+hg
+
 # ╔═╡ 47b3be16-4455-44ba-9cf5-1c793be056a7
 t.color
 
@@ -153,7 +156,7 @@ begin
     title = hg,backgroundcolor="#212121",titlecolor=:white)
 	
 	#plot
-	Makie.barplot!(ax,t.comm,t.norm_count,
+	Makie.barplot!(ax,t.comm,t.count,
 	stack=t.color,
 	color = colors[t.color],
 	direction=:x,
@@ -2126,9 +2129,9 @@ version = "2.0.2+0"
 
 [[deps.libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "94d180a6d2b5e55e447e2d27a29ed04fe79eb30c"
+git-tree-sha1 = "f7c281e9c61905521993a987d38b5ab1d4b53bef"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
-version = "1.6.38+0"
+version = "1.6.38+1"
 
 [[deps.libsixel_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Pkg", "libpng_jll"]
@@ -2184,6 +2187,7 @@ version = "3.5.0+0"
 # ╠═425e0977-c670-4b28-8dce-9fd0d0dde26b
 # ╠═c87b2c88-c32d-44c5-a654-c73384558be1
 # ╠═b5dd4fae-64aa-4228-86d8-b774fb11703e
+# ╠═bae9d81f-afd1-4b58-98e0-6030c5d30b1b
 # ╠═47b3be16-4455-44ba-9cf5-1c793be056a7
 # ╠═7a42621b-a387-4f0d-a322-b95329e5f85b
 # ╠═35bfd486-931e-41f7-a8d6-38989b866c65
