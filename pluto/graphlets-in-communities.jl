@@ -152,7 +152,7 @@ begin
 	f= Figure(backgroundcolor="#212121")
 	
 	#axis
-	ax = Makie.Axis(f[1, 1], xlabel = "x label", ylabel = "y label",
+	ax = Makie.Axis(f[1, 1], xlabel = "x label", ylabel = "Communities",
     title = hg,backgroundcolor="#212121",titlecolor=:white)
 	
 	#plot
@@ -172,7 +172,7 @@ begin
 
 
 	hidespines!(ax)
-	hidedecorations!(ax)
+	hidexdecorations!(ax)
 	DataInspector(f)
 	
 	f
@@ -317,9 +317,9 @@ version = "0.1.7"
 
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
+git-tree-sha1 = "9e2a6b69137e6969bab0152632dcb3bc108c8bdd"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
-version = "1.0.8+0"
+version = "1.0.8+1"
 
 [[deps.CEnum]]
 git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
