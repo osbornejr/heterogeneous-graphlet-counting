@@ -193,6 +193,8 @@ function get_community_structure(adj_matrix::AbstractArray,vertex_names::Vector{
     
     ## fix group column to match expected output of community
     vertices.group = parse.(Int,String.(vertices.group))
+    ## fix color column to string as well
+    vertices.color = String.(vertices.color)
     return vertices
 end
 
