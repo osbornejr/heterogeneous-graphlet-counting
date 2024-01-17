@@ -324,7 +324,6 @@ function network_visualisation(adj_matrix, network_counts,vertexlist,edgelist)
     
 end
 
-       
 function community_analysis(network_counts,adj_matrix)
     #Network Analysis
     ## Community structure
@@ -335,10 +334,16 @@ function community_analysis(network_counts,adj_matrix)
     ##use gene ids here, as they have more chance of getting a GO annotation
     if(params["analysis"]["func_annotate"]==true)
         vertex_gene_names = network_counts[!,:gene_id]
-        if (params["website"]["website"] == true)
-            community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
+        # if (params["website"]["website"] == true)
+        #     community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
+        # else
+        communities_file = "$anal_dir/communities.jld2" 
+        if (isfile(communities_file))
+            community_vertices = cache_load(communities_file,"communities")
         else
             community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_gene_names,"louvain") 
+            #save communities
+            cache_save(communities_file,"communities"=>community_vertices)
         end
         ## functional annotations of communities
         func_file = "$anal_dir/func_annotations.jld2" 
@@ -351,17 +356,25 @@ function community_analysis(network_counts,adj_matrix)
             cache_save(func_file,"functional annotations"=>functional_annotations)
         end 
         return [community_vertices,functional_annotations]
+
     else
         vertex_names = network_counts[!,:transcript_id]
-        if (params["website"]["website"] == true)
-            community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
+        # if (params["website"]["website"] == true)
+        #     community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain",threejs_plot = true,plot_prefix = "$(params["website"]["website_dir"])/$(params["website"]["page_name"])") 
+        # else
+        communities_file = "$anal_dir/communities.jld2" 
+        if (isfile(communities_file))
+            community_vertices = cache_load(communities_file,"communities")
         else
             community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain") 
+            #save communities
+            cache_save(communities_file,"communities"=>community_vertices)
         end
-        #find nodes who are not in any community (usually because they are not in connected component).
-        #community_orphans = findall(x->x==0,in.(1:length(vertexlist),Ref(community_vertices.name)))
         return community_vertices
     end
+    #find nodes who are not in any community (usually because they are not in connected component).
+    #community_orphans = findall(x->x==0,in.(1:length(vertexlist),Ref(community_vertices.name)))
+
 end
 export community_analysis
 

@@ -112,6 +112,25 @@ end
 export get_network_construction
 
 """
+    get_communities()
+Retrieve community information associated with the curent experiment parameters.
+
+## Example 
+    julia> communities = get_communities()
+"""
+function get_communities()
+    communities_file ="$(params["cache"]["community_dir"])/communities.jld2"
+
+    if (isfile(communities_file))
+        comms = cache_load(communities_file,"communities")
+    else
+       throw(ArgumentError("No cached file exists at $communities_file, please run community analysis."))
+    end
+    return comms
+end
+export get_communities
+
+"""
     get_wgcna()
 
 Retrieve WGCNA network and community information associated with the curent experiment parameters.
