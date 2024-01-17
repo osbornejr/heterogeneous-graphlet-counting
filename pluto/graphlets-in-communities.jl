@@ -84,11 +84,14 @@ begin
 raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist = get_output_data();
 end;
 
+# ╔═╡ 4eb673d6-f8c6-4a37-98d8-1e49113802c8
+raw_counts
+
 # ╔═╡ a04f10eb-d116-4e02-9f6e-3f9b41079e8a
 wgcna_network,wgcna_comms = get_wgcna();
 
 # ╔═╡ 2ef7f9d9-ba18-4aae-8480-74ad70c1614c
-comms = ProjectFunctions.community_analysis(network_counts,adj_matrix)
+comms = get_communities()
 
 # ╔═╡ 32ef7795-9069-4afb-a59e-fcd39d0b9544
 @bind comm Select([comms => "Louvain", wgcna_comms => "WGCNA"])
@@ -2172,6 +2175,7 @@ version = "3.5.0+0"
 # ╠═2411cca4-5386-11ee-0714-a5b2fa50031f
 # ╠═7b114d58-d116-4879-b2dd-8a77ac2e0c72
 # ╠═904be19d-a6db-40b2-b8d2-c9376789b3cb
+# ╠═4eb673d6-f8c6-4a37-98d8-1e49113802c8
 # ╠═149e7d3e-2a01-41ea-ad6c-094ed8ec8afb
 # ╠═61f86902-79c0-44b2-9108-242c8064a92d
 # ╠═45852339-5530-49b6-b1f2-a95b6452b431
