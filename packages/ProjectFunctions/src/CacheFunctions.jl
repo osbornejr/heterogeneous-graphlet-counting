@@ -2,6 +2,7 @@
 function cache_remove(file::String)
     run(`rm -rf $(file)`)
 end
+export cache_remove
 
 function make_cache(dirs...;dir_name::String)
     #join args into dir path
