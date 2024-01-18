@@ -368,6 +368,8 @@ function community_analysis(network_counts,adj_matrix)
         else
             community_vertices = GraphletAnalysis.get_community_structure(adj_matrix,vertex_names,"louvain") 
             #save communities
+            
+
             cache_save(communities_file,"communities"=>community_vertices)
         end
         return community_vertices
