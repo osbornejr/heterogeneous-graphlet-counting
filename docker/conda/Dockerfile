@@ -16,6 +16,19 @@ RUN adduser --disabled-password \
     --home $HOME \
     $USER
 
+#detect target architecture
+ARG TARGETARCH
+RUN echo "TARGETARCH is $TARGETARCH"
+
+# Set  variable conditionally during build
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        echo "CONDAARCH=x86_64" >> /tmp/env.txt; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        echo "CONDAARCH=aarch64" >> /tmp/env.txt; \
+    else \
+        echo "CONDAARCH=x86_64" >> /tmp/env.txt; \
+    fi 
+
 #install dependencies
 RUN apt-get update && apt-get install -y \
 	curl 
@@ -34,7 +47,7 @@ RUN apt-get update && apt-get install -y \
 USER $USER
 ##install miniconda (adapted from official miniconda container)
 ENV CONDA_DIR $HOME/conda
-RUN curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o $HOME/miniconda.sh \
+RUN . /tmp/env.txt && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-$CONDAARCH.sh -o $HOME/miniconda.sh \
     && bash $HOME/miniconda.sh -bfp $CONDA_DIR \
     && rm -rf $HOME/miniconda.sh
 # make non-activate conda commands available
