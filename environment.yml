@@ -3,10 +3,11 @@ name: julia-workspace
 channels:
         - conda-forge
         - bioconda
+        - r
 
 dependencies:
         - libstdcxx-ng
-        - icu<=60
+        - icu
         - r-base>=4.0
         - r-tidyverse 
         - r-data.table
