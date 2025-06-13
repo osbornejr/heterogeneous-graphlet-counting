@@ -32,7 +32,9 @@ file julia-port
 wincmd c
 
 "open REPL terminal vertically on right
-nos vert term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia'"
+""old nectar connecting command
+"nos vert term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia'"
+nos vert term zsh -is eval "dtach -A /tmp/hgc-julia zsh -is eval 'make julia'"
 file repl
 wincmd p
 
