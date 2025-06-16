@@ -16,7 +16,6 @@ dependencies:
         - r-ggdendro
         - r-igraph
         - r-threejs
-        - r-pcit
         - r-stringi
         - bioconductor-edger
         - bioconductor-deseq2
