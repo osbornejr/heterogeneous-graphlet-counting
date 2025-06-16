@@ -34,7 +34,8 @@ wincmd c
 "open REPL terminal vertically on right
 ""old nectar connecting command
 "nos vert term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia'"
-nos vert term zsh -is eval "dtach -A /tmp/hgc-julia zsh -is eval 'make julia'"
+"nos vert term zsh -is eval "dtach -A /tmp/hgc-julia zsh -is eval 'make julia'"
+nos vert term ssh -i ~/.ssh/mit-derm joel@192.168.175.134 zsh -is eval 'dtach -A /tmp/hgc-julia zsh -is eval "cd /home/joel/git/heterogeneous-graphlet-counting;sudo make julia"'
 file repl
 wincmd p
 
