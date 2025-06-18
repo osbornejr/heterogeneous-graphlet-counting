@@ -18,7 +18,8 @@ endfor
 nos term
 file local
 wincmd c
-nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test"
+"nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test"
+nos term ssh -t -i ~/.ssh/mit-derm joel@192.168.175.134 
 file remote
 wincmd c
 
@@ -35,7 +36,9 @@ wincmd c
 ""old nectar connecting command
 "nos vert term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia'"
 "nos vert term zsh -is eval "dtach -A /tmp/hgc-julia zsh -is eval 'make julia'"
-nos vert term ssh -i ~/.ssh/mit-derm joel@192.168.175.134 zsh -is eval 'dtach -A /tmp/hgc-julia zsh -is eval "cd /home/joel/git/heterogeneous-graphlet-counting;sudo make julia"'
+nos vert term ssh -t -i ~/.ssh/mit-derm joel@192.168.175.134 
+"commenting this out for now, cannot make it work smoothly
+"'dtach -A /tmp/hgc-julia "cd /home/joel/git/heterogeneous-graphlet-counting && sudo make julia"'
 file repl
 wincmd p
 
