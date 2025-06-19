@@ -13,7 +13,7 @@ end
 ## transcripts corresponding to transcripts in the original data. TODO this process probably should occur further up the line
 ## (pre-quantification even).
 function filter_count_data(filter_list_path,count_data)
-    filter_list=Array(DataFrame!(CSV.File(filter_list_path,header=false)))
+    filter_list=Array(DataFrame(CSV.File(filter_list_path,header=false)))
     filtered_counts=count_data[findall(in(filter_list),count_data.transcript_id),:]
     return filtered_counts
 end
