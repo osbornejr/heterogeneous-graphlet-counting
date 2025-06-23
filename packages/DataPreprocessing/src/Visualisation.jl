@@ -61,3 +61,8 @@ function tex_summary_table(dataframe::DataFrame,outfile::String)
 
     write(outfile,table)
 end
+
+
+
+
+
