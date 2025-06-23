@@ -28,7 +28,8 @@ nos term ./bin/unison heterogeneous-graphlet-counting
 wincmd c
 
 "setup terminal with port connection 
-nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia-server'"
+"nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia-server'"
+nos term ssh -t -i ~/.ssh/mit-derm -L 8080:localhost:8000 joel@192.168.175.134 
 file julia-port
 wincmd c
 
