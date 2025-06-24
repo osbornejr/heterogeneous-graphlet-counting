@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.36
+# v0.19.25
 
 using Markdown
 using InteractiveUtils
@@ -115,7 +115,7 @@ begin
 end;
 
 # ╔═╡ 20215a75-b329-48fa-9024-bd6aab7f8247
-params
+params["cache"]
 
 # ╔═╡ ee390e38-f48f-4ab9-9947-87de4224ca94
 summarystats(raw_counts."GSM1675513_MB011_1 data")
@@ -626,9 +626,9 @@ version = "0.10.8"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "1713c74e00545bfe14605d2a2be1712de8fbcb58"
+git-tree-sha1 = "06ee8d1aa558d2833aa799f6f0b31b30cada405f"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.25.1"
+version = "1.25.2"
 
 [[deps.ChangesOfVariables]]
 deps = ["InverseFunctions", "LinearAlgebra", "Test"]
@@ -730,7 +730,7 @@ version = "1.7.0"
 
 [[deps.DataPreprocessing]]
 deps = ["CSV", "Cairo", "Compose", "DataFrames", "Gadfly", "LinearAlgebra", "RCall", "Statistics"]
-path = "/home/osbornejr/app/packages/DataPreprocessing"
+path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/DataPreprocessing"
 uuid = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
 version = "0.1.0"
 
@@ -914,13 +914,13 @@ version = "1.3.15+0"
 
 [[deps.GraphletAnalysis]]
 deps = ["DataFrames", "DataPreprocessing", "GraphletCounting", "Graphs", "NetworkConstruction", "RCall"]
-path = "/home/osbornejr/app/packages/GraphletAnalysis"
+path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/GraphletAnalysis"
 uuid = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 version = "0.1.0"
 
 [[deps.GraphletCounting]]
 deps = ["CSV", "DataFrames", "DataStructures", "Distributed", "Graphs", "LinearAlgebra", "ProgressMeter", "StatsBase"]
-path = "/home/osbornejr/app/packages/GraphletCounting"
+path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/GraphletCounting"
 uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 version = "0.1.0"
 
@@ -1262,7 +1262,7 @@ version = "1.0.3"
 
 [[deps.NetworkConstruction]]
 deps = ["ColorSchemes", "Colors", "DataFrames", "DataPreprocessing", "Distributed", "Graphs", "InformationMeasures", "LinearAlgebra", "Luxor", "Printf", "ProgressMeter", "RCall", "SharedArrays", "Statistics", "StatsBase"]
-path = "/home/osbornejr/app/packages/NetworkConstruction"
+path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/NetworkConstruction"
 uuid = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 version = "0.1.0"
 
@@ -1413,7 +1413,7 @@ version = "1.10.4"
 
 [[deps.ProjectFunctions]]
 deps = ["CSV", "CategoricalArrays", "Colors", "Compose", "DataFrames", "DataPreprocessing", "DataStructures", "Dates", "Distributed", "Gadfly", "GraphPlot", "GraphletAnalysis", "GraphletCounting", "Graphs", "JLD2", "NetworkConstruction", "Pkg", "ProgressMeter", "Random", "StatsBase", "YAML"]
-path = "/home/osbornejr/app/packages/ProjectFunctions"
+path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/ProjectFunctions"
 uuid = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 version = "0.1.0"
 
