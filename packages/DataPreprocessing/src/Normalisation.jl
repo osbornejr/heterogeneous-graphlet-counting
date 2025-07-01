@@ -76,7 +76,8 @@ inputs:\n
     - data: M x N matrix of input data. (M dimensions, N trials)\n
 outputs:\n
     - PCs: each column is a principle component\n
-    - V: N x 1 matrix of variances\n
+    - D: N x 1 matrix of variances\n
+    - Z: the original data X projected onto the PCs. Z=PCs*X
 """
 function pca(data::AbstractArray{T,2}) where T<:Real
    
@@ -89,30 +90,39 @@ function pca(data::AbstractArray{T,2}) where T<:Real
     X = (v_data .- mean(v_data, dims=2)) #./ std(v_data,dims=2)
     #substitute so that Y'*Y is cov(X)
     Y = X' ./ sqrt(T(size(X,2)-1))
-    #Compute SVD of Y, which gives PCs of X (eigenvectors of cov(X)). See Shlens (2014) tutorial.
+    #Compute (truncated) SVD of Y, which gives PCs of X (eigenvectors of cov(X)). See Shlens (2014) tutorial.
     U,S,V = svd(Y)
         Σ = diagm(0=>S)
-#    #by same token, the square of the singular values diagonal matrix gives us the eigenvalues (variances) of cov(X)
-#    v = Σ * Σ
-#        #sort variance values and PCs 
-#        indexList = sortperm(diag(v); rev=true)
-#    PCs = map(x->V[:,x], indexList)
-#    #flatten components into one array (desirable? maybe label?)
-#    PCs = hcat(PCs...)
-#    #use method outlined at https://blog.bioturing.com/2018/06/14/principal-component-analysis-explained-simply/ 
+    #by same token, the square of the singular values diagonal matrix gives us the eigenvalues (variances) of cov(X)
+    v = Σ * Σ
+        #sort variance values and PCs 
+        indexList = sortperm(diag(v); rev=true)
+    PCs = map(x->V[:,x], indexList)
+    #flatten components into one array (desirable? maybe label?)
+    PCs = hcat(PCs...)
+    #use method outlined at https://blog.bioturing.com/2018/06/14/principal-component-analysis-explained-simply/ 
+    #to generate a per-sample value in each component 
+    #(experimental, need a reference/verification plus testing. Could be nice to name component columns) 
+    #per_sample=X'*PCs
+    #
+    #Finally, provide the original data projected onto the PCs 
+    Z = V'*v_data
+
 #Note that following the SVD method, we just need to take the transpose of V to get the PCs. This gives the correct (expected) dimensions for each component rather than the error from before. 
-        return V', S.^2
+        return V', S.^2, Z
 end
 
 
-function pca_plot(PCs::AbstractArray{T,2},grid_dims::Int) where T<:Real
+
+##NOTE as of recently, pca above has been tidied up, so now these plot functions expect input to be Z, the projection of the data onto the PCs, with each column representing a PC.
+function pca_plot(Z::AbstractArray{T,2},grid_dims::Int) where T<:Real
 #this function allows visualisation of the PCA decomposition. Grid dimensions sets the number of principal components that will be compared. A grid_dim of 1 implies a simple biplot of the first 2 principal  components.
-    data=DataFrame(PCs,:auto)
+    data=Z#DataFrame(PCs,:auto)
     #store plots in array
     plots=Array{Plot}(undef,grid_dims,grid_dims)
     for i in 1:grid_dims
         for j in 1:grid_dims
-            plots[i,j]=Gadfly.plot(data,x=data[:,j+i],y=data[:,i],Guide.xlabel(string("PC ",j+i)),Guide.ylabel(string("PC ",i)),Theme(key_position=:none)) 
+            plots[i,j]=Gadfly.plot(data,x=data[j+i,:],y=data[i,:],Guide.xlabel(string("PC ",j+i)),Guide.ylabel(string("PC ",i)),Theme(key_position=:none)) 
         end
     end
     Gadfly.set_default_plot_size(20cm, 20cm)
@@ -120,15 +130,15 @@ function pca_plot(PCs::AbstractArray{T,2},grid_dims::Int) where T<:Real
     return Grid
 end 
 
-function pca_plot(PCs::AbstractArray{T,2},grid_dims::Int,filename::String) where T<:Real
+function pca_plot(Z::AbstractArray{T,2},grid_dims::Int,filename::String) where T<:Real
 #this function allows visualisation of the PCA decomposition. Grid dimensions sets the number of principal components that will be compared. A grid_dim of 1 implies a simple biplot of the first 2 principal  components.
 #This version is to save plot to file, at given path filename
-    data=DataFrame(PCs,:auto)
+    data=Z#DataFrame(PCs,:auto)
     #store plots in array
     plots=Array{Plot}(undef,grid_dims,grid_dims)
     for i in 1:grid_dims
         for j in 1:grid_dims
-            plots[i,j]=Gadfly.plot(data,x=data[:,j+i],y=data[:,i],Guide.xlabel(string("PC ",j+i)),Guide.ylabel(string("PC ",i)),Theme(key_position=:none)) 
+            plots[i,j]=Gadfly.plot(data,x=data[j+i,:],y=data[i,:],Guide.xlabel(string("PC ",j+i)),Guide.ylabel(string("PC ",i)),Theme(key_position=:none)) 
         end
     end
     Gadfly.set_default_plot_size(20cm, 20cm)
