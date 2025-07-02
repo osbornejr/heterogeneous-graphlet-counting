@@ -77,6 +77,7 @@ inputs:\n
 outputs:\n
     - PC: each column is a principle component\n
     - V: M x 1 matrix of variances\n
+    - per_sample: 
 """
 function pca(data::AbstractArray{T,2}) where T<:Real
    
