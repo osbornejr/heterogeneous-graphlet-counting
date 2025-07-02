@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.25
+# v0.19.36
 
 using Markdown
 using InteractiveUtils
@@ -498,7 +498,10 @@ attributes=D3Attr(style=(;fill="rgba(255, 0, 0, 0.3)"))
 findall(x->x==max(abs.(per_sample[:,3])...),abs.(per_sample[:,3]))
 
 # ╔═╡ c05fca81-7f29-4576-99d6-fc35210e25b7
+Portinari.Shape(per_sample[:,1],per_sample[:,3],repeat([100],length(sample_names)),"yep")
 
+# ╔═╡ 3b95053e-9c84-477c-b95b-b2c70d415d44
+DataPreprocessing.pca_plot(per_sample,1)
 
 # ╔═╡ d082290c-4412-42b5-aa15-e35e01923e5e
 p_1=DataPreprocessing.pca_plot(per_sample,3)
@@ -534,7 +537,7 @@ DataFrames = "~1.7.0"
 DataStructures = "~0.18.22"
 Gadfly = "~1.4.1"
 HypertextLiteral = "~0.9.5"
-PlutoUI = "~0.7.65"
+PlutoUI = "~0.7.66"
 Portinari = "~0.1.2"
 Revise = "~3.6.6"
 StatsBase = "~0.34.4"
@@ -546,7 +549,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "b8eea1e39d91f4e8d7ead0d07891ab6dda648bf9"
+project_hash = "905e60154658df280a0012b98ff312b9c5b418d3"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
@@ -680,9 +683,9 @@ version = "0.9.1"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "TOML", "UUIDs"]
-git-tree-sha1 = "8ae8d32e09f0dcf42a36b90d4e17f5dd2e4c4215"
+git-tree-sha1 = "3a3dfb30697e96a440e4149c8c51bf32f818c0f3"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.16.0"
+version = "4.17.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -730,7 +733,7 @@ version = "1.7.0"
 
 [[deps.DataPreprocessing]]
 deps = ["CSV", "Cairo", "Compose", "DataFrames", "Gadfly", "LinearAlgebra", "RCall", "Statistics"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/DataPreprocessing"
+path = "/home/osbornejr/app/packages/DataPreprocessing"
 uuid = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
 version = "0.1.0"
 
@@ -914,13 +917,13 @@ version = "1.3.15+0"
 
 [[deps.GraphletAnalysis]]
 deps = ["DataFrames", "DataPreprocessing", "GraphletCounting", "Graphs", "NetworkConstruction", "RCall"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/GraphletAnalysis"
+path = "/home/osbornejr/app/packages/GraphletAnalysis"
 uuid = "32f39a16-8143-4a50-a7e7-080c0e917f42"
 version = "0.1.0"
 
 [[deps.GraphletCounting]]
 deps = ["CSV", "DataFrames", "DataStructures", "Distributed", "Graphs", "LinearAlgebra", "ProgressMeter", "StatsBase"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/GraphletCounting"
+path = "/home/osbornejr/app/packages/GraphletCounting"
 uuid = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 version = "0.1.0"
 
@@ -1157,10 +1160,10 @@ uuid = "4b2f31a3-9ecc-558c-b454-b3730dcb73e9"
 version = "2.41.0+0"
 
 [[deps.Librsvg_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pango_jll", "Pkg", "gdk_pixbuf_jll"]
-git-tree-sha1 = "ae0923dab7324e6bc980834f709c4cd83dd797ed"
+deps = ["Artifacts", "Cairo_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "Libdl", "Pango_jll", "XML2_jll", "gdk_pixbuf_jll"]
+git-tree-sha1 = "e6ab5dda9916d7041356371c53cdc00b39841c31"
 uuid = "925c91fb-5dd6-59dd-8e8c-345e74382d89"
-version = "2.54.5+0"
+version = "2.54.7+0"
 
 [[deps.Libtiff_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "XZ_jll", "Zlib_jll", "Zstd_jll"]
@@ -1262,7 +1265,7 @@ version = "1.0.3"
 
 [[deps.NetworkConstruction]]
 deps = ["ColorSchemes", "Colors", "DataFrames", "DataPreprocessing", "Distributed", "Graphs", "InformationMeasures", "LinearAlgebra", "Luxor", "Printf", "ProgressMeter", "RCall", "SharedArrays", "Statistics", "StatsBase"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/NetworkConstruction"
+path = "/home/osbornejr/app/packages/NetworkConstruction"
 uuid = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 version = "0.1.0"
 
@@ -1363,9 +1366,9 @@ version = "0.4.8"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Downloads", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "3151a0c8061cc3f887019beebf359e6c4b3daa08"
+git-tree-sha1 = "2b2127e64c1221b8204afe4eb71662b641f33b82"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.65"
+version = "0.7.66"
 
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
@@ -1413,7 +1416,7 @@ version = "1.10.4"
 
 [[deps.ProjectFunctions]]
 deps = ["CSV", "CategoricalArrays", "Colors", "Compose", "DataFrames", "DataPreprocessing", "DataStructures", "Dates", "Distributed", "Gadfly", "GraphPlot", "GraphletAnalysis", "GraphletCounting", "Graphs", "JLD2", "NetworkConstruction", "Pkg", "ProgressMeter", "Random", "StatsBase", "YAML"]
-path = "/Users/osbornejr/git/heterogeneous-graphlet-counting/packages/ProjectFunctions"
+path = "/home/osbornejr/app/packages/ProjectFunctions"
 uuid = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 version = "0.1.0"
 
@@ -1634,9 +1637,9 @@ uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
 version = "0.1.10"
 
 [[deps.URIs]]
-git-tree-sha1 = "24c1c558881564e2217dcf7840a8b2e10caeb0f9"
+git-tree-sha1 = "bef26fb046d031353ef97a82e3fdb6afe7f21b1a"
 uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
-version = "1.6.0"
+version = "1.6.1"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -1820,8 +1823,8 @@ version = "3.5.0+0"
 
 # ╔═╡ Cell order:
 # ╠═d4f1c85c-f854-11ed-09a1-af06379be62d
-# ╠═9752572a-cc9b-421d-ba41-05a1a8b6def6
-# ╠═ee05e4b5-13f4-433a-9076-ba304c5c8807
+# ╟─9752572a-cc9b-421d-ba41-05a1a8b6def6
+# ╟─ee05e4b5-13f4-433a-9076-ba304c5c8807
 # ╠═32668349-8283-40c6-bf0e-1afc5ee960ea
 # ╠═351ea0cc-ce6b-4e82-99dd-8773c5a9e8a4
 # ╠═aecb1084-001e-4b0d-a3f0-740de58e5753
@@ -1897,6 +1900,7 @@ version = "3.5.0+0"
 # ╠═86e018ba-a78c-4644-af9e-63c6fec86e40
 # ╠═a51fc8b8-e2d3-4962-abd9-54a5f07d517f
 # ╠═c05fca81-7f29-4576-99d6-fc35210e25b7
+# ╠═3b95053e-9c84-477c-b95b-b2c70d415d44
 # ╠═d082290c-4412-42b5-aa15-e35e01923e5e
 # ╠═50958e94-9de4-4b76-8d79-3b7f65b94729
 # ╟─00000000-0000-0000-0000-000000000001
