@@ -114,15 +114,20 @@ end
 
 
 
-##NOTE as of recently, pca above has been tidied up, so now these plot functions expect input to be Z, the projection of the data onto the PCs, with each column representing a PC.
-function pca_plot(Z::AbstractArray{T,2},grid_dims::Int) where T<:Real
+##NOTE as of recently, pca above has been tidied up, so now these plot functions expect input to be Z, the projection of the data onto the PCs, with each row representing a PC and each column a sample. We do then need to transpose this infunction to keep working with DataFrames as per Gadfly preference.
+function pca_plot(Z::AbstractArray{T,2},grid_dims::Int;labels::Vector{<:AbstractString}=nothing) where T<:Real
 #this function allows visualisation of the PCA decomposition. Grid dimensions sets the number of principal components that will be compared. A grid_dim of 1 implies a simple biplot of the first 2 principal  components.
-    data=Z#DataFrame(PCs,:auto)
+    #transpose Z so that samples are in rows, not columns
+    data=DataFrame(Z',:auto)
+    ##attach labels if provided
+    if !(labels==nothing)
+        data.label=labels
+    end
     #store plots in array
     plots=Array{Plot}(undef,grid_dims,grid_dims)
     for i in 1:grid_dims
         for j in 1:grid_dims
-            plots[i,j]=Gadfly.plot(data,x=data[j+i,:],y=data[i,:],Guide.xlabel(string("PC ",j+i)),Guide.ylabel(string("PC ",i)),Theme(key_position=:none)) 
+            plots[i,j]=Gadfly.plot(data,x=data[:,j+i],y=data[:,i],Guide.xlabel(string("PC ",j+i)),Guide.ylabel(string("PC ",i)),Theme(key_position=:none)) 
         end
     end
     Gadfly.set_default_plot_size(20cm, 20cm)
@@ -130,15 +135,21 @@ function pca_plot(Z::AbstractArray{T,2},grid_dims::Int) where T<:Real
     return Grid
 end 
 
-function pca_plot(Z::AbstractArray{T,2},grid_dims::Int,filename::String) where T<:Real
+function pca_plot(Z::AbstractArray{T,2},grid_dims::Int,filename::String;labels::Vector{<:AbstractString}=nothing) where T<:Real
 #this function allows visualisation of the PCA decomposition. Grid dimensions sets the number of principal components that will be compared. A grid_dim of 1 implies a simple biplot of the first 2 principal  components.
 #This version is to save plot to file, at given path filename
-    data=Z#DataFrame(PCs,:auto)
+    #transpose Z so that samples are in rows, not columns
+    data=DataFrame(Z',:auto)
+    
+    ##attach labels if provided
+    if !(labels==nothing)
+        data.label=labels
+    end
     #store plots in array
     plots=Array{Plot}(undef,grid_dims,grid_dims)
     for i in 1:grid_dims
         for j in 1:grid_dims
-            plots[i,j]=Gadfly.plot(data,x=data[j+i,:],y=data[i,:],Guide.xlabel(string("PC ",j+i)),Guide.ylabel(string("PC ",i)),Theme(key_position=:none)) 
+            plots[i,j]=Gadfly.plot(data,x=data[:,j+i],y=data[:,i],color=:label,Guide.xlabel(string("PC ",j+i)),Guide.ylabel(string("PC ",i)),Theme(key_position=:right)) 
         end
     end
     Gadfly.set_default_plot_size(20cm, 20cm)
