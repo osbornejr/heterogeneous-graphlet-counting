@@ -42,6 +42,8 @@ RUN cp $HOME/conda/envs/$ENV_PREFIX/lib/libstdc++.so.6 $HOME/julia-${JULIA_VERSI
 #RUN julia --projec#t=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg; for pkg in collect(keys(Pkg.installed()));Base.compilecache(Base.identify_package(pkg));end"
 #set up MPI.jl to use openMPI 
 #RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.build(\"MPI\");using MPI;MPI.install_mpiexecjl()"
+#Or without MPI-- TODO fix it so that can instantiate during build... currently we must run instantiate everytime we install on a fresh machine- it does not work here currently because the dev packages will not install before they are linked to in a container. Could solve maybe by registering them?
+#RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
 #add julia bin to path
 ENV  PATH $PATH:$HOME/.julia/bin
 
