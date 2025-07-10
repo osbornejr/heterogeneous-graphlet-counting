@@ -82,7 +82,7 @@ wincmd c
 "setup unison file sync
 
 execute 'nos term ./bin/unison unison-' . remote_method  
-"file unison
+file unison
 wincmd c
 
 """REMOTE PORT terminal: to connect with an open port (for pluto etc.)
