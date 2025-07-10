@@ -11,3 +11,5 @@ node_modules
 cytoscape/*
 bin/
 *Manifest.toml
+config/unison/*
+!config/unison/*.prf
