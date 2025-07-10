@@ -40,11 +40,11 @@ sudo-docker: ##make docker usable as non-sudo (linux only)
 	#sudo groupadd docker
 	sudo gpasswd -a $(USER) docker
 	newgrp docker
-
-ifeq ($(uname),Darwin)
+UNAME:= $(shell uname)
+ifeq ($(UNAME),Darwin)
 unison_file := "unison-v2.51.4+ocaml-4.05.0+x86_64.macos-10.15.tar.gz"
 endif
-ifeq ($(uname),Linux)
+ifeq ($(UNAME),Linux)
 unison_file := "unison-v2.51.4+ocaml-4.05.0+x86_64.linux.tar.gz"
 endif
 unison: ##use this to sync repo with a remote host. (this command just installs unison)
@@ -60,14 +60,14 @@ unison: ##use this to sync repo with a remote host. (this command just installs 
 	mv bin/temp/unison* bin/
 	rm -r bin/temp
 	#make sure config file is in right place
-	mkdir -p $HOME/.unison
-	cp config/unison/heterogeneous-graphlet-counting.prf $HOME/.unison/
+	#mkdir -p $HOME/.unison
+	#cp config/unison/heterogeneous-graphlet-counting.prf $HOME/.unison/
 	#set up share directory
 	mkdir -p output/share
 	# if on mac, set up fsmonitor
-	ifeq ($(uname),Darwin)
-	brew install autozimu/homebrew-formulas/unison-fsmonitor
-	endif
+	@if [ "$$(uname)" = "Darwin" ]; then \
+		brew install autozimu/homebrew-formulas/unison-fsmonitor; \
+	fi
 nectar-connect: ## ssh into nectar VM   
 
 
