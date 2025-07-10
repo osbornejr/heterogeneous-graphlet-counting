@@ -13,10 +13,54 @@ for i in term_list()
 endfor
 
 "set where remote is: nectar laptop race 
-let remote_method="race"
-let race_ip ="52-62-171-33"
-let $RACE_ADDRESS = "ec2-user@ec2-" . race_ip . ".ap-southeast-2.compute.amazonaws.com"
+let remote_method= "race"
 
+
+if remote_method ==# "race"
+    "for race, we need to set up depending on the ip of the currently used
+    "instance.
+    let race_ip ="3-25-227-252"
+    let race_address = "ec2-user@ec2-" . race_ip . ".ap-southeast-2.compute.amazonaws.com"
+    let $RACE_ADDRESS = race_address
+    
+    "unison in particular will need a separate config file depending on this
+    "address. we generate that here first
+    let remote_path = "/home/ec2-user/heterogeneous-graphlet-counting"
+    let remote_host = race_address 
+    let ssh_key = expand("~/.ssh/race-hub")
+elseif remote_method ==# "laptop"
+    "set unison config for linux laptop 
+    let remote_path = "/home/joel/git/heterogeneous-graphlet-counting"
+    let remote_host = "joel@192.168.175.134"
+    let ssh_key = expand("~/.ssh/mit-derm")
+elseif remote_method ==# "nectar"
+    "set unison config for nectar 
+    let remote_path = "/pvol/heterogeneous-graphlet-counting"
+    let remote_host = "ubuntu@118.138.237.216"
+    let ssh_key = expand("~/.ssh/nectar")
+else
+    echoerr "Unknown remote method: " . remote_method
+    finish
+endif
+
+let local_path = "/Users/osbornejr/git/heterogeneous-graphlet-counting"
+let remote_root = "ssh://" . remote_host . "//" . remote_path
+let config_path = local_path . "/config/unison/unison-" . remote_method . ".prf"
+
+"Build unison config based on method
+let base = readfile(expand("config/unison/heterogeneous-graphlet-counting.prf"))
+call insert(base, '#args for ssh', 0)
+call insert(base, 'sshargs = -i ' . ssh_key, 1)
+call insert(base, '#Roots', 2)
+call insert(base, 'root = ' . remote_root, 3)
+call insert(base, 'root = ' . local_path, 4)
+call insert(base, 'prefer = ' . local_path, 5)
+call insert(base, 'servercmd = ' . remote_path . '/bin/unison', 6)
+
+call writefile(base,config_path)
+
+"set unison config path to be where repo configs are stored
+let $UNISON = local_path . "/config/unison"
 
 "set up local and remote terminals (without swapfiles)
 """LOCAL terminal: to browse local files
@@ -36,8 +80,9 @@ wincmd c
 
 """UNISON terminal: to update files on remote server as they are edited locally
 "setup unison file sync
-nos term ./bin/unison heterogeneous-graphlet-counting-race
-file unison
+
+execute 'nos term ./bin/unison unison-' . remote_method  
+"file unison
 wincmd c
 
 """REMOTE PORT terminal: to connect with an open port (for pluto etc.)
