@@ -1,7 +1,7 @@
 #args for ssh
 sshargs = -i /Users/osbornejr/.ssh/race-hub
 #Roots
-root = ssh://ec2-user@ec2-3-25-227-252.ap-southeast-2.compute.amazonaws.com///home/ec2-user/heterogeneous-graphlet-counting
+root = ssh://ec2-user@ec2-13-239-39-89.ap-southeast-2.compute.amazonaws.com///home/ec2-user/heterogeneous-graphlet-counting
 root = /Users/osbornejr/git/heterogeneous-graphlet-counting
 prefer = /Users/osbornejr/git/heterogeneous-graphlet-counting
 servercmd = /home/ec2-user/heterogeneous-graphlet-counting/bin/unison
