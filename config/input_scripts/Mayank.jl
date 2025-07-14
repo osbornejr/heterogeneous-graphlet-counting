@@ -1,7 +1,7 @@
 using DataFrames,JLD2,ProjectFunctions,CSV,DataPreprocessing
 pwd = ENV["PWD"]
 ### Read in all counts
-input_dir ="$pwd/data/mayank-de-novo/output-data"
+input_dir ="$pwd/data/mayank-de-novo"
 @info "Pulling in all raw counts..."
 raw_counts=DataPreprocessing.read_count_data("$input_dir/isoforms",method="expected_count");
 @info "found $(size(raw_counts)[1]) transcripts at $input_dir..."   
