@@ -12,4 +12,4 @@ cytoscape/*
 bin/
 *Manifest.toml
 config/unison/*
-!config/unison/*.prf
+!config/unison/heterogeneous-graphlet-counting.prf
