@@ -30,13 +30,20 @@ function cleaner()
     ##remind GC to do its job
     Threads.@threads for i in 1:10000
         zeros(10000)
-    end
+    end 
     ##notify GC of its duties (including every worker)
     @everywhere GC.gc()
     ## bonus clean for sticky memory that can accumulate (again, for the worker)
     @everywhere ccall(:malloc_trim,Cvoid,(Cint,),0)
 end
 export cleaner
+
+function distributed_cleanup()
+    cleaner()
+    rmprocs(workers())
+    cleaner()
+end
+export distributed_cleanup
 
 function distributed_setup(inclusions::Vector{Symbol})
     distributed_setup(inclusions...)
