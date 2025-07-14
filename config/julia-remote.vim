@@ -19,7 +19,7 @@ let remote_method= "race"
 if remote_method ==# "race"
     "for race, we need to set up depending on the ip of the currently used
     "instance.
-    let race_ip ="13-239-39-89"
+    let race_ip ="13-54-65-141"
     let race_address = "ec2-user@ec2-" . race_ip . ".ap-southeast-2.compute.amazonaws.com"
     let $RACE_ADDRESS = race_address
     
@@ -68,16 +68,6 @@ nos term
 file local
 wincmd c
 
-"""REMOTE terminal: to browse files on remote server
-""nectar
-"nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test"
-""linux laptop
-"nos term ssh -t -i ~/.ssh/mit-derm joel@192.168.175.134 
-""race
-execute 'nos term ssh -i ~/.ssh/race-hub ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
-file remote
-wincmd c
-
 """UNISON terminal: to update files on remote server as they are edited locally
 "setup unison file sync
 
@@ -85,31 +75,69 @@ execute 'nos term ./bin/unison unison-' . remote_method
 file unison
 wincmd c
 
-"""REMOTE PORT terminal: to connect with an open port (for pluto etc.)
-"setup terminal with port connection 
-""nectar
-"nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia-server'"
-""linux laptop
-"nos term ssh -t -i ~/.ssh/mit-derm -L 8080:localhost:8000 joel@192.168.175.134 
-""
-""race
-execute 'nos term ssh -i ~/.ssh/race-hub -L 8080:localhost:8000 ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
-file julia-port
-wincmd c
 
-"""REPL terminal: to run julia in on remote server
-"open REPL terminal vertically on right
-""nectar
-"nos vert term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia'"
-"nos vert term zsh -is eval "dtach -A /tmp/hgc-julia zsh -is eval 'make julia'"
-""linux laptop
-"nos vert term ssh -t -i ~/.ssh/mit-derm joel@192.168.175.134 
-"commenting this out for now, cannot make it work smoothly
-"'dtach -A /tmp/hgc-julia "cd /home/joel/git/heterogeneous-graphlet-counting && sudo make julia"'
-""race
-execute 'nos vert term ssh -i ~/.ssh/race-hub ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
-file repl
-wincmd p
+"" for remote terminals this will depend on the remote_method
+if remote_method ==# "race"
+    """REMOTE terminal: to browse files on remote server
+    execute 'nos term ssh -i ~/.ssh/race-hub ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
+    file remote
+    wincmd c
+    
+    
+    """REMOTE PORT terminal: to connect with an open port (for pluto etc.)
+    "setup terminal with port connection 
+    execute 'nos term ssh -i ~/.ssh/race-hub -L 8080:localhost:8000 ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
+    file julia-port
+    wincmd c
+    
+    """REPL terminal: to run julia in on remote server
+    "open REPL terminal vertically on right
+    execute 'nos vert term ssh -i ~/.ssh/race-hub ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
+    file repl
+    wincmd p
+elseif remote_method ==# "laptop"
+    """REMOTE terminal: to browse files on remote server
+    nos term ssh -t -i ~/.ssh/mit-derm joel@192.168.175.134 
+    file remote
+    wincmd c
+    
+    
+    """REMOTE PORT terminal: to connect with an open port (for pluto etc.)
+    "setup terminal with port connection 
+    nos term ssh -t -i ~/.ssh/mit-derm -L 8080:localhost:8000 joel@192.168.175.134 
+    ""
+    file julia-port
+    wincmd c
+    
+    """REPL terminal: to run julia in on remote server
+    "open REPL terminal vertically on right
+    nos vert term ssh -t -i ~/.ssh/mit-derm joel@192.168.175.134 
+    "commenting this out for now, cannot make it work smoothly
+    "'dtach -A /tmp/hgc-julia "cd /home/joel/git/heterogeneous-graphlet-counting && sudo make julia"'
+    file repl
+    wincmd p
+elseif remote_method ==# "nectar"
+    """REMOTE terminal: to browse files on remote server
+    nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test"
+    file remote
+    wincmd c
+    
+    """REMOTE PORT terminal: to connect with an open port (for pluto etc.)
+    "setup terminal with port connection 
+    nos term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia-server'"
+    file julia-port
+    wincmd c
+    
+    """REPL terminal: to run julia in on remote server
+    "open REPL terminal vertically on right
+    nos vert term zsh -is eval "source ~/.conda/conda_init;conda activate nectar;~/git/rna-seq/nectar/launch-nectar-instance.sh graphlet-thread-test 'tmux a -d -t julia'"
+    "nos vert term zsh -is eval "dtach -A /tmp/hgc-julia zsh -is eval 'make julia'"
+    file repl
+    wincmd p
+else
+    echoerr "Unknown remote method: " . remote_method
+    finish
+endif
 
 "clear old slime variable from each loaded buffer
 let buffers = map(filter(copy(getbufinfo()), 'v:val.listed'), 'v:val.bufnr')
