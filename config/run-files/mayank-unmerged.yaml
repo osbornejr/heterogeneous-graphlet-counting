@@ -1,7 +1,7 @@
-test_name: Mayank
+test_name: mayank-unmerged
 
 
-raw_counts_script: "config/input_scripts/Mayank.jl"
+raw_counts_script: "config/input_scripts/mayank-unmerged.jl"
 distributed: true
 
 cache:

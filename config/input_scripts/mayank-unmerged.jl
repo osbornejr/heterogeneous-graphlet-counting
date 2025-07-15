@@ -24,7 +24,7 @@ insertcols!(noncode_counts,"transcript_type"=>"noncoding")
 raw_counts=outerjoin(code_counts,noncode_counts,on = intersect(names(code_counts),names(noncode_counts)))
 
 
-file = "$pwd/output/cache/Mayank/raw_counts.jld2"
+file = "$pwd/output/cache/mayank-unmerged/raw_counts.jld2"
 
 @info "Saving raw counts to $file"
 cache_save(file,"raw counts"=>raw_counts)
