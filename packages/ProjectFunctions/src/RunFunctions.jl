@@ -81,7 +81,7 @@ function run_all(config_file::String)
     end
 
 
-end
+end 
 
 function load_config(config_file::String)
         #setup parameters to be read.writable for all functions in this module
@@ -91,6 +91,15 @@ end
 export load_config
 export params
 
+#exposed function to allow just preprocessing run on given configs settings
+function data_preprocessing(config_file::String)
+    @info "Loading parameters"
+    load_config(config_file)
+    @info "Loading raw counts"
+    raw_counts = get_input_data()
+    @info "Preprocessing raw counts"
+    processed_counts = data_preprocessing(raw_counts)
+end
 
 function data_preprocessing(raw_counts::DataFrame)
     
