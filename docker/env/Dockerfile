@@ -3,7 +3,7 @@ FROM julia:latest
 USER root
 #add config files
 RUN apt-get update;apt-get install -y unzip ssh binutils locate
-COPY environment.yml Project.toml Manifest.toml docker/env/startup.jl /tmp/
+COPY docker/env/environment.yml docker/env/Project.toml docker/env/Manifest.toml docker/env/startup.jl /tmp/
 RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml /tmp/startup.jl
 #COPY postBuild /usr/local/bin/postBuild.sh
 #RUN chown $UID:$GID /usr/local/bin/postBuild.sh && \
