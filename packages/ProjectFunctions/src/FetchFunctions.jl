@@ -21,6 +21,12 @@ function get_input_data()
      end
     return raw_counts  
 end 
+
+function get_input_data(config_file::String)
+    load_config(config_file)
+    get_input_data()
+end
+
 export get_input_data
 
 
@@ -47,6 +53,12 @@ function get_output_data()
     components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
     return [raw_counts,processed_counts,similarity_matrix,adj_matrix,network_counts,vertexlist,edgelist]
 end
+
+function get_output_data(config_file::String)
+    load_config(config_file)
+    get_output_data()
+end
+
 export get_output_data
 
 """
@@ -77,6 +89,12 @@ function get_preprocessed_data()
     end
     return [raw_counts,round_counts,vst_counts,clean_counts,norm_counts,sample_counts]
 end
+
+function get_preprocessed_data(config_file::String)
+    load_config(config_file)
+    get_preprocessed_data()
+end
+
 export get_preprocessed_data
 
 """
@@ -109,6 +127,12 @@ function get_network_construction()
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
     return components,adj_matrix,network_counts,vertexlist,edgelist       
 end
+
+function get_network_construction(config_file::String)
+    load_config(config_file)
+    get_network_construction()
+end
+
 export get_network_construction
 
 """
@@ -128,6 +152,12 @@ function get_communities()
     end
     return comms
 end
+
+function get_communities(config_file::String)
+    load_config(config_file)
+    get_communities()
+end
+
 export get_communities
 
 """
@@ -149,6 +179,12 @@ function get_wgcna()
     end
     return [wgcna_network,wgcna_comm]
 end
+
+function get_wgcna(config_file::String)
+    load_config(config_file)
+    get_wgcna()
+end
+
 export get_wgcna
 
 """
@@ -176,6 +212,12 @@ function get_biological_validation()
     end
     return [ktt,gtt]
 end
+
+function get_biological_validation(config_file::String)
+    load_config(config_file)
+    get_biological_validation()
+end
+
 export get_biological_validation
 
 """
@@ -196,4 +238,10 @@ function get_graphlet_counts()
             throw(ArgumentError("No cached file exists at $graphlet_file, please ensure graphlet counting has been run on network."))
     end
 end
+
+function get_graphlet_counts(config_file::String)
+    load_config(config_file)
+    get_graphlet_counts()
+end
+
 export get_graphlet_counts
