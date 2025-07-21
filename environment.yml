@@ -1,0 +1,29 @@
+name: julia-workspace
+
+channels:
+        - conda-forge
+        - bioconda
+        - r
+
+dependencies:
+        - libstdcxx-ng
+        - icu
+        - r-base>=4.0
+        - r-tidyverse 
+        - r-data.table
+        - r-wgcna
+        - r-dendextend
+        - r-ggdendro
+        - r-igraph
+        - r-threejs
+        - r-stringi
+        - bioconductor-edger
+        - bioconductor-deseq2
+        - bioconductor-ebseq
+        - bioconductor-biomaRt
+        - bioconductor-go.db
+        - bioconductor-topgo
+        - bioconductor-org.hs.eg.db
+        
+        
+
