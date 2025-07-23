@@ -35,11 +35,11 @@ website:
 data_preprocessing: 
   roundsig: 5 
   vst: true
-  expression_cutoff: 0.1
-  minreq: 0.1
-  clean_method: "per-sample"
+  expression_cutoff: 0.5
+  minreq: 0.05
+  clean_method: "global"
   norm_method: "median"
-  variance_percent: 0.5
+  variance_percent: 9.0
     
 network_construction:
   construct: true
