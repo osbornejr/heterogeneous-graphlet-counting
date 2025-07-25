@@ -1,3 +1,5 @@
+using Pkg
+Pkg.activate(".")
 using GLMakie,StatsBase
 using ProjectFunctions
 raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/mayank-merged.yaml")
