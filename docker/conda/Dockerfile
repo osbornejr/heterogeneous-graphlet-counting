@@ -47,7 +47,8 @@ RUN apt-get update && apt-get install -y \
 USER $USER
 ##install miniconda (adapted from official miniconda container)
 ENV CONDA_DIR $HOME/conda
-RUN . /tmp/env.txt && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-$CONDAARCH.sh -o $HOME/miniconda.sh \
+#RUN . /tmp/env.txt && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-$CONDAARCH.sh -o $HOME/miniconda.sh \
+RUN . /tmp/env.txt && curl -sSL "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" -o $HOME/miniconda.sh \
     && bash $HOME/miniconda.sh -bfp $CONDA_DIR \
     && rm -rf $HOME/miniconda.sh
 # make non-activate conda commands available
