@@ -9,6 +9,8 @@ path = Project.toml
 path = Manifest.toml
 path = environment.yml
 path = output/share
+#share mayank merged output cache for now (could become too large post netconstr)
+path = output/cache/mayank-merged
 path = config
 path = docker
 ##watch

@@ -37,14 +37,14 @@ data_preprocessing:
   vst: true
   expression_cutoff: 0.5
   minreq: 0.05
-  clean_method: "global"
+  clean_method: "per-sample"
   norm_method: "median"
   variance_percent: 9.0
     
 network_construction:
   construct: true
   coexpression: "pidc"
-  nbins: "sqrt_n"  
+  nbins: "n_over_2"  
   threshold: 0.95
   threshold_method: "empirical_dist_zero"
   visualise: false
