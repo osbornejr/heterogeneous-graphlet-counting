@@ -3,7 +3,7 @@ FROM julia:latest
 USER root
 #add config files
 RUN apt-get update;apt-get install -y unzip ssh binutils locate
-COPY docker/env/environment.yml docker/env/Project.toml docker/env/Manifest.toml docker/env/startup.jl /tmp/
+COPY environment.yml Project.toml Manifest.toml docker/env/startup.jl /tmp/
 RUN chown $UID:$GID /tmp/environment.yml /tmp/Project.toml /tmp/Manifest.toml /tmp/startup.jl
 #COPY postBuild /usr/local/bin/postBuild.sh
 #RUN chown $UID:$GID /usr/local/bin/postBuild.sh && \
@@ -28,6 +28,7 @@ ENV ENV_PREFIX julia-workspace
 RUN mamba env create --file $PROJECT_DIR/environment.yml && \
     conda clean --all --yes
 
+
 #build the julia environment TODO find out why RCall does not install properly
 ENV R_HOME $CONDA_DIR/envs/$ENV_PREFIX/lib/R
 ENV R_LIBS_USER $CONDA_DIR/envs/$ENV_PREFIX/lib/
@@ -43,7 +44,8 @@ RUN cp $HOME/conda/envs/$ENV_PREFIX/lib/libstdc++.so.6 $HOME/julia-${JULIA_VERSI
 #set up MPI.jl to use openMPI 
 #RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.build(\"MPI\");using MPI;MPI.install_mpiexecjl()"
 #Or without MPI-- TODO fix it so that can instantiate during build... currently we must run instantiate everytime we install on a fresh machine- it does not work here currently because the dev packages will not install before they are linked to in a container. Could solve maybe by registering them?
-#RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
+COPY packages/ $PROJECT_DIR/packages/
+RUN julia --project=$PROJECT_DIR/Project.toml --startup-file=no -e "using Pkg;Pkg.instantiate();Pkg.update()"
 #add julia bin to path
 ENV  PATH $PATH:$HOME/.julia/bin
 

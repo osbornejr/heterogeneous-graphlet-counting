@@ -17,6 +17,7 @@ dependencies:
         - r-igraph
         - r-threejs
         - r-stringi
+        - r-pcit
         - bioconductor-edger
         - bioconductor-deseq2
         - bioconductor-ebseq
