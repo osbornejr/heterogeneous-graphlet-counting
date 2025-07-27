@@ -43,7 +43,7 @@ data_preprocessing:
     
 network_construction:
   construct: true
-  coexpression: "pidc"
+  coexpression: "pcit"
   nbins: "n_over_2"  
   threshold: 0.95
   threshold_method: "empirical_dist_zero"

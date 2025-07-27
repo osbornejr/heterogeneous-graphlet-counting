@@ -13,7 +13,7 @@ for i in term_list()
 endfor
 
 "set where repl is: nectar laptop race local
-let remote_method= "race"
+let remote_method= "local"
 
 
 if remote_method ==# "race"
@@ -82,7 +82,7 @@ else "set paths first for unison and remotes
     """UNISON terminal: to update files on remote server as they are edited locally
     "setup unison file sync
     
-    execute 'nos term ./bin/unison unison-' . remote_method  
+    execute 'nos term ./bin/unison -ignorearchives unison-' . remote_method  
     file unison
     wincmd c
     
