@@ -36,6 +36,15 @@ function plot_network(adj_matrix;vertex_colors=nothing)
     return fig
 end
 
+function add_to_fig(fig)
+    ax2 = Axis(fig[1, 2])  # Add another axis to the right of the graphplot
+    lines!(ax2, 1:10, rand(10))
+
+    display(fig)
+end
+
+
+tdd = GraphletCounting.typed_degree_distribution(vertexlist,edgelist)
 
 #end module
 end
