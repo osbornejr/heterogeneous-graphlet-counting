@@ -1,14 +1,15 @@
 using Pkg
 Pkg.activate(".")
-using GLMakie,StatsBase
 using ProjectFunctions
-raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/mayank-merged.yaml")
-var_data = vec(var(data_from_dataframe(norm_counts),dims=2 ))
+using Results
+#experiment = "mayank-merged"
+experiment = "GSE68559"
+raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/$(experiment).yaml")
+Results.variance_histogram(norm_counts)
 
-#histogram to see where coding and noncoding is represented in variance data
-bins = Int.(floor.(var_data.*10)).+1
-barplot(bins,repeat([1],length(var_data)),stack=bins,color=replace(norm_counts.transcript_type,"coding"=>1,"noncoding"=>2))
+components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
+fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple))
 
+f = Results.typed_degree_distribution(vertexlist,edgelist)
 
-
-
+#Results.add_to_fig(fig)
