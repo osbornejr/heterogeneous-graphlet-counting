@@ -59,6 +59,9 @@ function clean_round_counts(round_counts::DataFrame,cut_percent::Float64,minreq:
         cut = [round_sorted[cuts[i],i] for i in 1:m]
         ## get transcripts that have at least minreq of values above cut
         clean_counts = round_counts[vec(sum(round_data.>hcat([cut for i in 1:n]...)',dims=2).>m*minreq),:]
+    elseif (method == "old_method")
+        ##adding here for testing purposes. it uses the old method which only requires one input, expression_cutoff which should instead be an integer-- the cut_percent parameter is still labelled expression cutoff in configs due to this-- for testing we keep that match and ignore minreq. All transcripts with total counts below this figure will be removed. It was usually applied to raw, not rounded counts, but that shouldn't make too much difference.
+        clean_counts = clean_raw_counts(round_counts,Integer(cut_percent))
     else
         throw(ArgumentError("method must be either 'global' or 'per-sample'"))
     end
@@ -101,18 +104,33 @@ function normalise_clean_counts(clean_counts::DataFrame,norm_method::String)
     return norm_counts
 end
 
-function sample_norm_counts(norm_counts::DataFrame,variance_cutoff::Float64)
+function sample_norm_counts(norm_counts::DataFrame,variance_cutoff::Float64;method::String="cutoff",maintain_ratio=true)
+
 ##Sampling for most variable transcripts
 #add variance column to normalised data
     norm_data = data_from_dataframe(norm_counts,"data")
     variance = vec(var(norm_data, dims=2))
-   # norm_counts.variance = variance
-   # sample_counts_noncoding = sort(norm_counts[norm_counts[!,:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
-   # sample_counts_coding = sort(norm_counts[norm_counts[!,:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
-   # sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
-   # new, simpler method just setting variance cutoff
+    if (method == "percent")
+        if (variance_cutoff>1) | (variance_cutoff<0)
+            throw(ArgumentError("'percent' method requires a variance percentage input"))
+        end
+        variance_percent = variance_cutoff
+        norm_counts.variance = variance
+        #TODO generalise to any types/number of types
+        if (maintain_ratio == true)
+            sample_counts_noncoding = sort(norm_counts[norm_counts[!,:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+            sample_counts_coding = sort(norm_counts[norm_counts[!,:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+            sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
+        else
+            sample_counts = sort(norm_counts,:variance)[Int(round(end*(1-variance_percent))):end,:]
+        end
+    elseif (method == "cutoff")
+        # new, simpler method just setting variance cutoff
+        sample_counts = norm_counts[variance.>variance_cutoff,:]
+    else
+        throw(ArgumentError("method must be either 'cutoff' or 'percent'"))
+    end
 
-    sample_counts = norm_counts[variance.>variance_cutoff,:]
     return sample_counts
 end
 
