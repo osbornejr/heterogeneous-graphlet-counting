@@ -171,7 +171,7 @@ function data_preprocessing(raw_counts::DataFrame)
         sample_counts = cache_load(file,"sample counts")
     else
         @info "Saving sample counts to $file"
-        sample_counts = DataPreprocessing.sample_norm_counts(norm_counts,params["data_preprocessing"]["variance_percent"])
+        sample_counts = DataPreprocessing.sample_norm_counts(norm_counts,params["data_preprocessing"]["variance_percent"],method=params["data_preprocessing"]["sample_method"])
         cache_save(file,"sample counts"=>sample_counts)
     end
 

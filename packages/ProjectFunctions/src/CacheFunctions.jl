@@ -28,7 +28,7 @@ function cache_setup()
     make_cache(dir_name="vst_dir",params["cache"]["round_dir"],"vst",string(params["data_preprocessing"]["vst"]))
     make_cache(dir_name="clean_dir",params["cache"]["vst_dir"],"expression_cutoff",string(params["data_preprocessing"]["expression_cutoff"]),"minreq",string(params["data_preprocessing"]["minreq"]),"clean_method",string(params["data_preprocessing"]["clean_method"]))
     make_cache(dir_name="norm_dir",params["cache"]["clean_dir"],"normalisation",params["data_preprocessing"]["norm_method"])
-    make_cache(dir_name="sampling_dir",params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["variance_percent"]))
+    make_cache(dir_name="sampling_dir",params["cache"]["norm_dir"],"sampling",string(params["data_preprocessing"]["sample_method"]),string(params["data_preprocessing"]["variance_percent"]))
     #network construction dirs:
     ##at present we want to trial different bin sizes for the information measures, so we add the extra split here if "coexpression" is either MI or PID.
     if params["network_construction"]["coexpression"] in ["pidc","mutual_information"]
