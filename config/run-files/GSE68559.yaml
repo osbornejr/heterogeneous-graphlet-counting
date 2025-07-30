@@ -33,13 +33,14 @@ website:
   website_dir: "website"
 
 data_preprocessing: 
-  roundsig: 5 
-  vst: true
-  expression_cutoff: 0.05
+  roundsig: 50 
+  vst: false
+  clean_method: "old_method"
+  expression_cutoff: 1.0
   minreq: 0.05
-  clean_method: "per-sample"
-  norm_method: "median"
-  variance_percent: 2.0
+  norm_method: "upper_quartile"
+  sample_method: "percent"
+  variance_percent: 0.025
     
 network_construction:
   construct: true
