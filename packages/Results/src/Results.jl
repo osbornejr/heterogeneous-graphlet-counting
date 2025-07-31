@@ -51,19 +51,25 @@ function typed_degree_distribution(vertex_typelist,edgelist)
     cd = first.(collect.(values.(tdd)))
     nd = last.(collect.(values.(tdd)))
     #break down further to differentiate type of source
-    ccd = (vertex_typelist.=="coding").* cd
-    ncd = (vertex_typelist.=="noncoding").* cd
-    cnd = (vertex_typelist.=="coding").* nd
-    nnd = (vertex_typelist.=="noncoding").* nd
+    ccd = cd[(vertex_typelist.=="coding")]
+    ncd = cd[(vertex_typelist.=="noncoding")]
+    cnd = nd[(vertex_typelist.=="coding")]
+    nnd = nd[(vertex_typelist.=="noncoding")]
     f = Figure()
-
-    barplot(f[1,1],dd,repeat([1],length(dd)),stack=dd,color=(vertex_typelist.=="coding").+1)
-    hist(f[2,1],cd, bins = 1623)
-    hist(f[2,2],nd, bins = 1623)
-    hist(f[3,1],ccd, bins = 1623)
-    hist(f[3,2],ncd, bins = 1623)
-    hist(f[4,1],cnd, bins = 1623)
-    hist(f[4,2],nnd, bins = 1623)
+    ax1 = Axis(f[1, 1], title = "Degree Distribution")
+    barplot!(ax1,dd,repeat([1],length(dd)),stack=dd,color=(vertex_typelist.=="coding").+1)
+    ax2 = Axis(f[2, 1], title = "Coding Degree Distribution")
+    barplot!(ax2,cd,repeat([1],length(cd)),stack=cd,color=(vertex_typelist.=="coding").+1)
+    ax3 = Axis(f[2, 2], title = "Noncoding Degree Distribution")
+    barplot!(ax3,nd,repeat([1],length(nd)),stack=nd,color=(vertex_typelist.=="coding").+1)
+    ax4 = Axis(f[3, 1], title = "Coding to coding Degree Distribution")
+    barplot!(ax4,ccd,repeat([1],length(ccd)),stack=ccd,color="gold")
+    ax5 = Axis(f[3, 2], title = "Coding to noncoding Degree Distribution")
+    barplot!(ax5,ncd,repeat([1],length(ncd)),stack=ncd,color="purple")
+    ax6 = Axis(f[4, 1], title = "Noncoding to coding Degree Distribution")
+    barplot!(ax6,cnd,repeat([1],length(cnd)),stack=cnd,color="gold")
+    ax7 = Axis(f[4, 2], title = "Noncoding to noncoding Degree Distribution")
+    barplot!(ax7,nnd,repeat([1],length(nnd)),stack=nnd,color="purple")
     f 
 
 end
