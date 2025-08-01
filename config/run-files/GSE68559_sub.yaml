@@ -39,6 +39,7 @@ data_preprocessing:
   minreq: 0.10
   clean_method: "per-sample"
   norm_method: "median"
+  sample_method: "cutoff"
   variance_percent: 1.0
     
 network_construction:

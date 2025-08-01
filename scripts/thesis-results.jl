@@ -2,8 +2,8 @@ using Pkg
 Pkg.activate(".")
 using ProjectFunctions
 using Results
-#experiment = "mayank-merged"
-experiment = "GSE68559"
+experiment = "mayank-merged"
+#experiment = "GSE68559_sub"
 raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/$(experiment).yaml")
 Results.variance_histogram(norm_counts)
 

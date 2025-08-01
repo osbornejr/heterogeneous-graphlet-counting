@@ -13,7 +13,7 @@ for i in term_list()
 endfor
 
 "set where repl is: nectar laptop race local
-let remote_method= "race"
+let remote_method= "local"
 
 
 if remote_method ==# "race"
