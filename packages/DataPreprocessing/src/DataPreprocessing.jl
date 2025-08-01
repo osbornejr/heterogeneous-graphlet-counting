@@ -59,7 +59,7 @@ function clean_round_counts(round_counts::DataFrame,cut_percent::Float64,minreq:
         cut = [round_sorted[cuts[i],i] for i in 1:m]
         ## get transcripts that have at least minreq of values above cut
         clean_counts = round_counts[vec(sum(round_data.>hcat([cut for i in 1:n]...)',dims=2).>m*minreq),:]
-    elseif (method == "old_method")
+    elseif (method == "old-method")
         ##adding here for testing purposes. it uses the old method which only requires one input, expression_cutoff which should instead be an integer-- the cut_percent parameter is still labelled expression cutoff in configs due to this-- for testing we keep that match and ignore minreq. All transcripts with total counts below this figure will be removed. It was usually applied to raw, not rounded counts, but that shouldn't make too much difference.
         clean_counts = clean_raw_counts(round_counts,Integer(cut_percent))
     else

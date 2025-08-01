@@ -10,7 +10,8 @@ path = Manifest.toml
 path = environment.yml
 path = output/share
 #share mayank merged output cache for now (could become too large post netconstr)
-path = output/cache/mayank-merged
+#WARNING this is dangerous and maybe not best for managing/preserving cache.
+#path = output/cache/mayank-merged
 path = config
 path = docker
 ##watch

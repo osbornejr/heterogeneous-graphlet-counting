@@ -1,3 +1,4 @@
+
 test_name: mayank-merged
 
 
@@ -35,12 +36,12 @@ website:
 data_preprocessing: 
   roundsig: 5 
   vst: true
-  expression_cutoff: 25.0
+  expression_cutoff: 0.5
   minreq: 0.05
-  clean_method: "old-method"
+  clean_method: "per-sample"
   norm_method: "median"
-  sample_method: "percent"
-  variance_percent: 0.01
+  sample_method: "cutoff"
+  variance_percent: 9.0
     
 network_construction:
   construct: true
