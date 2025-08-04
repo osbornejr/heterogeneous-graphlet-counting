@@ -4,7 +4,7 @@ using ProjectFunctions
 using Results
 using GLMakie
 ##set experiment
-#experiment = "mayank-merged-1400-network"
+experiment = "mayank-merged-1400-network"
 experiment = "mayank-merged-altered-network"
 #experiment = "mayank-merged"
 #experiment = "GSE68559_sub"

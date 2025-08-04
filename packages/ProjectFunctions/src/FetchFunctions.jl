@@ -97,6 +97,35 @@ end
 
 export get_preprocessed_data
 
+
+"""
+    get_similarity_matrix()
+
+
+Retrieve the similarity matrix associated with the curent experiment parameters.
+
+## Example 
+    julia> similarity_matrix = get_similarity_matrix()
+"""
+function get_similarity_matrix() 
+    ##alt method that allows loading of cache if output exists, and gives an error otherwise.
+    sim_file = "$(params["cache"]["similarity_dir"])/similarity_matrix.jld2"
+    if (isfile(sim_file)) 
+        sim_matrix = cache_load(sim_file,"similarity_matrix")
+   else
+       throw(ArgumentError("No cached file exists at $sim_file, please run experiment to generate similarity matrix."))
+    end
+
+    return sim_matrix      
+end
+
+function get_similarity_matrix(config_file::String)
+    load_config(config_file)
+    get_similarity_matrix()
+end
+
+export get_similarity_matrix
+
 """
     get_network_construction()
 
