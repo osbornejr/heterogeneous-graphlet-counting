@@ -417,8 +417,8 @@ function biomaRt_connect()
         ensembl_version = "current" 
         if (ensembl_version=="current")
             {
-            ##mirrors to try: "useast" "uswest" "asia"
-            ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="useast", dataset = "hsapiens_gene_ensembl") 
+            ##mirrors to try: "useast" "www" "asia"
+            ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL",mirror="www", dataset = "hsapiens_gene_ensembl") 
             } else
             {
             ensembl <- useEnsembl(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",version=ensembl_version) 
