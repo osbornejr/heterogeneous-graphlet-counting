@@ -40,18 +40,33 @@ sudo-docker: ##make docker usable as non-sudo (linux only)
 	#sudo groupadd docker
 	sudo gpasswd -a $(USER) docker
 	newgrp docker
-UNAME:= $(shell uname)
-ifeq ($(UNAME),Darwin)
-unison_file := "unison-v2.51.4+ocaml-4.05.0+x86_64.macos-10.15.tar.gz"
+
+#unison setup
+PLATFORM := $(shell uname)
+ARCH := $(shell uname -m)
+UNISON_VERSION := 2.53.7
+
+ifeq ($(PLATFORM),Darwin)
+ifeq ($(ARCH),x86_64)
+unison_file := "unison-$(UNISON_VERSION)-macos-x86_64.tar.gz"
 endif
-ifeq ($(UNAME),Linux)
-unison_file := "unison-v2.51.4+ocaml-4.05.0+x86_64.linux.tar.gz"
+ifeq ($(ARCH),arm64)
+unison_file := "unison-$(UNISON_VERSION)-macos-arm64.tar.gz"
+endif
+endif
+ifeq ($(PLATFORM),Linux)
+ifeq ($(ARCH),x86_64)
+unison_file := "unison-$(UNISON_VERSION)-ubuntu-x86_64.tar.gz"
+endif
+ifeq ($(ARCH),arm64)
+unison_file := "unison-$(UNISON_VERSION)-ubuntu-arm64.tar.gz"
+endif
 endif
 unison: ##use this to sync repo with a remote host. (this command just installs unison)
 	rm -rf bin/unison
 	mkdir -p bin/unison
 	##download file
-	wget --no-check-certificate --content-disposition -P ./bin/unison/ "https://github.com/bcpierce00/unison/releases/download/v2.51.4/$(unison_file)"
+	wget --no-check-certificate --content-disposition -P ./bin/unison/ "https://github.com/bcpierce00/unison/releases/download/v$(UNISON_VERSION)/$(unison_file)"
 	##extract and tidy
 	tar -xvzf bin/unison/$(unison_file) -C bin/unison
 	mkdir bin/temp
