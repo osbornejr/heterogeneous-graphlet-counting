@@ -1,0 +1,24 @@
+
+---
+title : Mayank high degree transcripts 
+author : Joel Robertson
+date: 6th August 2025
+
+---
+
+```julia; echo = true; results = "hidden"; cache = true
+    include("scripts/thesis-results.jl")
+```
+
+
+Have been getting to the bottom of issues with chickpea network. 
+
+- First issue is that since I had last worked on the chickpea data, we had introduced a more nuanced threshold setup in line with the PIDC approach.
+Applied to the chickpea data, this was causing edges to form between two transcripts with lots of 0 entries. Over enough samples this would not be possible (any transcripts with significant zeros would be removed during preprocessing). But it seems that all aspects of the PIDC approach need to be abandoned for datasets with smaller sample size. I can see now why this was particularly affecting the transcripts in question.
+
+- Returned to old hard threshold approach, which more or less recovered the same structure as I had observed during second milestone.Recall that this still had the strange bimodal shape but to a much lesser degree. 
+
+```julia
+f2
+```
+
