@@ -14,3 +14,4 @@ bin/
 !/Manifest.toml
 config/unison/*
 !config/unison/heterogeneous-graphlet-counting.prf
+weave/cache
