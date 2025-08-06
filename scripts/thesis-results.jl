@@ -47,10 +47,10 @@ sample_names = ["JG11-Control-R1","JG11-Control-R2","JG11-Control-R3","JG11-Stre
 f2 = Figure()
 ax1 = Axis(f2[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: high degree transcripts")
 #add extra layer of xtick labels
-Axis(f2[1,1],xticks=((2:6:12),["JG11","ICCV2"]),xticklabelpad=25)
+Axis(f2[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
 heatmap!(ax1,pd[high_ids,:]')
 ax2 = Axis(f2[1,2],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: other transcripts")
-Axis(f2[1,2],xticks=((2:6:12),["JG11","ICCV2"]),xticklabelpad=25)
+Axis(f2[1,2],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
 heatmap!(ax2,pd[ids,:]')
 f2
 
@@ -61,3 +61,7 @@ cor_pd = cor(pd')
 #find all transcript pairs with cor greater than threshold
 cor_threshold = 0.99
 matching_pairs = filter(t->t[1]!=t[2],Tuple.(findall(>(cor_threshold),cor_pd)))
+high_cors = unique(vcat(first.(matching_pairs),last.(matching_pairs)))
+ax3 = Axis(f2[2,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: highly correlated transcripts")
+Axis(f2[2,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
+heatmap!(ax3,pd[high_cors,:]')
