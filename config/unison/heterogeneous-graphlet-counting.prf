@@ -17,4 +17,4 @@ path = docker
 ##watch
 repeat = watch
 ##ignore
-ignore = Name config/unison
+ignore = Path config/unison
