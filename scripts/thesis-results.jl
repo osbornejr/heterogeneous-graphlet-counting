@@ -60,7 +60,7 @@ f2
 #take correlation matrix
 cor_pd = cor(pd')
 #find all transcript 9pairs with cor greater than threshold
-cor_threshold = 0.999
+cor_threshold = 0.99
 matching_pairs = filter(t->t[1]!=t[2],Tuple.(findall(>(cor_threshold),cor_pd)))
 high_cors = unique(vcat(first.(matching_pairs),last.(matching_pairs)))
 ax3 = Axis(f2[2,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: highly correlated (>$(cor_threshold)) transcripts")
@@ -73,3 +73,16 @@ ax4 = Axis(f2[2,2],xticks=((2:3:12),["Control","Stress","Control","Stress"]),tit
 Axis(f2[2,2],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
 heatmap!(ax4,pd[non_high_deg_high_cors,:]')
 
+non_high_cor_high_deg = high_ids[map(x->!in(x,intersect(high_ids,high_cors)),high_ids)]
+ax5 = Axis(f2[3,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: high degree but not high cor transcripts")
+Axis(f2[3,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
+heatmap!(ax5,pd[non_high_cor_high_deg,:]')
+
+##find those transcripts that have an expression pattern that is on or off depending on strain (with a tolerance of 1 sample not following pattern)
+#matching_strain_pattern = collect(1:size(pd)[1])[abs.(sum((pd.==0.0)[:,1:6],dims=2)-sum((pd.==0.0)[:,7:12],dims=2)).>4]
+matching_JG_strain_pattern = collect(1:size(pd)[1])[sum((pd.==0.0)[:,1:6],dims=2)-sum((pd.==0.0)[:,7:12],dims=2).>4]
+matching_ICCV_strain_pattern = collect(1:size(pd)[1])[sum((pd.==0.0)[:,1:6],dims=2)-sum((pd.==0.0)[:,7:12],dims=2).<-4]
+matching_strain_pattern = vcat(matching_JG_strain_pattern,matching_ICCV_strain_pattern)
+ax6 = Axis(f2[3,2],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: expression profiles matching strain samples")
+Axis(f2[3,2],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
+heatmap!(ax6,pd[matching_strain_pattern,:]')
