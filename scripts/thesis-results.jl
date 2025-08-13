@@ -83,6 +83,28 @@ heatmap!(ax5,pd[non_high_cor_high_deg,:]')
 matching_JG_strain_pattern = collect(1:size(pd)[1])[sum((pd.==0.0)[:,1:6],dims=2)-sum((pd.==0.0)[:,7:12],dims=2).>4]
 matching_ICCV_strain_pattern = collect(1:size(pd)[1])[sum((pd.==0.0)[:,1:6],dims=2)-sum((pd.==0.0)[:,7:12],dims=2).<-4]
 matching_strain_pattern = vcat(matching_JG_strain_pattern,matching_ICCV_strain_pattern)
-ax6 = Axis(f2[3,2],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: expression profiles matching strain samples")
+ax6 = Axis(f2[3,2],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: expression profiles matching strain samples (with 1 sample tolerance)")
 Axis(f2[3,2],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
 heatmap!(ax6,pd[matching_strain_pattern,:]')
+
+
+### finding potentially a more agnostic way to determine which regularly occuring patterns to remove from the data
+# divide the processed expression counts up into 4 bin2: x<2, 2<x<7,6<x<12, 12<x 
+binned_pd = (pd.>2)#+(pd.>7)+(pd.>12)
+#turn each profile into its own object
+binned_profiles = map(Tuple,eachrow(binned_pd))
+#sort by least to most common binned expression count profile.
+sorted = sort(collect(pairs(countmap(binned_profiles))), by = x -> x[2])
+#now want the transcript index so we can sort and view as heatmap
+#create a Dict: profile => indices where it appears
+profile_to_indices = Dict{Tuple, Vector{Int}}()
+for (i, profile) in enumerate(binned_profiles)
+    push!(get!(profile_to_indices, profile, Int[]), i)
+end
+#extract indices in sorted order
+sorted_indices = [profile_to_indices[profile] for (profile, _) in sorted]
+#plot processed data sorted this way as heatmap
+f3 = Figure()
+ax7 = Axis(f3[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: expression profiles binned and sorted by prevalence")
+Axis(f3[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
+heatmap!(ax7,pd[vcat(sorted_indices...),:]')
