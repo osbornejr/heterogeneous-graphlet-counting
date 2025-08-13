@@ -82,7 +82,7 @@ else "set paths first for unison and remotes
     """UNISON terminal: to update files on remote server as they are edited locally
     "setup unison file sync
     
-    execute 'nos term ./bin/unison -ignorearchives unison-' . remote_method  
+    execute 'nos term ./bin/unison unison-' . remote_method  
     file unison
     wincmd c
     

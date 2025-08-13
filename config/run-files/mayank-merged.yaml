@@ -14,6 +14,7 @@ cache:
     vst_dir: false
     clean_dir: false 
     norm_dir: false
+    prune_dir: false
     sampling_dir: false 
     similarity_dir: false 
     adjacency_dir: false  
@@ -39,6 +40,10 @@ data_preprocessing:
   minreq: 0.05
   clean_method: "old-method"
   norm_method: "median"
+  prune: true
+  prune_condition: "strain"
+  prune_cutoff: 2.0
+  prune_strictness: "n-1"
   sample_method: "percent"
   variance_percent: 0.01
     

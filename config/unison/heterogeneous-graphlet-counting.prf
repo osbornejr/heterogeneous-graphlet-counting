@@ -11,7 +11,7 @@ path = environment.yml
 path = output/share
 #share mayank merged output cache for now (could become too large post netconstr)
 #WARNING this is dangerous and maybe not best for managing/preserving cache.
-#path = output/cache/mayank-merged
+path = output/cache
 path = docker
 #for some reason now have to explicitly add config subdirs we want tracked (unison dir isnt being ignored for some reason)
 path = config/run-files
@@ -21,3 +21,6 @@ path = config/startup-files
 repeat = watch
 ##ignore
 #ignore = Path config/unison/**
+#ignore = Path output/cache/**relationships.csv
+#Cannot be transferring the massive relationships.csv files this way
+ignore = Regex ^output/cache/.*\.csv$
