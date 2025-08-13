@@ -7,7 +7,7 @@ using Results
 using GLMakie
 ##set experiment
 experiment = "mayank-merged-1400-network"
-experiment = "mayank-unmerged"
+#experiment = "mayank-unmerged"
 #experiment = "mayank-merged-altered-network"
 #experiment = "mayank-merged"
 #experiment = "GSE68559_sub"
@@ -35,7 +35,7 @@ dd = sum.(values.(GraphletCounting.typed_degree_distribution(vertexlist,edgelist
 #get ids for large component
 #largest component
 l_comp = components[findall(==(maximum(length.(components))),length.(components))...]
-id_cut = 120
+id_cut = 100
 high_ids = l_comp[dd.>id_cut]
 ids = l_comp[dd.<id_cut]
 #compare processed_data for high degree to rest of proto-network
@@ -59,10 +59,17 @@ f2
 
 #take correlation matrix
 cor_pd = cor(pd')
-#find all transcript pairs with cor greater than threshold
-cor_threshold = 0.99
+#find all transcript 9pairs with cor greater than threshold
+cor_threshold = 0.999
 matching_pairs = filter(t->t[1]!=t[2],Tuple.(findall(>(cor_threshold),cor_pd)))
 high_cors = unique(vcat(first.(matching_pairs),last.(matching_pairs)))
-ax3 = Axis(f2[2,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: highly correlated transcripts")
+ax3 = Axis(f2[2,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: highly correlated (>$(cor_threshold)) transcripts")
 Axis(f2[2,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
 heatmap!(ax3,pd[high_cors,:]')
+
+##observe those transcripts that have high cor interactions but not high degree 
+non_high_deg_high_cors = high_cors[.!in.(high_cors,Ref(intersect(high_ids,high_cors)))]
+ax4 = Axis(f2[2,2],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: highly correlated but not high degree transcripts")
+Axis(f2[2,2],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
+heatmap!(ax4,pd[non_high_deg_high_cors,:]')
+
