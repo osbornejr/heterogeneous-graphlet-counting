@@ -24,7 +24,7 @@ function plot_network(adj_matrix;vertex_colors=nothing)
     g = Graph(adj_matrix)
     set_theme!(backgroundcolor="#212121",textcolor=:white)
     fig,scene,p = graphplot(g;
-                            layout=Spectral(dim=3),
+                            layout=Spring(dim=3,seed=5),#Spectral(dim=3),
     node_color = vertex_colors,
     node_size = 10,
     edge_color = :white,
