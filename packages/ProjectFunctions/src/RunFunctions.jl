@@ -163,6 +163,24 @@ function data_preprocessing(raw_counts::DataFrame)
         cache_save(file,"norm counts"=>norm_counts)
     end
 
+    ### High contrast pruning
+    ##update cache
+    file = "$(params["cache"]["prune_dir"])/prune_counts.jld2"
+    if(isfile(file))
+        prune_counts = cache_load(file,"prune counts")
+    else
+        if (params["data_preprocessing"]["prune"] == true) 
+           #TODO needs to work for human data with mroe than two options for a condition 
+           prune_counts = DataPreprocessing.prune_normalised_counts(norm_counts,params["conditions"][params["data_preprocessing"]["prune_condition"]]["samples_1"],params["conditions"][params["data_preprocessing"]["prune_condition"]]["samples_2"],params["data_preprocessing"]["prune_cutoff"],params["data_preprocessing"]["prune_strictness"])
+        else
+        prune_counts = norm_counts
+        end
+
+        @info "Saving pruned counts to $file"
+        cache_save(file,"prune counts"=>prune_counts)
+    end
+
+
     ##Sampling for most variable transcripts
     ##update cache
     file = "$(params["cache"]["sampling_dir"])/sample_counts.jld2"
@@ -171,7 +189,7 @@ function data_preprocessing(raw_counts::DataFrame)
         sample_counts = cache_load(file,"sample counts")
     else
         @info "Saving sample counts to $file"
-        sample_counts = DataPreprocessing.sample_norm_counts(norm_counts,params["data_preprocessing"]["variance_percent"],method=params["data_preprocessing"]["sample_method"])
+        sample_counts = DataPreprocessing.sample_norm_counts(prune_counts,params["data_preprocessing"]["variance_percent"],method=params["data_preprocessing"]["sample_method"])
         cache_save(file,"sample counts"=>sample_counts)
     end
 
