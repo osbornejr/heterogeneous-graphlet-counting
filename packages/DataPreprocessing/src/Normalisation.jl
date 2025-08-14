@@ -203,4 +203,47 @@ function histogram(data::DataFrame,plotcol::Symbol,colourcol::Symbol;title::Stri
     return p
 end
 
+
+"""
+    high_contrast_transcripts(count_data,a,b,expression_cutoff;strictness)
+
+    Function to identify transcripts with expression profiles that follow conditions a and b closely.
+    Returns a vector containing the ids (rows) of the high contrast transcripts. 
+    Arguments:
+    - count_data: a matrix containing normalised count data, with each row representing a transcript and each column a sample.
+    - a: columns corresponding to condition a.
+    - b: columns corresponding to condition b.
+    - expression_cutoff: the threshold for determining whether an individual count is off or on. Defaults to 0, but will be determined by the distribution of the normalised data.
+    - strictness: the level at which we determine if a transcript is 'off' or 'on' for a given condition. We are identifying transcripts that are either off in condition a and on in condition b, or off in condition b and on in condition a. Defaults to 'n', i.e. that all samples in a condition must be off/on for a transcript to be off/on. The other option, 'n-1', allows a slight tolerance of one sample not bmatching the others.
+
+"""
+function high_contrast_transcripts(count_data::Matrix{Float64},a::Vector{Int},b::Vector{Int},expression_cutoff::Float64=0.0;strictness::String="n")
+    ##set how strictly we determine an 'off' or 'on' condition-- currently must match/not match on either or all samples ("n") or all samples bar one "n-1".
+    if strictness == "n"
+        tol_a = length(a)
+        tol_b = length(b)
+    elseif strictness == "n-1"
+        tol_a = length(a)-1
+        tol_b = length(b)-1
+    else 
+        throw(ArgumentError("strictness must be either 'n' or 'n-1'."))
+    end
+    # identify all transcripts that are on in condition a and off in condition b 
+    if tol_a == length(a) #n
+        matching_a = collect(1:size(count_data)[1])[(sum(count_data[:,a].>expression_cutoff,dims = 2).==length(a)).*(sum(count_data[:,b].<=expression_cutoff,dims=2).==length(b))]
+    else #n-1
+        ##maintain order, so that fully contrasted (strictness "n") transcripts are listed first, followed by either those that have exactly n-1 'on' matches in a (and any 'off' matches in b), and then by any 'on' matches in a that correspond to exactly n-1 'off' matches in b
+        matching_a = vcat(collect(1:size(count_data)[1])[(sum(count_data[:,a].>expression_cutoff,dims = 2).==length(a)).*(sum(count_data[:,b].<=expression_cutoff,dims=2).==length(b))],collect(1:size(count_data)[1])[(sum(count_data[:,a].>expression_cutoff,dims = 2).==tol_a).*(sum(count_data[:,b].<=expression_cutoff,dims=2).>tol_b-1)],collect(1:size(count_data)[1])[(sum(count_data[:,a].>expression_cutoff,dims = 2).>tol_a-1).*(sum(count_data[:,b].<=expression_cutoff,dims=2).==tol_b)])
+    end
+    # identify all transcripts that are on in condition b and off in condition a 
+    if tol_b == length(b) #n
+        matching_b = collect(1:size(count_data)[1])[(sum(count_data[:,b].>expression_cutoff,dims = 2).==length(b)).*(sum(count_data[:,a].<=expression_cutoff,dims=2).==length(a))]
+    else #n-1
+        ##maintain order, so that fully contrasted (strictness "n") transcripts are listed first, followed by either those that have exactly n-1 'on' matches in b (and any 'off' matches in a), and then by any 'on' matches in b that correspond to exactly n-1 'off' matches in a
+        matching_b = vcat(collect(1:size(count_data)[1])[(sum(count_data[:,b].>expression_cutoff,dims = 2).==length(b)).*(sum(count_data[:,a].<=expression_cutoff,dims=2).==length(a))],collect(1:size(count_data)[1])[(sum(count_data[:,b].>expression_cutoff,dims = 2).==tol_b).*(sum(count_data[:,a].<=expression_cutoff,dims=2).>tol_a-1)],collect(1:size(count_data)[1])[(sum(count_data[:,b].>expression_cutoff,dims = 2).>tol_b-1).*(sum(count_data[:,a].<=expression_cutoff,dims=2).==tol_a)])
+    end
+    #get all transcripts that match either of above
+    matching = vcat(matching_a,matching_b)
+    return matching
+end
   

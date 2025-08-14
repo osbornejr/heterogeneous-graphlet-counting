@@ -1,5 +1,5 @@
 module DataPreprocessing
-export data_from_dataframe
+#export data_from_dataframe
 
 include("Normalisation.jl")
 include("ReadExpressionData.jl")
@@ -9,7 +9,7 @@ function data_from_dataframe(df::DataFrame,identifier::String="data")
     #transform the numerical data columns of a DataFrame into an array. The identifier is a string that is common and uniquely contained in the names of the desired columns 
     data = Array(select(df,filter(x->occursin(identifier,x),names(df))))
 end
-export data_from_dataframe
+#export data_from_dataframe
 
 function round_raw_counts(raw_counts::DataFrame,sig::Int)
     raw_data = data_from_dataframe(raw_counts,"data")
@@ -73,7 +73,6 @@ function clean_round_counts(round_counts::DataFrame,cut_percent::Float64,minreq:
     end
 end
 
-
 function clean_raw_counts(raw_counts::DataFrame,expression_cutoff::Int)
     @info "This method is depreceated; cleaning should now happen on rounded counts using clean_round_counts"
     ##Deduplicate-- there may be multiple entries for the same transcript, we need to select only one of these
@@ -90,8 +89,6 @@ function clean_raw_counts(raw_counts::DataFrame,expression_cutoff::Int)
     return clean_counts
 end
 
-
-
 function normalise_clean_counts(clean_counts::DataFrame,norm_method::String)
 ### Normalisation
 
@@ -102,36 +99,42 @@ function normalise_clean_counts(clean_counts::DataFrame,norm_method::String)
 
     norm_counts[:,findall(x->occursin("data",x),names(norm_counts))] = norm_data
     return norm_counts
-end
+ end
 
-function sample_norm_counts(norm_counts::DataFrame,variance_cutoff::Float64;method::String="cutoff",maintain_ratio=true)
+ function prune_normalised_counts(norm_counts::DataFrame,condition_a::Vector{Int},condition_b::Vector{Int},prune_strictness::String,prune_cutoff::Float64)
+     matches = high_contrast_transcripts(data_from_dataframe(norm_counts),condition_a,condition_b,prune_cutoff,strictness=prune_strictness)
+     keepers =  setdiff(1:size(norm_counts,1),matches)
+     return norm_counts[keepers,:]
+ end
 
-##Sampling for most variable transcripts
-#add variance column to normalised data
-    norm_data = data_from_dataframe(norm_counts,"data")
-    variance = vec(var(norm_data, dims=2))
-    if (method == "percent")
-        if (variance_cutoff>1) | (variance_cutoff<0)
-            throw(ArgumentError("'percent' method requires a variance percentage input"))
-        end
-        variance_percent = variance_cutoff
-        norm_counts.variance = variance
-        #TODO generalise to any types/number of types
-        if (maintain_ratio == true)
-            sample_counts_noncoding = sort(norm_counts[norm_counts[!,:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
-            sample_counts_coding = sort(norm_counts[norm_counts[!,:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
-            sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
-        else
-            sample_counts = sort(norm_counts,:variance)[Int(round(end*(1-variance_percent))):end,:]
-        end
-    elseif (method == "cutoff")
-        # new, simpler method just setting variance cutoff
-        sample_counts = norm_counts[variance.>variance_cutoff,:]
-    else
-        throw(ArgumentError("method must be either 'cutoff' or 'percent'"))
-    end
+ function sample_norm_counts(norm_counts::DataFrame,variance_cutoff::Float64;method::String="cutoff",maintain_ratio=true)
 
-    return sample_counts
-end
+     ##Sampling for most variable transcripts
+     #add variance column to normalised data
+     norm_data = data_from_dataframe(norm_counts,"data")
+     variance = vec(var(norm_data, dims=2))
+     if (method == "percent")
+         if (variance_cutoff>1) | (variance_cutoff<0)
+             throw(ArgumentError("'percent' method requires a variance percentage input"))
+         end
+         variance_percent = variance_cutoff
+         norm_counts.variance = variance
+         #TODO generalise to any types/number of types
+         if (maintain_ratio == true)
+             sample_counts_noncoding = sort(norm_counts[norm_counts[!,:transcript_type].=="noncoding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+             sample_counts_coding = sort(norm_counts[norm_counts[!,:transcript_type].=="coding",:],:variance)[Int(round(end*(1-variance_percent))):end,:]
+             sample_counts = outerjoin(sample_counts_noncoding,sample_counts_coding,on = names(norm_counts))
+         else
+             sample_counts = sort(norm_counts,:variance)[Int(round(end*(1-variance_percent))):end,:]
+         end
+     elseif (method == "cutoff")
+         # new, simpler method just setting variance cutoff
+         sample_counts = norm_counts[variance.>variance_cutoff,:]
+     else
+         throw(ArgumentError("method must be either 'cutoff' or 'percent'"))
+     end
+
+     return sample_counts
+ end
 
 end # module
