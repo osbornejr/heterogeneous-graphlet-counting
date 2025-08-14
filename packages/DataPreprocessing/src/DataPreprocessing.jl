@@ -101,7 +101,7 @@ function normalise_clean_counts(clean_counts::DataFrame,norm_method::String)
     return norm_counts
  end
 
- function prune_normalised_counts(norm_counts::DataFrame,condition_a::Vector{Int},condition_b::Vector{Int},prune_strictness::String,prune_cutoff::Float64)
+ function prune_normalised_counts(norm_counts::DataFrame,condition_a::Vector{Int},condition_b::Vector{Int},prune_cutoff::Float64,prune_strictness::String)
      matches = high_contrast_transcripts(data_from_dataframe(norm_counts),condition_a,condition_b,prune_cutoff,strictness=prune_strictness)
      keepers =  setdiff(1:size(norm_counts,1),matches)
      return norm_counts[keepers,:]
