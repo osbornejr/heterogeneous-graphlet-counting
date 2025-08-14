@@ -108,3 +108,18 @@ f3 = Figure()
 ax7 = Axis(f3[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: expression profiles binned and sorted by prevalence")
 Axis(f3[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
 heatmap!(ax7,pd[vcat(sorted_indices...),:]')
+
+## But actually is probably best just to select via profiles that match strains. 
+#That way there is less risk of removing transcripts that are biologically interesting. 
+#Let's rather set selection based on an off/on for each strain i.e. 5 or more samples on (expression>2) is on for that strain. 
+#Then if we remove all transcripts that are off/on or on/off. 
+#transcripts that are JG on, ICCV off
+##reset back to all normalised data
+pd = data_from_dataframe(norm_counts)
+#rearrange for JG and ICCV order
+pd = pd[:,[4,5,6,7,8,9,10,11,12,1,2,3]]
+
+matching_JG_strain_pattern = vcat(collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).==6).*(sum(pd[:,7:12].<2,dims=2).==6)],collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).==5).*(sum(pd[:,7:12].<2,dims=2).>4)],collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).>4).*(sum(pd[:,7:12].<2,dims=2).==5)])
+#transcripts that are JG off, ICCV on
+matching_ICCV_strain_pattern = vcat(collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).==6).*(sum(pd[:,7:12].>2,dims=2).==6)],collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).==5).*(sum(pd[:,7:12].>2,dims=2).>4)],collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).>4).*(sum(pd[:,7:12].>2,dims=2).==5)])
+matching_strain_pattern = vcat(matching_JG_strain_pattern,matching_ICCV_strain_pattern)
