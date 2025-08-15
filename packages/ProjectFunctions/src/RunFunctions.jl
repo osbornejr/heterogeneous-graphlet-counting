@@ -311,6 +311,10 @@ function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},metho
         return corkendall(data')
     end
 
+    if (method== "ridge_partialcor")
+        return NetworkConstruction.ridge_partialcor(data',ridge=1e-3)
+    end
+
     if (method=="mutual_information")
         
         ##determine nbins from config

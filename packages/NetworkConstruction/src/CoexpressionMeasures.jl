@@ -19,6 +19,37 @@ function discretise(data::AbstractMatrix;nbins::Int=0,discretizer::String="unifo
     return bin_ids
 end  
 
+
+##partialcor method with a ridge if necessary (chat-gpt assisted)
+#note- expects data transposed i.e. samples as rows, transcripts as columns
+#TODO add check that ridge is effective i.e. check that all eigenvals of cov(Xs) are >0.
+function ridge_partialcor(X; ridge = 1e-5)
+    λ = ridge
+    # Standardize gene expression data (samples x genes)
+    Xs = (X .- mean(X, dims=1)) ./ std(X, dims=1)
+
+    # Compute covariance matrix
+    Σ = cov(Xs, dims=1)
+
+    # Add ridge (λ) to diagonal
+    Σ_ridge = Σ + λ * I
+
+    # Invert to get precision matrix
+    P = inv(Σ_ridge)
+
+    # Compute partial correlations
+    n = size(P, 1)
+    pc_matrix = zeros(Float64, n, n)
+    for i in 1:n, j in 1:n
+        if i == j
+            pc_matrix[i, j] = 1.0
+        else
+            pc_matrix[i, j] = -P[i, j] / sqrt(P[i, i] * P[j, j])
+        end
+    end
+    return pc_matrix
+end
+
 #modified form of function described on InformationMeasures.jl github page. Faster than old method because bin calculation isn't repeated for each variable for every element. Main changes are orientation (variables as rows) and outputting as a symmetric matrix rather than a one dimensional array.
 function mutual_information(data; discretizer = "uniform_width", estimator = "maximum_likelihood", mi_base = 2,nbins::Int=0)
 
