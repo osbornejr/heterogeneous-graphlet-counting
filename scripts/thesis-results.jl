@@ -6,10 +6,11 @@ using StatsBase
 using Results
 using GLMakie
 ##set experiment
-experiment = "mayank-merged-1400-network"
+#experiment = "mayank-merged-1400-network"
 #experiment = "mayank-unmerged"
 #experiment = "mayank-merged-altered-network"
-#experiment = "mayank-merged"
+experiment = "mayank-merged"
+experiment = "mayank-merged-small-pruned"
 #experiment = "GSE68559_sub"
 
 ##load preprocessing data
@@ -47,7 +48,7 @@ sample_names = ["JG11-Control-R1","JG11-Control-R2","JG11-Control-R3","JG11-Stre
 
 f2 = Figure()
 ax1 = Axis(f2[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: high degree transcripts")
-#add extra layer of xtick labels
+##add extra layer of xtick labels
 Axis(f2[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
 heatmap!(ax1,pd[high_ids,:]')
 ax2 = Axis(f2[1,2],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: other transcripts")
@@ -60,7 +61,7 @@ f2
 #take correlation matrix
 cor_pd = cor(pd')
 #find all transcript 9pairs with cor greater than threshold
-cor_threshold = 0.99
+cor_threshold = 0.999
 matching_pairs = filter(t->t[1]!=t[2],Tuple.(findall(>(cor_threshold),cor_pd)))
 high_cors = unique(vcat(first.(matching_pairs),last.(matching_pairs)))
 ax3 = Axis(f2[2,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: highly correlated (>$(cor_threshold)) transcripts")
@@ -115,7 +116,7 @@ heatmap!(ax7,pd[vcat(sorted_indices...),:]')
 #Then if we remove all transcripts that are off/on or on/off. 
 #transcripts that are JG on, ICCV off
 ##reset back to all normalised data
-pd = data_from_dataframe(norm_counts)
+pd = data_from_dataframe(processed_counts)
 #rearrange for JG and ICCV order
 pd = pd[:,[4,5,6,7,8,9,10,11,12,1,2,3]]
 
