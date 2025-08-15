@@ -9,9 +9,12 @@ using GLMakie
 #experiment = "mayank-merged-1400-network"
 #experiment = "mayank-unmerged"
 #experiment = "mayank-merged-altered-network"
-experiment = "mayank-merged"
-experiment = "mayank-merged-small-pruned"
 #experiment = "GSE68559_sub"
+
+
+#experiment = "mayank-merged-small-pruned"
+#experiment = "mayank-merged-large-pruned"
+experiment = "mayank-merged"
 
 ##load preprocessing data
 raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/$(experiment).yaml")
@@ -28,7 +31,6 @@ f = Results.typed_degree_distribution(vertexlist,edgelist)
 
 #Results.add_to_fig(fig)
 #
-
 
 #finding high degree nodes
 #degree distribution
@@ -116,20 +118,27 @@ heatmap!(ax7,pd[vcat(sorted_indices...),:]')
 #Then if we remove all transcripts that are off/on or on/off. 
 #transcripts that are JG on, ICCV off
 ##reset back to all normalised data
-pd = data_from_dataframe(processed_counts)
+pd = data_from_dataframe(norm_counts)
 #rearrange for JG and ICCV order
 pd = pd[:,[4,5,6,7,8,9,10,11,12,1,2,3]]
+
+#Chickpea
+strain = ["JG11 (salt tolerant)"=>[1,2,3,4,5,6],"ICCV2 (salt sensitive)"=>[7,8,9,10,11,12]]
+treatment = ["Control"=>[1,2,3,7,8,9],"Salt Stress"=>[4,5,6,10,11,12]]
+# Human
 
 matching_JG_strain_pattern = vcat(collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).==6).*(sum(pd[:,7:12].<2,dims=2).==6)],collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).==5).*(sum(pd[:,7:12].<2,dims=2).>4)],collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).>4).*(sum(pd[:,7:12].<2,dims=2).==5)])
 #transcripts that are JG off, ICCV on
 matching_ICCV_strain_pattern = vcat(collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).==6).*(sum(pd[:,7:12].>2,dims=2).==6)],collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).==5).*(sum(pd[:,7:12].>2,dims=2).>4)],collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).>4).*(sum(pd[:,7:12].>2,dims=2).==5)])
 matching_strain_pattern = vcat(matching_JG_strain_pattern,matching_ICCV_strain_pattern)
 
+
+matching_strain_pattern = DataPreprocessing.high_contrast_transcripts(pd,strain[1][2],strain[2][2],2.0,strictness="n-1")
+f4 = Figure()
+ax8 = Axis(f4[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: expression profiles binned and sorted by prevalence")
+Axis(f4[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
+heatmap!(ax8,pd[matching_strain_pattern,:]')
 ##generalise-- finding high contrast counts. condition(s) supplied in param config?
-#Chickpea
-strain = ["JG11 (salt tolerant)"=>[1,2,3,4,5,6],"ICCV2 (salt sensitive)"=>[7,8,9,10,11,12]]
-treatment = ["Control"=>[1,2,3,7,8,9],"Salt Stress"=>[4,5,6,10,11,12]]
-# Human
 
 
 
