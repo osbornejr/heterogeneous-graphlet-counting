@@ -55,13 +55,13 @@ data_preprocessing:
   prune_cutoff: 2.0
   prune_strictness: "n-1"
   sample_method: "percent"
-  variance_percent: 0.05
+  variance_percent: 0.01
     
 network_construction:
   construct: true
-  coexpression: "pcit"
+  coexpression: "ridge_partialcor" #TODO add ridge parameter here.
   nbins: "n_over_2"  
-  threshold: 0.95
+  threshold: 0.01
   threshold_method: "hard"
   visualise: false
   synthetic: false

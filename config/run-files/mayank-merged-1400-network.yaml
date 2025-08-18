@@ -49,7 +49,7 @@ data_preprocessing:
   minreq: 0.05
   clean_method: "per-sample"
   norm_method: "median"
-  prune: true
+  prune: false
   prune_condition: "strain"
   prune_cutoff: 2.0
   prune_strictness: "n-1"
