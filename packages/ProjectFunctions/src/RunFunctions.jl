@@ -83,13 +83,6 @@ function run_all(config_file::String)
 
 end 
 
-function load_config(config_file::String)
-        #setup parameters to be read.writable for all functions in this module
-        global params = YAML.load_file(config_file)
-        cache_setup()
-end
-export load_config
-export params
 
 #exposed function to allow just preprocessing run on given configs settings
 function data_preprocessing(config_file::String)
@@ -231,6 +224,21 @@ function network_construction(sample_counts::DataFrame)
         pre_adj_matrix = cache_load(adj_file,"pre-adj_matrix")
         adj_matrix = cache_load(adj_file,"adjacency_matrix")
         components =cache_load(adj_file,"components")
+        # need to get includes again here based on select_components option
+        if (params["network_construction"]["select_components"] == "largest")
+            
+            #get largest component
+            largest = findmax(length.(components))[2]
+            includes = components[largest]
+        elseif (params["network_construction"]["select_components"] == "non-zero")
+            #old method-- just get all nonzero components
+            includes = vcat(components[length.(components).!=1]...)
+        elseif (params["network_construction"]["select_components"] == "graphlet-size")
+            graphlet_size = params["analysis"]["graphlet_size"]
+            includes = vcat(components[length.(components).>graphlet_size]...)
+        else
+            throw(ArgumentError("component selection method $(params["network_construction"]["select_components"]) is not recognised."))
+        end
 
     else
         @info "Generating adjacency matrix..."
@@ -250,16 +258,27 @@ function network_construction(sample_counts::DataFrame)
         ##form final adjacency matrix (remove zero nodes)
         adj_matrix = copy(pre_adj_matrix)
         
-        ##TODO HACK: remove dodgy second component from network (kinda assumes there are no zero nodes)
         #get components
         components = NetworkConstruction.network_components(pre_adj_matrix)
-        #get largest component
-        largest = findmax(length.(components))[2]
-        adj_matrix = pre_adj_matrix[components[largest],components[largest]]
         
-        #old method-- just get all nonzero components
-        #adj_matrix = adj_matrix[:,vec(sum(pre_adj_matrix,dims=1).!=0)]
-        #adj_matrix = adj_matrix[vec(sum(pre_adj_matrix,dims=1).!=0),:]
+        ##decide how many components we want
+        if (params["network_construction"]["select_components"] == "largest")
+            
+            #get largest component
+            largest = findmax(length.(components))[2]
+            includes = components[largest]
+            adj_matrix = pre_adj_matrix[includes,includes]
+        elseif (params["network_construction"]["select_components"] == "non-zero")
+            #old method-- just get all nonzero components
+            includes = vcat(components[length.(components).!=1]...)
+            adj_matrix = pre_adj_matrix[includes,includes]
+        elseif (params["network_construction"]["select_components"] == "graphlet-size")
+            graphlet_size = params["analysis"]["graphlet_size"]
+            includes = vcat(components[length.(components).>graphlet_size]...)
+            adj_matrix = pre_adj_matrix[includes,includes]
+        else
+            throw(ArgumentError("component selection method $(params["network_construction"]["select_components"]) is not recognised."))
+        end
 
 
 
@@ -270,12 +289,9 @@ function network_construction(sample_counts::DataFrame)
 
     
 
-    #get largest component
-    largest = findmax(length.(components))[2]
-
-    network_counts = sample_counts[components[largest],:]
+    #store transcripts that are in network
+    network_counts = sample_counts[includes,:]
     #or to just get all non-zero components
-    #Trim nodes with degree zero (and TODO HACK remove component 2 as well!
     #network_counts = sample_counts[vec(sum(pre_adj_matrix,dims=2).!=0),:]
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
