@@ -13,8 +13,8 @@ using GLMakie
 
 
 #experiment = "mayank-merged-small-pruned"
-#experiment = "mayank-merged-large-pruned"
-experiment = "mayank-merged"
+experiment = "mayank-merged-large-pruned"
+#experiment = "mayank-merged"
 
 ##load preprocessing data
 raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/$(experiment).yaml")
