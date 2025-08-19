@@ -3,6 +3,7 @@ using DataPreprocessing, NetworkConstruction,GraphletCounting ,GraphletAnalysis
 
 include("RunFunctions.jl")
 include("CacheFunctions.jl")
+include("ConfigFunctions.jl")
 include("FetchFunctions.jl")
 include("WebFunctions.jl")
 

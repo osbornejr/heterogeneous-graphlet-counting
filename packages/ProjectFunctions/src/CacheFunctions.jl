@@ -44,7 +44,7 @@ function cache_setup()
     end
     
 
-    make_cache(dir_name="adjacency_dir",params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"])
+    make_cache(dir_name="adjacency_dir",params["cache"]["similarity_dir"],"threshold",string(params["network_construction"]["threshold"]),"threshold_method",params["network_construction"]["threshold_method"],"component_selection",params["network_construction"]["select_components"])
 
     #analyis dirs :
     if (params["network_construction"]["synthetic"] == true)
