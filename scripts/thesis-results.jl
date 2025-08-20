@@ -2,22 +2,30 @@ using Pkg
 Pkg.activate(".")
 using ProjectFunctions
 using GraphletCounting
+using DataPreprocessing
 using StatsBase
 using Results
 using GLMakie
-##set experiment
-#experiment = "mayank-merged-1400-network"
-#experiment = "mayank-unmerged"
-#experiment = "mayank-merged-altered-network"
+## set experiment
+experiment = "mayank-merged"
 #experiment = "GSE68559_sub"
 
+## set run
+#run = "mayank-merged-1400-network"
+#run = "mayank-unmerged"
+#run = "mayank-merged-altered-network"
+#run = "GSE68559_sub"
 
-#experiment = "mayank-merged-small-pruned"
-experiment = "mayank-merged-large-pruned"
-#experiment = "mayank-merged"
+
+#run = "mayank-merged-small-pruned"
+run = "mayank-merged-large-pruned"
+#run = "mayank-merged"
+
+
+#run = "GSE68559_sub"         
 
 ##load preprocessing data
-raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/$(experiment).yaml")
+raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/$(experiment)/$(run).yaml")
 #plot variance histogram
 Results.variance_histogram(norm_counts)
 
@@ -28,6 +36,9 @@ components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construct
 fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple))
 #view typed degree distributions
 f = Results.typed_degree_distribution(vertexlist,edgelist)
+
+#for each component, dd and network density
+dds = map(x->sum(adj_matrix,dims=1)[x],components)
 
 #Results.add_to_fig(fig)
 #
@@ -127,12 +138,6 @@ strain = ["JG11 (salt tolerant)"=>[1,2,3,4,5,6],"ICCV2 (salt sensitive)"=>[7,8,9
 treatment = ["Control"=>[1,2,3,7,8,9],"Salt Stress"=>[4,5,6,10,11,12]]
 # Human
 
-matching_JG_strain_pattern = vcat(collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).==6).*(sum(pd[:,7:12].<2,dims=2).==6)],collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).==5).*(sum(pd[:,7:12].<2,dims=2).>4)],collect(1:size(pd)[1])[(sum(pd[:,1:6].>2,dims = 2).>4).*(sum(pd[:,7:12].<2,dims=2).==5)])
-#transcripts that are JG off, ICCV on
-matching_ICCV_strain_pattern = vcat(collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).==6).*(sum(pd[:,7:12].>2,dims=2).==6)],collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).==5).*(sum(pd[:,7:12].>2,dims=2).>4)],collect(1:size(pd)[1])[(sum(pd[:,1:6].<2,dims = 2).>4).*(sum(pd[:,7:12].>2,dims=2).==5)])
-matching_strain_pattern = vcat(matching_JG_strain_pattern,matching_ICCV_strain_pattern)
-
-
 matching_strain_pattern = DataPreprocessing.high_contrast_transcripts(pd,strain[1][2],strain[2][2],2.0,strictness="n-1")
 f4 = Figure()
 ax8 = Axis(f4[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: expression profiles binned and sorted by prevalence")
@@ -141,4 +146,9 @@ heatmap!(ax8,pd[matching_strain_pattern,:]')
 ##generalise-- finding high contrast counts. condition(s) supplied in param config?
 
 
-
+## Analysis
+#
+#
+#Typed representations
+graphlet_counts,timer = get_graphlet_counts()
+t_r_output = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
