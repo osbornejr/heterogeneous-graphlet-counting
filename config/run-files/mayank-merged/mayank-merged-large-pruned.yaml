@@ -63,11 +63,12 @@ network_construction:
   nbins: "n_over_2"  
   threshold: 0.95
   threshold_method: "hard"
+  select_components: "graphlet_size"
   visualise: false
   synthetic: false
 
 analysis:    
-  biological_validation: true
+  biological_validation: false
   community_detection: false
   wgcna: false
   func_annotate: false

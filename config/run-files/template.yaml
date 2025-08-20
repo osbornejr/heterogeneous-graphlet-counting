@@ -48,7 +48,7 @@ network_construction:
   nbins: "n_over_2"  
   threshold: 0.95
   threshold_method: "empirical_dist_zero"
-  select_components: "non-zero"
+  select_components: "largest"
   visualise: false
   synthetic: false
 

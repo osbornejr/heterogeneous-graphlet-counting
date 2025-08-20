@@ -13,13 +13,13 @@ for i in term_list()
 endfor
 
 "set where repl is: nectar laptop race local
-let remote_method= "race"
+let remote_method= "local"
 
 
 if remote_method ==# "race"
     "for race, we need to set up depending on the ip of the currently used
     "instance.
-    let race_ip ="16-176-216-140"
+    let race_ip ="3-27-237-48"
     let race_address = "ec2-user@ec2-" . race_ip . ".ap-southeast-2.compute.amazonaws.com"
     let $RACE_ADDRESS = race_address
     
