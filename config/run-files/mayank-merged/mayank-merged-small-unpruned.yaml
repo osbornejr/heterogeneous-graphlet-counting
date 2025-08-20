@@ -1,0 +1,81 @@
+
+test_name: mayank-merged
+
+raw_counts_script: "config/input_scripts/mayank-merged.jl"
+distributed: true
+conditions:
+  strain:
+    name_1: "JG11 (salt tolerant)"
+    samples_1: [4,5,6,7,8,9] #TODO if ever wiping mayank cache, should change at input stage so that this is in more sensible order
+    name_2: "ICCV2 (salt sensitive)"
+    samples_2: [10,11,12,1,2,3]
+  treatment:
+    name_1: "Control"
+    samples_1: [4,5,6,10,11,12]
+    name_2: "Salt Stress"
+    samples_2: [7,8,9,1,2,3] 
+
+cache:
+  keep_cache: true
+  base_dir: "output/cache"
+  clear: #TODO put this as an option when calling run function rather than in config-- thats better suited to a one-off option rather than risking forgetting turning it back off
+    archive: false
+    test_dir: false
+    round_dir: false
+    vst_dir: false
+    clean_dir: false 
+    norm_dir: false
+    prune_dir: false
+    sampling_dir: false 
+    similarity_dir: false 
+    adjacency_dir: false  
+    anal_dir: false 
+    bio_dir: false
+    community_dir: false 
+    wgcna_dir: false
+    graphlet_counting_dir: false
+    rep_dir: false 
+    graphlet_enum_dir: false 
+    coinc_dir: false 
+    orbit_dir: false 
+
+website:
+  website: false
+  page_name: "menu1"
+  website_dir: "website"
+
+data_preprocessing: 
+  roundsig: 5 
+  vst: true
+  expression_cutoff: 25.0
+  minreq: 0.05
+  clean_method: "old-method"
+  norm_method: "median"
+  prune: false
+  prune_condition: "strain"
+  prune_cutoff: 2.0
+  prune_strictness: "n-1"
+  sample_method: "percent"
+  variance_percent: 0.01
+    
+network_construction:
+  construct: true
+  coexpression: "pcit"
+  nbins: "n_over_2"  
+  threshold: 0.95
+  threshold_method: "hard"
+  visualise: false
+  synthetic: false
+
+analysis:    
+  biological_validation: true
+  community_detection: false
+  wgcna: false
+  func_annotate: false
+  graphlet_counting: true
+  graphlet_size: 4
+  recursive: true #count lower graphlets as well
+  typed_representation: true
+  null_model_size: 1000
+  coincident_graphlets: true
+  
