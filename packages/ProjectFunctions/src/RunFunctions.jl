@@ -225,20 +225,8 @@ function network_construction(sample_counts::DataFrame)
         adj_matrix = cache_load(adj_file,"adjacency_matrix")
         components =cache_load(adj_file,"components")
         # need to get includes again here based on select_components option
-        if (params["network_construction"]["select_components"] == "largest")
-            
-            #get largest component
-            largest = findmax(length.(components))[2]
-            includes = components[largest]
-        elseif (params["network_construction"]["select_components"] == "non-zero")
-            #old method-- just get all nonzero components
-            includes = vcat(components[length.(components).!=1]...)
-        elseif (params["network_construction"]["select_components"] == "graphlet-size")
-            graphlet_size = params["analysis"]["graphlet_size"]
-            includes = vcat(components[length.(components).>graphlet_size]...)
-        else
-            throw(ArgumentError("component selection method $(params["network_construction"]["select_components"]) is not recognised."))
-        end
+        includes = select_network_components(components)
+
 
     else
         @info "Generating adjacency matrix..."
@@ -256,30 +244,15 @@ function network_construction(sample_counts::DataFrame)
 
         end
         ##form final adjacency matrix (remove zero nodes)
-        adj_matrix = copy(pre_adj_matrix)
+        #adj_matrix = copy(pre_adj_matrix)
         
         #get components
         components = NetworkConstruction.network_components(pre_adj_matrix)
         
-        ##decide how many components we want
-        if (params["network_construction"]["select_components"] == "largest")
-            
-            #get largest component
-            largest = findmax(length.(components))[2]
-            includes = components[largest]
-            adj_matrix = pre_adj_matrix[includes,includes]
-        elseif (params["network_construction"]["select_components"] == "non-zero")
-            #old method-- just get all nonzero components
-            includes = vcat(components[length.(components).!=1]...)
-            adj_matrix = pre_adj_matrix[includes,includes]
-        elseif (params["network_construction"]["select_components"] == "graphlet-size")
-            graphlet_size = params["analysis"]["graphlet_size"]
-            includes = vcat(components[length.(components).>graphlet_size]...)
-            adj_matrix = pre_adj_matrix[includes,includes]
-        else
-            throw(ArgumentError("component selection method $(params["network_construction"]["select_components"]) is not recognised."))
-        end
-
+        ## decide which to include
+        includes = select_network_components(components)
+        
+        adj_matrix = pre_adj_matrix[includes,includes]
 
 
         @info "Saving adjacency matrix to $adj_file"
@@ -306,6 +279,24 @@ function network_construction(sample_counts::DataFrame)
     return [adj_matrix, network_counts,vertexlist,edgelist]       
 end
 export network_construction
+
+function select_network_components(components::Vector{Vector{Int}})
+        ##decide how many components we want
+        if (params["network_construction"]["select_components"] == "largest")
+            
+            #get largest component
+            largest = findmax(length.(components))[2]
+            includes = components[largest]
+        elseif (params["network_construction"]["select_components"] == "non_zero")
+            #old method-- just get all nonzero components
+            includes = vcat(components[length.(components).!=1]...)
+        elseif (params["network_construction"]["select_components"] == "graphlet_size")
+            graphlet_size = params["analysis"]["graphlet_size"]
+            includes = vcat(components[length.(components).>(graphlet_size-1)]...)
+        else
+            throw(ArgumentError("component selection method $(params["network_construction"]["select_components"]) is not recognised."))
+        end
+end
 
 ##catch all function to call desired coexpression_measure 
 function coexpression_measure(data::Union{AbstractDataFrame,AbstractArray},method::String)
@@ -633,7 +624,8 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     end
 
     #merged boxplots
-    #tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","input",ylabel = "log value")
+    NetworkConstruction.tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","standalone",ylabel = "log value")
+
 
     ## find significant graphlets
 
@@ -684,7 +676,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
    # end
 
     #pretty_table(random_edges,backend=:html,standalone = false)
-    return hog_array
+    return [hog_array,sig_graphlets,insig_graphlets]
 end 
 export typed_representations
 

@@ -144,17 +144,20 @@ function get_network_construction()
         adj_matrix = cache_load(adj_file,"adjacency_matrix")
         components = cache_load(adj_file,"components")
         sample_counts = cache_load(samp_file,"sample counts")
+        # need to get includes again here based on select_components option
+        includes = select_network_components(components)
    else
        throw(ArgumentError("No cached files exist at either $adj_file or $samp_file, please provide processed counts input data."))
     end
-    #Trim nodes with degree zero
 
-    largest = findmax(length.(components))[2]
-    network_counts = sample_counts[components[largest],:]    
+    network_counts = sample_counts[includes,:]    
     #maintain list of vertices in graph
     vertexlist = copy(network_counts[!,:transcript_type])     
     edgelist = NetworkConstruction.edgelist_from_adj(adj_matrix)
-    return components,adj_matrix,network_counts,vertexlist,edgelist       
+
+    #recalculate component labels here so that they match network indices, not processed count indices (at present this is the only place where components are exposed, so can happen here even if cached components are indexed on processed counts)
+    updated_components = NetworkConstruction.network_components(adj_matrix)
+    return updated_components,adj_matrix,network_counts,vertexlist,edgelist       
 end
 
 function get_network_construction(config_file::String)
@@ -253,9 +256,10 @@ export get_biological_validation
     get_graphlet_counts()
 
 Retrieve graphlet counts associated with the network under curent experiment parameters.
+Also includes time that run took for downstream analysis.
 
 ## Example
-    julia> graphlet_counts = get_graphlet_counts()
+    julia> graphlet_counts,timer = get_graphlet_counts()
  """
 function get_graphlet_counts()
 
@@ -263,9 +267,11 @@ function get_graphlet_counts()
     graphlet_file = "$anal_dir/graphlet-counting.jld2" 
     if (isfile(graphlet_file))
         graphlet_counts = cache_load(graphlet_file,"graphlets")
+        timer = cache_load(graphlet_file,"time")
     else
             throw(ArgumentError("No cached file exists at $graphlet_file, please ensure graphlet counting has been run on network."))
     end
+    return [graphlet_counts,timer]
 end
 
 function get_graphlet_counts(config_file::String)
