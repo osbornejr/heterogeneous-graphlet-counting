@@ -3,7 +3,10 @@ module Results
 using GLMakie,StatsBase
 #Network Construction
 using Graphs,GraphMakie,NetworkLayout
-using ProjectFunctions,GraphletCounting
+using ProjectFunctions,GraphletCounting,NetworkConstruction
+
+## Typed representation (TODO check clash between Cairo and GL makie-- make switchable?)
+#using MakieTex,CairoMakie,FileIO
 
 
 function variance_histogram(count_data)
