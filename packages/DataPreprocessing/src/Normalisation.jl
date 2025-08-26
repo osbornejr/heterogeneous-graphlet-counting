@@ -243,7 +243,12 @@ function high_contrast_transcripts(count_data::Matrix{Float64},a::Vector{Int},b:
         matching_b = vcat(collect(1:size(count_data)[1])[(sum(count_data[:,b].>expression_cutoff,dims = 2).==length(b)).*(sum(count_data[:,a].<=expression_cutoff,dims=2).==length(a))],collect(1:size(count_data)[1])[(sum(count_data[:,b].>expression_cutoff,dims = 2).==tol_b).*(sum(count_data[:,a].<=expression_cutoff,dims=2).>tol_a-1)],collect(1:size(count_data)[1])[(sum(count_data[:,b].>expression_cutoff,dims = 2).>tol_b-1).*(sum(count_data[:,a].<=expression_cutoff,dims=2).==tol_a)])
     end
     #get all transcripts that match either of above
-    matching = vcat(matching_a,matching_b)
+    #note that some will have appeared twice in each category, so we use union here.
+    matching = union(matching_a,matching_b)
+    #out of interest:transcreipts that match both?
+    #matching = intersect(matching_a,matching_b)
+
+    
     return matching
 end
   
