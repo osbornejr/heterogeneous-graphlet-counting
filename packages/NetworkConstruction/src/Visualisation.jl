@@ -675,6 +675,8 @@ function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVe
     #NODES
     #get sorted list of types
     types = sort(unique(node_schematic))
+
+
     # set palette to appropriate length, ideally based on node_colours
     if (length(types)<=length(node_colours))
         col_pal = node_colours[1:length(types)]
@@ -685,6 +687,9 @@ function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVe
 
     #now add chosen colours to node schematic in place of types
     #first make sure colours are in same order as types (to avoid erroneous swapping)
+    #
+    #TODO add step here if colour map is provided explicitly (new option)
+    #
     sort!(col_pal)
     for (i,t) in enumerate(types)
         replace!(node_schematic,t=>col_pal[i])

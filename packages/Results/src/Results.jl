@@ -79,10 +79,26 @@ function typed_degree_distribution(vertex_typelist,edgelist)
 end
 
 function typed_representation_results(t_r_output::Vector{DataFrame})
+
     fig = Figure()
-    NetworkConstruction.draw_graphlet("noncoding_noncoding_coding_noncoding_4-star")
-    svg= SVGDocument(svgstring())
-    scatter(fig[1, 1], 1, 1, marker=Cached(svg), markersize = 50)
+    for (i,df) in enumerate(t_r_output)
+        ax = Axis(fig[i,1],
+                  xgridvisible=false,
+                  ygridvisible=false,
+                  xticklabelsvisible = false,
+                  yticklabelsvisible = false,
+                  xticksvisible = false,
+                  yticksvisible = false
+                 )  
+        for (j,g) in enumerate(df.Graphlet)
+            #need to set colours here based on graphlet order so that coding and noncoding colouring is consistent.
+
+            NetworkConstruction.draw_graphlet(g)
+            svg= SVGDocument(svgstring())
+            scatter!(ax,j,1,marker=Cached(svg), markersize = 50)
+        end
+    end
+    #scatter(fig[1, 1], 1, 1, marker=Cached(svg), markersize = 50)
     fig
 
 end
