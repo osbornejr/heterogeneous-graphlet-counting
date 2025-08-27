@@ -16,10 +16,12 @@ experiment = "mayank-merged"
 #run = "mayank-merged-altered-network"
 #run = "GSE68559_sub"
 
-
+#PCIT method
 #run = "mayank-merged-small-pruned"
-run = "mayank-merged-large-pruned"
-#run = "mayank-merged"
+#run = "mayank-merged-large-pruned"
+
+## Ridge partial correlation method
+run = "mayank-merged"
 
 
 #run = "GSE68559_sub"         
@@ -48,10 +50,13 @@ dds = map(x->sum(adj_matrix,dims=1)[x],components)
 dd = sum.(values.(GraphletCounting.typed_degree_distribution(vertexlist,edgelist)))
 #get ids for large component
 #largest component
-l_comp = components[findall(==(maximum(length.(components))),length.(components))...]
+#l_comp = components[findall(==(maximum(length.(components))),length.(components))...]
 id_cut = 100
-high_ids = l_comp[dd.>id_cut]
-ids = l_comp[dd.<id_cut]
+#high_ids = l_comp[dd.>id_cut]
+#ids = l_comp[dd.<id_cut]
+#shouldn't need high id distinction now
+high_ids = (1:size(adj_matrix,1))[dd.>id_cut]
+ids = (1:size(adj_matrix,1))[dd.<id_cut]
 #compare processed_data for high degree to rest of proto-network
 pd = data_from_dataframe(processed_counts)
 
@@ -140,9 +145,15 @@ treatment = ["Control"=>[1,2,3,7,8,9],"Salt Stress"=>[4,5,6,10,11,12]]
 
 matching_strain_pattern = DataPreprocessing.high_contrast_transcripts(pd,strain[1][2],strain[2][2],2.0,strictness="n-1")
 f4 = Figure()
-ax8 = Axis(f4[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: expression profiles binned and sorted by prevalence")
+ax8 = Axis(f4[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression profiles of selected transcripts")
 Axis(f4[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
-heatmap!(ax8,pd[matching_strain_pattern,:]')
+## if we want all epxression profiles shown, with the problematic onees at the top
+to_view = pd[matching_strain_pattern,:]'
+#to_view = pd[setdiff(1:size(pd,1),matching_strain_pattern),:]'
+#to_view = pd'
+pd = data_from_dataframe(processed_counts)
+to_view = pd'
+heatmap!(ax8,to_view)
 ##generalise-- finding high contrast counts. condition(s) supplied in param config?
 
 
