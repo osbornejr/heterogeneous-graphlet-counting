@@ -1,12 +1,13 @@
 module Results
 #Preprocessing
-using GLMakie,StatsBase
+using GLMakie,StatsBase,DataFrames
 #Network Construction
 using Graphs,GraphMakie,NetworkLayout
 using ProjectFunctions,GraphletCounting,NetworkConstruction
 
 ## Typed representation (TODO check clash between Cairo and GL makie-- make switchable?)
-#using MakieTex,CairoMakie,FileIO
+using MakieTeX,FileIO,Luxor
+#using CairoMakie
 
 
 function variance_histogram(count_data)
@@ -76,6 +77,16 @@ function typed_degree_distribution(vertex_typelist,edgelist)
     f 
 
 end
+
+function typed_representation_results(t_r_output::Vector{DataFrame})
+    fig = Figure()
+    NetworkConstruction.draw_graphlet("noncoding_noncoding_coding_noncoding_4-star")
+    svg= SVGDocument(svgstring())
+    scatter(fig[1, 1], 1, 1, marker=Cached(svg), markersize = 50)
+    fig
+
+end
+
 
 #end module
 end

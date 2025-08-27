@@ -568,6 +568,8 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
             ##get summary (for tikZ plot)
             summary = describe(rand_fil_fil[:,3:3],:min,:q25,:median,:q75,:max)
             summary.variable = [heg*"_"*hog]
+            
+
             append!(summaries,summary)
             ##histogram for each heterogeneous graphlet
             #
@@ -676,7 +678,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
    # end
 
     #pretty_table(random_edges,backend=:html,standalone = false)
-    return [hog_array,sig_graphlets,insig_graphlets]
+    return [hog_array,sig_graphlets,insig_graphlets,rand_df]
 end 
 export typed_representations
 

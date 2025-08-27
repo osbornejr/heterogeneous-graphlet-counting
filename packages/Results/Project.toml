@@ -4,13 +4,24 @@ authors = ["osbornejr "]
 version = "0.1.0"
 
 [deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
 GraphletCounting = "7ac45bc0-02f1-46da-ad35-65e91b15b4e1"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
+MakieTeX = "6d554a22-29e7-47bd-aee5-0c5f06619414"
+NetworkConstruction = "6c2e41d2-72ae-425a-84e9-b8f08a301efb"
 NetworkLayout = "46757867-2c16-5918-afeb-47bfcb05e46a"
 ProjectFunctions = "a8586eae-54f0-4952-9436-ba92c8ab3181"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
+CairoMakie = "0.12.18"
+DataFrames = "1.7.0"
+FileIO = "1.17.0"
+Luxor = "4.2.0"
+MakieTeX = "0.4.3"
 NetworkLayout = "0.4.10"
