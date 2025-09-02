@@ -2,7 +2,7 @@
 ##script to set up a fresh ec2 instance on RACE hub
 export DEBIAN_FRONTEND=noninteractive
 #get required packages
-sudo apt update && sudo apt install -y dtach kitty mailutils msmtp msmtp-mta 
+sudo apt update && sudo apt install -y dtach kitty mailutils msmtp msmtp-mta curl 
 #set permissions for script
 #sudo chmod +x get-docker.sh
 #install docker using recommended method
