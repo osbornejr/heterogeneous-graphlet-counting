@@ -78,7 +78,13 @@ function typed_degree_distribution(vertex_typelist,edgelist)
 
 end
 
-function typed_representation_results(t_r_output::Vector{DataFrame})
+function typed_representation_results(t_r_output::Vector{DataFrame};colour_mapping=nothing)
+    ## if no colour mapping is provided, need to set one here based on all types in output 
+    if isnothing(colour_mapping)
+        types = sort(String.(unique(vcat(map(x->x[1:end-1],split.(vcat(map(x->x.Graphlet,t_r_output)...),"_"))...))))
+        node_colours = ["hotpink","gold","skyblue","limegreen"]
+        colour_mapping = Dict(Pair.(types,node_colours[1:length(types)]))
+    end
 
     fig = Figure()
     for (i,df) in enumerate(t_r_output)
@@ -90,10 +96,11 @@ function typed_representation_results(t_r_output::Vector{DataFrame})
                   xticksvisible = false,
                   yticksvisible = false
                  )  
+        #sort by graphlet to maintain consistency on each axis
+        sort!(df,:Graphlet)
         for (j,g) in enumerate(df.Graphlet)
             #need to set colours here based on graphlet order so that coding and noncoding colouring is consistent.
-
-            NetworkConstruction.draw_graphlet(g)
+            NetworkConstruction.draw_graphlet(g,colour_mapping=colour_mapping)
             svg= SVGDocument(svgstring())
             scatter!(ax,j,1,marker=Cached(svg), markersize = 50)
         end
