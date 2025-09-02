@@ -18,10 +18,10 @@ experiment = "mayank-merged"
 
 #PCIT method
 #run = "mayank-merged-small-pruned"
-#run = "mayank-merged-large-pruned"
+run = "mayank-merged-large-pruned"
 
 ## Ridge partial correlation method
-run = "mayank-merged"
+#run = "mayank-merged"
 
 
 #run = "GSE68559_sub"         
@@ -163,3 +163,4 @@ heatmap!(ax8,to_view)
 #Typed representations
 graphlet_counts,timer = get_graphlet_counts()
 t_r_output = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+Results.typed_representation_results(t_r_output)

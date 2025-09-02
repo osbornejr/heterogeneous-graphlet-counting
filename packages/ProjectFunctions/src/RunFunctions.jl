@@ -678,7 +678,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
    # end
 
     #pretty_table(random_edges,backend=:html,standalone = false)
-    return [hog_array,sig_graphlets,insig_graphlets,rand_df]
+    return hog_array
 end 
 export typed_representations
 
