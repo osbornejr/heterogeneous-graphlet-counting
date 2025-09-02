@@ -627,7 +627,7 @@ function draw_graphlet(node_schematic::Vector{String},edge_schematic::Vector{Int
     return draw_graphlet(node_schematic,BitVector(edge_schematic);kwargs...)
 end
 
-function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVector{Bool};dim::Int=50,rotation::Float64=0.0,node_colours::Array{String,1}=["hotpink","gold","skyblue","limegreen"],line_colour::String = "lightgrey",file::Union{Symbol,String}=:svg) 
+function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVector{Bool};dim::Int=50,rotation::Float64=0.0,node_colours::Array{String,1}=["hotpink","gold","skyblue","limegreen"],colour_mapping=nothing,line_colour::String = "lightgrey",file::Union{Symbol,String}=:svg) 
  #function to create graphlet images programatically using Luxor tools.
  #`file` can be either a filepath string to save a hard copy of image, or a symbol (either :svg or :png) to only create image in memory (useful for cases (i.e. Pluto) where separate file artefacts are a drawback.  
     Drawing(dim,dim,file) 
@@ -690,9 +690,18 @@ function draw_graphlet(node_schematic::Vector{String},edge_schematic::AbstractVe
     #
     #TODO add step here if colour map is provided explicitly (new option)
     #
-    sort!(col_pal)
-    for (i,t) in enumerate(types)
-        replace!(node_schematic,t=>col_pal[i])
+    #If colour mapping is provided, we use that as a priority.
+    if colour_mapping !=nothing
+        if sort(union(node_schematic,keys(colour_mapping))) == sort(collect(keys(colour_mapping)))
+            replace!(node_schematic,colour_mapping...)
+        else
+            throw(ArgumentError("supplied colour mapping does not give a colour for one or more types in the node schematic")) 
+        end
+    else
+        sort!(col_pal)
+        for (i,t) in enumerate(types)
+            replace!(node_schematic,t=>col_pal[i])
+        end
     end
     
     #check that length of node_schematic matches order
