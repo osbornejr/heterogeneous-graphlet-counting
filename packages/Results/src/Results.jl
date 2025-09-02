@@ -100,6 +100,20 @@ function typed_representation_results(t_r_output::Vector{DataFrame};colour_mappi
         sort!(df,:Graphlet)
         for (j,g) in enumerate(df.Graphlet)
             #need to set colours here based on graphlet order so that coding and noncoding colouring is consistent.
+            
+            ##identify overrepresented graphlets
+            @drawsvg begin setline(6);sethue("green"); box(O, 150, 150, 10, action = :stroke) end
+            if df[j,:p_value]<0.05
+                svg= SVGDocument(svgstring())
+                scatter!(ax,j,1,marker=Cached(svg), markersize = 200)
+            end
+            ##identify underrepresented graphlets
+            @drawsvg begin setline(6);sethue("red"); box(O, 150, 150, 10, action = :stroke) end
+            if df[j,:p_value]>0.95
+                svg= SVGDocument(svgstring())
+                scatter!(ax,j,1,marker=Cached(svg), markersize = 200)
+            end
+
             NetworkConstruction.draw_graphlet(g,colour_mapping=colour_mapping)
             svg= SVGDocument(svgstring())
             scatter!(ax,j,1,marker=Cached(svg), markersize = 50)
