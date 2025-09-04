@@ -7,18 +7,18 @@ using StatsBase
 using Results
 using GLMakie
 ## set experiment
-experiment = "mayank-merged"
-#experiment = "GSE68559_sub"
+#experiment = "mayank-merged"
+experiment = "GSE68559_sub"
 
 ## set run
 #run = "mayank-merged-1400-network"
 #run = "mayank-unmerged"
 #run = "mayank-merged-altered-network"
-#run = "GSE68559_sub"
+run = "GSE68559_sub"
 
 #PCIT method
 #run = "mayank-merged-small-pruned"
-run = "mayank-merged-large-pruned"
+#run = "mayank-merged-large-pruned"
 
 ## Ridge partial correlation method
 #run = "mayank-merged"
