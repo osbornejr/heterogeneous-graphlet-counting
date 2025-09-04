@@ -39,7 +39,7 @@ data_preprocessing:
   expression_cutoff: 0.10
   minreq: 0.10
   clean_method: "per-sample"
-  norm_method: "median"
+  norm_method: "upper_quartile"
   prune: false
   prune_condition: "strain"
   prune_cutoff: 2.0
