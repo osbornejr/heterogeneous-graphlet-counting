@@ -1,8 +1,81 @@
 test_name: GSE68559_sub
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 raw_counts_script: "config/input_scripts/GSE68559_sub.jl"
 distributed: true
+conditions:
+  region: ##numbers match those in the column titles (from GSE- RAW) . 
+    name_1: "frontopolar cortex" #1
+    sample_1: [9,18,27,36,45,54,63,72,80,89]
+    name_2: "Wernicke's area" #2
+    sample_2: [10,19,28,37,46,55,64,73,81,90]
+    name_3: "anterior cingulate cortex" #3
+    sample_3: [11,20,29,38,47,56,65,74,82,91]
+    name_4: "insula" #4
+    sample_4: [12,21,30,39,48,57,66,75,83,92]
+    name_5: "amygdala" #5
+    sample_5: [13,22,31,40,49,58,67,76,84,93]
+    name_6: "hippocampus" #6
+    sample_6: [14,23,32,41,50,59,68,77,85,94]
+    name_7: "posterior putamen" #7
+    sample_7: [15,24,33,42,51,60,69,78,86,95]
+    name_8: "cerebellum" #8
+    sample_8: [16,25,34,43,52,61,70,79,87,96]
+    name_9: "raphae nuclei" #9
+    sample_9: [17,26,35,44,53,62,71,88,97]
+    name_10: "dorsolateral prefrontal cortex" #10
+    sample_10: [1,2,3,4,5,6,7,8]
+  patient: ## notice strange order for the single digit samples-- this it to place 10th region samples last not first
+    name_1: "MB011" #smoker
+    sample_1: [9,10,11,12,13,14,15,16,17,1] 
+    name_2: "MB052" #nonsmoker
+    sample_2: [18,19,20,21,22,23,24,25,26,2] 
+    name_3: "MB059" #smoker
+    sample_3: [27,28,29,30,31,32,33,34,35] 
+    name_4: "MB100" #smoker
+    sample_4: [36,37,38,39,40,41,42,43,44,3] 
+    name_5: "MB147" #nonsmoker
+    sample_5: [45,46,47,48,49,50,51,52,53,4] 
+    name_6: "MB148" #smoker
+    sample_6: [54,55,56,57,58,59,60,61,62,5] 
+    name_7: "MB151" #nonsmoker
+    sample_7: [63,64,65,66,67,68,69,70,71,6] 
+    name_8: "MB160" #smoker (note, this is where the one sample was removed- for region 10)
+    sample_8: [72,73,74,75,76,77,78,79] 
+    name_9: "MB197" #nonsmoker
+    sample_9: [80,81,82,83,84,85,86,87,88,7] 
+    name_10: "MB202" #nonsmoker
+    sample_10: [89,90,91,92,93,94,95,96,97,8] 
+  treatment: ##we maintain the same ordering here, combining all smoker subjects in the same order as they would be separately
+    name_1: "smoker" 
+    samples_1: [9,10,11,12,13,14,15,16,17,1,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,3,54,55,56,57,58,59,60,61,62,5,72,73,74,75,76,77,78,79] 
+
+    name_2: "nonsmoker" 
+    samples_2: [18,19,20,21,22,23,24,25,26,2,45,46,47,48,49,50,51,52,53,4,63,64,65,66,67,68,69,70,71,6,80,81,82,83,84,85,86,87,88,7,89,90,91,92,93,94,95,96,97,8]
+
+
+
+
 
 cache:
   keep_cache: true
