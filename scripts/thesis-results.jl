@@ -1,11 +1,12 @@
 using Pkg
-Pkg.activate(".")
+Pkg.activate("results")
 using ProjectFunctions
 using GraphletCounting
 using DataPreprocessing
 using StatsBase
 using Results
 using GLMakie
+
 ## set experiment
 #experiment = "mayank-merged"
 experiment = "GSE68559_sub"
