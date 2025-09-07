@@ -4,15 +4,11 @@ raw_counts_script: "config/input_scripts/mayank-merged.jl"
 distributed: true
 conditions:
   strain:
-    name_1: "JG11 (salt tolerant)"
-    samples_1: [4,5,6,7,8,9] #TODO if ever wiping mayank cache, should change at input stage so that this is in more sensible order
-    name_2: "ICCV2 (salt sensitive)"
-    samples_2: [10,11,12,1,2,3]
+    JG11 (salt tolerant): [4,5,6,7,8,9] #TODO if ever wiping mayank cache, should change at input stage so that this is in more sensible order
+    ICCV2 (salt sensitive): [10,11,12,1,2,3]
   treatment:
-    name_1: "Control"
-    samples_1: [4,5,6,10,11,12]
-    name_2: "Salt Stress"
-    samples_2: [7,8,9,1,2,3] 
+    Control: [4,5,6,10,11,12]
+    Salt Stress: [7,8,9,1,2,3] 
 
 cache:
   keep_cache: true
