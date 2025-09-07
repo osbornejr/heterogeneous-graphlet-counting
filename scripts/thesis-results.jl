@@ -137,14 +137,24 @@ heatmap!(ax7,pd[vcat(sorted_indices...),:]')
 ##reset back to all normalised data
 pd = data_from_dataframe(norm_counts)
 #rearrange for JG and ICCV order
-pd = pd[:,[4,5,6,7,8,9,10,11,12,1,2,3]]
+#pd = pd[:,[4,5,6,7,8,9,10,11,12,1,2,3]]
 
 #Chickpea
-strain = ["JG11 (salt tolerant)"=>[1,2,3,4,5,6],"ICCV2 (salt sensitive)"=>[7,8,9,10,11,12]]
-treatment = ["Control"=>[1,2,3,7,8,9],"Salt Stress"=>[4,5,6,10,11,12]]
+#strain = ["JG11 (salt tolerant)"=>[1,2,3,4,5,6],"ICCV2 (salt sensitive)"=>[7,8,9,10,11,12]]
+#treatment = ["Control"=>[1,2,3,7,8,9],"Salt Stress"=>[4,5,6,10,11,12]]
 # Human
+if occursin("GSE68559",experiment)
+  condition = "treatment" 
+   elseif occursin("mayank",experiment)
+       condition = "strain"
+   else
+       throw(ArgumentError("need to provide a condition for current experiment"))
+end
 
-matching_strain_pattern = DataPreprocessing.high_contrast_transcripts(pd,strain[1][2],strain[2][2],2.0,strictness="n-1")
+
+matching_strain_pattern = DataPreprocessing.high_contrast_transcripts(pd,collect(values(params["conditions"][condition]))[1],collect(values(params["conditions"][condition]))[2],2.0,strictness="n-1")
+
+
 f4 = Figure()
 ax8 = Axis(f4[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression profiles of selected transcripts")
 Axis(f4[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
