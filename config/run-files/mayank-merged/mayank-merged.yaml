@@ -65,13 +65,13 @@ network_construction:
 
 analysis:    
   biological_validation: false
-  community_detection: false
-  wgcna: false
+  community_detection: true
+  wgcna: true
   func_annotate: false
   graphlet_counting: true
   graphlet_size: 4
   recursive: true #count lower graphlets as well
   typed_representation: true
   null_model_size: 1000
-  coincident_graphlets: true
+  coincident_graphlets: false
   
