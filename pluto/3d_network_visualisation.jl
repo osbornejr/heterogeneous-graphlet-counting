@@ -100,7 +100,7 @@ begin
 end
 
 # ╔═╡ 7cb8287e-e94a-43c2-8296-b71862c27a25
-wgcna_vertexlist = network_counts[wgcna_components[largest],:].transcript_type
+wgcna_vertexlist = processed_counts[wgcna_components[largest],:].transcript_type
 
 # ╔═╡ 9eb00fbb-a39e-4c49-acb5-f1728fd41d5e
 length(edgelist)

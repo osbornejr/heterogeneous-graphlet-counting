@@ -8,18 +8,22 @@ using Results
 using GLMakie
 
 ## set experiment
-#experiment = "mayank-merged"
-experiment = "GSE68559_sub"
+experiment = "mayank-merged"
+#experiment = "GSE68559_sub"
 
-## set run
+##Human smoker
+#run = "GSE68559_sub"
+#run = "Milestone-3-network"
+
+
+## Chickpea salt stress
 #run = "mayank-merged-1400-network"
 #run = "mayank-unmerged"
 #run = "mayank-merged-altered-network"
-run = "GSE68559_sub"
 
 #PCIT method
 #run = "mayank-merged-small-pruned"
-#run = "mayank-merged-large-pruned"
+run = "mayank-merged-large-pruned"
 
 ## Ridge partial correlation method
 #run = "mayank-merged"
@@ -62,8 +66,8 @@ ids = (1:size(adj_matrix,1))[dd.<id_cut]
 pd = data_from_dataframe(processed_counts)
 
 ## at this stage lets rearrange for the visualisation to have the sample columns in order (baked in order is 10,11,12,1,2,3,4,5,6,7,8,9; this translates to ICCV2-Stressed,JG11-Control,JG11-Stressed,ICCV2-Control. we will move the first three columns to the back to get each strain next to its condition pair.
-pd = pd[:,[4,5,6,7,8,9,10,11,12,1,2,3]]
-sample_names = ["JG11-Control-R1","JG11-Control-R2","JG11-Control-R3","JG11-Stress-R1","JG11-Stress-R2","JG11-Stress-R3","ICCV2-Control-R1","ICCV2-Control-R2","ICCV2-Control-R3","ICCV2-Stress-R1","ICCV2-Stress-R2","ICCV2-Stress-R3"]
+#pd = pd[:,[4,5,6,7,8,9,10,11,12,1,2,3]]
+#sample_names = ["JG11-Control-R1","JG11-Control-R2","JG11-Control-R3","JG11-Stress-R1","JG11-Stress-R2","JG11-Stress-R3","ICCV2-Control-R1","ICCV2-Control-R2","ICCV2-Control-R3","ICCV2-Stress-R1","ICCV2-Stress-R2","ICCV2-Stress-R3"]
 
 f2 = Figure()
 ax1 = Axis(f2[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression counts: high degree transcripts")
@@ -170,6 +174,28 @@ heatmap!(ax8,to_view)
 
 ## Analysis
 #
+#
+#Communities
+comm_df = ProjectFunctions.community_analysis(network_counts,adj_matrix);
+vertex_colors =string.(comm_df.color);
+c_comp = components[findall(==(maximum(length.(components))),length.(components))...]
+#for some reason communities aren't detected on largest component TODO fix/do community detection on each component
+#HACK for now, set it manually
+if length(components)>1
+    c_comp = components[3]
+end
+comm_fig = Results.plot_network(adj_matrix[c_comp,c_comp],vertex_colors = vertex_colors)
+
+#WGCNA
+wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna();
+unweighted_wgcna= (wgcna_network.>0.95)
+wgcna_components = NetworkConstruction.network_components(unweighted_wgcna)
+#largest = findmax(length.(wgcna_components))[2]
+wgcna_adj = unweighted_wgcna
+#wgcna_comp_comms = wgcna_comm[wgcna_components[largest],:]
+vertex_colors =string.(wgcna_comm.color);
+wgcna_fig = Results.plot_network(wgcna_adj,vertex_colors = vertex_colors)
+
 #
 #Typed representations
 graphlet_counts,timer = get_graphlet_counts()
