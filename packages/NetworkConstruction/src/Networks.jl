@@ -335,7 +335,9 @@ function wgcna(data::AbstractArray,transcript_types::Array{String})
     end
     colours = dict_match.(Ref(hex_hash),dynamicColors)
     #now do same to switch group names to numbers
-    number_hash = Dict(Pair.(groups,1:12))
+
+
+    number_hash = Dict(Pair.(groups,1:length(groups)))
     numbers = dict_match.(Ref(number_hash),dynamicColors)
     
     ##set adjacency diag to 0
