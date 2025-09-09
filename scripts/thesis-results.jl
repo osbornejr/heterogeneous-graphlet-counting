@@ -8,12 +8,12 @@ using Results
 using GLMakie
 
 ## set experiment
-experiment = "mayank-merged"
-#experiment = "GSE68559_sub"
+#experiment = "mayank-merged"
+experiment = "GSE68559_sub"
 
 ##Human smoker
 #run = "GSE68559_sub"
-#run = "Milestone-3-network"
+run = "Milestone-3-network"
 
 
 ## Chickpea salt stress
@@ -23,7 +23,7 @@ experiment = "mayank-merged"
 
 #PCIT method
 #run = "mayank-merged-small-pruned"
-run = "mayank-merged-large-pruned"
+#run = "mayank-merged-large-pruned"
 
 ## Ridge partial correlation method
 #run = "mayank-merged"
@@ -114,7 +114,7 @@ heatmap!(ax6,pd[matching_strain_pattern,:]')
 
 ### finding potentially a more agnostic way to determine which regularly occuring patterns to remove from the data
 # divide the processed expression counts up into 4 bin2: x<2, 2<x<7,6<x<12, 12<x 
-binned_pd = (pd.>2)#+(pd.>7)+(pd.>12)
+binned_pd = (pd.>2)+(pd.>7)+(pd.>12)
 #turn each profile into its own object
 binned_profiles = map(Tuple,eachrow(binned_pd))
 #sort by least to most common binned expression count profile.
@@ -168,6 +168,7 @@ to_view = pd[matching_strain_pattern,:]'
 #to_view = pd'
 pd = data_from_dataframe(processed_counts)
 to_view = pd'
+#to_view = binned_pd
 heatmap!(ax8,to_view)
 ##generalise-- finding high contrast counts. condition(s) supplied in param config?
 
