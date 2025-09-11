@@ -13,6 +13,13 @@ using StatsBase
 #using GLMakie
 using CairoMakie
 
+
+##set output base dir of thesis
+thesis_dir = "/Users/osbornejr/git/phd/thesis/"
+thesis_version_dir = "final-draft"
+network_chapter_dir = "network-analysis"
+
+
 ## set experiment
 #experiment = "mayank-merged"
 experiment = "GSE68559_sub"
@@ -208,3 +215,5 @@ wgcna_fig = Results.plot_network(wgcna_adj,vertex_colors = vertex_colors)
 graphlet_counts,timer = get_graphlet_counts()
 t_r_output = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
 t_r_result = Results.typed_representation_results(t_r_output)
+save("$(thesis_dir)/$(thesis_version_dir)/$(network_chapter_dir)/figs/$(experiment)_t_r_results.pdf",t_r_result)
+
