@@ -1,13 +1,14 @@
 module Results
 #Preprocessing
-using GLMakie,StatsBase,DataFrames
+using StatsBase,DataFrames
 #Network Construction
 using Graphs,GraphMakie,NetworkLayout
 using ProjectFunctions,GraphletCounting,NetworkConstruction
 
 ## Typed representation (TODO check clash between Cairo and GL makie-- make switchable?)
 using MakieTeX,FileIO,Luxor
-#using CairoMakie
+using CairoMakie
+#using GLMakie
 
 
 function variance_histogram(count_data)
@@ -15,7 +16,7 @@ function variance_histogram(count_data)
 
     #histogram to see where coding and noncoding is represented in variance data
     bins = Int.(floor.(var_data.*10)).+1
-    barplot(bins,repeat([1],length(var_data)),stack=bins,color=replace(count_data.transcript_type,"coding"=>1,"noncoding"=>2))
+    barplot(bins,repeat([1],length(var_data)),stack=bins,color=replace(count_data.transcript_type,"coding"=>:pink,"noncoding"=>:yellow))
 end
 
 
@@ -86,7 +87,11 @@ function typed_representation_results(t_r_output::Vector{DataFrame};colour_mappi
         colour_mapping = Dict(Pair.(types,node_colours[1:length(types)]))
     end
 
-    fig = Figure()
+    fig = Figure(
+                 backgroundcolor = RGBf(0.90, 0.90, 0.90),
+                 size = (1000, 700))
+    ## re-sort output so that 3 node graphlets are first
+    t_r_output = t_r_output[vcat(collect(1:8)[occursin.("3-",vcat(map(x->String.(unique(map(x->x[end],split.(x.Graphlet,"_")))),t_r_output)...))],collect(1:8)[.!occursin.("3-",vcat(map(x->String.(unique(map(x->x[end],split.(x.Graphlet,"_")))),t_r_output)...))]...)]
     for (i,df) in enumerate(t_r_output)
         ax = Axis(fig[i,1],
                   xgridvisible=false,
@@ -96,19 +101,20 @@ function typed_representation_results(t_r_output::Vector{DataFrame};colour_mappi
                   xticksvisible = false,
                   yticksvisible = false
                  )  
+        hidespines!(ax)
         #sort by graphlet to maintain consistency on each axis
         sort!(df,:Graphlet)
         for (j,g) in enumerate(df.Graphlet)
             #need to set colours here based on graphlet order so that coding and noncoding colouring is consistent.
             
             ##identify overrepresented graphlets
-            @drawsvg begin setline(6);sethue("green"); box(O, 150, 150, 10, action = :stroke) end
+            @drawsvg begin setline(6);sethue("#42f587"); box(O, 150, 150, 10, action = :stroke) end
             if df[j,:p_value]<0.05
                 svg= SVGDocument(svgstring())
                 scatter!(ax,j,1,marker=Cached(svg), markersize = 200)
             end
             ##identify underrepresented graphlets
-            @drawsvg begin setline(6);sethue("red"); box(O, 150, 150, 10, action = :stroke) end
+            @drawsvg begin setline(6);sethue("#f74859"); box(O, 150, 150, 10, action = :stroke) end
             if df[j,:p_value]>0.95
                 svg= SVGDocument(svgstring())
                 scatter!(ax,j,1,marker=Cached(svg), markersize = 200)
