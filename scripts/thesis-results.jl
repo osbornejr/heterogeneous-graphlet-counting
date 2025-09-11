@@ -1,11 +1,17 @@
 using Pkg
 Pkg.activate("results")
+#dev packages
 using ProjectFunctions
-using GraphletCounting
 using DataPreprocessing
-using StatsBase
+using NetworkConstruction
+using GraphletCounting
+using GraphletAnalysis
 using Results
-using GLMakie
+
+##external packages
+using StatsBase
+#using GLMakie
+using CairoMakie
 
 ## set experiment
 #experiment = "mayank-merged"
@@ -201,4 +207,4 @@ wgcna_fig = Results.plot_network(wgcna_adj,vertex_colors = vertex_colors)
 #Typed representations
 graphlet_counts,timer = get_graphlet_counts()
 t_r_output = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
-Results.typed_representation_results(t_r_output)
+t_r_result = Results.typed_representation_results(t_r_output)
