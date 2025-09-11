@@ -89,9 +89,11 @@ function typed_representation_results(t_r_output::Vector{DataFrame};colour_mappi
 
     fig = Figure(
                  backgroundcolor = RGBf(0.90, 0.90, 0.90),
-                 size = (1000, 700))
-    ## re-sort output so that 3 node graphlets are first
-    t_r_output = t_r_output[vcat(collect(1:8)[occursin.("3-",vcat(map(x->String.(unique(map(x->x[end],split.(x.Graphlet,"_")))),t_r_output)...))],collect(1:8)[.!occursin.("3-",vcat(map(x->String.(unique(map(x->x[end],split.(x.Graphlet,"_")))),t_r_output)...))]...)]
+                 size = (700, 700))
+    ## re-sort output so that 3 node graphlets are first, and that within each graphlet order they are sorted from least to most typed orbits
+    three_node = collect(1:length(t_r_output))[occursin.("3-",vcat(map(x->String.(unique(map(x->x[end],split.(x.Graphlet,"_")))),t_r_output)...))]
+    four_node = collect(1:length(t_r_output))[occursin.("4-",vcat(map(x->String.(unique(map(x->x[end],split.(x.Graphlet,"_")))),t_r_output)...))]
+    t_r_output = [sort(t_r_output[three_node],by=nrow)...,sort(t_r_output[four_node],by=nrow)...]    
     for (i,df) in enumerate(t_r_output)
         ax = Axis(fig[i,1],
                   xgridvisible=false,
