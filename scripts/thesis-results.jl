@@ -20,6 +20,8 @@ thesis_version_dir = "final-draft"
 network_chapter_dir = "network-analysis"
 
 
+#set colours
+colour_map = Dict("noncoding"=>:gold,"coding"=>:hotpink)
 ## set experiment
 #experiment = "mayank-merged"
 experiment = "GSE68559_sub"
@@ -64,7 +66,7 @@ for er in batch
     ##load network info 
     components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
     #visualise network
-    fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,"noncoding"=>:blue,"coding"=>:purple))
+    fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,collect(colour_map)...))
     #view typed degree distributions
     f = Results.typed_degree_distribution(vertexlist,edgelist)
     
@@ -213,7 +215,7 @@ for er in batch
     
     #WGCNA
     wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna();
-    unweighted_wgcna= (wgcna_network.>0.95)
+    unweighted_wgcna= (wgcna_network.>0.22)
     wgcna_components = NetworkConstruction.network_components(unweighted_wgcna)
     #largest = findmax(length.(wgcna_components))[2]
     wgcna_adj = unweighted_wgcna
