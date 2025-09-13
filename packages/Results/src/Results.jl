@@ -7,8 +7,8 @@ using ProjectFunctions,GraphletCounting,NetworkConstruction
 
 ## Typed representation (TODO check clash between Cairo and GL makie-- make switchable?)
 using MakieTeX,FileIO,Luxor
-using CairoMakie
-#using GLMakie
+#using CairoMakie
+using GLMakie
 
 
 function variance_histogram(count_data)
@@ -20,24 +20,30 @@ function variance_histogram(count_data)
 end
 
 
-function plot_network(adj_matrix;vertex_colors=nothing)
+function plot_network(adj_matrix;vertex_colors=nothing,communities=nothing)
     #define node colors first
     if (vertex_colors == nothing)
         vertex_colors = repeat(["blue"],size(adj_matrix)[1])
     end
-
+    #dim of graph
+    d = 2
     g = Graph(adj_matrix)
     set_theme!(backgroundcolor="#212121",textcolor=:white)
     fig,scene,p = graphplot(g;
-                            layout=Spring(dim=3,seed=5),#Spectral(dim=3),
-    node_color = vertex_colors,
-    node_size = 10,
-    edge_color = :white,
-    edge_width = .05,
-    figure = (size = (1500, 800),)
+                            #layout=Spring(dim=d,seed=10),#Spectral(dim=d),
+                            layout = community_force_layout(g, communities),
+                            node_color = vertex_colors,
+                            node_size = 10,
+                            edge_color = :grey,#:white,
+                            edge_width = .01,
+                            figure = (size = (1500, 800),)
+                           )
+    if d == 3
+        scene.show_axis =false
+    elseif d == 2
+        hidedecorations!(scene)
+    end
 
-    )
-    scene.show_axis =false
     return fig
 end
 
@@ -131,6 +137,44 @@ function typed_representation_results(t_r_output::Vector{DataFrame};colour_mappi
     fig
 
 end
+
+function community_force_layout(g::Graph, communities::Vector{Int})
+    num_nodes = nv(g)
+    positions = Vector{Makie.Point2f0}(undef, num_nodes)
+    
+    # Get unique communities and arrange them in a grid
+    unique_comms = sort(unique(communities))
+    ncomms = length(unique_comms)
+    grid_cols = ceil(Int, sqrt(ncomms))
+    grid_rows = ceil(Int, ncomms / grid_cols)
+    comm_positions = Dict{Int, Makie.Point2f0}()
+
+    spacing = 0.02  # distance between community centers
+    for (i, comm) in enumerate(unique_comms)
+        row = (i - 1) ÷ grid_cols
+        col = (i - 1) % grid_cols
+        comm_positions[comm] = Makie.Point2f0(col * spacing, -row * spacing)
+    end
+
+    for comm in unique_comms
+        # Get nodes in the community
+        nodes = findall(x -> x == comm, communities)
+        subg = induced_subgraph(g, nodes)
+        alg = Spectral(dim=2)
+        subpos = alg(subg[1])
+
+        # Re-map subgraph node indices to original graph node indices
+        for (i, node) in enumerate(nodes)
+            # Offset local layout by community center
+            offset = comm_positions[comm]
+
+            positions[node] = subpos[i] .+ offset
+        end
+    end
+
+    return positions
+end
+
 
 
 #end module
