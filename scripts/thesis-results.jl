@@ -211,7 +211,7 @@ for er in batch
     if length(components)>1
         c_comp = components[3]
     end
-    comm_fig = Results.plot_network(adj_matrix[c_comp,c_comp],vertex_colors = vertex_colors,communities=comm_df.group)
+    comm_fig = Results.plot_network(adj_matrix[c_comp,c_comp],vertex_colors = vertex_colors,groupby=comm_df.group)
     
     #WGCNA
     wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna();
