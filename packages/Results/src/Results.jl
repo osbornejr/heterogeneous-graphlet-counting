@@ -7,8 +7,8 @@ using ProjectFunctions,GraphletCounting,NetworkConstruction
 
 ## Typed representation (TODO check clash between Cairo and GL makie-- make switchable?)
 using MakieTeX,FileIO,Luxor
-#using CairoMakie
-using GLMakie
+using CairoMakie
+#using GLMakie
 
 
 function variance_histogram(count_data)
@@ -20,18 +20,41 @@ function variance_histogram(count_data)
 end
 
 
-function plot_network(adj_matrix;vertex_colors=nothing,communities=nothing)
+function plot_network(adj_matrix;layout="Spring",dim=2,engine="Cairo",vertex_colors=nothing,groupby=nothing)
     #define node colors first
     if (vertex_colors == nothing)
         vertex_colors = repeat(["blue"],size(adj_matrix)[1])
     end
     #dim of graph
-    d = 2
+    d = dim
+    
+    #build graph object before setting layout method
     g = Graph(adj_matrix)
+
+
+    #set layout here
+    if layout == "Spring"
+        lo = Spring(dim=d,seed=10)
+    elseif layout == "Spectral"
+        lo = Spectral(dim=d)
+    elseif layout == "Stress"
+        lo = Stress(dim=d)
+    elseif layout == "Grouped"
+        if groupby == nothing
+            throw(ArgumentError("for Grouped layout, a groupby vector must be supplied"))
+        else
+            lo = community_force_layout(g, groupby)
+        end
+    else
+        throw(ArgumentError("supplied layout not recognise:w
+                            d"))
+    end
+
+
     set_theme!(backgroundcolor="#212121",textcolor=:white)
     fig,scene,p = graphplot(g;
                             #layout=Spring(dim=d,seed=10),#Spectral(dim=d),
-                            layout = community_force_layout(g, communities),
+                            layout =lo,
                             node_color = vertex_colors,
                             node_size = 10,
                             edge_color = :grey,#:white,
@@ -138,10 +161,15 @@ function typed_representation_results(t_r_output::Vector{DataFrame};colour_mappi
 
 end
 
-function community_force_layout(g::Graph, communities::Vector{Int})
+function community_force_layout(g::Graph, communities::Vector{Any})
     num_nodes = nv(g)
     positions = Vector{Makie.Point2f0}(undef, num_nodes)
     
+    # turn communities into integers if required
+    if !(unique(typeof.(unique(communities)))... == Int)
+        communities = Int.(replace(communities,[Pair(c,i) for (i,c) in enumerate(unique(communities))]...))
+    end
+
     # Get unique communities and arrange them in a grid
     unique_comms = sort(unique(communities))
     ncomms = length(unique_comms)
