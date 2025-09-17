@@ -51,14 +51,14 @@ function plot_network(adj_matrix;layout="Spring",dim=2,engine="Cairo",vertex_col
     end
 
 
-    set_theme!(backgroundcolor="#212121",textcolor=:white)
+    #set_theme!(backgroundcolor="#212121",textcolor=:white)
     fig,scene,p = graphplot(g;
                             #layout=Spring(dim=d,seed=10),#Spectral(dim=d),
                             layout =lo,
                             node_color = vertex_colors,
                             node_size = 10,
                             edge_color = :grey,#:white,
-                            edge_width = .01,
+                            edge_width = .2,
                             figure = (size = (1500, 800),)
                            )
     if d == 3
@@ -66,6 +66,7 @@ function plot_network(adj_matrix;layout="Spring",dim=2,engine="Cairo",vertex_col
     elseif d == 2
         hidedecorations!(scene)
     end
+    hidespines!(scene)
 
     return fig
 end
