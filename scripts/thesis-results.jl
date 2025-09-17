@@ -26,6 +26,18 @@ colour_map = Dict("noncoding"=>:cyan,"coding"=>:purple)
 experiment = "mayank-merged"
 experiment = "GSE68559_sub"
 
+## Chickpea salt stress
+#run = "mayank-merged-1400-network"
+#run = "mayank-unmerged"
+#run = "mayank-merged-altered-network"
+
+#PCIT method
+#run = "mayank-merged-small-pruned"
+#run = "mayank-merged-large-pruned"
+
+# Ridge partial correlation method
+#run = "mayank-merged"
+
 ##Human smoker
 #run = "GSE68559_sub"
 run = "Milestone-3-network"
