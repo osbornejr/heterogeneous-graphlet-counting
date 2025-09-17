@@ -21,9 +21,9 @@ network_chapter_dir = "network-analysis"
 
 
 #set colours
-colour_map = Dict("noncoding"=>:gold,"coding"=>:hotpink)
+colour_map = Dict("noncoding"=>:cyan,"coding"=>:purple)
 ## set experiment
-#experiment = "mayank-merged"
+experiment = "mayank-merged"
 experiment = "GSE68559_sub"
 
 ##Human smoker
@@ -67,6 +67,7 @@ for er in batch
     components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
     #visualise network
     fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,collect(colour_map)...))
+    fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,collect(colour_map)...),layout="Grouped",groupby = replace(vertexlist,"coding"=>0,"noncoding"=>1))
     #view typed degree distributions
     f = Results.typed_degree_distribution(vertexlist,edgelist)
     
@@ -214,15 +215,23 @@ for er in batch
     comm_fig = Results.plot_network(adj_matrix[c_comp,c_comp],vertex_colors = vertex_colors,groupby=comm_df.group)
     
     #WGCNA
-    wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna();
-    unweighted_wgcna= (wgcna_network.>0.22)
-    wgcna_components = NetworkConstruction.network_components(unweighted_wgcna)
-    #largest = findmax(length.(wgcna_components))[2]
-    wgcna_adj = unweighted_wgcna
-    #wgcna_comp_comms = wgcna_comm[wgcna_components[largest],:]
-    vertex_colors =string.(wgcna_comm.color);
-    wgcna_fig = Results.plot_network(wgcna_adj,vertex_colors = vertex_colors)
+    #wgcna_network,wgcna_comm = ProjectFunctions.get_wgcna();
+    #unweighted_wgcna= (wgcna_network.>0.22)
+    #wgcna_components = NetworkConstruction.network_components(unweighted_wgcna)
+    ##largest = findmax(length.(wgcna_components))[2]
+    #wgcna_adj = unweighted_wgcna
+    ##wgcna_comp_comms = wgcna_comm[wgcna_components[largest],:]
+    #vertex_colors =string.(wgcna_comm.color);
+    #wgcna_fig = Results.plot_network(wgcna_adj,vertex_colors = vertex_colors)
+
     
+
+    ##Network vis for thesis
+    save("$(thesis_dir)/$(thesis_version_dir)/$(network_chapter_dir)/figs/$(experiment)_network.png",comm_fig,px_per_unit =4.0)
+
+
+
+
     #
     #Typed representations
     graphlet_counts,timer = get_graphlet_counts()
