@@ -115,7 +115,10 @@ function typed_representation_results(t_r_output::Vector{DataFrame};colour_mappi
         types = sort(String.(unique(vcat(map(x->x[1:end-1],split.(vcat(map(x->x.Graphlet,t_r_output)...),"_"))...))))
         node_colours = ["hotpink","gold","skyblue","limegreen"]
         colour_mapping = Dict(Pair.(types,node_colours[1:length(types)]))
+    elseif typeof(collect(values(colour_mapping))) != Vector{String}
+        colour_mapping = Dict(Pair.(keys(colour_mapping),String.(values(colour_mapping))))
     end
+
 
     fig = Figure(
                  backgroundcolor = RGBf(0.90, 0.90, 0.90),

@@ -22,6 +22,7 @@ network_chapter_dir = "network-analysis"
 
 #set colours
 colour_map = Dict("noncoding"=>:cyan,"coding"=>:purple)
+
 ## set experiment
 experiment = "mayank-merged"
 experiment = "GSE68559_sub"
@@ -248,6 +249,6 @@ for er in batch
     #Typed representations
     graphlet_counts,timer = get_graphlet_counts()
     t_r_output = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
-    t_r_result = Results.typed_representation_results(t_r_output)
+    t_r_result = Results.typed_representation_results(t_r_output,colour_mapping = colour_map)
     save("$(thesis_dir)/$(thesis_version_dir)/$(network_chapter_dir)/figs/$(experiment)_t_r_results.pdf",t_r_result)
 end 
