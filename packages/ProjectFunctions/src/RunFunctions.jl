@@ -626,7 +626,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
     end
 
     #merged boxplots
-    NetworkConstruction.tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","standalone",ylabel = "log value")
+    #NetworkConstruction.tex_merged_boxplot(merged_summaries,"output/share/merged_boxplot.tex","standalone",ylabel = "log value")
 
 
     ## find significant graphlets
@@ -678,7 +678,7 @@ function typed_representations(graphlet_counts,timer,vertexlist,edgelist)
    # end
 
     #pretty_table(random_edges,backend=:html,standalone = false)
-    return hog_array
+    return [hog_array,merged_summaries]
 end 
 export typed_representations
 

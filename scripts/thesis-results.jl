@@ -244,11 +244,13 @@ for er in batch
 
 
 
-
     #
     #Typed representations
     graphlet_counts,timer = get_graphlet_counts()
-    t_r_output = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+    t_r_output,merged_summaries = typed_representations(graphlet_counts,timer,vertexlist,edgelist)
+    ## table of over/under represented
     t_r_result = Results.typed_representation_results(t_r_output,colour_mapping = colour_map)
     save("$(thesis_dir)/$(thesis_version_dir)/$(network_chapter_dir)/figs/$(experiment)_t_r_results.pdf",t_r_result)
+    #merged boxplots
+    NetworkConstruction.tex_merged_boxplot(merged_summaries,"$(thesis_dir)/$(thesis_version_dir)/$(network_chapter_dir)/figs/$(experiment)_merged_boxplot.tex","input",ylabel = "log value")
 end 
