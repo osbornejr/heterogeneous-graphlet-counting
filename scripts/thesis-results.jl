@@ -89,61 +89,8 @@ for er in batch
            throw(ArgumentError("need to provide a condition for current experiment"))
     end
     
-    
-    ##define rev dictionary here for treatment values (used for figure)
-    rev_dict = Dict()
-    for (k,v) in params["conditions"]["treatment"]
-        for x in v
-            push!(rev_dict,x=>k)
-        end
-    end
+    heatmaps = Results.plot_heatmaps(pd,condition)
 
-    # we also need to sort samples based on their treatment type, within each of the chosen condition.
-    display_sample_order = []
-    display_condition_order = []
-    display_condition_ticks = []
-    display_treatment_order = []
-    display_treatment_ticks = []
-    for (k,v) in params["conditions"][condition]
-        treatment_match = [(x,rev_dict[x]) for x in v]
-        sort!(treatment_match, by = x->x[2])
-        push!(display_sample_order,first.(treatment_match)...)
-        push!(display_condition_order,k)
-        push!(display_condition_ticks,length(v)/2+.5)
-        for (k,v)in countmap(last.(treatment_match))
-            push!(display_treatment_ticks,v/2+.5)
-            push!(display_treatment_order,k)
-        end
-    end
-
-
-    ##if chosen condition has multiple features, we need to run for each condition against all others (i.e. region 1 vs region 2-10, for regions 1-10)
-    ## two set condition is actually exception (we don't need to compare each set against the other twice)
-    if length(params["conditions"][condition]) == 2
-        condition_a =collect(values(params["conditions"][condition]))[1]
-        condition_b =collect(values(params["conditions"][condition]))[2]
-   ##find which transcripts follow the chosen pattern 
-    matching_condition_pattern = DataPreprocessing.high_contrast_transcripts(pd,condition_a,condition_b,2.0,strictness="n-1")
-    fig = Figure()
-    # we apply treatment level axis first
-    ax = Axis(fig[1,1],xticks=(display_treatment_ticks,display_treatment_order),title="Expression profiles of selected transcripts")
-    Axis(f4[1,1],xticks=(display_condition_ticks,display_condition_order),xticklabelpad=25)
-    heatmap!(ax,pd[:,display_sample_order])
-    else
-    
-        for (cond_name,cond_samples) in params["conditions"][condition]
-            condition_a = cond_samples
-            ## other condition is all other samples
-            condition_b = setdiff(vcat(values(params["conditions"][condition])...),condition_a)
-            ##find which transcripts follow the chosen pattern 
-            matching_condition_pattern = DataPreprocessing.high_contrast_transcripts(pd,condition_a,condition_b,2.0,strictness="n-1")
-            fig = Figure()
-            # we apply treatment level axis first
-            ax = Axis(fig[1,1],xticks=(display_treatment_ticks,display_treatment_order),title="Expression profiles of selected transcripts")
-            Axis(f4[1,1],xticks=(display_condition_ticks,display_condition_order),xticklabelpad=25)
-            heatmap!(ax,pd[:,display_sample_order])
-        end
-    end
 
     #TODO
 ## - adjust to allow for multifeature conditions (as in human data)
