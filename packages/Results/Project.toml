@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DataPreprocessing = "0c67aaa8-d5ff-4929-99a0-75b09377fbc9"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
