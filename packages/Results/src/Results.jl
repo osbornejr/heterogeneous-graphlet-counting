@@ -33,17 +33,17 @@ function plot_heatmaps(pd,condition)
     # we also need to sort samples based on their treatment type, within each of the chosen condition.
     display_sample_order = []
     display_condition_order = []
-    display_condition_ticks = []
+    display_condition_ticks = Float64[]
     display_treatment_order = []
-    display_treatment_ticks = []
+    display_treatment_ticks = Float64[]
     for (k,v) in params["conditions"][condition]
         treatment_match = [(x,rev_dict[x]) for x in v]
         sort!(treatment_match, by = x->x[2])
         push!(display_sample_order,first.(treatment_match)...)
         push!(display_condition_order,k)
-        push!(display_condition_ticks,length(v)/2+.5)
+        push!(display_condition_ticks,sum(display_condition_ticks)+length(v)/2+.5)
         for (k,v)in countmap(last.(treatment_match))
-            push!(display_treatment_ticks,v/2+.5)
+            push!(display_treatment_ticks,sum(display_treatment_ticks)+v/2+.5)
             push!(display_treatment_order,k)
         end
     end
@@ -58,6 +58,8 @@ function plot_heatmaps(pd,condition)
     matching_condition_pattern = DataPreprocessing.high_contrast_transcripts(pd,condition_a,condition_b,2.0,strictness="n-1")
     fig = Figure()
     # we apply treatment level axis first
+    
+
     ax = Axis(fig[1,1],xticks=(display_treatment_ticks,display_treatment_order),title="Expression profiles of selected transcripts")
     Axis(fig[1,1],xticks=(display_condition_ticks,display_condition_order),xticklabelpad=25)
     heatmap!(ax,pd[:,display_sample_order])
