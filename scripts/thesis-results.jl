@@ -25,7 +25,7 @@ colour_map = Dict("noncoding"=>:cyan,"coding"=>:purple)
 
 ## set experiment
 experiment = "mayank-merged"
-experiment = "GSE68559_sub"
+#experiment = "GSE68559_sub"
 
 ## Chickpea salt stress
 #run = "mayank-merged-1400-network"
@@ -37,11 +37,11 @@ experiment = "GSE68559_sub"
 #run = "mayank-merged-large-pruned"
 
 # Ridge partial correlation method
-#run = "mayank-merged"
+run = "mayank-merged"
 
 ##Human smoker
 #run = "GSE68559_sub"
-run = "Milestone-3-network"
+#run = "Milestone-3-network"
 
 ##or batch wise
 #batch = nothing 
@@ -102,17 +102,17 @@ for er in batch
 #       - latex font
 
     
-    f4 = Figure()
-    ax8 = Axis(f4[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression profiles of selected transcripts")
-    Axis(f4[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
+    #f4 = Figure()
+    #ax8 = Axis(f4[1,1],xticks=((2:3:12),["Control","Stress","Control","Stress"]),title="Expression profiles of selected transcripts")
+    #Axis(f4[1,1],xticks=((2:6:12),["JG11 (salt tolerant)","ICCV2 (salt sensitive)"]),xticklabelpad=25)
     ## if we want all epxression profiles shown, with the problematic onees at the top
-    to_view = pd[matching_condition_pattern,:]'
+    #to_view = pd[matching_condition_pattern,:]'
     #to_view = pd[setdiff(1:size(pd,1),matching_condition_pattern),:]'
     #to_view = pd'
-    pd = data_from_dataframe(processed_counts)
-    to_view = pd'
+    #pd = data_from_dataframe(processed_counts)
+    #to_view = pd'
     #to_view = binned_pd
-    heatmap!(ax8,to_view)
+    #heatmap!(ax8,to_view)
     ##generalise-- finding high contrast counts. condition(s) supplied in param config?
     
     
