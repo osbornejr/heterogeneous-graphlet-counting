@@ -414,7 +414,8 @@ function biomaRt_connect()
         library(httr)
 #       ## connect to biomart
         set_config(config(ssl_verifypeer = 0L))
-        ensembl_version = "current" 
+        #ensembl_version = "current" 
+        ensembl_version = "109" 
         if (ensembl_version=="current")
             {
             ##mirrors to try: "useast" "www" "asia"

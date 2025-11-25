@@ -13,20 +13,19 @@ for i in term_list()
 endfor
 
 "set where repl is: nectar laptop race local
-let remote_method= "local"
+let remote_method= "race"
 
 
 if remote_method ==# "race"
     "for race, we need to set up depending on the ip of the currently used
     "instance.
-    let race_ip ="3-27-27-85"
-    let race_address = "ec2-user@ec2-" . race_ip . ".ap-southeast-2.compute.amazonaws.com"
+    let race_address = "ec2-3-26-234-138.ap-southeast-2.compute.amazonaws.com"
     let $RACE_ADDRESS = race_address
     
     "unison in particular will need a separate config file depending on this
     "address. we generate that here first
     let remote_path = "/home/ec2-user/heterogeneous-graphlet-counting"
-    let remote_host = race_address 
+    let remote_host = 'ec2-user@' . race_address . ''
     let ssh_key = expand("~/.ssh/race-hub")
 elseif remote_method ==# "laptop"
     "set unison config for linux laptop 
@@ -90,20 +89,20 @@ else "set paths first for unison and remotes
     "" for remote terminals this will depend on the remote_method
     if remote_method ==# "race"
         """REMOTE terminal: to browse files on remote server
-        execute 'nos term ssh -i ~/.ssh/race-hub ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
+        execute 'nos term ssh -i ~/.ssh/race-hub ec2-user@' . race_address . ''
         file remote
         wincmd c
         
         
         """REMOTE PORT terminal: to connect with an open port (for pluto etc.)
         "setup terminal with port connection 
-        execute 'nos term ssh -i ~/.ssh/race-hub -L 8080:localhost:8000 ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
+        execute 'nos term ssh -i ~/.ssh/race-hub -L 8080:localhost:8000 ec2-user@' . race_address . ''
         file julia-port
         wincmd c
         
         """REPL terminal: to run julia in on remote server
         "open REPL terminal vertically on right
-        execute 'nos vert term ssh -i ~/.ssh/race-hub ec2-user@ec2-' . race_ip . '.ap-southeast-2.compute.amazonaws.com'
+        execute 'nos vert term ssh -i ~/.ssh/race-hub ec2-user@' . race_address . ''
         file repl
         wincmd p
     elseif remote_method ==# "laptop"
