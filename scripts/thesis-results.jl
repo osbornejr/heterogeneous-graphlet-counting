@@ -34,10 +34,10 @@ experiment = "mayank-merged"
 
 #PCIT method
 #run = "mayank-merged-small-pruned"
-#run = "mayank-merged-large-pruned"
+run = "mayank-merged-large-pruned"
 
 # Ridge partial correlation method
-run = "mayank-merged"
+#run = "mayank-merged"
 
 ##Human smoker
 #run = "GSE68559_sub"

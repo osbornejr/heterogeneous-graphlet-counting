@@ -430,6 +430,33 @@ end
 """
     get_entrez_ids(names,nametype)
 
+New function that uses KEGGREST to get entrez ids for use in both KEGG and GO.
+This just outputs a list of entrez ids corresponding to the input ids.
+For the old function that used biomart (which is not accessible atm), see get_entrez_ids_biomart()
+
+"""
+function get_entrez_ids(names::Vector{<:AbstractString},nametype::String)
+
+    restart_R()
+    @info "Getting Entrez ids..."
+    species = "ath"
+    @rput names
+    @rput species
+    R"""
+    library(KEGGREST)
+    ##KEGG
+    uniprot_ids <- paste0("up:",names)
+    entrez_ids <-keggConv(species,uniprot_ids)
+    #keggids %in% paste0(species,":",genelinks$GeneID)
+    entrez_names<-sub(paste0("^",species,":"), "", keggids)
+    
+    """
+    @rget entrez_names
+    return entrez_names
+end
+"""
+    get_entrez_ids_biomart(names,nametype)
+***ARCHIVED VERSION THAT USES BIOMART- BIOMART IS DOWN ATM
 Generate a map between `names` and the entrez gene ids associated with them. 
 Elements of `names` may be any string, but only ensembl names will generate a match. 
 "Name.x" will have ".x" automatically trimmed as biomaRt will not match to the sub id level.
@@ -437,7 +464,7 @@ Elements of `names` may be any string, but only ensembl names will generate a ma
 Matches be either at the "transcript" or "gene" level, which is given by `nametype`.
 
 """
-function get_entrez_ids(names::Vector{<:AbstractString},nametype::String)
+function get_entrez_ids_biomart(names::Vector{<:AbstractString},nametype::String)
 
     restart_R()
     biomaRt_connect()

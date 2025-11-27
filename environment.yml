@@ -24,7 +24,11 @@ dependencies:
         - bioconductor-biomaRt
         - bioconductor-go.db
         - bioconductor-topgo
+        - bioconductor-keggrest
+        - bioconductor-clusterprofiler  
         - bioconductor-org.hs.eg.db
+        - bioconductor-org.At.tair.db
+
         
         
 
