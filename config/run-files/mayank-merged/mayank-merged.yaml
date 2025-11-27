@@ -64,7 +64,7 @@ network_construction:
   synthetic: false
 
 analysis:    
-  biological_validation: false
+  biological_validation: true
   community_detection: true
   wgcna: true
   func_annotate: false
