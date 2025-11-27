@@ -79,6 +79,7 @@ unison: ##use this to sync repo with a remote host. (this command just installs 
 	#cp config/unison/heterogeneous-graphlet-counting.prf $HOME/.unison/
 	#set up share directory
 	mkdir -p output/share
+	mkdir -p output/cache
 	# if on mac, set up fsmonitor
 	@if [ "$$(uname)" = "Darwin" ]; then \
 		brew install autozimu/homebrew-formulas/unison-fsmonitor; \
