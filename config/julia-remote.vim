@@ -19,7 +19,7 @@ let remote_method= "race"
 if remote_method ==# "race"
     "for race, we need to set up depending on the ip of the currently used
     "instance.
-    let race_address = "ec2-3-26-234-138.ap-southeast-2.compute.amazonaws.com"
+    let race_address = "ec2-3-27-30-16.ap-southeast-2.compute.amazonaws.com"
     let $RACE_ADDRESS = race_address
     
     "unison in particular will need a separate config file depending on this
