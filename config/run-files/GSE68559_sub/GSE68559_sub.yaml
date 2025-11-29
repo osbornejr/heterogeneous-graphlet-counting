@@ -83,6 +83,7 @@ network_construction:
 
 analysis:    
   biological_validation: true
+  species: "hsa"  
   community_detection: true
   wgcna: true
   func_annotate: false
