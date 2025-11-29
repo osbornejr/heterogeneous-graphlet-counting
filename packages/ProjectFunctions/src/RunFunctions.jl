@@ -725,8 +725,9 @@ function load_relationships(file_path)
 export load_relationships
 
 function kegg_information(network_counts)
-
-    vertex_names = network_counts[!,:transcript_id]
+    ##rewording here to get explictly provided entrez ids (see bio val note)
+    #vertex_names = network_counts[!,:transcript_id]
+    vertex_names = network_counts.EntrezID
     #get baseline entrez and kegg info about transcripts
     bio_dir = params["cache"]["bio_dir"]
     kegg_file = "$(bio_dir)/kegg_info.jld2"
@@ -735,15 +736,17 @@ function kegg_information(network_counts)
         top_terms = cache_load(kegg_file,"top_terms")
     else
         @info "getting KEGG info..."
-        top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcript")
+        top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcript",params["analysis"]["species"])
         cache_save(kegg_file,["top_terms"=>top_terms ])
     end
     return top_terms
 
 end
 function go_information(network_counts)
-
-    vertex_names = network_counts[!,:transcript_id]
+    
+    ##rewording here to get explictly provided entrez ids (see bio val note)
+    #vertex_names = network_counts[!,:transcript_id]
+    vertex_names = network_counts.EntrezID
     #get baseline GO info about transcripts
     bio_dir = params["cache"]["bio_dir"]
     go_file = "$(bio_dir)/go_info.jld2"
@@ -753,7 +756,7 @@ function go_information(network_counts)
         top_terms = cache_load(go_file,"top_terms")
     else
         @info "getting GO info..."
-        top_terms = GraphletAnalysis.get_GO_terms(vertex_names,"transcript")
+        top_terms = GraphletAnalysis.get_GO_terms(vertex_names,"transcript",params["analysis"]["species"])
         cache_save(go_file,["top_terms"=>top_terms ])
     end
     return top_terms
@@ -775,7 +778,12 @@ function ensembl_coverage(network_counts)
     return entrez_map
 end
 
+
 function biological_validation(network_counts)
+    ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
+    blastx_matches = CSV.read("data/mayank-de-novo/matching_entrez_ids.txt",DataFrame) 
+    merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :QueryID)
+    network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
     ##generate top terms for kegg and go
     ktt = kegg_information(network_counts)
     gtt = go_information(network_counts)

@@ -505,67 +505,120 @@ function get_entrez_ids_biomart(names::Vector{<:AbstractString},nametype::String
     return name_map
 end
 
-function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String)
+##simpler alternative where entrez ids are explicitly provided
+function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String,species::String)
 
-    ##get name map to entrez ids for vertex names
-    ## note: R restart and biomaRt init happen in this function, so dont need to do again here
-    name_map = get_entrez_ids(vertex_names,nametype)
-    
-    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id
-    entrez_map = filter(:entrez_id=>!ismissing,name_map)
-    ## importantly, record which nodes in network ahve carried through
-    entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
-    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+    entrez_ids = vertex_names
     #restart_R()
     @info "Getting GO matches..."
     @rput entrez_ids
+    @rput species
     #biomaRt_connect()
     R"""
     library(edgeR)
 
     ## get top hits to select from
-    top_terms = topGO(goana(entrez_ids))
+    top_terms = topGO(goana(paste0(species,":",entrez_ids)))
     """
     @rget top_terms 
 
     return top_terms
 end
+#function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String)
+#
+#    ##get name map to entrez ids for vertex names
+#    ## note: R restart and biomaRt init happen in this function, so dont need to do again here
+#    name_map = get_entrez_ids(vertex_names,nametype)
+#    
+#    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id
+#    entrez_map = filter(:entrez_id=>!ismissing,name_map)
+#    ## importantly, record which nodes in network ahve carried through
+#    entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
+#    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+#    #restart_R()
+#    @info "Getting GO matches..."
+#    @rput entrez_ids
+#    #biomaRt_connect()
+#    R"""
+#    library(edgeR)
+#
+#    ## get top hits to select from
+#    top_terms = topGO(goana(entrez_ids))
+#    """
+#    @rget top_terms 
+#
+#    return top_terms
+#end
 
-function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
+##simpler alternative where entrez ids are explicitly provided
+
+function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String,species::String) 
     
-    ##get name map to entrez ids for vertex names
-    ## note: R restart and biomaRt init happen in this function, so dont need to do again here
-    name_map = get_entrez_ids(vertex_names,nametype)
-    
-    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id
-    entrez_map = filter(:entrez_id=>!ismissing,name_map)
-    ## importantly, record which nodes in network ahve carried through
-    entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
-    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+    entrez_ids = vertex_names
+    entrez_ids = entrez_ids[entrez_ids.!="NA"]
     #restart_R()
     @info "Getting KEGG matches..."
     @rput entrez_ids
+    @rput species
+
+    
     #biomaRt_connect()
     R"""
     library(edgeR)
 
     #get list of entrez ids mapped to KEGG pathways 
     ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
-    #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
-    pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
+    #KEGG <-getGeneKEGGLinks(species.KEGG=species)
+    pathway_links <- read.table(paste0("data/kegg_pathway_links_",species,".txt"))
     names(pathway_links) <- c("GeneID","PathwayID")
-    ##need to convert gene ids to correct integer format
-    pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
-    pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
+    ##need to convert gene ids to correct integer format (2025: OR maybe not?)
+    #pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub(paste0(species,":"),"",x)))
+        pathway_list <- read.table(paste0("data/kegg_pathway_list_",species,".txt"),sep = "\t")
     names(pathway_list) <- c("PathwayID","PathwayName")
 
     ## get top hits to select from
-    top_terms = topKEGG(kegga(entrez_ids,n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
+    top_terms = topKEGG(kegga(paste0(species,":",entrez_ids),n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
 
     """ 
     @rget top_terms
     return top_terms
 end
+
+#function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String) 
+#    
+#    ##get name map to entrez ids for vertex names
+#    ## note: R restart and biomaRt init happen in this function, so dont need to do again here
+#    name_map = get_entrez_ids(vertex_names,nametype)
+#    
+#    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id
+#    entrez_map = filter(:entrez_id=>!ismissing,name_map)
+#    ## importantly, record which nodes in network ahve carried through
+#    entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
+#    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+#    #restart_R()
+#    @info "Getting KEGG matches..."
+#    @rput entrez_ids
+#    #biomaRt_connect()
+#    R"""
+#    library(edgeR)
+#
+#    #get list of entrez ids mapped to KEGG pathways 
+#    ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
+#    #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+#    pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
+#    names(pathway_links) <- c("GeneID","PathwayID")
+#    ##need to convert gene ids to correct integer format
+#    pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
+#    pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
+#    names(pathway_list) <- c("PathwayID","PathwayName")
+#
+#    ## get top hits to select from
+#    top_terms = topKEGG(kegga(entrez_ids,n=Inf,truncate = 34,gene.pathway = pathway_links,pathway.names = pathway_list))
+#
+#    """ 
+#    @rget top_terms
+#    return top_terms
+#end
 
 function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::String)
     ##get name map to entrez ids for vertex names
