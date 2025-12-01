@@ -736,7 +736,7 @@ function kegg_information(network_counts)
         top_terms = cache_load(kegg_file,"top_terms")
     else
         @info "getting KEGG info..."
-        top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,"transcript",params["analysis"]["species"])
+        top_terms = GraphletAnalysis.get_KEGG_pathways(vertex_names,params["analysis"]["species"])
         cache_save(kegg_file,["top_terms"=>top_terms ])
     end
     return top_terms
@@ -756,7 +756,7 @@ function go_information(network_counts)
         top_terms = cache_load(go_file,"top_terms")
     else
         @info "getting GO info..."
-        top_terms = GraphletAnalysis.get_GO_terms(vertex_names,"transcript",params["analysis"]["species"])
+        top_terms = GraphletAnalysis.get_GO_terms(vertex_names,params["analysis"]["species"])
         cache_save(go_file,["top_terms"=>top_terms ])
     end
     return top_terms
@@ -781,7 +781,7 @@ end
 
 function biological_validation(network_counts)
     ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
-    blastx_matches = CSV.read("data/mayank-de-novo/matching_entrez_ids.txt",DataFrame) 
+    blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
     merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :QueryID)
     network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
     ##generate top terms for kegg and go
@@ -796,6 +796,10 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     coinc_dir = params["cache"]["coinc_dir"]
     run(`mkdir -p $(coinc_dir)`)
         
+    ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
+    blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
+    merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :QueryID)
+    network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
 
     #coincidents
     #TODO for smaller networks/lower order graphlets, it may take longer to load CSV than to just run
@@ -810,16 +814,16 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         fix_int(g) = map(x->parse(Int,x),split(replace(replace(g,("["=>"")),("]"=>"")),","))
         fix_bool(g) = BitArray(map(x->parse(Int,x),split(replace(replace(replace(g,("["=>"")),("]"=>"")),("Bool"=>"")),",")))
         Coincidents.Vertices = fix_int.(Coincidents.Vertices)
-        Coincidents.Entrez = fix_int.(Coincidents.Entrez)
-        Coincidents.Ensembl = fix.(Coincidents.Ensembl)
-        Coincidents.Ensembl = map(x->string.(x),Coincidents.Ensembl)
+        #Coincidents.Entrez = fix_int.(Coincidents.Entrez)
+        #Coincidents.Ensembl = fix.(Coincidents.Ensembl)
+        #Coincidents.Ensembl = map(x->string.(x),Coincidents.Ensembl)
         Coincidents.Transcript_type = fix.(Coincidents.Transcript_type)
         Coincidents.Transcript_type = map(x->string.(x),Coincidents.Transcript_type)
         Coincidents.Inclusion = fix_bool.(Coincidents.Inclusion)
 
         ##load in matching candidate info
         @info "Loading candidate info from $coinc_dir..."
-        entrez_id_vector = cache_load(candidates_file,"entrez_id_vector")
+        #entrez_id_vector = cache_load(candidates_file,"entrez_id_vector")
         candidates = cache_load(candidates_file,"candidates")
     else
         ##relationships 
@@ -858,15 +862,23 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     
         ##get candidate information from kegg
         ##get baseline network info about biological function, with candidate info.
-        @info "Getting candidate pathway info from KEGG..."
         vertex_names = network_counts[!,:transcript_id]
-        entrez_id_vector, candidates,top_terms = GraphletAnalysis.get_KEGG_candidates(vertex_names,"transcript")   
+        entrez_ids = network_counts.EntrezID
+        if params["analysis"]["coincident_terms"] == "KEGG"
+            @info "Getting candidate pathway info from KEGG..."
+            candidates,top_terms = GraphletAnalysis.get_KEGG_candidates(entrez_ids,params["analysis"]["species"])   
+        elseif params["analysis"]["coincident_terms"] == "GO"
+            @info "Getting candidate pathway info from GO..."
+            candidates,top_terms = GraphletAnalysis.get_GO_candidates(entrez_ids,params["analysis"]["species"])   
+        else
+            throw(ArgumentError("Unknown coincident term provided in analysis parameters."))
+        end
         @info "Conducting per graphlet pathway coincidence analysis..."
-        Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,entrez_id_vector,candidates)
+        Coincidents = GraphletAnalysis.graphlet_coincidences(rel,rel_types,vertexlist,vertex_names,candidates)
         @info "Saving coincidents and candidates at $coinc_dir..."
 
         CSV.write(coincidents_file,Coincidents)
-        cache_save(candidates_file,["entrez_id_vector"=>entrez_id_vector,"candidates"=>candidates ])
+        cache_save(candidates_file,["candidates"=>candidates,"top_terms"=>top_terms])
     end
     
     ##get pathways as separate vector
@@ -932,6 +944,8 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
 
     #collect known pathway vectors for corresponding known pathway nodes
 
+    
+
     known_pathway_dfs = Array{DataFrame,1}(undef,length(candidate_pathways))
     for (i,p) in enumerate(candidate_pathways)
         subset = candidates[p]
@@ -968,6 +982,10 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     sig_check = map(x->(sum(x,dims=2).>(sig_cut)),unknown_ecdf_comparison)
     sig_nodes = findall(x->sum(x)>0,sig_check)
     sig_nodes_dict = Dict(Pair.(sig_nodes,map(x->candidate_pathways[vec(x)],sig_check[sig_nodes])))
+    
+    Main.@infiltrate
+
+
 
     return sig_nodes_dict
 end
