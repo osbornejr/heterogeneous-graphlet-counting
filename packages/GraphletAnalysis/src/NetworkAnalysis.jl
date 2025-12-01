@@ -314,7 +314,7 @@ end
 function per_graphlet_coincidence(graphlet::AbstractArray,type::AbstractString,candidates)
 
 end
-function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertexlist::Vector{<:AbstractString},vertex_names::Vector{<:AbstractString},ntrez_id_vector::Array{Int,1},candidates::Dict{String,Array{Int,1}})
+function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertexlist::Vector{<:AbstractString},vertex_names::Vector{<:AbstractString},candidates::Dict{String,Array{Int,1}})
         #convert into "nicer" format
         #rel_array = eachrow(rel)
         
@@ -859,14 +859,15 @@ end
 
 function pernode_significance_detail(i::Int,sub_Coincidents::DataFrame,graphlet_size::Int,candidate_pathways::Array{String,1},in_key::BitArray{1})#all coincident graphlets that i is involvedF in
     ##for orbit level significance, this function takes a specific node and finds all its coincident graphlets, and then counts the orbit position the node is in in each. returns a dataframe detailing these stats
+    
     ##find those graphlets that include i
     pre_graphlets = filter(:Vertices=> x -> in(i,x),sub_Coincidents)
     #filter further to find cases where at least `thresh` OTHER nodes in graphlet are in pathway (i.e. self coincidence does not count)
     #TODO coincidence threshold settable in config? May need logic check against graphlet size
-    thresh = graphlet_size - 1
+    thresh = graphlet_size - 2
     path_graphlets = filter(:Coincident_nodes=>x->x>thresh,filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
     ##for nonpath, we only require coincident node count to be equal to thresh
-    nonpath_graphlets = filter(:Coincident_nodes=>x->x>=thresh,filter(:Pathway=>x-> in(x,candidate_pathways[in_key]),pre_graphlets))
+    nonpath_graphlets = filter(:Coincident_nodes=>x->x>=thresh,filter(:Pathway=>x-> in(x,candidate_pathways[.!in_key]),pre_graphlets))
     graphlets = vcat(path_graphlets,nonpath_graphlets) 
     ##set up orbit templates to be checked against
                 #peripheral: degree one orbit
