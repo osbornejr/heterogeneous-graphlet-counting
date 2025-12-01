@@ -379,12 +379,31 @@ function graphlet_coincidences(rel::Matrix{Int},rel_types::AbstractVector,vertex
 
         
         #Get data into wide form dataframe, with info on transcript type, ensembl code, entrez id etc...
-        Coincidents_df = DataFrame(Pathway=String[],Coincident_nodes = Int[], Hom_graphlet = String[],Vertices = Array{Int64,1}[],Ensembl = Array{String,1}[],Entrez = Array{Int64,1}[],Transcript_type = Array{String,1}[])
+        Coincidents_df = DataFrame(Pathway=String[],
+                                   Coincident_nodes = Int[], 
+                                   Hom_graphlet = String[],
+                                   Vertices = Array{Int64,1}[],
+                                   #Ensembl = Array{String,1}[],
+                                   #Entrez = Array{Int64,1}[],
+                                   Transcript_type = Array{String,1}[])
+        
+        
+
+
         for e in Coincidents
             @info "expanding $(first(e))"
             for ee in last(e)
                 for eee in last(ee)
-                    push!(Coincidents_df,(first(e),first(ee),last(eee),first(eee),broadcast(x->vertex_names[x],first(eee)),broadcast(x->entrez_id_vector[x],first(eee)),broadcast(x->vertexlist[x],first(eee))))
+                    push!(Coincidents_df,
+                            (first(e),
+                            first(ee),
+                            last(eee),
+                            first(eee),
+                            #broadcast(x->vertex_names[x],first(eee)),
+                            #broadcast(x->vertex_names[x],first(eee)),
+                            broadcast(x->vertexlist[x],first(eee))
+                            )
+                           )
                 end
             end
         end
@@ -433,6 +452,7 @@ end
 New function that uses KEGGREST to get entrez ids for use in both KEGG and GO.
 This just outputs a list of entrez ids corresponding to the input ids.
 For the old function that used biomart (which is not accessible atm), see get_entrez_ids_biomart()
+UPDATE: doesnt work either (at least on RACE)
 
 """
 function get_entrez_ids(names::Vector{<:AbstractString},nametype::String)
@@ -506,7 +526,7 @@ function get_entrez_ids_biomart(names::Vector{<:AbstractString},nametype::String
 end
 
 ##simpler alternative where entrez ids are explicitly provided
-function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String,species::String)
+function get_GO_terms(vertex_names::Vector{<:AbstractString},species::String)
 
     entrez_ids = vertex_names
     #restart_R()
@@ -516,9 +536,18 @@ function get_GO_terms(vertex_names::Vector{<:AbstractString},nametype::String,sp
     #biomaRt_connect()
     R"""
     library(edgeR)
-
+    library(clusterProfiler)
+    library(org.At.tair.db)
     ## get top hits to select from
-    top_terms = topGO(goana(paste0(species,":",entrez_ids)))
+    #top_terms = topGO(goana(paste0(species,":",entrez_ids)))
+    go_results <- enrichGO(gene = entrez_ids,
+                        OrgDb = org.At.tair.db,
+                        keyType = "TAIR",
+                        ont = "ALL", # Or "MF", "CC", or "ALL"
+                        pAdjustMethod = "BH", # Benjamini-Hochberg adjustment
+                        pvalueCutoff = 0.05,
+                        qvalueCutoff = 0.05)
+    top_terms <- head(go_results,20)
     """
     @rget top_terms 
 
@@ -552,7 +581,7 @@ end
 
 ##simpler alternative where entrez ids are explicitly provided
 
-function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},nametype::String,species::String) 
+function get_KEGG_pathways(vertex_names::Vector{<:AbstractString},species::String) 
     
     entrez_ids = vertex_names
     entrez_ids = entrez_ids[entrez_ids.!="NA"]
@@ -620,49 +649,109 @@ end
 #    return top_terms
 #end
 
-function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::String)
+
+
+
+
+
+
+#simplified version with entrez ids presupplied (as above)
+function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},species::String)
     ##get name map to entrez ids for vertex names
     ## note: R restart and biomaRt init happen in this function, so dont need to do again here
-    name_map = get_entrez_ids(vertex_names,nametype)
-    
+    #name_map = get_entrez_ids(vertex_names,nametype)
+     
+    entrez_ids = vertex_names
+    entrez_id_index = (1:length(entrez_ids))[entrez_ids.!="NA"]
+    entrez_ids = entrez_ids[entrez_ids.!="NA"]
+    #restart_R()
+    @info "Getting KEGG matches..."
+    @rput entrez_ids
+    @rput species
     ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id TODO how is this chosen?
-    entrez_map = filter(:entrez_id=>!ismissing,name_map)
-    ## importantly, record which nodes in network ahve carried through TODO expose this properly?
-    entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
-    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+   # entrez_map = filter(:entrez_id=>!ismissing,name_map)
+   # ## importantly, record which nodes in network ahve carried through TODO expose this properly?
+   # entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
+   # entrez_ids = entrez_map.entrez_id
     #run this to get top_terms
-    top_terms = get_KEGG_pathways(vertex_names,nametype)
+    top_terms = get_KEGG_pathways(vertex_names,species)
 
     @rput entrez_ids
     @rput top_terms 
+    @rput species
     R"""
     #get list of entrez ids mapped to KEGG pathways 
     ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
-    #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
-    pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
+    #KEGG <-getGeneKEGGLinks(species.KEGG=species)
+    pathway_links <- read.table(paste0("data/kegg_pathway_links_",species,".txt"))
     names(pathway_links) <- c("GeneID","PathwayID")
     ##need to convert gene ids to correct integer format
-    pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
-    pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
+    #pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub(paste0(species,":"),"",x)))
+        pathway_list <- read.table(paste0("data/kegg_pathway_list_",species,".txt"),sep = "\t")
     names(pathway_list) <- c("PathwayID","PathwayName")
     
     ##get the network candidates for each pathway
     per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == pathway_list$PathwayID[pathway_list$PathwayName == top_terms$Pathway[x]]
 ])
-    in_network = lapply(per_pathway,function(x) entrez_ids %in% x)
+    in_network = lapply(per_pathway,function(x) paste0(species,":",entrez_ids) %in% x)
     names(in_network) = top_terms$Pathway
     """
     @rget in_network
     @info "Finding candidates that match top KEGG pathways..."
     candidates = Dict{String,Array{Int,1}}()
     for e in in_network
-        candidates[string(first(e))] = findall(.==(true),last(e))
+        #candidates[string(first(e))] = findall(.==(true),last(e))
+        candidates[string(first(e))] =  entrez_id_index[last(e)]  
     end
     #TODO check that reduction to only those transcripts with a entrez match here does not cause problems down the line (coincident analysis) 
     #addressing this (in some way) by giving full vector here, with 0 for nodes with no entrez id. May need to pass full dataframe with multiple entrez match info in future if we want to account for that (and handle dataframe downstream for coincident analysis).
-    entrez_ids_preserved = coalesce.(name_map.entrez_id,0)
-    return (entrez_ids_preserved,candidates,top_terms)
+    #entrez_ids_preserved = coalesce.(name_map.entrez_id,0)
+    return (entrez_id_index,candidates,top_terms)
 end
+
+#function get_KEGG_candidates(vertex_names::Vector{<:AbstractString},nametype::String)
+#    ##get name map to entrez ids for vertex names
+#    ## note: R restart and biomaRt init happen in this function, so dont need to do again here
+#    name_map = get_entrez_ids(vertex_names,nametype)
+#    
+#    ##just select one entrez id (first match) atm, and remove transcripts with no corresponding entrez id TODO how is this chosen?
+#    entrez_map = filter(:entrez_id=>!ismissing,name_map)
+#    ## importantly, record which nodes in network ahve carried through TODO expose this properly?
+#    entrez_map.network_node_id = findall(!ismissing,name_map.entrez_id)
+#    entrez_ids = convert(Vector{Int},entrez_map.entrez_id)
+#    #run this to get top_terms
+#    top_terms = get_KEGG_pathways(vertex_names,nametype)
+#
+#    @rput entrez_ids
+#    @rput top_terms 
+#    R"""
+#    #get list of entrez ids mapped to KEGG pathways 
+#    ##For some reason this is not working atm (SSH issue? MAybe Kitty? TODO) so we will manually load in pathway info
+#    #KEGG <-getGeneKEGGLinks(species.KEGG="hsa")
+#    pathway_links <- read.table("data/kegg_pathway_links_hsa.txt")
+#    names(pathway_links) <- c("GeneID","PathwayID")
+#    ##need to convert gene ids to correct integer format
+#    pathway_links$GeneID = strtoi(sapply(pathway_links$GeneID,function(x) sub("hsa:","",x)))
+#    pathway_list <- read.table("data/kegg_pathway_list_hsa.txt",sep = "\t")
+#    names(pathway_list) <- c("PathwayID","PathwayName")
+#    
+#    ##get the network candidates for each pathway
+#    per_pathway = sapply(1:nrow(top_terms),function(x) pathway_links$GeneID[ pathway_links$PathwayID == pathway_list$PathwayID[pathway_list$PathwayName == top_terms$Pathway[x]]
+#])
+#    in_network = lapply(per_pathway,function(x) entrez_ids %in% x)
+#    names(in_network) = top_terms$Pathway
+#    """
+#    @rget in_network
+#    @info "Finding candidates that match top KEGG pathways..."
+#    candidates = Dict{String,Array{Int,1}}()
+#    for e in in_network
+#        candidates[string(first(e))] = findall(.==(true),last(e))
+#    end
+#    #TODO check that reduction to only those transcripts with a entrez match here does not cause problems down the line (coincident analysis) 
+#    #addressing this (in some way) by giving full vector here, with 0 for nodes with no entrez id. May need to pass full dataframe with multiple entrez match info in future if we want to account for that (and handle dataframe downstream for coincident analysis).
+#    entrez_ids_preserved = coalesce.(name_map.entrez_id,0)
+#    return (entrez_ids_preserved,candidates,top_terms)
+#end
 
 function pathways_per_node_dict(node_set::Array{Int,1},candidates::Dict{String,Array{Int,1}})
     output_dict = Dict{Int,Array{String,1}}() 
@@ -1039,4 +1128,6 @@ end
 #
     #return sig_nodes_dict
 
-
+"TRINITY_DN10313_c0_g1_i3"  "TRINITY_DN10347_c0_g1_i5"  "TRINITY_DN1059_c0_g1_i8"  
+  [4] "TRINITY_DN10731_c0_g1_i2"  "TRINITY_DN1075_c0_g2_i4"   "TRINITY_DN11057_c0_g1_i9" 
+  [7] "TRINITY_DN110_c1_g2_i5"    "TRINITY_DN1139_c15_g1_
