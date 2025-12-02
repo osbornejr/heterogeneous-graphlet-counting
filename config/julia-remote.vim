@@ -13,13 +13,13 @@ for i in term_list()
 endfor
 
 "set where repl is: nectar laptop race local
-let remote_method= "local"
+let remote_method= "race"
 
 
 if remote_method ==# "race"
     "for race, we need to set up depending on the ip of the currently used
     "instance.
-    let race_address = "ec2-13-211-95-35.ap-southeast-2.compute.amazonaws.com"
+    let race_address = "ec2-3-26-195-178.ap-southeast-2.compute.amazonaws.com"
     let $RACE_ADDRESS = race_address
     
     "unison in particular will need a separate config file depending on this
