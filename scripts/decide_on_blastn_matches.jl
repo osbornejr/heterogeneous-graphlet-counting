@@ -21,7 +21,7 @@ function decide_blastn_matches(input_file::String)
                     df_out[i,:MatchType] = "$relative_size match" 
                 else
                     ## either too many gaps, or not enough matching, so we disregard match
-                    df_out[i,:MatchType] = "minor association"
+                    df_out[i,:MatchType] = "possible association"
                 end
             elseif (row.QueryLen*1.2) < row.SeqLen
                 ## the query is smaller than sequence
@@ -31,7 +31,7 @@ function decide_blastn_matches(input_file::String)
                     df_out[i,:MatchType] = "$relative_size match" 
                 else
                     ## either too many gaps, or not enough matching, so we disregard match
-                    df_out[i,:MatchType] = "minor association"
+                    df_out[i,:MatchType] = "possible association"
                 end
             else
                 ##the query and sequence are of similar size 
@@ -40,7 +40,7 @@ function decide_blastn_matches(input_file::String)
                     df_out[i,:MatchType] = "match" 
                 else
                     ## either too many gaps, or not enough matching, so we disregard match
-                    df_out[i,:MatchType] = "minor association"
+                    df_out[i,:MatchType] = "possible association"
                 end
             end
         end
@@ -53,17 +53,32 @@ function get_rnatype_from_description(df_out)
     for (i,row) in enumerate(eachrow(df_out))
         ## other housekeeping. check description for missing terms to put in RNAType field
         if (ismissing(row.RNAType))
+            if length(split(row.Description))<3
+                df_out[i,:RNAType] = "no description"
+            end
             if occursin("DNA",row.Description)
                 df_out[i,:RNAType] = "DNA"
+            end
+            if occursin("plasmid",row.Description)
+                df_out[i,:RNAType] = "plasmid DNA"
             end
             if occursin("cDNA",row.Description)
                 df_out[i,:RNAType] = "cDNA"
             end
             if occursin("mitochond",row.Description)
-                df_out[i,:RNAType] = "mitoc"
+                df_out[i,:RNAType] = "mitochondrial"
             end
             if occursin("satellite",row.Description)
                 df_out[i,:RNAType] = "satellite"
+            end
+            if occursin("SCAR marker",row.Description)
+                df_out[i,:RNAType] = "marker"
+            end
+            if occursin("ISSR marker",row.Description)
+                df_out[i,:RNAType] = "marker"
+            end
+            if occursin("Synthetic construct",row.Description)
+                df_out[i,:RNAType] = "synthetic"
             end
             if occursin(" transposon ",row.Description)
                 df_out[i,:RNAType] = "transposon"
@@ -72,16 +87,22 @@ function get_rnatype_from_description(df_out)
                 df_out[i,:RNAType] = "transposon"
             end
             if occursin("retrotransposon",row.Description)
-                df_out[i,:RNAType] = "retrotransposon"
+                df_out[i,:RNAType] = "transposon"
             end
             if occursin("Retrotransposon",row.Description)
-                df_out[i,:RNAType] = "RT gene"
+                df_out[i,:RNAType] = "transposon"
             end
             if occursin("RT gene",row.Description)
-                df_out[i,:RNAType] = "retrotransposon"
+                df_out[i,:RNAType] = "transposon"
             end
             if occursin("pseudogene",row.Description)
                 df_out[i,:RNAType] = "pseudogene"
+            end
+            if occursin("promoter region",row.Description)
+                df_out[i,:RNAType] = "mRNA"
+            end
+            if occursin("transcription factor",row.Description)
+                df_out[i,:RNAType] = "mRNA"
             end
             if occursin("genomic sequence",row.Description)
                 df_out[i,:RNAType] = "gene"
@@ -89,13 +110,43 @@ function get_rnatype_from_description(df_out)
             if occursin("gene complete cds",row.Description)
                 df_out[i,:RNAType] = "gene"
             end
+            if occursin("gene partial cds",row.Description)
+                df_out[i,:RNAType] = "gene"
+            end
+            if occursin("synthetase gene",row.Description)
+                df_out[i,:RNAType] = "gene"
+            end
             if occursin("protein gene",row.Description)
                 df_out[i,:RNAType] = "gene"
+            end
+            if occursin("inhibitor gene",row.Description)
+                df_out[i,:RNAType] = "gene"
+            end
+            if (occursin("genome",row.Description) & (row.SeqLen>100000))
+                df_out[i,:RNAType] = "genome"
+            end
+            if (occursin("region",row.Description) & (row.SeqLen>100000))
+                df_out[i,:RNAType] = "genome"
             end
             if occursin("complete genome",row.Description)
                 df_out[i,:RNAType] = "genome"
             end
             if occursin("whole genome",row.Description)
+                df_out[i,:RNAType] = "genome"
+            end
+            if occursin("genome assembly",row.Description)
+                df_out[i,:RNAType] = "genome"
+            end
+            if occursin("partial genome",row.Description)
+                df_out[i,:RNAType] = "genome"
+            end
+            if (occursin(" genes ",row.Description) & (row.SeqLen>100000))
+                df_out[i,:RNAType] = "genome"
+            end
+            if occursin("b3v08",row.Description)
+                df_out[i,:RNAType] = "genome"
+            end
+            if occursin("XXX",row.Description)
                 df_out[i,:RNAType] = "genome"
             end
             if occursin("complete sequence",row.Description)
@@ -104,14 +155,56 @@ function get_rnatype_from_description(df_out)
             if occursin("COMPLETE SEQUENCE",row.Description)
                 df_out[i,:RNAType] = "genome"
             end
+            if occursin("linkage group",row.Description)
+                df_out[i,:RNAType] = "chromosome"
+            end
             if occursin("chromosome",row.Description)
                 df_out[i,:RNAType] = "chromosome"
+            end
+            if occursin(" BAC ",row.Description)
+                df_out[i,:RNAType] = "chromosome"
+            end
+            if occursin("_BAC ",row.Description)
+                df_out[i,:RNAType] = "chromosome"
+            end
+            if occursin("scaffold",row.Description)
+                df_out[i,:RNAType] = "scaffold"
+            end
+            if occursin("chloroplast",row.Description)
+                df_out[i,:RNAType] = "chloroplast"
+            end
+            if occursin("organelle",row.Description)
+                df_out[i,:RNAType] = "organelle"
+            end
+            if occursin("plastid",row.Description)
+                df_out[i,:RNAType] = "organelle"
             end
             if occursin("ribosomal RNA", row.Description)
                 df_out[i,:RNAType] = "rrna"
             end
             if occursin("misc_RNA",row.Description)
                 df_out[i,:RNAType] = "misc_RNA"
+            end
+            if occursin("microRNA",row.Description)
+                df_out[i,:RNAType] = "mirna"
+            end
+            if occursin("small nuclear RNA",row.Description)
+                df_out[i,:RNAType] = "sncrna"
+            end
+            if occursin("small cytoplasmic RNA",row.Description)
+                df_out[i,:RNAType] = "sncrna"
+            end
+            if occursin("snoRNA",row.Description)
+                df_out[i,:RNAType] = "sncrna"
+            end
+            if occursin("genomic repeat sequence",row.Description)
+                df_out[i,:RNAType] = "ncrna"
+            end
+            if occursin("SRP RNA",row.Description)
+                df_out[i,:RNAType] = "ncrna"
+            end
+            if occursin("non-coding RNA",row.Description)
+                df_out[i,:RNAType] = "ncrna"
             end
             if occursin("long non-coding RNA",row.Description)
                 df_out[i,:RNAType] = "lncrna"
@@ -209,15 +302,36 @@ nt_any_np_df[idx,:]
 match_df[idx,:] = nt_match_df[idx,:]
 
 ##nt minor over rs none
-##lastly, we want to take any minor associations in nt that are no matches in refseq.
-idx = findall(((rs_match_df.MatchType.=="no match").+(nt_match_df.MatchType.=="minor association")).==2)
+##lastly, we want to take any possible associations in nt that are no matches in refseq.
+idx = findall(((rs_match_df.MatchType.=="no match").+(nt_match_df.MatchType.=="possible association")).==2)
 match_df[idx,:] = nt_match_df[idx,:]
 
 @info "searching for more rnatypes in description field..."
 match_df = get_rnatype_from_description(match_df)
+rs_match_df = get_rnatype_from_description(rs_match_df)
+nt_match_df = get_rnatype_from_description(nt_match_df)
+
+
 
 ##manually inspect the last few explicit matches that haven't got an explicit RNAtype 
-filter(:MatchType=>==("match"),match_df[(ismissing.(match_df.RNAType).+ismissing.(match_df.SeqID)).==1,:])
+idx = findall((ismissing.(match_df.RNAType).*(match_df.MatchType.!="no match")))
+@info "Assigning remaining $(length(idx)) missing matches as 'gene' (check list below)..."
+###the filter is now fairly comprehensive, but it is hard to capture every gene annotation, particularly from core-nt. We inspect the last here, hopefully they can all be manually assigned as gene.
+## manually set via vector
+match_df[idx,:RNAType] = fill("gene",length(idx))
 
+
+
+
+##write out match file, as well as ref-seq and nt specific outfiles. Also include condensed form of final file
+CSV.write("data/mayank-de-novo/blastn_match.txt",match_df)
+
+
+##show descriptions of sequences that were manually set as gene despite no match in filter 
+unique(match_df[idx,:Description])
+
+##potential other strings of interest in description:
+#salt tolerance
+#heat stress/HEAT-SHOCK heat-shock
 
 
