@@ -64,6 +64,10 @@ for er in batch
     
     ##load network info 
     components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
+    ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
+    blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
+    merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :QueryID)
+    network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
     #visualise network
     fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,collect(colour_map)...))
     fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,collect(colour_map)...),layout="Grouped",groupby = replace(vertexlist,"coding"=>0,"noncoding"=>1))

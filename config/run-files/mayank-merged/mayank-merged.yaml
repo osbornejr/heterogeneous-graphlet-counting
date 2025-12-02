@@ -1,6 +1,7 @@
 test_name: mayank-merged
 
 raw_counts_script: "config/input_scripts/mayank-merged.jl"
+entrez_match_file: "data/mayank-de-novo/matching_entrez_ids.txt"
 distributed: true
 conditions:
   strain:
@@ -74,5 +75,6 @@ analysis:
   recursive: true #count lower graphlets as well
   typed_representation: true
   null_model_size: 1000
-  coincident_graphlets: false
+  coincident_graphlets: true
+  coincident_terms: "GO"
   
