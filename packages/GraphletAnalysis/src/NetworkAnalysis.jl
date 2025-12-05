@@ -1155,6 +1155,3 @@ end
 #
     #return sig_nodes_dict
 
-"TRINITY_DN10313_c0_g1_i3"  "TRINITY_DN10347_c0_g1_i5"  "TRINITY_DN1059_c0_g1_i8"  
-  [4] "TRINITY_DN10731_c0_g1_i2"  "TRINITY_DN1075_c0_g2_i4"   "TRINITY_DN11057_c0_g1_i9" 
-  [7] "TRINITY_DN110_c1_g2_i5"    "TRINITY_DN1139_c15_g1_
