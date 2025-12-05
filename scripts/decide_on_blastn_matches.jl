@@ -290,14 +290,14 @@ match_df[idx,:] = nt_match_df[idx,:]
 ##for replacing rs sub/super matches with nt matches, we review first to see what is replacing what
 idx = findall(((rs_match_df.MatchType.=="super match").+(nt_match_df.MatchType.=="match")).==2)
 ##observe (for instance)
-rs_any_np_df[idx,:]
-nt_any_np_df[idx,:]
+rs_match_df[idx,:]
+nt_match_df[idx,:]
 ##by default we include the nt matches, as they should be good, and we will keep the rs and nt match outputs around as well if we do need purely "rna" matches.
 match_df[idx,:] = nt_match_df[idx,:]
 idx = findall(((rs_match_df.MatchType.=="sub match").+(nt_match_df.MatchType.=="match")).==2)
 ##observe (for instance)
-rs_any_np_df[idx,:]
-nt_any_np_df[idx,:]
+rs_match_df[idx,:]
+nt_match_df[idx,:]
 ##by default we include the nt matches, as they should be good, and we will keep the rs and nt match outputs around as well if we do need purely "rna" matches.
 match_df[idx,:] = nt_match_df[idx,:]
 
@@ -324,6 +324,8 @@ match_df[idx,:RNAType] = fill("gene",length(idx))
 
 
 ##write out match file, as well as ref-seq and nt specific outfiles. Also include condensed form of final file
+CSV.write("data/mayank-de-novo/blastn_ref-seq_match.txt",match_df)
+CSV.write("data/mayank-de-novo/blastn_core-nt_match.txt",match_df)
 CSV.write("data/mayank-de-novo/blastn_match.txt",match_df)
 
 
