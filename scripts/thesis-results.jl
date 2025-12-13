@@ -13,6 +13,10 @@ using StatsBase
 #using GLMakie
 using CairoMakie
 
+##for loading in blastx matches (at least for now)
+using CSV
+using DataFrames
+
 
 ##set output base dir of thesis
 thesis_dir = "/Users/osbornejr/git/phd/thesis/"
@@ -24,8 +28,8 @@ fig_dir = "$(thesis_dir)/$(thesis_version_dir)/$(network_chapter_dir)/figs/"
 colour_map = Dict("noncoding"=>:cyan,"coding"=>:purple)
 
 ## set experiment
-experiment = "mayank-merged"
-#experiment = "GSE68559_sub"
+#experiment = "mayank-merged"
+experiment = "GSE68559_sub"
 
 ## Chickpea salt stress
 #run = "mayank-merged-1400-network"
@@ -34,40 +38,45 @@ experiment = "mayank-merged"
 
 #PCIT method
 #run = "mayank-merged-small-pruned"
-run = "mayank-merged-large-pruned"
+#run = "mayank-merged-large-pruned"
 
 # Ridge partial correlation method
 #run = "mayank-merged"
 
 ##Human smoker
 #run = "GSE68559_sub"
-#run = "Milestone-3-network"
+run = "Milestone-3-network"
 
 ##or batch wise
 #batch = nothing 
-batch = [("GSE68559_sub","Milestone-3-network"),("mayank-merged","mayank-merged-large-pruned")]
+batch = [("GSE68559_sub","Milestone-3-network")]#,("mayank-merged","mayank-merged-large-pruned")]
 
 if batch == nothing
     #construct batch just for one experiment
     batch = [(experiment,run)]
 end
 
-for er in batch
-    experiment = er[1]
-    run = er[2]
-    
+
+function load_run_data(experiment,run)
+    @info "Loading data from $experiment experiment, run $run..."
     ##load preprocessing data
-    raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/$(experiment)/$(run).yaml")
+    global raw_counts,round_counts,vst_counts,clean_counts,norm_counts,processed_counts = get_preprocessed_data("config/run-files/$(experiment)/$(run).yaml")
     #plot variance histogram
     Results.variance_histogram(norm_counts)
     
     
     ##load network info 
-    components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
-    ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
-    blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
-    merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :QueryID)
-    network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
+    global components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
+    
+    if !(:entrez_id in names(network_counts)) 
+        ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
+        blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
+        merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :TranscriptID)
+        network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
+        rename!(network_counts,:EntrezID=> :entrez_id)
+    end
+
+    global network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
     #visualise network
     fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,collect(colour_map)...))
     fig = Results.plot_network(adj_matrix,vertex_colors = replace(vertexlist,collect(colour_map)...),layout="Grouped",groupby = replace(vertexlist,"coding"=>0,"noncoding"=>1))
@@ -161,3 +170,9 @@ for er in batch
     #merged boxplots
     NetworkConstruction.tex_merged_boxplot(merged_summaries,"$(fig_dir)/$(experiment)_merged_boxplot.tex","input",ylabel = "log value")
 end 
+
+
+##load both experiments (last listed will be global)
+for er in batch
+    load_run_data(er[1],er[2])
+end
