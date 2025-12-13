@@ -54,7 +54,7 @@ fi' > /usr/local/bin/check_uptime.sh && sudo chmod +x /usr/local/bin/check_uptim
 #pull repo with submodules
 git clone --recurse-submodules https://github.com/osbornejr/heterogeneous-graphlet-counting.git
 #change permissions for all dirs in repo
-sudo chmod -R 644 heterogeneous-graphlet-counting
+sudo chmod -R 755 heterogeneous-graphlet-counting
 sudo chown -R ec2-user:ec2-user heterogeneous-graphlet-counting
 #cd into repo
 cd heterogeneous-graphlet-counting
