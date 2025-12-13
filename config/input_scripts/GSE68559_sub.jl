@@ -36,6 +36,12 @@ raw_counts.transcript_type = replace(x-> occursin("lnc",x) ? "noncoding" : "codi
 ##for simplicity we will take them directly from the biotypes file that is now generated in an R script
 transcript_biotypes = CSV.read("data/GSE68559/transcript_biotypes.txt",DataFrame,stringtype=String)
 raw_counts.transcript_id = transcript_biotypes.TranscriptID
+##2025 add: now we get the biomart types externally, loaded viave transcrpt biotypes file
+#raw_counts.biomart_type = replace(transcript_types,missing=>"none")
+raw_counts.biomart_type = String.(strip.(transcript_biotypes.Biotype))
+##also add Entrez ids here too for simplicity
+entrez_ids = CSV.read("data/GSE68559/matching_entrez_ids.txt",DataFrame,stringtype=String)
+raw_counts.entrez_id = entrez_ids.EntrezID
 
 ## find transcript types via biomaRt (NOTE this should be inside the raw counts cache section above, but currently input data has vanished from NeCTAR! It is all cached here thankfully, so for now we use this workaround.
 #@info "Checking transcript types via biomaRt"
@@ -69,9 +75,6 @@ raw_counts.transcript_id = transcript_biotypes.TranscriptID
 #
 #@rget transcript_types
 ## get rid of missing values and add to raw counts data
-##2025 add: now we get the biomart types externally, loaded viave transcrpt biotypes file
-#raw_counts.biomart_type = replace(transcript_types,missing=>"none")
-raw_counts.biomart_type = String.(strip.(transcript_biotypes.Biotype))
 ##cut down raw counts to only those with coding or lncRNA labels (as well as those explicitly labelled lncRNA in input data).
 raw_counts = vcat(filter(:transcript_type=>x->x=="noncoding",raw_counts),filter(:biomart_type=>x->x in ["lncRNA","protein_coding"],raw_counts))
 ## set transcripts that biomart identifies as lncRNA to noncoding

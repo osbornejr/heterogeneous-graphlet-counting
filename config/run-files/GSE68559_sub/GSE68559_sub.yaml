@@ -1,6 +1,7 @@
 test_name: GSE68559_sub
 
 raw_counts_script: "config/input_scripts/GSE68559_sub.jl"
+entrez_match_file: "data/GSE68559/matching_entrez_ids.txt"
 distributed: true
 conditions:
   region: ##numbers match those in the column titles (from GSE- RAW) . 

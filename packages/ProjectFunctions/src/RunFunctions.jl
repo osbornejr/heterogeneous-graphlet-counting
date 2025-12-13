@@ -727,7 +727,7 @@ export load_relationships
 function kegg_information(network_counts)
     ##rewording here to get explictly provided entrez ids (see bio val note)
     #vertex_names = network_counts[!,:transcript_id]
-    vertex_names = network_counts.EntrezID
+    vertex_names = network_counts.entrez_id
     #get baseline entrez and kegg info about transcripts
     bio_dir = params["cache"]["bio_dir"]
     kegg_file = "$(bio_dir)/kegg_info.jld2"
@@ -746,7 +746,7 @@ function go_information(network_counts)
     
     ##rewording here to get explictly provided entrez ids (see bio val note)
     #vertex_names = network_counts[!,:transcript_id]
-    vertex_names = network_counts.EntrezID
+    vertex_names = network_counts.entrez_id
     #get baseline GO info about transcripts
     bio_dir = params["cache"]["bio_dir"]
     go_file = "$(bio_dir)/go_info.jld2"
@@ -780,10 +780,14 @@ end
 
 
 function biological_validation(network_counts)
-    ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
-    blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
-    merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :QueryID)
-    network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
+    if !(:entrez_id in names(network_counts)) 
+        ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
+        #addendum--  now we are introducing this being loaded into raw_counts, as it should be
+        blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
+        merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :TranscriptID)
+        network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
+        rename!(network_counts,:EntrezID=> :entrez_id)
+    end
     ##generate top terms for kegg and go
     ktt = kegg_information(network_counts)
     gtt = go_information(network_counts)
@@ -796,10 +800,13 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     coinc_dir = params["cache"]["coinc_dir"]
     run(`mkdir -p $(coinc_dir)`)
         
-    ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
-    blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
-    merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :QueryID)
-    network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
+    if !(:entrez_id in names(network_counts)) 
+        ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
+        blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
+        merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :TranscriptID)
+        network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
+        rename!(network_counts,:EntrezID=> :entrez_id)
+    end
 
     #coincidents
     #TODO for smaller networks/lower order graphlets, it may take longer to load CSV than to just run
@@ -863,7 +870,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
         ##get candidate information from kegg
         ##get baseline network info about biological function, with candidate info.
         vertex_names = network_counts[!,:transcript_id]
-        entrez_ids = network_counts.EntrezID
+        entrez_ids = network_counts.entrez_id
         if params["analysis"]["coincident_terms"] == "KEGG"
             @info "Getting candidate pathway info from KEGG..."
             candidates,top_terms = GraphletAnalysis.get_KEGG_candidates(entrez_ids,params["analysis"]["species"])   
