@@ -68,7 +68,7 @@ function load_run_data(experiment,run)
     ##load network info 
     global components,adj_matrix,network_counts,vertexlist,edgelist = get_network_construction()
     
-    if !(:entrez_id in names(network_counts)) 
+    if !("entrez_id" in names(network_counts)) 
         ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
         blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
         merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :TranscriptID)

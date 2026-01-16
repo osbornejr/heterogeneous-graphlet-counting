@@ -66,5 +66,5 @@ analysis:
   recursive: true #count lower graphlets as well
   typed_representation: true
   null_model_size: 1000
-  coincident_graphlets: false
+  coincident_graphlets: true
   

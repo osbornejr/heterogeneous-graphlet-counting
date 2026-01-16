@@ -780,9 +780,8 @@ end
 
 
 function biological_validation(network_counts)
-    if !(:entrez_id in names(network_counts)) 
+    if !("entrez_id" in names(network_counts)) 
         ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
-        #addendum--  now we are introducing this being loaded into raw_counts, as it should be
         blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
         merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :TranscriptID)
         network_counts = merger[indexin(network_counts.transcript_id,merger.transcript_id),:]
@@ -800,7 +799,7 @@ function coincident_graphlets(network_counts,vertexlist,edgelist)
     coinc_dir = params["cache"]["coinc_dir"]
     run(`mkdir -p $(coinc_dir)`)
         
-    if !(:entrez_id in names(network_counts)) 
+    if !("entrez_id" in names(network_counts)) 
         ##2025: add entrez ids here as columns to network_counts... from file, as biomart etc. are not working.
         blastx_matches = CSV.read(params["entrez_match_file"],DataFrame) 
         merger = innerjoin(network_counts,blastx_matches,on = :transcript_id => :TranscriptID)
